@@ -7,7 +7,7 @@ import { SESIZARE_TIPURI } from "@/lib/constants";
 import type { SesizareRow } from "@/lib/supabase/types";
 
 export const metadata: Metadata = {
-  title: "Impact — probleme rezolvate prin Civia",
+  title: "Impact — probleme rezolvate",
   description: "Galerie before/after cu sesizări rezolvate în București: trotuare, gropi, iluminat. Dovada că implicarea civică funcționează.",
   alternates: { canonical: "/impact" },
 };

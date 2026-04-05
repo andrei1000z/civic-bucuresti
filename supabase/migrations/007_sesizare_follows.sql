@@ -70,4 +70,7 @@ create view public.sesizari_feed as
   where s.moderation_status = 'approved' and s.publica = true
   group by s.id;
 
+-- Force PostgREST to reload its schema cache so `nr_followers` is visible
+notify pgrst, 'reload schema';
+
 select 'Migration 007 aplicată: sesizare_follows + view actualizat.' as status;

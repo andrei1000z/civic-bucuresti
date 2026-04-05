@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
 
-export const runtime = "nodejs"; // need full Node.js for supabase
+export const runtime = "nodejs";
 export const alt = "Sesizare Civia";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -39,14 +39,24 @@ const TIP_ICONS: Record<string, string> = {
   altele: "📝",
 };
 
-export default async function SesizareOG({ params }: { params: { code: string } }) {
-  const sesizare = await getSesizareByCode(params.code).catch(() => null);
+function truncate(str: string, max: number): string {
+  if (str.length <= max) return str;
+  return str.slice(0, max - 1).trim() + "…";
+}
 
-  const title = sesizare?.titlu ?? "Sesizare negăsită";
+export default async function SesizareOG({
+  params,
+}: {
+  params: Promise<{ code: string }>;
+}) {
+  const { code } = await params;
+  const sesizare = await getSesizareByCode(code).catch(() => null);
+
+  const title = truncate(sesizare?.titlu ?? "Sesizare negăsită", 90);
   const status = sesizare?.status ?? "nou";
   const tip = sesizare?.tip ?? "altele";
   const sector = sesizare?.sector ?? "";
-  const locatie = sesizare?.locatie ?? "";
+  const locatie = truncate(sesizare?.locatie ?? "", 80);
   const statusColor = STATUS_COLORS[status] ?? "#64748b";
   const statusLabel = STATUS_LABELS[status] ?? status;
   const tipIcon = TIP_ICONS[tip] ?? "📝";
@@ -62,19 +72,11 @@ export default async function SesizareOG({ params }: { params: { code: string } 
           background: "linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #1C4ED8 100%)",
           padding: "72px 80px",
           position: "relative",
+          fontFamily: "system-ui",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
-          }}
-        />
-
-        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
+        {/* Header: logo + Civia + status */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 40 }}>
           <div
             style={{
               width: 56,
@@ -89,14 +91,13 @@ export default async function SesizareOG({ params }: { params: { code: string } 
           >
             🏙️
           </div>
-          <div style={{ color: "#fff", fontSize: 28, fontWeight: 700 }}>Civia</div>
+          <div style={{ color: "#fff", fontSize: 28, fontWeight: 700, display: "flex" }}>Civia</div>
           <div
             style={{
               marginLeft: "auto",
               display: "flex",
               alignItems: "center",
-              gap: 10,
-              padding: "8px 18px",
+              padding: "10px 22px",
               borderRadius: 999,
               background: statusColor,
               color: "#fff",
@@ -108,60 +109,51 @@ export default async function SesizareOG({ params }: { params: { code: string } 
           </div>
         </div>
 
+        {/* Tip + sector */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: 16,
-            marginBottom: 20,
+            marginBottom: 24,
             color: "#bfdbfe",
-            fontSize: 24,
+            fontSize: 26,
           }}
         >
           <span style={{ fontSize: 40 }}>{tipIcon}</span>
-          <span style={{ textTransform: "capitalize" }}>{tip}</span>
-          {sector && (
-            <>
-              <span>·</span>
-              <span>{sector}</span>
-            </>
-          )}
+          <span style={{ textTransform: "capitalize", display: "flex" }}>{tip}</span>
+          {sector && <span style={{ display: "flex" }}>· {sector}</span>}
         </div>
 
+        {/* Title */}
         <div
           style={{
             color: "#fff",
-            fontSize: 64,
+            fontSize: 60,
             fontWeight: 800,
             lineHeight: 1.1,
-            maxWidth: 1040,
             letterSpacing: -1.5,
-            marginBottom: 20,
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
+            marginBottom: 24,
+            display: "flex",
           }}
         >
           {title}
         </div>
 
+        {/* Location */}
         {locatie && (
           <div
             style={{
               color: "#cbd5e1",
               fontSize: 26,
-              maxWidth: 1040,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
+              display: "flex",
             }}
           >
             📍 {locatie}
           </div>
         )}
 
+        {/* Footer */}
         <div
           style={{
             position: "absolute",
@@ -175,10 +167,8 @@ export default async function SesizareOG({ params }: { params: { code: string } 
             fontSize: 20,
           }}
         >
-          <div style={{ fontFamily: "monospace" }}>
-            #{params.code}
-          </div>
-          <div>civia.ro/sesizari/{params.code}</div>
+          <div style={{ fontFamily: "monospace", display: "flex" }}>#{code}</div>
+          <div style={{ display: "flex" }}>civia.ro/sesizari/{code}</div>
         </div>
       </div>
     ),
