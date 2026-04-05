@@ -24,7 +24,6 @@ const STATIC_PAGES: SearchResult[] = [
   { type: "page", title: "Evenimente", url: "/evenimente", excerpt: "Evenimente majore istorice" },
   { type: "page", title: "Ghiduri", url: "/ghiduri", excerpt: "Ghiduri pentru cetățeni" },
   { type: "page", title: "Contul tău", url: "/cont", excerpt: "Profil + sesizările tale" },
-  { type: "page", title: "API pentru dezvoltatori", url: "/api-docs", excerpt: "API public CC BY 4.0" },
 ];
 
 export async function GET(req: Request) {

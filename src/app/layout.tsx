@@ -12,6 +12,7 @@ import { CookieBanner } from "@/components/CookieBanner";
 import { Analytics } from "@/components/Analytics";
 import { ToastProvider } from "@/components/Toast";
 import { BackToTop } from "@/components/BackToTop";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/constants";
 
 // CivicAssistant is heavy (AI chat UI) and not needed on first paint — lazy-load it.
@@ -123,6 +124,7 @@ export default function RootLayout({
               <AuthModal />
               <CookieBanner />
               <BackToTop />
+              <InstallPrompt />
             </ToastProvider>
           </AuthProvider>
         </ThemeProvider>

@@ -18,7 +18,6 @@ export default function robots(): MetadataRoute.Robots {
           "/api/",        // all API routes
           "/auth/",       // auth callback/error
           "/cont/",       // personal account (private)
-          "/api-docs",    // internal docs (low SEO value)
           "/admin/",      // admin panel
           "/embed/",      // iframe embeds
         ],

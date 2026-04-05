@@ -2,13 +2,12 @@
 
 import { Circle } from "react-leaflet";
 import { GeoJsonLayer } from "./GeoJsonLayer";
-import { accidente } from "@/data/accidente";
 import { METRO_COLORS } from "@/lib/constants";
 import type { PathOptions } from "leaflet";
 import type { Feature } from "geojson";
 
 interface HartiLayersProps {
-  activeTab: "bicicleta" | "pejos" | "transport" | "statistici";
+  activeTab: "bicicleta" | "pejos" | "auto" | "transport" | "statistici";
   showDedicate: boolean;
   showMarcate: boolean;
   showRecomandate: boolean;
@@ -18,8 +17,6 @@ interface HartiLayersProps {
   visibleLines: string[];
   statsMode: "accidente" | "aer" | "densitate";
 }
-
-const accidentColor = { 1: "#EAB308", 2: "#F97316", 3: "#DC2626" };
 
 const aerSectors = [
   { center: [44.465, 26.08] as [number, number], aqi: 68, radius: 2000 },
@@ -85,12 +82,29 @@ function metroStationStyle(): PathOptions {
   } as PathOptions;
 }
 
-const pedestrianStyle: PathOptions = {
-  color: "#8B5CF6",
-  weight: 2,
-  opacity: 0.6,
-  fillColor: "#8B5CF6",
-  fillOpacity: 0.15,
+const pedestrianAccessStyle: PathOptions = {
+  color: "#059669", // green — pedestrian friendly
+  weight: 2.5,
+  opacity: 0.75,
+};
+
+const pedestrianRestrictedStyle: PathOptions = {
+  color: "#DC2626", // red — restricted/private
+  weight: 2.5,
+  opacity: 0.65,
+  dashArray: "4 4",
+};
+
+const autoAccessStyle: PathOptions = {
+  color: "#2563EB", // blue — driveable city street
+  weight: 1.5,
+  opacity: 0.5,
+};
+
+const autoRestrictedStyle: PathOptions = {
+  color: "#F97316", // orange — major roads, no pedestrians
+  weight: 3,
+  opacity: 0.8,
 };
 
 const parkStyle: PathOptions = {
@@ -129,7 +143,21 @@ function metroStationPopup(feature: Feature): string {
 
 function pedestrianPopup(feature: Feature): string {
   const p = feature.properties ?? {};
-  return `<div><b>${p.name ?? "Zonă pietonală"}</b></div>`;
+  const name = p.name ?? "Zonă pietonală";
+  const type = p.highway === "pedestrian" ? "stradă pietonală" : p.highway === "footway" ? "trotuar" : "cale";
+  return `<div><b>${name}</b><br/><span style="font-size:11px;color:#64748b">${type}</span></div>`;
+}
+
+function pedestrianRestrictedPopup(feature: Feature): string {
+  const p = feature.properties ?? {};
+  return `<div><b>${p.name ?? "Acces restricționat"}</b><br/><span style="font-size:11px;color:#64748b">privat / interzis pietonilor</span></div>`;
+}
+
+function autoPopup(feature: Feature): string {
+  const p = feature.properties ?? {};
+  const name = p.name ?? "Stradă";
+  const type = p.highway ?? "";
+  return `<div><b>${name}</b><br/><span style="font-size:11px;color:#64748b">${type}</span></div>`;
 }
 
 function parkPopup(feature: Feature): string {
@@ -170,8 +198,18 @@ export default function HartiLayers(props: HartiLayersProps) {
           <GeoJsonLayer url="/geojson/parcuri.json" style={parkStyle} popupFormatter={parkPopup} />
         )}
         {showPietonal && (
-          <GeoJsonLayer url="/geojson/pietonal.json" style={pedestrianStyle} popupFormatter={pedestrianPopup} />
+          <GeoJsonLayer url="/geojson/pietonal-accesibil.json" style={pedestrianAccessStyle} popupFormatter={pedestrianPopup} />
         )}
+        <GeoJsonLayer url="/geojson/pietonal-neaccesibil.json" style={pedestrianRestrictedStyle} popupFormatter={pedestrianRestrictedPopup} />
+      </>
+    );
+  }
+
+  if (activeTab === "auto") {
+    return (
+      <>
+        <GeoJsonLayer url="/geojson/auto-accesibil.json" style={autoAccessStyle} popupFormatter={autoPopup} />
+        <GeoJsonLayer url="/geojson/auto-restrictionat.json" style={autoRestrictedStyle} popupFormatter={autoPopup} />
       </>
     );
   }
@@ -186,68 +224,24 @@ export default function HartiLayers(props: HartiLayersProps) {
     );
   }
 
-  if (activeTab === "statistici") {
-    if (statsMode === "accidente") {
-      return (
-        <>
-          {accidente.map((a) => (
-            <Circle
-              key={a.id}
-              center={[a.lat, a.lng]}
-              radius={a.severity * 120}
-              pathOptions={{
-                color: accidentColor[a.severity],
-                fillColor: accidentColor[a.severity],
-                fillOpacity: 0.35,
-                weight: 1.5,
-              }}
-            />
-          ))}
-        </>
-      );
-    }
-    if (statsMode === "aer") {
-      return (
-        <>
-          {aerSectors.map((s, i) => (
-            <Circle
-              key={i}
-              center={s.center}
-              radius={s.radius}
-              pathOptions={{
-                color: aqiColor(s.aqi),
-                fillColor: aqiColor(s.aqi),
-                fillOpacity: 0.3,
-                weight: 2,
-              }}
-            />
-          ))}
-        </>
-      );
-    }
-    if (statsMode === "densitate") {
-      return (
-        <>
-          {accidente.map((a, i) => {
-            // deterministic "random" based on id hash for stable rendering
-            const seed = (a.id.charCodeAt(a.id.length - 1) + i * 17) % 300;
-            return (
-              <Circle
-                key={a.id}
-                center={[a.lat + 0.002, a.lng - 0.002]}
-                radius={200 + seed}
-                pathOptions={{
-                  color: "#8B5CF6",
-                  fillColor: "#8B5CF6",
-                  fillOpacity: 0.2,
-                  weight: 0.5,
-                }}
-              />
-            );
-          })}
-        </>
-      );
-    }
+  if (activeTab === "statistici" && statsMode === "aer") {
+    return (
+      <>
+        {aerSectors.map((s, i) => (
+          <Circle
+            key={i}
+            center={s.center}
+            radius={s.radius}
+            pathOptions={{
+              color: aqiColor(s.aqi),
+              fillColor: aqiColor(s.aqi),
+              fillOpacity: 0.3,
+              weight: 2,
+            }}
+          />
+        ))}
+      </>
+    );
   }
 
   return null;

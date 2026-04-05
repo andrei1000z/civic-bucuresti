@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Offline — Civia</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #1C4ED8 0%, #1e3a8a 50%, #0F172A 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+    }
+    .container { max-width: 420px; }
+    .logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #fff, #dbeafe);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    p {
+      font-size: 1rem;
+      color: #bfdbfe;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    button {
+      background: #fff;
+      color: #1C4ED8;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    button:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🏙️</div>
+    <h1>Ești offline</h1>
+    <p>Nu ai conexiune la internet. Unele pagini salvate pot fi disponibile.</p>
+    <button onclick="location.reload()">Încearcă din nou</button>
+  </div>
+</body>
+</html>

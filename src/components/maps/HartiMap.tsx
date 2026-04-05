@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { Bike, Footprints, Bus, BarChart3, Layers, ChevronLeft, Locate, Loader2 } from "lucide-react";
+import { Bike, Footprints, Bus, BarChart3, Car, Layers, ChevronLeft, Locate, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { accidente } from "@/data/accidente";
 import { METRO_COLORS } from "@/lib/constants";
 
+// Metrorex București — 5 magistrale, 55 stații total (confirmat 2025)
 const METRO_INFO = [
-  { id: "M1", name: "Magistrala 1", stations: 22 },
-  { id: "M2", name: "Magistrala 2", stations: 14 },
-  { id: "M3", name: "Magistrala 3", stations: 15 },
-  { id: "M4", name: "Magistrala 4", stations: 8 },
-  { id: "M5", name: "Magistrala 5", stations: 10 },
+  { id: "M1", name: "Magistrala 1 (Galben)", stations: 22 },
+  { id: "M2", name: "Magistrala 2 (Roșu)", stations: 14 },
+  { id: "M3", name: "Magistrala 3 (Albastru)", stations: 4 },
+  { id: "M4", name: "Magistrala 4 (Verde)", stations: 8 },
+  { id: "M5", name: "Magistrala 5 (Maro)", stations: 12 },
 ];
 
 const LeafletMap = dynamic(() => import("./LeafletMap"), {
@@ -26,13 +26,14 @@ const LeafletMap = dynamic(() => import("./LeafletMap"), {
 
 const HartiLayers = dynamic(() => import("./HartiLayers"), { ssr: false });
 
-type Tab = "bicicleta" | "pejos" | "transport" | "statistici";
+type Tab = "bicicleta" | "pejos" | "auto" | "transport" | "statistici";
 
 const tabs = [
   { id: "bicicleta" as const, label: "Bicicletă", icon: Bike },
   { id: "pejos" as const, label: "Pe jos", icon: Footprints },
-  { id: "transport" as const, label: "Transport public", icon: Bus },
-  { id: "statistici" as const, label: "Statistici", icon: BarChart3 },
+  { id: "auto" as const, label: "Cu mașina", icon: Car },
+  { id: "transport" as const, label: "Transport", icon: Bus },
+  { id: "statistici" as const, label: "Aer", icon: BarChart3 },
 ];
 
 export function HartiMap() {
@@ -47,13 +48,13 @@ export function HartiMap() {
   // Pe jos filters
   const [showParcuri, setShowParcuri] = useState(true);
   const [showPietonal, setShowPietonal] = useState(true);
-  const [showTraversari, setShowTraversari] = useState(true);
+  const showTraversari = true;
 
   // Transport
   const [visibleLines, setVisibleLines] = useState<string[]>(["M1", "M2", "M3", "M4", "M5"]);
 
-  // Statistics
-  const [statsMode, setStatsMode] = useState<"accidente" | "aer" | "densitate">("accidente");
+  // Statistics — only "aer" mode for now (accidente + densitate removed with mock data)
+  const statsMode = "aer" as const;
 
   // Locate
   const [flyTarget, setFlyTarget] = useState<{ coords: [number, number]; zoom?: number } | null>(null);
@@ -171,27 +172,58 @@ export function HartiMap() {
                 Trasee pedestre
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                Parcuri și zone pietonale din Bucureștiul — date reale OpenStreetMap.
+                Zone pietonale din Bucureștiul — date reale OpenStreetMap.
               </p>
-              <div className="space-y-3">
+              <div className="space-y-3 mb-5">
                 <Toggle
-                  label="Parcuri (566)"
-                  color="#059669"
+                  label="Parcuri"
+                  color="#10b981"
                   checked={showParcuri}
                   onChange={setShowParcuri}
                 />
                 <Toggle
-                  label="Zone pietonale (524)"
-                  color="#8B5CF6"
+                  label="Trotuare + zone pietonale"
+                  color="#059669"
                   checked={showPietonal}
                   onChange={setShowPietonal}
                 />
-                <Toggle
-                  label="Traversări sigure"
-                  color="#EAB308"
-                  checked={showTraversari}
-                  onChange={setShowTraversari}
-                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-start gap-3">
+                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#059669" }} />
+                  <p className="text-xs text-[var(--color-text-muted)]">Verde — accesibil public</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-4 h-1 rounded-full mt-2 shrink-0 border border-dashed border-red-500" style={{ background: "repeating-linear-gradient(90deg, #DC2626 0, #DC2626 2px, transparent 2px, transparent 4px)" }} />
+                  <p className="text-xs text-[var(--color-text-muted)]">Roșu punctat — privat / restricționat</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "auto" && (
+            <div>
+              <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
+                Drumuri București
+              </h3>
+              <p className="text-sm text-[var(--color-text-muted)] mb-4">
+                Colorăm toate străzile după tip de acces.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#2563EB" }} />
+                  <div>
+                    <p className="text-sm font-medium">Acces normal</p>
+                    <p className="text-xs text-[var(--color-text-muted)]">Străzi de cartier, secundare, livezi</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#F97316" }} />
+                  <div>
+                    <p className="text-sm font-medium">Drumuri majore</p>
+                    <p className="text-xs text-[var(--color-text-muted)]">Bulevarde, autostrăzi, ieșiri — pietonii nu au voie</p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -202,7 +234,7 @@ export function HartiMap() {
                 Metrou București
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                64 stații Metrorex + linii tramvai. Click pe stație pentru detalii.
+                55 stații Metrorex + linii tramvai. Click pe stație pentru detalii.
               </p>
               <div className="space-y-2 mb-5">
                 {METRO_INFO.map((line) => {
@@ -242,54 +274,13 @@ export function HartiMap() {
               <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
                 Statistici pe hartă
               </h3>
-              <div className="space-y-2 mb-4">
-                {(
-                  [
-                    { id: "accidente" as const, label: "Accidente rutiere", color: "#DC2626" },
-                    { id: "aer" as const, label: "Calitate aer", color: "#059669" },
-                    { id: "densitate" as const, label: "Densitate sesizări", color: "#8B5CF6" },
-                  ]
-                ).map((mode) => (
-                  <button
-                    key={mode.id}
-                    onClick={() => setStatsMode(mode.id)}
-                    className={cn(
-                      "w-full flex items-center gap-3 p-3 rounded-[8px] text-sm transition-all text-left",
-                      statsMode === mode.id
-                        ? "bg-[var(--color-primary)] text-white"
-                        : "bg-[var(--color-surface-2)] hover:bg-[var(--color-border)]"
-                    )}
-                  >
-                    <span
-                      className="w-3 h-3 rounded-full shrink-0"
-                      style={{ background: mode.color }}
-                    />
-                    <span className="font-medium">{mode.label}</span>
-                  </button>
-                ))}
+              <div className="bg-[var(--color-surface-2)] rounded-[12px] p-4">
+                <p className="text-xs text-[var(--color-text-muted)] mb-1">Calitate aer per sector</p>
+                <p className="text-2xl font-bold text-amber-600">AQI live</p>
+                <p className="text-xs text-[var(--color-text-muted)] mt-2">
+                  Verde ≤ 50 · Galben &lt; 80 · Portocaliu &lt; 100 · Roșu ≥ 100
+                </p>
               </div>
-              {statsMode === "accidente" && (
-                <div className="bg-[var(--color-surface-2)] rounded-[12px] p-4">
-                  <p className="text-xs text-[var(--color-text-muted)] mb-1">Accidente anul acesta</p>
-                  <p className="text-2xl font-bold text-red-600">{accidente.length}</p>
-                  <p className="text-xs text-[var(--color-text-muted)] mt-2">
-                    Mărimea cercului reprezintă gravitatea incidentului.
-                  </p>
-                </div>
-              )}
-              {statsMode === "aer" && (
-                <div className="bg-[var(--color-surface-2)] rounded-[12px] p-4">
-                  <p className="text-xs text-[var(--color-text-muted)] mb-1">AQI mediu</p>
-                  <p className="text-2xl font-bold text-amber-600">83</p>
-                  <p className="text-xs text-[var(--color-text-muted)] mt-2">Moderat</p>
-                </div>
-              )}
-              {statsMode === "densitate" && (
-                <div className="bg-[var(--color-surface-2)] rounded-[12px] p-4">
-                  <p className="text-xs text-[var(--color-text-muted)] mb-1">Sesizări lunar</p>
-                  <p className="text-2xl font-bold text-purple-600">1.247</p>
-                </div>
-              )}
             </div>
           )}
         </div>

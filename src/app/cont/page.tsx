@@ -42,6 +42,8 @@ export default function ContPage() {
   const [saved, setSaved] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [form, setForm] = useState({ display_name: "", full_name: "", address: "", phone: "" });
 
   useEffect(() => {
@@ -56,11 +58,27 @@ export default function ContPage() {
 
   const loadData = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
-      const [p, s] = await Promise.all([
-        fetch("/api/profile").then((r) => r.json()),
-        fetch("/api/profile/sesizari").then((r) => r.json()),
+      const [pRes, sRes] = await Promise.all([
+        fetch("/api/profile"),
+        fetch("/api/profile/sesizari"),
       ]);
+      // 401 → sesiune expirată
+      if (pRes.status === 401 || sRes.status === 401) {
+        setLoadError("Sesiunea a expirat. Te rog autentifică-te din nou.");
+        setTimeout(() => {
+          router.push("/");
+          openAuthModal();
+        }, 1500);
+        return;
+      }
+      const p = await pRes.json().catch(() => ({}));
+      const s = await sRes.json().catch(() => ({}));
+      if (!pRes.ok) {
+        setLoadError(p.error ?? "Nu s-a putut încărca profilul.");
+        return;
+      }
       if (p.data) {
         setProfile(p.data);
         setForm({
@@ -71,12 +89,12 @@ export default function ContPage() {
         });
       }
       if (s.data) setSesizari(s.data);
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : "Eroare la încărcarea contului");
     } finally {
       setLoading(false);
     }
   };
-
-  const [saveError, setSaveError] = useState<string | null>(null);
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);

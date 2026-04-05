@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { SesizariMap } from "@/components/maps/SesizariMap";
 import { Badge } from "@/components/ui/Badge";
-import { stiri } from "@/data/stiri";
+import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { SOURCE_COLORS } from "@/lib/constants";
 import { timeAgo } from "@/lib/utils";
 import { LiveStatsBar } from "@/components/home/LiveStatsBar";
@@ -98,8 +98,35 @@ const quickAccess = [
 ];
 
 
-export default function HomePage() {
-  const latestStiri = stiri.slice(0, 3);
+interface StireRow {
+  id: string;
+  url: string;
+  title: string;
+  excerpt: string | null;
+  source: string;
+  category: string;
+  published_at: string;
+  image_url: string | null;
+}
+
+async function getLatestStiri(): Promise<StireRow[]> {
+  try {
+    const admin = createSupabaseAdmin();
+    const { data } = await admin
+      .from("stiri_cache")
+      .select("id, url, title, excerpt, source, category, published_at, image_url")
+      .order("published_at", { ascending: false })
+      .limit(3);
+    return (data as StireRow[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export const revalidate = 900; // revalidate homepage every 15 min
+
+export default async function HomePage() {
+  const latestStiri = await getLatestStiri();
 
   return (
     <>
@@ -108,12 +135,12 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-grid-pattern opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent" />
 
-        {/* Floating cards */}
+        {/* Floating cards — static brand info */}
         <div className="absolute top-20 right-8 hidden lg:block animate-float">
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[12px] p-4 shadow-2xl min-w-[220px]">
-            <p className="text-xs text-white/60 mb-1">Sesizări luna aceasta</p>
-            <p className="text-3xl font-bold">1.247</p>
-            <p className="text-xs text-emerald-300 mt-1">+23% vs luna trecută</p>
+            <p className="text-xs text-white/60 mb-1">Hărți bazate pe</p>
+            <p className="text-2xl font-bold">OpenStreetMap</p>
+            <p className="text-xs text-emerald-300 mt-1">date deschise, real-time</p>
           </div>
         </div>
         <div
@@ -121,9 +148,9 @@ export default function HomePage() {
           style={{ animationDelay: "1s" }}
         >
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[12px] p-4 shadow-2xl min-w-[200px]">
-            <p className="text-xs text-white/60 mb-1">Piste de biciclete</p>
-            <p className="text-3xl font-bold">38 km</p>
-            <p className="text-xs text-emerald-300 mt-1">+4 km în 2026</p>
+            <p className="text-xs text-white/60 mb-1">Metrou București</p>
+            <p className="text-3xl font-bold">55 stații</p>
+            <p className="text-xs text-emerald-300 mt-1">M1 • M2 • M3 • M4 • M5</p>
           </div>
         </div>
         <div
@@ -131,9 +158,9 @@ export default function HomePage() {
           style={{ animationDelay: "2s" }}
         >
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[12px] p-4 shadow-2xl min-w-[180px]">
-            <p className="text-xs text-white/60 mb-1">Linii STB active</p>
-            <p className="text-3xl font-bold">12</p>
-            <p className="text-xs text-white/70 mt-1">principale</p>
+            <p className="text-xs text-white/60 mb-1">Platformă</p>
+            <p className="text-2xl font-bold">open-source</p>
+            <p className="text-xs text-white/70 mt-1">MIT license</p>
           </div>
         </div>
 
@@ -281,40 +308,60 @@ export default function HomePage() {
               Vezi toate știrile <ArrowRight size={16} />
             </Link>
           </div>
-          <div className="grid md:grid-cols-3 gap-5">
-            {latestStiri.map((stire) => (
-              <Link
-                key={stire.id}
-                href="/stiri"
-                className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] transition-all"
-              >
-                <div className={`h-40 bg-gradient-to-br ${stire.imageGradient} relative`}>
-                  <div className="absolute top-3 left-3">
-                    <Badge bgColor={SOURCE_COLORS[stire.source]} color="white">
-                      {stire.source}
-                    </Badge>
-                  </div>
-                  <div className="absolute bottom-3 left-3">
-                    <Badge className="bg-black/40 text-white border border-white/20">
-                      {stire.category}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h3 className="font-semibold text-base mb-2 line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
-                    {stire.title}
-                  </h3>
-                  <p className="text-sm text-[var(--color-text-muted)] line-clamp-2 mb-3">
-                    {stire.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)]">
-                    <span>{timeAgo(stire.publishedAt)}</span>
-                    <span>{stire.readingMinutes} min citire</span>
-                  </div>
-                </div>
+          {latestStiri.length === 0 ? (
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-10 text-center">
+              <p className="text-[var(--color-text-muted)] mb-4">
+                Știrile se actualizează automat din surse verificate.
+              </p>
+              <Link href="/stiri" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-primary)] hover:underline">
+                Vezi toate știrile disponibile <ArrowRight size={14} />
               </Link>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-5">
+              {latestStiri.map((stire) => (
+                <a
+                  key={stire.id}
+                  href={stire.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] transition-all"
+                >
+                  <div className="h-40 bg-gradient-to-br from-slate-600 to-slate-800 relative">
+                    {stire.image_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={stire.image_url} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" loading="lazy" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                    <div className="absolute top-3 left-3">
+                      <Badge bgColor={SOURCE_COLORS[stire.source] ?? "#64748b"} color="white">
+                        {stire.source}
+                      </Badge>
+                    </div>
+                    <div className="absolute bottom-3 left-3">
+                      <Badge className="bg-black/40 text-white border border-white/20">
+                        {stire.category}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-semibold text-base mb-2 line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
+                      {stire.title}
+                    </h3>
+                    {stire.excerpt && (
+                      <p className="text-sm text-[var(--color-text-muted)] line-clamp-2 mb-3">
+                        {stire.excerpt}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)]">
+                      <span>{timeAgo(stire.published_at)}</span>
+                      <span>Citește →</span>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

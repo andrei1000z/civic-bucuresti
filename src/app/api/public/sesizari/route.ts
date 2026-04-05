@@ -49,7 +49,7 @@ export async function GET(req: Request) {
         limit,
         offset,
         license: "CC BY 4.0 — free to use with attribution to Civia",
-        docs: "https://civia.ro/api-docs",
+        license_url: "https://creativecommons.org/licenses/by/4.0/",
       },
     }), {
       headers: {

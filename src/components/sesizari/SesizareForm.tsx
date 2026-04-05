@@ -12,13 +12,15 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
-import { SESIZARE_TIPURI, SECTOARE } from "@/lib/constants";
+import { SESIZARE_TIPURI } from "@/lib/constants";
 import { getAuthoritiesFor } from "@/lib/sesizari/authorities";
+import { detectSectorFromCoords } from "@/lib/geo/sector-from-coords";
 import { detectGen, subsemnatulForm, domiciliatForm } from "@/lib/sesizari/gen";
 import { cn } from "@/lib/utils";
 import { PhotoUploader } from "./PhotoUploader";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { EmailChoicePanel } from "./EmailChoicePanel";
+import { buildGmailLink, buildMailtoLink, type MailtoInput } from "@/lib/sesizari/mailto";
 
 interface FormData {
   nume: string;
@@ -51,7 +53,6 @@ const INITIAL: FormData = {
 };
 
 export function SesizareForm() {
-  const router = useRouter();
   const { user } = useAuth();
   const [data, setData] = useState<FormData>(INITIAL);
   const [imagini, setImagini] = useState<string[]>([]);
@@ -117,11 +118,18 @@ export function SesizareForm() {
     }
   }, [user, profileLoaded]);
 
-  // Debounced auto-classify (runs when tip or sector missing)
+  // AI tip detection state
+  const [tipDetecting, setTipDetecting] = useState(false);
+  const [tipDetectedByAI, setTipDetectedByAI] = useState(false);
+
+  // Debounced auto-classify tip from description (800ms after typing stops)
   useEffect(() => {
-    if (data.descriere.length < 20 || (data.tip && data.sector)) return;
+    // Skip if description too short OR user already picked a tip manually
+    if (data.descriere.length < 15) return;
+    if (data.tip && !tipDetectedByAI) return; // user chose manually
     if (classifyTimerRef.current) clearTimeout(classifyTimerRef.current);
     classifyTimerRef.current = setTimeout(async () => {
+      setTipDetecting(true);
       try {
         const res = await fetch("/api/ai/classify", {
           method: "POST",
@@ -130,13 +138,14 @@ export function SesizareForm() {
         });
         if (!res.ok) return;
         const json = await res.json();
-        setData((d) => ({
-          ...d,
-          tip: d.tip || json.data?.tip || d.tip,
-          sector: d.sector || json.data?.sector || d.sector,
-        }));
+        if (json.data?.tip) {
+          setData((d) => ({ ...d, tip: json.data.tip }));
+          setTipDetectedByAI(true);
+        }
       } catch {
         // silent fail
+      } finally {
+        setTipDetecting(false);
       }
     }, 800);
     return () => {
@@ -144,6 +153,15 @@ export function SesizareForm() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.descriere, data.locatie]);
+
+  // Auto-detect sector from GPS coords (whenever lat/lng change)
+  useEffect(() => {
+    if (data.lat == null || data.lng == null) return;
+    const s = detectSectorFromCoords(data.lat, data.lng);
+    if (s && s !== data.sector) {
+      setData((d) => ({ ...d, sector: s }));
+    }
+  }, [data.lat, data.lng, data.sector]);
 
   const handleAIImprove = async () => {
     if (data.descriere.length < 10) {
@@ -276,7 +294,6 @@ export function SesizareForm() {
     data.tip &&
     effectiveTitlu.length >= 3 &&
     data.locatie.length >= 3 &&
-    data.sector &&
     data.descriere.length >= 10 &&
     !submitting;
 
@@ -290,6 +307,8 @@ export function SesizareForm() {
 
     const lat = data.lat ?? 44.4268;
     const lng = data.lng ?? 26.1025;
+    // Auto-detect sector from coords; fallback to S3 (centrul istoric) if detection fails
+    const sector = data.sector || detectSectorFromCoords(lat, lng) || "S3";
 
     try {
       const res = await fetch("/api/sesizari", {
@@ -301,7 +320,7 @@ export function SesizareForm() {
           tip: data.tip,
           titlu: effectiveTitlu,
           locatie: data.locatie.trim(),
-          sector: data.sector,
+          sector,
           lat,
           lng,
           descriere: data.descriere.trim(),
@@ -380,55 +399,16 @@ ${data.nume || "[NUMELE]"}`;
       code: submitted.code,
     };
     return (
-      <div className="max-w-2xl mx-auto py-4">
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-            <CheckCircle2 size={32} className="text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <h3 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-2">
-            Sesizare înregistrată!
-          </h3>
-          <p className="text-[var(--color-text-muted)] mb-2">Cod unic:</p>
-          <p className="font-mono font-bold text-2xl text-[var(--color-primary)]">
-            {submitted.code}
-          </p>
-        </div>
-
-        <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-[12px] p-5 mb-6">
-          <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-1 flex items-center gap-2">
-            <Mail size={16} />
-            Trimite acum și la autorități
-          </h4>
-          <p className="text-sm text-blue-800 dark:text-blue-400 mb-4">
-            Alege serviciul tău de email. Se deschide într-un tab nou cu tot textul pregătit — doar apeși Send.
-          </p>
-          {imagini.length > 0 && (
-            <p className="text-xs text-blue-700 dark:text-blue-500 mb-3 italic">
-              ⚠️ Atașează fotografiile manual — link-urile lor sunt incluse în corpul emailului.
-            </p>
-          )}
-          <EmailChoicePanel input={emailInput} />
-        </div>
-
-        <div className="flex flex-wrap gap-3 justify-center">
-          <button
-            onClick={() => router.push(`/sesizari/${submitted.code}`)}
-            className="h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
-          >
-            Vezi sesizarea ta →
-          </button>
-          <button
-            onClick={() => {
-              setSubmitted(null);
-              setData((d) => ({ ...INITIAL, nume: d.nume, adresa: d.adresa, email: d.email }));
-              setImagini([]);
-            }}
-            className="h-11 px-5 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)]"
-          >
-            Altă sesizare
-          </button>
-        </div>
-      </div>
+      <SuccessScreen
+        code={submitted.code}
+        emailInput={emailInput}
+        imaginiCount={imagini.length}
+        onAnother={() => {
+          setSubmitted(null);
+          setData((d) => ({ ...INITIAL, nume: d.nume, adresa: d.adresa, email: d.email }));
+          setImagini([]);
+        }}
+      />
     );
   }
 
@@ -503,12 +483,15 @@ ${data.nume || "[NUMELE]"}`;
           {aiLoading ? "AI procesează..." : "Îmbunătățește cu AI"}
         </button>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Tip problemă" required>
+        <Field label="Tip problemă" required>
+          <div className="flex items-center gap-2">
             <select
               value={data.tip}
-              onChange={(e) => update("tip", e.target.value)}
-              className={inputClass}
+              onChange={(e) => {
+                update("tip", e.target.value);
+                setTipDetectedByAI(false);
+              }}
+              className={cn(inputClass, "flex-1")}
             >
               <option value="">Alege tipul...</option>
               {SESIZARE_TIPURI.map((t) => (
@@ -517,20 +500,23 @@ ${data.nume || "[NUMELE]"}`;
                 </option>
               ))}
             </select>
-          </Field>
-          <Field label="Sector" required>
-            <select
-              value={data.sector}
-              onChange={(e) => update("sector", e.target.value)}
-              className={inputClass}
-            >
-              <option value="">Alege...</option>
-              {SECTOARE.map((s) => (
-                <option key={s.id} value={s.id}>{s.label}</option>
-              ))}
-            </select>
-          </Field>
-        </div>
+            {tipDetecting && (
+              <span className="text-xs text-[var(--color-text-muted)] inline-flex items-center gap-1">
+                <Loader2 size={12} className="animate-spin" /> AI
+              </span>
+            )}
+            {tipDetectedByAI && !tipDetecting && (
+              <span className="text-xs text-purple-600 dark:text-purple-400 font-medium inline-flex items-center gap-1">
+                <Sparkles size={12} /> AI
+              </span>
+            )}
+          </div>
+          {tipDetectedByAI && !tipDetecting && (
+            <p className="text-xs text-[var(--color-text-muted)] mt-1">
+              Tipul a fost detectat automat din descriere. Poți să-l schimbi dacă vrei altul.
+            </p>
+          )}
+        </Field>
 
         {recipients && (
           <div className="rounded-[8px] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 p-3 text-xs">
@@ -594,19 +580,26 @@ ${data.nume || "[NUMELE]"}`;
             </button>
           </div>
           {data.lat && data.lng && (
-            <p className={cn(
-              "text-xs mt-1 flex items-center gap-1.5",
-              gpsAccuracy != null && gpsAccuracy <= 15 ? "text-emerald-600" : "text-amber-600"
-            )}>
-              📍 {data.lat.toFixed(5)}, {data.lng.toFixed(5)}
-              {gpsAccuracy != null && (
-                <span className="font-medium">
-                  · precizie ±{Math.round(gpsAccuracy)}m
-                  {geoLoading && <span className="ml-1 italic opacity-70">(se rafinează...)</span>}
-                  {!geoLoading && gpsAccuracy <= 15 && " ✓"}
-                </span>
+            <div className="mt-1 space-y-0.5">
+              <p className={cn(
+                "text-xs flex items-center gap-1.5",
+                gpsAccuracy != null && gpsAccuracy <= 15 ? "text-emerald-600" : "text-amber-600"
+              )}>
+                📍 {data.lat.toFixed(5)}, {data.lng.toFixed(5)}
+                {gpsAccuracy != null && (
+                  <span className="font-medium">
+                    · precizie ±{Math.round(gpsAccuracy)}m
+                    {geoLoading && <span className="ml-1 italic opacity-70">(se rafinează...)</span>}
+                    {!geoLoading && gpsAccuracy <= 15 && " ✓"}
+                  </span>
+                )}
+              </p>
+              {data.sector && (
+                <p className="text-xs text-[var(--color-text-muted)]">
+                  🏙️ Sector {data.sector.slice(1)} (detectat automat)
+                </p>
               )}
-            </p>
+            </div>
           )}
         </Field>
 
@@ -687,8 +680,8 @@ ${data.nume || "[NUMELE]"}`;
           </div>
           {recipients && (
             <p className="text-xs text-[var(--color-text-muted)] mt-4">
-              <strong>Destinatari:</strong> {recipients.primary.join(", ")}
-              {recipients.cc.length > 0 && <><br /><strong>CC:</strong> {recipients.cc.join(", ")}</>}
+              <strong>Destinatari:</strong> {recipients.primary.map((a) => a.name).join(", ")}
+              {recipients.cc.length > 0 && <><br /><strong>CC:</strong> {recipients.cc.map((a) => a.name).join(", ")}</>}
             </p>
           )}
         </div>
@@ -715,6 +708,97 @@ function Field({
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       {children}
+    </div>
+  );
+}
+
+function SuccessScreen({
+  code,
+  emailInput,
+  imaginiCount,
+  onAnother,
+}: {
+  code: string;
+  emailInput: MailtoInput;
+  imaginiCount: number;
+  onAnother: () => void;
+}) {
+  const router = useRouter();
+  const [autoOpened, setAutoOpened] = useState(false);
+  const [popupBlocked, setPopupBlocked] = useState(false);
+
+  // Auto-open email provider on mount. If user has @gmail address → Gmail.
+  // Otherwise → mailto: (system default).
+  useEffect(() => {
+    const emailAddr = emailInput.author_email?.toLowerCase() ?? "";
+    const useGmail = emailAddr.endsWith("@gmail.com") || emailAddr.endsWith("@googlemail.com");
+    const url = useGmail ? buildGmailLink(emailInput) : buildMailtoLink(emailInput);
+    try {
+      if (useGmail) {
+        const win = window.open(url, "_blank", "noopener,noreferrer");
+        if (!win || win.closed || typeof win.closed === "undefined") {
+          setPopupBlocked(true);
+        } else {
+          setAutoOpened(true);
+        }
+      } else {
+        // mailto: — navigate same window (doesn't trigger popup blocker)
+        window.location.href = url;
+        setAutoOpened(true);
+      }
+    } catch {
+      setPopupBlocked(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="max-w-2xl mx-auto py-4">
+      <div className="text-center mb-6">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+          <CheckCircle2 size={32} className="text-emerald-600 dark:text-emerald-400" />
+        </div>
+        <h3 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-2">
+          Sesizare înregistrată!
+        </h3>
+        <p className="text-[var(--color-text-muted)] mb-2">Cod unic:</p>
+        <p className="font-mono font-bold text-2xl text-[var(--color-primary)]">{code}</p>
+      </div>
+
+      <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-[12px] p-5 mb-6">
+        <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-1 flex items-center gap-2">
+          <Mail size={16} />
+          {autoOpened ? "Ți-am deschis emailul" : "Trimite la autorități"}
+        </h4>
+        <p className="text-sm text-blue-800 dark:text-blue-400 mb-4">
+          {autoOpened
+            ? "Verifică tab-ul nou / clientul tău de email — textul e deja completat, doar apeși Send."
+            : popupBlocked
+              ? "Browser-ul a blocat popup-ul. Alege manual clientul de email:"
+              : "Alege serviciul tău de email:"}
+        </p>
+        {imaginiCount > 0 && (
+          <p className="text-xs text-blue-700 dark:text-blue-500 mb-3 italic">
+            ⚠️ Atașează fotografiile manual — link-urile lor sunt incluse în corpul emailului.
+          </p>
+        )}
+        <EmailChoicePanel input={emailInput} />
+      </div>
+
+      <div className="flex flex-wrap gap-3 justify-center">
+        <button
+          onClick={() => router.push(`/sesizari/${code}`)}
+          className="h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
+        >
+          Vezi sesizarea ta →
+        </button>
+        <button
+          onClick={onAnother}
+          className="h-11 px-5 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)]"
+        >
+          Altă sesizare
+        </button>
+      </div>
     </div>
   );
 }

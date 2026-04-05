@@ -6,10 +6,10 @@ import { LiveAqiWidget } from "@/components/statistici/LiveAqiWidget";
 
 export function BucurestiStats() {
   const stats = [
-    { icon: Users, label: "Populație", value: 1.88, decimals: 2, suffix: "M", color: "#2563EB", description: "locuitori rezidenți" },
+    { icon: Users, label: "Populație", value: 1.72, decimals: 2, suffix: "M", color: "#2563EB", description: "recensământ 2021 (INS)" },
     { icon: Building2, label: "Sectoare", value: 6, decimals: 0, suffix: "", color: "#8B5CF6", description: "primării + CGMB" },
-    { icon: Bike, label: "Piste bicicletă", value: 38, decimals: 0, suffix: " km", color: "#059669", description: "amenajate OSM" },
-    { icon: Train, label: "Stații metrou", value: 64, decimals: 0, suffix: "", color: "#F97316", description: "pe 5 magistrale" },
+    { icon: Bike, label: "Piste bicicletă", value: 373, decimals: 0, suffix: "", color: "#059669", description: "segmente OSM verified" },
+    { icon: Train, label: "Stații metrou", value: 55, decimals: 0, suffix: "", color: "#F97316", description: "M1-M5 Metrorex" },
   ];
 
   return (

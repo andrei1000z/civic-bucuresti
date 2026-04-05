@@ -46,7 +46,7 @@ export function Footer() {
               <li><Link href="/ghiduri/ghid-cutremur" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Cutremur</Link></li>
               <li><Link href="/ghiduri/ghid-transport" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Transport</Link></li>
               <li><Link href="/cum-functioneaza" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Cum funcționează primăria</Link></li>
-              <li><Link href="/api-docs" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">API dezvoltatori</Link></li>
+              <li><Link href="/impact" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Impact</Link></li>
             </ul>
           </div>
 
