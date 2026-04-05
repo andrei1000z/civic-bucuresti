@@ -159,6 +159,16 @@ h1, h2, h3, h4, h5, h6 {
 .leaflet-container {
   background: var(--color-surface-2);
   font-family: inherit;
+  /* Isolation creates a new stacking context so Leaflet's internal
+     z-indexes (controls=1000, popups=700, panes=400-650) don't leak
+     above page-level modals. */
+  isolation: isolate;
+}
+
+/* Cap Leaflet's control z-index so lightbox/modals (z-[120]+) can overlay */
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 40 !important;
 }
 
 .leaflet-tile {
