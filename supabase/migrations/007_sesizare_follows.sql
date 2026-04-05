@@ -52,8 +52,11 @@ as $$
   where sesizare_id = p_sesizare_id;
 $$;
 
--- Add follows count to the feed view
-drop view if exists public.sesizari_feed;
+-- Add follows count to the feed view.
+-- CASCADE because sesizari_similare() RPC (migration 005) depends on this view.
+-- We'll recreate the RPC right after.
+drop view if exists public.sesizari_feed cascade;
+
 create view public.sesizari_feed as
   select s.*,
     coalesce(sum(case when v.value = 1 then 1 else 0 end), 0)::int as upvotes,
@@ -70,7 +73,31 @@ create view public.sesizari_feed as
   where s.moderation_status = 'approved' and s.publica = true
   group by s.id;
 
+-- Recreate sesizari_similare RPC (was dropped by CASCADE above)
+create or replace function public.sesizari_similare(
+  p_sesizare_id uuid,
+  p_radius_m integer default 300
+)
+returns setof public.sesizari_feed
+language sql
+stable
+as $$
+  with origin as (
+    select tip, lat, lng, id
+    from public.sesizari
+    where id = p_sesizare_id
+  )
+  select s.*
+  from public.sesizari_feed s, origin o
+  where s.id != o.id
+    and s.tip = o.tip
+    and abs(s.lat - o.lat) < (p_radius_m::float / 111000.0)
+    and abs(s.lng - o.lng) < (p_radius_m::float / (111000.0 * cos(radians(o.lat))))
+  order by s.created_at desc
+  limit 10;
+$$;
+
 -- Force PostgREST to reload its schema cache so `nr_followers` is visible
 notify pgrst, 'reload schema';
 
-select 'Migration 007 aplicată: sesizare_follows + view actualizat.' as status;
+select 'Migration 007 aplicată: sesizare_follows + view + RPC recreat.' as status;
