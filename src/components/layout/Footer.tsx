@@ -40,7 +40,7 @@ export function Footer() {
                 <Link2 size={16} />
               </a>
               <a
-                href="mailto:contact@civic-bucuresti.ro"
+                href="mailto:contact@civia.ro"
                 aria-label="Email"
                 className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-primary)] hover:text-white transition-all text-[var(--color-text-muted)]"
               >

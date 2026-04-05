@@ -5,6 +5,7 @@ import type {
   SesizareRow,
   SesizareCommentRow,
   SesizareTimelineRow,
+  SesizareVerificationRow,
 } from "@/lib/supabase/types";
 
 export interface ListFilters {
@@ -191,4 +192,70 @@ export async function getUserVote(params: {
     .eq("user_id", params.userId)
     .maybeSingle();
   return ((data as { value: -1 | 1 } | null)?.value ?? null);
+}
+
+// ========== VERIFICĂRI REZOLVARE ==========
+
+export async function getVerifications(
+  sesizareId: string
+): Promise<SesizareVerificationRow[]> {
+  const supabase = await createSupabaseServer();
+  const { data, error } = await supabase
+    .from("sesizare_verifications")
+    .select("*")
+    .eq("sesizare_id", sesizareId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as SesizareVerificationRow[];
+}
+
+export async function getUserVerification(params: {
+  sesizareId: string;
+  userId: string;
+}): Promise<boolean | null> {
+  const supabase = await createSupabaseServer();
+  const { data } = await supabase
+    .from("sesizare_verifications")
+    .select("agrees")
+    .eq("sesizare_id", params.sesizareId)
+    .eq("user_id", params.userId)
+    .maybeSingle();
+  return (data as { agrees: boolean } | null)?.agrees ?? null;
+}
+
+export async function upsertVerification(params: {
+  sesizareId: string;
+  userId: string;
+  agrees: boolean;
+}): Promise<void> {
+  const supabase = await createSupabaseServer();
+  const { error } = await supabase
+    .from("sesizare_verifications")
+    .upsert(
+      {
+        sesizare_id: params.sesizareId,
+        user_id: params.userId,
+        agrees: params.agrees,
+      },
+      { onConflict: "sesizare_id,user_id" }
+    );
+  if (error) throw error;
+}
+
+// ========== SESIZĂRI SIMILARE ==========
+
+export async function getSimilarSesizari(
+  sesizareId: string,
+  radiusM: number = 300
+): Promise<SesizareFeedRow[]> {
+  const supabase = await createSupabaseServer();
+  const { data, error } = await supabase.rpc("sesizari_similare", {
+    p_sesizare_id: sesizareId,
+    p_radius_m: radiusM,
+  });
+  if (error) {
+    // RPC might not exist yet (migration not applied) — fail gracefully
+    return [];
+  }
+  return (data ?? []) as SesizareFeedRow[];
 }

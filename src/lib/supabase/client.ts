@@ -10,7 +10,7 @@ export function createSupabaseBrowser() {
 
   if (!url || !anonKey) {
     throw new Error(
-      "[Civic București] Lipsește .env.local. Copiază .env.local.example → .env.local și completează NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY, apoi restart npm run dev."
+      "[Civia] Lipsește .env.local. Copiază .env.local.example → .env.local și completează NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY, apoi restart npm run dev."
     );
   }
 

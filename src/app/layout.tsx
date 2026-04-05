@@ -10,6 +10,8 @@ import { CivicAssistant } from "@/components/ai/CivicAssistant";
 import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/JsonLd";
 import { CookieBanner } from "@/components/CookieBanner";
 import { Analytics } from "@/components/Analytics";
+import { ToastProvider } from "@/components/Toast";
+import { BackToTop } from "@/components/BackToTop";
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/constants";
 
 const inter = Inter({
@@ -46,9 +48,9 @@ export const metadata: Metadata = {
     "administrație locală",
     "consiliul general",
   ],
-  authors: [{ name: "Civic București" }],
-  creator: "Civic București",
-  publisher: "Civic București",
+  authors: [{ name: "Civia" }],
+  creator: "Civia",
+  publisher: "Civia",
   robots: {
     index: true,
     follow: true,
@@ -72,10 +74,16 @@ export const metadata: Metadata = {
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
   },
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-icon.png",
+  other: {
+    "theme-color": "#1C4ED8",
   },
+};
+
+export const viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0F172A" },
+  ],
 };
 
 export default function RootLayout({
@@ -93,14 +101,23 @@ export default function RootLayout({
         <OrganizationJsonLd />
         <WebsiteJsonLd />
         <Analytics />
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[200] focus:px-4 focus:py-2 focus:bg-[var(--color-primary)] focus:text-white focus:rounded-[8px] focus:shadow-lg"
+        >
+          Sări la conținut
+        </a>
         <ThemeProvider>
           <AuthProvider>
-            <Navbar />
-            <main className="flex-1 flex flex-col">{children}</main>
-            <Footer />
-            <CivicAssistant />
-            <AuthModal />
-            <CookieBanner />
+            <ToastProvider>
+              <Navbar />
+              <main id="main-content" className="flex-1 flex flex-col">{children}</main>
+              <Footer />
+              <CivicAssistant />
+              <AuthModal />
+              <CookieBanner />
+              <BackToTop />
+            </ToastProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

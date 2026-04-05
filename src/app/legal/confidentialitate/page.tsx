@@ -4,7 +4,7 @@ import { ChevronLeft } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Politica de confidențialitate",
-  description: "Cum prelucrăm datele tale pe platforma Civic București, conform GDPR.",
+  description: "Cum prelucrăm datele tale pe platforma Civia, conform GDPR.",
 };
 
 export default function ConfidentialitatePage() {
@@ -26,7 +26,7 @@ export default function ConfidentialitatePage() {
 
         <h2>Cine suntem</h2>
         <p>
-          Civic București este o platformă civică independentă, neafiliată niciunei autorități
+          Civia este o platformă civică independentă, neafiliată niciunei autorități
           publice. Scopul nostru e să facilitam comunicarea între cetățeni și administrația locală.
         </p>
 
@@ -90,8 +90,8 @@ export default function ConfidentialitatePage() {
         <h2>Contact</h2>
         <p>
           Pentru întrebări sau solicitări GDPR:{" "}
-          <a href="mailto:contact@civic-bucuresti.ro" className="text-[var(--color-primary)]">
-            contact@civic-bucuresti.ro
+          <a href="mailto:contact@civia.ro" className="text-[var(--color-primary)]">
+            contact@civia.ro
           </a>
         </p>
       </article>

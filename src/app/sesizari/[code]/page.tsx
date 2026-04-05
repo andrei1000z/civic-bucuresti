@@ -2,7 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, MapPin, Calendar, User, Clock, CheckCircle2, Image as ImgIcon } from "lucide-react";
-import { getSesizareByCode, getTimeline, getComments, getUserVote } from "@/lib/sesizari/repository";
+import {
+  getSesizareByCode,
+  getTimeline,
+  getComments,
+  getUserVote,
+  getUserVerification,
+  getSimilarSesizari,
+} from "@/lib/sesizari/repository";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
 import { formatDate, formatDateTime } from "@/lib/utils";
@@ -12,6 +19,11 @@ import { CommentsSection } from "@/components/sesizari/CommentsSection";
 import { EvenimentMap } from "@/components/maps/EvenimentMap";
 import { SignSesizareButton } from "@/components/sesizari/SignSesizareButton";
 import { MarkResolvedButton } from "@/components/sesizari/MarkResolvedButton";
+import { ShareMenu } from "@/components/sesizari/ShareMenu";
+import { BeforeAfter } from "@/components/sesizari/BeforeAfter";
+import { VerifyPanel } from "@/components/sesizari/VerifyPanel";
+import { SimilarSesizari } from "@/components/sesizari/SimilarSesizari";
+import { SITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -50,18 +62,34 @@ export default async function SesizareDetailPage({
   const sesizare = await getSesizareByCode(code);
   if (!sesizare) notFound();
 
-  const [timeline, comments] = await Promise.all([
+  const [timeline, comments, similar] = await Promise.all([
     getTimeline(sesizare.id),
     getComments(sesizare.id),
+    getSimilarSesizari(sesizare.id, 300),
   ]);
 
-  // Check if current user has voted
+  // Check if current user has voted / verified
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
   let userVote: -1 | 1 | null = null;
+  let userVerification: boolean | null = null;
   if (user) {
     userVote = await getUserVote({ sesizareId: sesizare.id, userId: user.id });
+    userVerification = await getUserVerification({
+      sesizareId: sesizare.id,
+      userId: user.id,
+    });
   }
+
+  const isAuthor = user
+    ? sesizare.user_id === user.id || sesizare.author_email === user.email
+    : false;
+
+  // Poză "before" pentru before/after: prima imagine a sesizării (dacă există)
+  const beforeUrl = sesizare.imagini.length > 0 ? sesizare.imagini[0] : null;
+  const afterUrl = sesizare.resolved_photo_url;
+  const isResolved = sesizare.status === "rezolvat";
+  const hasBeforeAfter = isResolved && beforeUrl && afterUrl;
 
   const tipLabel = SESIZARE_TIPURI.find((t) => t.value === sesizare.tip)?.label ?? sesizare.tip;
   const tipIcon = SESIZARE_TIPURI.find((t) => t.value === sesizare.tip)?.icon ?? "📝";
@@ -125,11 +153,25 @@ export default async function SesizareDetailPage({
             authorEmail={sesizare.author_email}
             userId={sesizare.user_id}
           />
+          <ShareMenu
+            url={`${SITE_URL}/sesizari/${sesizare.code}`}
+            title={sesizare.titlu}
+            size="md"
+          />
         </div>
       </div>
 
       <div className="grid lg:grid-cols-[1fr_340px] gap-8">
         <div>
+          {/* Before / After (doar dacă e rezolvat) */}
+          {hasBeforeAfter && (
+            <BeforeAfter
+              beforeUrl={beforeUrl}
+              afterUrl={afterUrl}
+              resolvedAt={sesizare.resolved_at}
+            />
+          )}
+
           {/* Description */}
           <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
             <h2 className="font-semibold mb-3">Descriere</h2>
@@ -191,7 +233,7 @@ export default async function SesizareDetailPage({
         {/* Sidebar */}
         <aside className="space-y-4">
           {/* Vote */}
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 sticky top-20">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
             <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3">
               Sprijină sesizarea
             </p>
@@ -206,6 +248,20 @@ export default async function SesizareDetailPage({
               {sesizare.voturi_net} scor net · {sesizare.nr_comentarii} comentarii
             </p>
           </div>
+
+          {/* Verify panel (doar la rezolvate) */}
+          {isResolved && (
+            <VerifyPanel
+              code={sesizare.code}
+              verifDa={sesizare.verif_da}
+              verifNu={sesizare.verif_nu}
+              initialUserChoice={userVerification}
+              isAuthor={isAuthor}
+            />
+          )}
+
+          {/* Similar sesizari (cine a mai sesizat) */}
+          <SimilarSesizari sesizari={similar} />
 
           {/* Timeline */}
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">

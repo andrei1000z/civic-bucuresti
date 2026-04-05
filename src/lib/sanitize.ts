@@ -8,7 +8,6 @@ export function sanitizeText(input: string, maxLength = 2000): string {
     .replace(/javascript:/gi, "")
     .replace(/vbscript:/gi, "")
     .replace(/data:text\/html/gi, "")
-    // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
     .trim();
 }

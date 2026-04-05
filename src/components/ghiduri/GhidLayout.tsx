@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, List, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
+import { ReadProgress } from "@/components/ReadProgress";
 
 interface Chapter {
   id: string;
@@ -51,6 +52,7 @@ export function GhidLayout({
 
   return (
     <>
+      <ReadProgress />
       {/* Hero */}
       <section className={`relative overflow-hidden bg-gradient-to-br ${gradient} text-white`}>
         <div className="absolute inset-0 bg-grid-pattern opacity-15" />

@@ -263,3 +263,39 @@ h1, h2, h3, h4, h5, h6 {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* Screen reader only (skip-to-content, a11y) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.focus\:not-sr-only:focus {
+  position: fixed;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Print-friendly sesizari */
+@media print {
+  nav, footer, aside, button:not([data-print-keep]),
+  .leaflet-container, [data-no-print], .animate-ticker {
+    display: none !important;
+  }
+  body { background: white !important; color: black !important; }
+  main { padding: 0 !important; }
+  a { color: black !important; text-decoration: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+  p, li { page-break-inside: avoid; }
+}

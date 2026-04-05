@@ -13,7 +13,7 @@ export async function reverseGeocode(lat: number, lng: number): Promise<Geocodin
   try {
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=ro`;
     const res = await fetch(url, {
-      headers: { "User-Agent": "CivicBucuresti/1.0 (contact@civic-bucuresti.ro)" },
+      headers: { "User-Agent": "CivicBucuresti/1.0 (contact@civia.ro)" },
     });
     if (!res.ok) return null;
     const data = (await res.json()) as {

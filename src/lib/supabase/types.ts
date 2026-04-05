@@ -27,6 +27,9 @@ export interface SesizareRow {
   imagini: string[];
   publica: boolean;
   moderation_status: ModerationStatus;
+  resolved_at: string | null;
+  resolved_by_author: boolean;
+  resolved_photo_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -36,6 +39,15 @@ export interface SesizareFeedRow extends SesizareRow {
   downvotes: number;
   voturi_net: number;
   nr_comentarii: number;
+  verif_da: number;
+  verif_nu: number;
+}
+
+export interface SesizareVerificationRow {
+  sesizare_id: string;
+  user_id: string;
+  agrees: boolean;
+  created_at: string;
 }
 
 export interface SesizareVoteRow {
@@ -114,6 +126,12 @@ export interface Database {
         Row: SesizareTimelineRow;
         Insert: Omit<SesizareTimelineRow, "id" | "created_at"> & { id?: string; created_at?: string };
         Update: Partial<SesizareTimelineRow>;
+        Relationships: [];
+      };
+      sesizare_verifications: {
+        Row: SesizareVerificationRow;
+        Insert: Omit<SesizareVerificationRow, "created_at"> & { created_at?: string };
+        Update: Partial<SesizareVerificationRow>;
         Relationships: [];
       };
       chat_sessions: {

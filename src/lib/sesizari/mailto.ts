@@ -29,13 +29,11 @@ export function buildFormalText(input: MailtoInput): string {
   const today = new Date().toLocaleDateString("ro-RO");
 
   if (input.formal_text) {
-    // AI already generated the full classic-style letter — append image refs + code
-    const withCode = input.formal_text;
+    // AI already generated the full classic-style letter — append image refs only
     const imagesBlock = input.imagini && input.imagini.length > 0
       ? `\n\nFotografii atașate:\n${input.imagini.map((u) => `- ${u}`).join("\n")}`
       : "";
-    const codeBlock = input.code ? `\n\n(Cod platformă Civic București: ${input.code})` : "";
-    return `${withCode}${imagesBlock}${codeBlock}`;
+    return `${input.formal_text}${imagesBlock}`;
   }
 
   // Fallback: classic structure with proper gender agreement
@@ -55,13 +53,13 @@ Vă mulțumesc anticipat și vă rog să îmi comunicați numărul de înregistr
 
 Cu respect,
 ${input.author_name || "[NUMELE]"}
-${today}${input.code ? `\n\n(Cod platformă Civic București: ${input.code})` : ""}`;
+${today}`;
 }
 
 export function buildEmailPayload(input: MailtoInput): EmailPayload {
   const recipients = getAuthoritiesFor(input.tip, input.sector ?? null);
   const tipLabel = SESIZARE_TIPURI.find((t) => t.value === input.tip)?.label ?? "";
-  const subject = `Sesizare ${tipLabel} — ${input.locatie}${input.code ? ` [${input.code}]` : ""}`;
+  const subject = `Sesizare ${tipLabel} — ${input.locatie}`;
   const body = buildFormalText(input);
   return {
     to: recipients.primary.map((a) => a.email),

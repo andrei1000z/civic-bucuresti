@@ -48,8 +48,8 @@ export async function GET(req: Request) {
         count: data?.length ?? 0,
         limit,
         offset,
-        license: "CC BY 4.0 — free to use with attribution to Civic București",
-        docs: "https://civic-bucuresti.ro/api-docs",
+        license: "CC BY 4.0 — free to use with attribution to Civia",
+        docs: "https://civia.ro/api-docs",
       },
     }), {
       headers: {

@@ -18,7 +18,7 @@ const SUGGESTED_QUESTIONS = [
 
 const INITIAL_MESSAGE: Message = {
   role: "assistant",
-  content: "Salut! Sunt Asistentul Civic București. Te pot ajuta cu informații despre transport, sesizări, primărie, ghiduri sau orice altceva despre oraș. Ce vrei să știi?",
+  content: "Salut! Sunt Asistentul Civia. Te pot ajuta cu informații despre transport, sesizări, primărie, ghiduri sau orice altceva despre oraș. Ce vrei să știi?",
 };
 
 const CHAT_STORAGE_KEY = "civic_chat_history";

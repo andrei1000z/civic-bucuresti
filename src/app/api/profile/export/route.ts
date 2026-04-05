@@ -32,7 +32,7 @@ export async function GET() {
     comments: comments.data ?? [],
   };
 
-  const filename = `civic-bucuresti-export-${user.email?.split("@")[0]}-${new Date().toISOString().slice(0, 10)}.json`;
+  const filename = `civia-export-${user.email?.split("@")[0]}-${new Date().toISOString().slice(0, 10)}.json`;
   return new Response(JSON.stringify(exportData, null, 2), {
     headers: {
       "Content-Type": "application/json; charset=utf-8",

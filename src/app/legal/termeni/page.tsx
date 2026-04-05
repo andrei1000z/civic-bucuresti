@@ -4,7 +4,7 @@ import { ChevronLeft } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Termeni și condiții",
-  description: "Termenii de utilizare a platformei Civic București.",
+  description: "Termenii de utilizare a platformei Civia.",
 };
 
 export default function TermeniPage() {
@@ -26,7 +26,7 @@ export default function TermeniPage() {
 
         <h2>1. Despre serviciu</h2>
         <p>
-          Civic București este o platformă gratuită care ajută cetățenii să formuleze și să
+          Civia este o platformă gratuită care ajută cetățenii să formuleze și să
           urmărească sesizările către autoritățile locale. Nu suntem afiliați PMB sau altor
           instituții publice.
         </p>

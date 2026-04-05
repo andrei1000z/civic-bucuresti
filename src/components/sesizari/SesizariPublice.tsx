@@ -214,18 +214,32 @@ export function SesizariPublice() {
                   <span>{s.sector}</span>
                 </div>
                 <p className="text-sm text-[var(--color-text)] mb-3 line-clamp-2">{s.descriere}</p>
-                {s.imagini.length > 0 && (
+                {(s.imagini.length > 0 || s.resolved_photo_url) && (
                   <div className="flex gap-1 mb-3">
-                    {s.imagini.slice(0, 3).map((url, i) => (
-                      <div key={i} className="w-14 h-14 rounded-[8px] bg-[var(--color-surface-2)] overflow-hidden flex items-center justify-center">
+                    {s.imagini.slice(0, s.resolved_photo_url ? 2 : 3).map((url, i) => (
+                      <div key={i} className="relative w-14 h-14 rounded-[8px] bg-[var(--color-surface-2)] overflow-hidden flex items-center justify-center">
                         {url.startsWith("http") ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={url} alt="" className="w-full h-full object-cover" />
                         ) : (
                           <ImgIcon size={16} className="text-[var(--color-text-muted)]" />
                         )}
+                        {i === 0 && s.resolved_photo_url && (
+                          <span className="absolute bottom-0 inset-x-0 bg-red-500/90 text-white text-[8px] font-bold text-center leading-tight py-0.5">
+                            BEFORE
+                          </span>
+                        )}
                       </div>
                     ))}
+                    {s.resolved_photo_url && (
+                      <div className="relative w-14 h-14 rounded-[8px] overflow-hidden ring-2 ring-emerald-500">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={s.resolved_photo_url} alt="După" className="w-full h-full object-cover" />
+                        <span className="absolute bottom-0 inset-x-0 bg-emerald-500/90 text-white text-[8px] font-bold text-center leading-tight py-0.5">
+                          AFTER
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)]">

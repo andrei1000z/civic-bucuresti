@@ -4,7 +4,7 @@ import { ChevronLeft, Code, Download } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "API public pentru dezvoltatori",
-  description: "API gratuit cu datele Civic București — pentru jurnaliști, cercetători, dezvoltatori.",
+  description: "API gratuit cu datele Civia — pentru jurnaliști, cercetători, dezvoltatori.",
 };
 
 export default function ApiDocsPage() {
@@ -82,7 +82,7 @@ export default function ApiDocsPage() {
         <h3 className="font-semibold text-sm mt-4 mb-2">Exemplu cerere (fetch)</h3>
         <pre className="p-4 rounded-[8px] bg-[var(--color-surface-2)] text-xs font-mono overflow-x-auto">
 {`const res = await fetch(
-  "https://civic-bucuresti.ro/api/public/sesizari?sector=S3&status=nou&limit=50"
+  "https://civia.ro/api/public/sesizari?sector=S3&status=nou&limit=50"
 );
 const { data, meta } = await res.json();
 console.log(data); // [{ code, titlu, descriere, locatie, sector, lat, lng, ... }]`}
@@ -112,7 +112,7 @@ console.log(data); // [{ code, titlu, descriere, locatie, sector, lat, lng, ... 
     "limit": 50,
     "offset": 0,
     "license": "CC BY 4.0",
-    "docs": "https://civic-bucuresti.ro/api-docs"
+    "docs": "https://civia.ro/api-docs"
   }
 }`}
         </pre>
@@ -125,8 +125,11 @@ console.log(data); // [{ code, titlu, descriere, locatie, sector, lat, lng, ... 
         <p className="text-sm text-[var(--color-text-muted)] mb-4">
           Pentru analize în Excel/Python/R, cu filtre similare.
         </p>
+        {/* API endpoint download — not a Next route */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a
           href="/api/sesizari/export?limit=1000"
+          download
           className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
         >
           <Download size={14} />
@@ -151,14 +154,14 @@ console.log(data); // [{ code, titlu, descriere, locatie, sector, lat, lng, ... 
         <p className="text-sm text-amber-800 dark:text-amber-300">
           Datele sunt disponibile sub licența <strong>Creative Commons BY 4.0</strong>.
           Poți să le folosești liber, inclusiv comercial, cu condiția să atribui sursa:
-          <em> &quot;Date furnizate de Civic București (civic-bucuresti.ro)&quot;</em>.
+          <em> &quot;Date furnizate de Civia (civia.ro)&quot;</em>.
         </p>
       </section>
 
       <section className="mt-8 p-5 bg-[var(--color-surface-2)] rounded-[12px] text-sm">
         <p className="text-[var(--color-text-muted)]">
           <strong>Rate limiting:</strong> 60 cereri/minut per IP. Pentru volume mai mari, contactează-ne la{" "}
-          <a href="mailto:api@civic-bucuresti.ro" className="text-[var(--color-primary)]">api@civic-bucuresti.ro</a>.
+          <a href="mailto:api@civia.ro" className="text-[var(--color-primary)]">api@civia.ro</a>.
         </p>
       </section>
     </div>

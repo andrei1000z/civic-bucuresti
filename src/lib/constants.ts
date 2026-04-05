@@ -1,7 +1,8 @@
-export const SITE_NAME = "Civic București";
+export const SITE_NAME = "Civia";
+export const SITE_TAGLINE = "Platforma civică a Bucureștiului";
 export const SITE_DESCRIPTION =
   "Hărți, sesizări, ghiduri, știri și statistici despre Bucureștiul tău — într-un singur loc.";
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://civic-bucuresti.ro";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://civia.ro";
 
 // Bucharest geographic center
 export const BUCHAREST_CENTER: [number, number] = [44.4268, 26.1025];

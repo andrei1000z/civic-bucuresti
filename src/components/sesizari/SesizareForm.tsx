@@ -17,7 +17,6 @@ import { getAuthoritiesFor } from "@/lib/sesizari/authorities";
 import { detectGen, subsemnatulForm, domiciliatForm } from "@/lib/sesizari/gen";
 import { cn } from "@/lib/utils";
 import { PhotoUploader } from "./PhotoUploader";
-import { buildMailtoLink } from "@/lib/sesizari/mailto";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { EmailChoicePanel } from "./EmailChoicePanel";
 

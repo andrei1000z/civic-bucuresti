@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Civic București";
+export const alt = "Civia";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -46,7 +46,7 @@ export default async function OGImage() {
           >
             🏙️
           </div>
-          <div style={{ color: "#fff", fontSize: 32, fontWeight: 700 }}>Civic București</div>
+          <div style={{ color: "#fff", fontSize: 32, fontWeight: 700 }}>Civia</div>
         </div>
 
         <div
@@ -85,7 +85,7 @@ export default async function OGImage() {
             <span>📮 Sesizări</span>
             <span>📊 Statistici</span>
           </div>
-          <div>civic-bucuresti.ro</div>
+          <div>civia.ro</div>
         </div>
       </div>
     ),

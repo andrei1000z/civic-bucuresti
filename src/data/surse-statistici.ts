@@ -63,9 +63,9 @@ export const SURSE: Record<string, Sursa> = {
     publisher: "PMB",
   },
   "civic-local": {
-    name: "Baza proprie de sesizări Civic București",
+    name: "Baza proprie de sesizări Civia",
     url: "/sesizari",
     year: "live",
-    publisher: "Civic București",
+    publisher: "Civia",
   },
 };

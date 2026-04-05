@@ -51,6 +51,14 @@ export async function POST(
       const h = humanizeSupabaseError(error);
       return NextResponse.json({ error: h.message }, { status: h.status });
     }
+
+    // Adaugă eveniment în timeline
+    await admin.from("sesizare_timeline").insert({
+      sesizare_id: sesizare.id,
+      event_type: "rezolvat",
+      description: "Marcată ca rezolvată de autor",
+    });
+
     return NextResponse.json({ ok: true });
   } catch (e) {
     if (e instanceof z.ZodError) {
