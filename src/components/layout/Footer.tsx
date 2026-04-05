@@ -21,7 +21,7 @@ export function Footer() {
               href="mailto:contact@civia.ro"
               className="inline-flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
             >
-              <Mail size={14} /> contact@civia.ro
+              <Mail size={14} /> .
             </a>
           </div>
 

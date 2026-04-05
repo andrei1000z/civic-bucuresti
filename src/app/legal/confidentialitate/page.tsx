@@ -92,7 +92,6 @@ export default function ConfidentialitatePage() {
         <p>
           Pentru întrebări sau solicitări GDPR:{" "}
           <a href="mailto:contact@civia.ro" className="text-[var(--color-primary)]">
-            contact@civia.ro
           </a>
         </p>
       </article>
