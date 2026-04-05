@@ -1,0 +1,31 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
+import { Sun, Moon } from "lucide-react";
+
+export function ThemeToggle() {
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return (
+      <button className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)]" aria-label="Theme toggle" />
+    );
+  }
+
+  const current = resolvedTheme ?? theme;
+  const isDark = current === "dark";
+
+  return (
+    <button
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      className="relative w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] transition-all flex items-center justify-center text-[var(--color-text)]"
+      aria-label={isDark ? "Activează modul luminos" : "Activează modul întunecat"}
+    >
+      {isDark ? <Sun size={18} /> : <Moon size={18} />}
+    </button>
+  );
+}

@@ -1,0 +1,109 @@
+"use client";
+
+import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { useEffect, type ReactNode } from "react";
+import { BUCHAREST_CENTER } from "@/lib/constants";
+
+// Fix default icons for Next.js
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
+export function createColoredIcon(color: string, size = 28): L.DivIcon {
+  return L.divIcon({
+    html: `<div style="
+      width: ${size}px;
+      height: ${size}px;
+      background: ${color};
+      border: 3px solid white;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    "></div>`,
+    className: "custom-marker-icon",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size],
+    popupAnchor: [0, -size],
+  });
+}
+
+export function createDotIcon(color: string, size = 14): L.DivIcon {
+  return L.divIcon({
+    html: `<div style="
+      width: ${size}px;
+      height: ${size}px;
+      background: ${color};
+      border: 2px solid white;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    "></div>`,
+    className: "custom-dot-icon",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2],
+  });
+}
+
+interface LeafletMapProps {
+  center?: [number, number];
+  zoom?: number;
+  children?: ReactNode;
+  className?: string;
+  scrollWheelZoom?: boolean;
+  flyToTarget?: { coords: [number, number]; zoom?: number } | null;
+}
+
+function MapResizer() {
+  const map = useMap();
+  useEffect(() => {
+    const timeout = setTimeout(() => map.invalidateSize(), 100);
+    return () => clearTimeout(timeout);
+  }, [map]);
+  return null;
+}
+
+function FlyTo({ target }: { target: { coords: [number, number]; zoom?: number } | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (target) {
+      map.flyTo(target.coords, target.zoom ?? 15, { duration: 1.2 });
+    }
+  }, [target, map]);
+  return null;
+}
+
+export default function LeafletMap({
+  center = BUCHAREST_CENTER,
+  zoom = 12,
+  children,
+  className = "w-full h-full",
+  scrollWheelZoom = true,
+  flyToTarget = null,
+}: LeafletMapProps) {
+  return (
+    <MapContainer
+      center={center}
+      zoom={zoom}
+      scrollWheelZoom={scrollWheelZoom}
+      className={className}
+      zoomControl={true}
+    >
+      <TileLayer
+        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+      />
+      <MapResizer />
+      <FlyTo target={flyToTarget} />
+      {children}
+    </MapContainer>
+  );
+}
+
+export { Marker, Popup, Polyline, Circle };

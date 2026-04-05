@@ -1,0 +1,116 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+import { STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
+import { createSupabaseBrowser } from "@/lib/supabase/client";
+import type { SesizareFeedRow } from "@/lib/supabase/types";
+
+const LeafletMap = dynamic(() => import("./LeafletMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-[var(--color-surface-2)] animate-pulse rounded-[12px] flex items-center justify-center">
+      <p className="text-[var(--color-text-muted)] text-sm">Se încarcă harta...</p>
+    </div>
+  ),
+});
+
+const MarkerLayer = dynamic(() => import("./SesizariMarkersLayer"), { ssr: false });
+
+interface SesizariMapProps {
+  limit?: number;
+  height?: string;
+  zoom?: number;
+}
+
+interface MarkerData {
+  id: string;
+  code: string;
+  titlu: string;
+  locatie: string;
+  status: string;
+  data: string;
+  voturi: number;
+  comentarii: number;
+  coords: [number, number];
+}
+
+export function SesizariMap({ limit = 15, height = "400px", zoom = 12 }: SesizariMapProps) {
+  const [markers, setMarkers] = useState<MarkerData[]>([]);
+
+  useEffect(() => {
+    fetch(`/api/sesizari?limit=${limit}`)
+      .then((r) => r.json())
+      .then((j) => {
+        const rows = (j.data as SesizareFeedRow[]) ?? [];
+        setMarkers(
+          rows.map((r) => ({
+            id: r.id,
+            code: r.code,
+            titlu: r.titlu,
+            locatie: r.locatie,
+            status: r.status,
+            data: r.created_at,
+            voturi: r.voturi_net,
+            comentarii: r.nr_comentarii,
+            coords: [r.lat, r.lng],
+          }))
+        );
+      })
+      .catch(() => setMarkers([]));
+  }, [limit]);
+
+  // Realtime inserts
+  useEffect(() => {
+    const supabase = createSupabaseBrowser();
+    const channel = supabase
+      .channel("map-sesizari-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "sesizari" },
+        (payload: { new: SesizareFeedRow }) => {
+          const r = payload.new as SesizareFeedRow;
+          if (!r.publica) return;
+          setMarkers((prev) => {
+            const next: MarkerData = {
+              id: r.id,
+              code: r.code,
+              titlu: r.titlu,
+              locatie: r.locatie,
+              status: r.status,
+              data: r.created_at,
+              voturi: 0,
+              comentarii: 0,
+              coords: [r.lat, r.lng],
+            };
+            return [next, ...prev].slice(0, limit);
+          });
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [limit]);
+
+  return (
+    <div
+      style={{ height }}
+      className="w-full rounded-[12px] overflow-hidden border border-[var(--color-border)] relative"
+    >
+      <LeafletMap zoom={zoom}>
+        <MarkerLayer data={markers} />
+      </LeafletMap>
+      <div className="absolute bottom-3 left-3 z-[400] bg-[var(--color-surface)] backdrop-blur border border-[var(--color-border)] rounded-[8px] p-3 shadow-[var(--shadow-md)]">
+        <div className="flex flex-col gap-1.5">
+          {(["nou", "in-lucru", "rezolvat"] as const).map((status) => (
+            <div key={status} className="flex items-center gap-2 text-xs">
+              <span className="w-3 h-3 rounded-full" style={{ background: STATUS_COLORS[status] }} />
+              <span className="text-[var(--color-text)]">{STATUS_LABELS[status]}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,111 @@
+"use client";
+
+import { useState } from "react";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/auth/AuthProvider";
+
+interface VoteButtonsProps {
+  code: string;
+  initialUpvotes: number;
+  initialDownvotes: number;
+  initialUserVote?: -1 | 1 | null;
+  size?: "sm" | "md";
+  layout?: "horizontal" | "vertical";
+}
+
+export function VoteButtons({
+  code,
+  initialUpvotes,
+  initialDownvotes,
+  initialUserVote = null,
+  size = "md",
+  layout = "horizontal",
+}: VoteButtonsProps) {
+  const { user, openAuthModal } = useAuth();
+  const [upvotes, setUpvotes] = useState(initialUpvotes);
+  const [downvotes, setDownvotes] = useState(initialDownvotes);
+  const [userVote, setUserVote] = useState<-1 | 1 | null>(initialUserVote);
+  const [loading, setLoading] = useState(false);
+
+  const handleVote = async (value: 1 | -1) => {
+    if (!user) {
+      openAuthModal();
+      return;
+    }
+    if (loading) return;
+    setLoading(true);
+
+    // Calculate optimistic update
+    const newValue = userVote === value ? 0 : value;
+    const prevVote = userVote;
+
+    // Optimistic
+    if (prevVote === 1) setUpvotes((v) => v - 1);
+    if (prevVote === -1) setDownvotes((v) => v - 1);
+    if (newValue === 1) setUpvotes((v) => v + 1);
+    if (newValue === -1) setDownvotes((v) => v + 1);
+    setUserVote(newValue === 0 ? null : (newValue as 1 | -1));
+
+    try {
+      const res = await fetch(`/api/sesizari/${code}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: newValue }),
+      });
+      if (!res.ok) throw new Error("Vote failed");
+    } catch {
+      // Rollback
+      if (prevVote === 1) setUpvotes((v) => v + 1);
+      if (prevVote === -1) setDownvotes((v) => v + 1);
+      if (newValue === 1) setUpvotes((v) => v - 1);
+      if (newValue === -1) setDownvotes((v) => v - 1);
+      setUserVote(prevVote);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const iconSize = size === "sm" ? 14 : 16;
+  const textClass = size === "sm" ? "text-xs" : "text-sm";
+
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2",
+        layout === "vertical" && "flex-col"
+      )}
+    >
+      <button
+        onClick={() => handleVote(1)}
+        disabled={loading}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 transition-colors font-medium",
+          userVote === 1
+            ? "bg-emerald-500 text-white"
+            : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)]",
+          textClass
+        )}
+        aria-label="Votează util"
+      >
+        <ThumbsUp size={iconSize} />
+        {upvotes}
+      </button>
+      <button
+        onClick={() => handleVote(-1)}
+        disabled={loading}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 transition-colors font-medium",
+          userVote === -1
+            ? "bg-red-500 text-white"
+            : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)]",
+          textClass
+        )}
+        aria-label="Votează neutil"
+      >
+        <ThumbsDown size={iconSize} />
+        {downvotes}
+      </button>
+    </div>
+  );
+}

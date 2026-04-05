@@ -1,0 +1,45 @@
+import { describe, it, expect } from "vitest";
+import { SYSTEM_PROMPT_FORMAL, SYSTEM_PROMPT_CLASSIFIER, SYSTEM_PROMPT_CIVIC_ASSISTANT } from "./prompts";
+
+describe("Groq system prompts", () => {
+  it("SYSTEM_PROMPT_FORMAL is non-empty Romanian content", () => {
+    expect(SYSTEM_PROMPT_FORMAL.length).toBeGreaterThan(200);
+    expect(SYSTEM_PROMPT_FORMAL).toMatch(/român/i);
+    expect(SYSTEM_PROMPT_FORMAL.toLowerCase()).toContain("sesizăr");
+  });
+
+  it("SYSTEM_PROMPT_FORMAL requests strict JSON format", () => {
+    expect(SYSTEM_PROMPT_FORMAL).toContain("JSON");
+    expect(SYSTEM_PROMPT_FORMAL).toContain("formal_text");
+  });
+
+  it("SYSTEM_PROMPT_FORMAL uses classic letter template", () => {
+    expect(SYSTEM_PROMPT_FORMAL).toContain("Bună ziua");
+    expect(SYSTEM_PROMPT_FORMAL).toContain("Cu respect");
+    expect(SYSTEM_PROMPT_FORMAL).toContain("OG 27/2002");
+  });
+
+  it("SYSTEM_PROMPT_CLASSIFIER lists all 8 types", () => {
+    const types = ["groapa", "trotuar", "iluminat", "copac", "gunoi", "parcare", "graffiti", "altele"];
+    for (const t of types) {
+      expect(SYSTEM_PROMPT_CLASSIFIER).toContain(t);
+    }
+  });
+
+  it("SYSTEM_PROMPT_CLASSIFIER lists all 6 sectors", () => {
+    for (let i = 1; i <= 6; i++) {
+      expect(SYSTEM_PROMPT_CLASSIFIER).toContain(`S${i}`);
+    }
+  });
+
+  it("SYSTEM_PROMPT_CIVIC_ASSISTANT covers key topics", () => {
+    const topics = ["STB", "Metrorex", "sesizări", "PMB", "Consiliul General"];
+    for (const t of topics) {
+      expect(SYSTEM_PROMPT_CIVIC_ASSISTANT).toContain(t);
+    }
+  });
+
+  it("SYSTEM_PROMPT_CIVIC_ASSISTANT mentions site navigation", () => {
+    expect(SYSTEM_PROMPT_CIVIC_ASSISTANT).toMatch(/\/harti|\/sesizari|\/bilete/);
+  });
+});

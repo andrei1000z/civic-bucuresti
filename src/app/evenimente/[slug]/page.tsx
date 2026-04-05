@@ -1,0 +1,311 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import {
+  Flame,
+  Droplets,
+  Zap,
+  Users as UsersIcon,
+  Building2,
+  Car,
+  AlertTriangle,
+  MapPin,
+  ExternalLink,
+  ChevronLeft,
+  TriangleAlert,
+  Quote,
+} from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
+import { EvenimentMap } from "@/components/maps/EvenimentMap";
+import { evenimente } from "@/data/evenimente";
+import { evenimenteDetails } from "@/data/evenimente-detail";
+import { formatDate } from "@/lib/utils";
+import type { EvenimentCategory, EvenimentSeverity } from "@/types";
+
+export const dynamic = "force-static";
+
+const categoryIcons: Record<EvenimentCategory, React.ElementType> = {
+  accident: Car,
+  incendiu: Flame,
+  inundatie: Droplets,
+  cutremur: Zap,
+  protest: UsersIcon,
+  infrastructura: Building2,
+};
+
+const categoryLabels: Record<EvenimentCategory, string> = {
+  accident: "Accident",
+  incendiu: "Incendiu",
+  inundatie: "Inundații",
+  cutremur: "Cutremur",
+  protest: "Protest",
+  infrastructura: "Infrastructură",
+};
+
+const severityColors: Record<EvenimentSeverity, string> = {
+  minor: "#84CC16",
+  moderat: "#EAB308",
+  major: "#F97316",
+  critic: "#DC2626",
+};
+
+const severityLabels: Record<EvenimentSeverity, string> = {
+  minor: "Minor",
+  moderat: "Moderat",
+  major: "Major",
+  critic: "Critic",
+};
+
+export function generateStaticParams() {
+  return evenimente.map((e) => ({ slug: e.slug }));
+}
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
+  const { slug } = await params;
+  const ev = evenimente.find((e) => e.slug === slug);
+  return {
+    title: ev?.titlu ?? "Eveniment negăsit",
+    description: ev?.descriere.slice(0, 160) ?? "",
+    alternates: { canonical: `/evenimente/${slug}` },
+    openGraph: {
+      title: ev?.titlu,
+      description: ev?.descriere.slice(0, 160),
+      type: "article",
+      publishedTime: ev?.data,
+    },
+  };
+}
+
+export default async function EvenimentDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const eveniment = evenimente.find((e) => e.slug === slug);
+  const detail = evenimenteDetails[slug];
+  if (!eveniment) notFound();
+
+  const Icon = categoryIcons[eveniment.category];
+
+  return (
+    <>
+      {/* Hero */}
+      <section className={`relative bg-gradient-to-br ${eveniment.gradient} text-white overflow-hidden`}>
+        <div className="absolute inset-0 bg-grid-pattern opacity-10" />
+        <div className="container-narrow relative z-10 py-12 md:py-16">
+          <Link
+            href="/evenimente"
+            className="inline-flex items-center gap-1 text-white/70 hover:text-white text-sm mb-6 transition-colors"
+          >
+            <ChevronLeft size={16} /> Toate evenimentele
+          </Link>
+          <div className="flex items-start gap-6">
+            <div className="hidden md:flex w-20 h-20 rounded-[12px] bg-white/10 border border-white/20 items-center justify-center backdrop-blur">
+              <Icon size={44} strokeWidth={1.5} />
+            </div>
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <Badge className="bg-white/15 text-white border border-white/20">
+                  {categoryLabels[eveniment.category]}
+                </Badge>
+                <Badge bgColor={severityColors[eveniment.severity]} color="white">
+                  {severityLabels[eveniment.severity].toUpperCase()}
+                </Badge>
+                <Badge className="bg-white/15 text-white border border-white/20">
+                  {formatDate(eveniment.data)}
+                </Badge>
+              </div>
+              <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-5xl font-bold mb-3">
+                {eveniment.titlu}
+              </h1>
+              <p className="text-lg text-white/85 max-w-2xl">{eveniment.descriere}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {detail?.ongoingStatus && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900">
+          <div className="container-narrow py-3 flex items-center gap-3 text-sm">
+            <TriangleAlert size={16} className="text-amber-700 dark:text-amber-400" />
+            <span className="text-amber-900 dark:text-amber-200">
+              <strong>Status:</strong> {detail.ongoingStatus}
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div className="container-narrow py-12 grid lg:grid-cols-[1fr_340px] gap-12">
+        <article className="prose-civic max-w-none">
+          {/* Stats */}
+          {(eveniment.victime != null || eveniment.evacuati != null || eveniment.echipaje != null) && (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10 not-prose">
+              {eveniment.victime != null && eveniment.victime > 0 && (
+                <StatCard icon={AlertTriangle} label="Victime" value={eveniment.victime.toString()} color="#DC2626" />
+              )}
+              {eveniment.evacuati != null && eveniment.evacuati > 0 && (
+                <StatCard icon={UsersIcon} label="Evacuați" value={eveniment.evacuati.toString()} color="#F97316" />
+              )}
+              {eveniment.echipaje != null && eveniment.echipaje > 0 && (
+                <StatCard icon={Building2} label="Echipaje" value={eveniment.echipaje.toString()} color="#2563EB" />
+              )}
+            </div>
+          )}
+
+          {detail ? (
+            <>
+              <h2>Ce s-a întâmplat</h2>
+              <p>{detail.fullDescription}</p>
+
+              <h2>Cronologie</h2>
+              <div className="not-prose space-y-3 my-6">
+                {detail.timeline.map((entry, i) => (
+                  <div key={i} className="flex gap-4">
+                    <div className="shrink-0 w-20 text-right">
+                      <span className="inline-block font-mono font-semibold text-[var(--color-primary)] text-sm">
+                        {entry.time}
+                      </span>
+                    </div>
+                    <div className="relative flex-1 pl-6 pb-3 border-l-2 border-[var(--color-border)] last:border-transparent">
+                      <span className="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-[var(--color-primary)] ring-4 ring-[var(--color-bg)]" />
+                      <p className="font-semibold text-sm mb-0.5">{entry.titlu}</p>
+                      <p className="text-xs text-[var(--color-text-muted)]">{entry.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <h2>Localizare</h2>
+              <div className="not-prose mb-8">
+                <EvenimentMap
+                  coords={detail.coords}
+                  label={eveniment.titlu}
+                  color={severityColors[eveniment.severity]}
+                  zoom={15}
+                  height="400px"
+                />
+                <p className="text-xs text-[var(--color-text-muted)] mt-2 flex items-center gap-1">
+                  <MapPin size={12} /> {detail.coords[0].toFixed(4)}, {detail.coords[1].toFixed(4)}
+                </p>
+              </div>
+
+              <h2>Cauze identificate</h2>
+              <ul>
+                {detail.causes.map((c, i) => (
+                  <li key={i}>{c}</li>
+                ))}
+              </ul>
+
+              <h2>Impact</h2>
+              <p>{detail.impact}</p>
+
+              <h2>Răspunsul autorităților</h2>
+              <p>{detail.response}</p>
+
+              {detail.quotes.length > 0 && (
+                <>
+                  <h2>Declarații</h2>
+                  <div className="not-prose my-6 space-y-3">
+                    {detail.quotes.map((q, i) => (
+                      <blockquote
+                        key={i}
+                        className="bg-[var(--color-surface)] border-l-4 border-[var(--color-primary)] rounded-r-[12px] p-4 not-italic"
+                      >
+                        <Quote size={16} className="text-[var(--color-primary)] mb-1" />
+                        <p className="text-sm italic mb-2">&ldquo;{q.text}&rdquo;</p>
+                        <footer className="text-xs text-[var(--color-text-muted)] font-medium">
+                          — {q.author}
+                        </footer>
+                      </blockquote>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              <h2>Surse</h2>
+              <ul className="not-prose space-y-2 text-sm">
+                {detail.sources.map((src, i) => (
+                  <li key={i} className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                    <ExternalLink size={14} />
+                    <a href={src.url} target="_blank" rel="noreferrer" className="hover:text-[var(--color-primary)] hover:underline">
+                      {src.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <>
+              <h2>Rezumat</h2>
+              <p>{eveniment.descriere}</p>
+              <p className="text-sm text-[var(--color-text-muted)]">
+                Detalii complete în curs de documentare.
+              </p>
+            </>
+          )}
+        </article>
+
+        {/* Sidebar */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-24 space-y-4">
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+              <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3">
+                Detalii
+              </p>
+              <dl className="space-y-3 text-sm">
+                <div>
+                  <dt className="text-xs text-[var(--color-text-muted)]">Data</dt>
+                  <dd className="font-medium">{formatDate(eveniment.data)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-[var(--color-text-muted)]">Categorie</dt>
+                  <dd className="font-medium">{categoryLabels[eveniment.category]}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-[var(--color-text-muted)]">Gravitate</dt>
+                  <dd>
+                    <Badge bgColor={severityColors[eveniment.severity]} color="white">
+                      {severityLabels[eveniment.severity]}
+                    </Badge>
+                  </dd>
+                </div>
+                {eveniment.victime != null && (
+                  <div>
+                    <dt className="text-xs text-[var(--color-text-muted)]">Victime</dt>
+                    <dd className="font-medium text-red-600">{eveniment.victime}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </>
+  );
+}
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  color,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  color: string;
+}) {
+  return (
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4">
+      <Icon size={20} style={{ color }} className="mb-2" />
+      <p className="text-xs text-[var(--color-text-muted)] mb-0.5">{label}</p>
+      <p className="text-2xl font-bold" style={{ color }}>
+        {value}
+      </p>
+    </div>
+  );
+}
+

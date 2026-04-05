@@ -1,0 +1,292 @@
+"use client";
+
+import { useState, useRef, useEffect, useCallback } from "react";
+import { MessageCircle, X, Send, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
+
+const SUGGESTED_QUESTIONS = [
+  "Cât costă abonamentul STB lunar?",
+  "Cum fac o sesizare la PMB?",
+  "Ce fac la cutremur?",
+  "Cine e primarul Bucureștiului?",
+];
+
+const INITIAL_MESSAGE: Message = {
+  role: "assistant",
+  content: "Salut! Sunt Asistentul Civic București. Te pot ajuta cu informații despre transport, sesizări, primărie, ghiduri sau orice altceva despre oraș. Ce vrei să știi?",
+};
+
+const CHAT_STORAGE_KEY = "civic_chat_history";
+
+function loadChatHistory(): Message[] {
+  if (typeof window === "undefined") return [INITIAL_MESSAGE];
+  try {
+    const saved = sessionStorage.getItem(CHAT_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved) as Message[];
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {
+    // ignore
+  }
+  return [INITIAL_MESSAGE];
+}
+
+export function CivicAssistant() {
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>(loadChatHistory);
+  const [input, setInput] = useState("");
+  const [streaming, setStreaming] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Abort any in-flight stream on unmount
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
+
+  // Persist chat history (sessionStorage — survives tab reloads, cleared on close)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages.slice(-30)));
+    } catch {
+      // quota or disabled
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, streaming]);
+
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 200);
+    }
+  }, [open]);
+
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || streaming) return;
+    const userMsg: Message = { role: "user", content: text.trim() };
+    setMessages((prev) => {
+      const next = [...prev, userMsg, { role: "assistant" as const, content: "" }];
+      return next;
+    });
+    setInput("");
+    setStreaming(true);
+
+    const controller = new AbortController();
+    abortRef.current?.abort();
+    abortRef.current = controller;
+
+    try {
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          messages: [...messages, userMsg].slice(-10),
+        }),
+      });
+
+      if (!res.ok || !res.body) throw new Error("Network error");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let accumulated = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const payload = line.slice(6).trim();
+          if (payload === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(payload) as { delta?: string; error?: string };
+            if (parsed.error) throw new Error(parsed.error);
+            if (parsed.delta) {
+              accumulated += parsed.delta;
+              setMessages((prev) => {
+                const next = [...prev];
+                next[next.length - 1] = { role: "assistant", content: accumulated };
+                return next;
+              });
+            }
+          } catch {
+            // skip malformed chunk
+          }
+        }
+      }
+    } catch (e) {
+      if (e instanceof Error && e.name === "AbortError") {
+        // Intentional cancel — silent
+      } else {
+        const errMsg = e instanceof Error ? e.message : "Eroare conexiune";
+        setMessages((prev) => {
+          const next = [...prev];
+          next[next.length - 1] = {
+            role: "assistant",
+            content: `Scuze, asistentul e temporar indisponibil. (${errMsg})`,
+          };
+          return next;
+        });
+      }
+    } finally {
+      setStreaming(false);
+      abortRef.current = null;
+    }
+  }, [messages, streaming]);
+
+  return (
+    <>
+      {/* Launcher button */}
+      <button
+        onClick={() => setOpen(!open)}
+        className={cn(
+          "fixed bottom-6 right-6 z-40 rounded-full shadow-[var(--shadow-xl)] transition-all",
+          "bg-gradient-to-br from-[var(--color-primary)] to-indigo-800 text-white",
+          "hover:scale-105 active:scale-95",
+          open ? "w-12 h-12" : "w-14 h-14"
+        )}
+        aria-label={open ? "Închide asistent" : "Deschide asistent civic"}
+      >
+        {open ? <X size={20} className="m-auto" /> : <Sparkles size={22} className="m-auto" />}
+      </button>
+
+      {/* Chat window */}
+      {open && (
+        <div className="fixed bottom-24 right-6 z-40 w-[calc(100vw-3rem)] sm:w-[400px] max-h-[calc(100vh-8rem)] h-[600px] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-xl)] flex flex-col overflow-hidden animate-fade-in-up">
+          {/* Header */}
+          <header className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)] to-indigo-700 text-white">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <MessageCircle size={16} />
+              </div>
+              <div>
+                <p className="font-semibold text-sm leading-tight">Asistent Civic</p>
+                <p className="text-[10px] text-white/70 leading-tight">powered by Groq AI</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => {
+                  setMessages([INITIAL_MESSAGE]);
+                  if (typeof window !== "undefined") sessionStorage.removeItem(CHAT_STORAGE_KEY);
+                }}
+                className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center"
+                aria-label="Resetează conversația"
+                title="Resetează"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.74 3.08L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setOpen(false)}
+                className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center"
+                aria-label="Închide"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </header>
+
+          {/* Messages */}
+          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "flex",
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                )}
+              >
+                <div
+                  className={cn(
+                    "max-w-[85%] rounded-[12px] px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap",
+                    msg.role === "user"
+                      ? "bg-[var(--color-primary)] text-white rounded-br-sm"
+                      : "bg-[var(--color-surface-2)] text-[var(--color-text)] rounded-bl-sm"
+                  )}
+                >
+                  {msg.content || (streaming && i === messages.length - 1 ? (
+                    <span className="inline-flex gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </span>
+                  ) : null)}
+                </div>
+              </div>
+            ))}
+
+            {/* Suggested questions on empty state */}
+            {messages.length === 1 && !streaming && (
+              <div className="pt-2 space-y-2">
+                <p className="text-xs text-[var(--color-text-muted)] px-1">Încearcă:</p>
+                {SUGGESTED_QUESTIONS.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => sendMessage(q)}
+                    className="w-full text-left text-xs px-3 py-2 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] border border-[var(--color-border)] transition-colors"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Input */}
+          <form
+            className="border-t border-[var(--color-border)] p-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendMessage(input);
+            }}
+          >
+            <div className="flex gap-2">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Întreabă orice despre București..."
+                disabled={streaming}
+                className="flex-1 h-10 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || streaming}
+                className="w-10 h-10 rounded-[8px] bg-[var(--color-primary)] text-white flex items-center justify-center hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                aria-label="Trimite"
+              >
+                <Send size={16} />
+              </button>
+            </div>
+            <p className="text-[10px] text-[var(--color-text-muted)] mt-2 text-center">
+              AI poate face greșeli. Verifică informațiile importante oficial.
+            </p>
+          </form>
+        </div>
+      )}
+    </>
+  );
+}
