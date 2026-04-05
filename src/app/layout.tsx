@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
+import dynamic from "next/dynamic";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { CivicAssistant } from "@/components/ai/CivicAssistant";
 import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/JsonLd";
 import { CookieBanner } from "@/components/CookieBanner";
 import { Analytics } from "@/components/Analytics";
@@ -14,28 +14,32 @@ import { ToastProvider } from "@/components/Toast";
 import { BackToTop } from "@/components/BackToTop";
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/constants";
 
+// CivicAssistant is heavy (AI chat UI) and not needed on first paint — lazy-load it.
+const CivicAssistant = dynamic(
+  () => import("@/components/ai/CivicAssistant").then((m) => ({ default: m.CivicAssistant }))
+);
+
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
   variable: "--font-inter",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 const sora = Sora({
   subsets: ["latin", "latin-ext"],
   variable: "--font-sora",
   display: "swap",
+  weight: ["500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
   title: {
-    default: `${SITE_NAME} — ${SITE_DESCRIPTION}`,
+    default: `${SITE_NAME} — Platforma civică a Bucureștiului`,
     template: `%s — ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   metadataBase: new URL(SITE_URL),
-  alternates: {
-    canonical: "/",
-  },
   keywords: [
     "București",
     "sesizări",
@@ -68,11 +72,13 @@ export const metadata: Metadata = {
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
     siteName: SITE_NAME,
+    images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
+    images: ["/opengraph-image"],
   },
   other: {
     "theme-color": "#1C4ED8",

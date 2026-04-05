@@ -4,7 +4,8 @@ import { ChevronLeft } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Termeni și condiții",
-  description: "Termenii de utilizare a platformei Civia.",
+  description: "Termeni și condiții de utilizare a platformei Civia: conduita, responsabilitatea conținutului, moderarea, drepturi de proprietate și legea aplicabilă.",
+  alternates: { canonical: "/legal/termeni" },
 };
 
 export default function TermeniPage() {

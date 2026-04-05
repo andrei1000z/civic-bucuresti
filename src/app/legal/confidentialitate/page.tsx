@@ -4,7 +4,8 @@ import { ChevronLeft } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Politica de confidențialitate",
-  description: "Cum prelucrăm datele tale pe platforma Civia, conform GDPR.",
+  description: "Politica de confidențialitate Civia: ce date colectăm, cum le folosim, drepturile tale GDPR și cum exerciți acces, rectificare, ștergere.",
+  alternates: { canonical: "/legal/confidentialitate" },
 };
 
 export default function ConfidentialitatePage() {

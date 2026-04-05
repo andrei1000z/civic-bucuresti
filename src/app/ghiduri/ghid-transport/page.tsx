@@ -4,6 +4,7 @@ import { GhidLayout, Chapter, Callout } from "@/components/ghiduri/GhidLayout";
 export const metadata: Metadata = {
   title: "Ghid transport public București",
   description: "Metrou, STB, Ilfov, carduri, abonamente, aplicații și trucuri pentru călătorii eficiente.",
+  alternates: { canonical: "/ghiduri/ghid-transport" },
 };
 
 const chapters = [

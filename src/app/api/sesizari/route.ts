@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { listSesizari, createSesizare } from "@/lib/sesizari/repository";
-import { generateSesizareCode } from "@/lib/sesizari/codes";
+import { generateUniqueCode } from "@/lib/sesizari/codes";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
 import { sanitizeText } from "@/lib/sanitize";
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
     const supabase = await createSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
 
-    const code = await generateSesizareCode();
+    const code = await generateUniqueCode();
     try {
       const row = await createSesizare({
         code,

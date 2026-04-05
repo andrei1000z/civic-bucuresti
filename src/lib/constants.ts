@@ -24,6 +24,8 @@ export const NAV_LINKS = [
 ] as const;
 
 export const GHID_DROPDOWN = [
+  { href: "/ghiduri/ghid-cetatean", label: "Drepturile cetățeanului", icon: "⚖️" },
+  { href: "/ghiduri/ghid-sesizari", label: "Ghid sesizări", icon: "📮" },
   { href: "/ghiduri/ghid-biciclist", label: "Ghidul biciclistului", icon: "🚲" },
   { href: "/ghiduri/ghid-vara", label: "Ghid de vară", icon: "☀️" },
   { href: "/ghiduri/ghid-cutremur", label: "Ghid cutremur", icon: "🌍" },

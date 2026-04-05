@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useToast } from "@/components/Toast";
 
 interface VoteButtonsProps {
   code: string;
@@ -23,6 +24,7 @@ export function VoteButtons({
   layout = "horizontal",
 }: VoteButtonsProps) {
   const { user, openAuthModal } = useAuth();
+  const { toast } = useToast();
   const [upvotes, setUpvotes] = useState(initialUpvotes);
   const [downvotes, setDownvotes] = useState(initialDownvotes);
   const [userVote, setUserVote] = useState<-1 | 1 | null>(initialUserVote);
@@ -61,6 +63,7 @@ export function VoteButtons({
       if (newValue === 1) setUpvotes((v) => v - 1);
       if (newValue === -1) setDownvotes((v) => v - 1);
       setUserVote(prevVote);
+      toast("Nu s-a putut înregistra votul", "error");
     } finally {
       setLoading(false);
     }

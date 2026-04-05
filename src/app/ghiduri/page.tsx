@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 export const metadata: Metadata = {
   title: "Ghiduri pentru cetățeni",
   description: "Ghiduri complete pentru cetățenii Bucureștiului: bicicletă, caniculă, cutremur, transport, sesizări.",
+  alternates: { canonical: "/ghiduri" },
 };
 
 const dificultateMap = {

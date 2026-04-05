@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   title: "Bilete & Abonamente transport",
   description:
     "Toate tarifele pentru STB, Metrorex, linii Ilfov - bilete, abonamente, card Activ.",
+  alternates: { canonical: "/bilete" },
 };
 
 function OperatorSection({ operator }: { operator: "stb" | "metrorex" | "ilfov" }) {

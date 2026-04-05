@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Map as MapIcon,
@@ -21,6 +22,12 @@ import { LiveStatsBar } from "@/components/home/LiveStatsBar";
 import { BucurestiStats } from "@/components/home/BucurestiStats";
 import { TopVotedWidget } from "@/components/home/TopVotedWidget";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
+
+export const metadata: Metadata = {
+  title: { absolute: "Civia — Platforma civică a Bucureștiului" },
+  description: "Hărți, sesizări, ghiduri, știri și statistici despre Bucureștiul tău — într-un singur loc.",
+  alternates: { canonical: "/" },
+};
 
 const quickAccess = [
   {
@@ -267,8 +274,9 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {latestStiri.map((stire) => (
-              <article
+              <Link
                 key={stire.id}
+                href="/stiri"
                 className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] transition-all"
               >
                 <div className={`h-40 bg-gradient-to-br ${stire.imageGradient} relative`}>
@@ -295,7 +303,7 @@ export default function HomePage() {
                     <span>{stire.readingMinutes} min citire</span>
                   </div>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </div>

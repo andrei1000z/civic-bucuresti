@@ -4,6 +4,7 @@ import { GhidLayout, Chapter, Callout } from "@/components/ghiduri/GhidLayout";
 export const metadata: Metadata = {
   title: "Ghid de vară — cum supraviețuiești caniculei",
   description: "Cod roșu, hidratare, surse de apă gratuită, parcuri umbroase și cum ajuți persoanele vulnerabile.",
+  alternates: { canonical: "/ghiduri/ghid-vara" },
 };
 
 const chapters = [

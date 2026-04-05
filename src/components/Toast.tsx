@@ -70,7 +70,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 export function useToast() {
   const ctx = useContext(ToastContext);
   if (!ctx) {
-    return { toast: (msg: string) => console.log("[toast]", msg) };
+    // Silent no-op when used outside ToastProvider (shouldn't happen in practice)
+    return { toast: () => {} };
   }
   return ctx;
 }

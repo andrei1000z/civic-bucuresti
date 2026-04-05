@@ -7,6 +7,7 @@ import { UrmarireSesizare } from "@/components/sesizari/UrmarireSesizare";
 export const metadata: Metadata = {
   title: "Sesizări",
   description: "Generează sesizări formale pentru PMB, vezi sesizările publice și urmărește statusul.",
+  alternates: { canonical: "/sesizari" },
 };
 
 export default function SesizariPage() {

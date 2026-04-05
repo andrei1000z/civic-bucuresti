@@ -1,4 +1,5 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { rateLimit, getClientIp } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,16 @@ export async function GET(req: Request) {
   const sector = searchParams.get("sector");
   const tip = searchParams.get("tip");
   const limit = Math.min(Number(searchParams.get("limit") ?? 500), 2000);
+
+  // Rate limit bulk exports: 5 requests per IP per minute
+  const ip = getClientIp(req);
+  const rl = rateLimit(`export:${ip}`, { limit: 5, windowMs: 60_000 });
+  if (!rl.success) {
+    return new Response(
+      JSON.stringify({ error: "Prea multe cereri. Încearcă în câteva secunde." }),
+      { status: 429, headers: { "Content-Type": "application/json" } }
+    );
+  }
 
   try {
     const supabase = await createSupabaseServer();

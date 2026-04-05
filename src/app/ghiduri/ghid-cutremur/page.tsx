@@ -4,6 +4,7 @@ import { GhidLayout, Chapter, Callout } from "@/components/ghiduri/GhidLayout";
 export const metadata: Metadata = {
   title: "Ghid cutremur — ce faci înainte, în timpul și după",
   description: "Zona seismică Vrancea, pregătirea casei, rucsacul de urgență, clădirile cu bulină roșie.",
+  alternates: { canonical: "/ghiduri/ghid-cutremur" },
 };
 
 const chapters = [

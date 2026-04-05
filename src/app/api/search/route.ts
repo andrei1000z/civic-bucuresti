@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { ghiduri } from "@/data/ghiduri";
 import { evenimente } from "@/data/evenimente";
-import { SITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -117,6 +116,3 @@ export async function GET(req: Request) {
 
   return NextResponse.json({ data: results.slice(0, 30) });
 }
-
-// Silence unused SITE_URL in case we want absolute URLs later
-void SITE_URL;

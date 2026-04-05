@@ -16,19 +16,16 @@ export function LiveStatsBar() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/sesizari?limit=100").then((r) => r.json()).catch(() => ({ data: [] })),
+      fetch("/api/statistici/summary").then((r) => r.json()).catch(() => ({ data: null })),
       fetch("/api/statistici/aqi").then((r) => r.json()).catch(() => ({ data: { aqi: 65, quality: "Moderat" } })),
-    ]).then(([sesizari, aqi]) => {
-      const rows = sesizari.data ?? [];
-      const today = new Date().toISOString().slice(0, 10);
-      const sesizariAzi = rows.filter((r: { created_at: string }) => r.created_at.startsWith(today)).length;
-      const sesizariInLucru = rows.filter((r: { status: string }) => r.status === "in-lucru").length;
+    ]).then(([summary, aqi]) => {
+      const s = summary.data ?? { total: 0, today: 0, inLucru: 0 };
       setData({
-        sesizariAzi,
-        sesizariInLucru,
+        sesizariAzi: s.today,
+        sesizariInLucru: s.inLucru,
         aqi: aqi.data?.aqi ?? 65,
         aqiQuality: aqi.data?.quality ?? "Moderat",
-        totalSesizari: rows.length,
+        totalSesizari: s.total,
       });
     });
   }, []);

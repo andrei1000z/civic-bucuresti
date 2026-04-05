@@ -5,6 +5,8 @@ import { ChevronLeft, Code, Download } from "lucide-react";
 export const metadata: Metadata = {
   title: "API public pentru dezvoltatori",
   description: "API gratuit cu datele Civia — pentru jurnaliști, cercetători, dezvoltatori.",
+  alternates: { canonical: "/api-docs" },
+  robots: { index: false, follow: true },
 };
 
 export default function ApiDocsPage() {

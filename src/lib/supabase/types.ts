@@ -74,19 +74,6 @@ export interface SesizareTimelineRow {
   created_at: string;
 }
 
-export interface ChatSessionRow {
-  id: string;
-  created_at: string;
-}
-
-export interface ChatMessageRow {
-  id: string;
-  session_id: string;
-  role: "user" | "assistant" | "system";
-  content: string;
-  created_at: string;
-}
-
 export interface Database {
   __InternalSupabase: {
     PostgrestVersion: "12";
@@ -132,18 +119,6 @@ export interface Database {
         Row: SesizareVerificationRow;
         Insert: Omit<SesizareVerificationRow, "created_at"> & { created_at?: string };
         Update: Partial<SesizareVerificationRow>;
-        Relationships: [];
-      };
-      chat_sessions: {
-        Row: ChatSessionRow;
-        Insert: Partial<ChatSessionRow>;
-        Update: Partial<ChatSessionRow>;
-        Relationships: [];
-      };
-      chat_messages: {
-        Row: ChatMessageRow;
-        Insert: Omit<ChatMessageRow, "id" | "created_at"> & { id?: string; created_at?: string };
-        Update: Partial<ChatMessageRow>;
         Relationships: [];
       };
     };

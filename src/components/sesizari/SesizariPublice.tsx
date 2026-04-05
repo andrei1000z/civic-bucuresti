@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ThumbsUp, MessageSquare, MapPin, Filter, Image as ImgIcon, Loader2, Map as MapIconLucide, List } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -8,8 +8,7 @@ import { ShareButton } from "./ShareButton";
 
 const SesizariMap = dynamic(() => import("@/components/maps/SesizariMap").then((m) => m.SesizariMap), { ssr: false });
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI, SECTOARE } from "@/lib/constants";
-import { timeAgo } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { timeAgo, cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import type { SesizareFeedRow } from "@/lib/supabase/types";
@@ -78,7 +77,7 @@ export function SesizariPublice() {
     };
   }, []);
 
-  const filtered = useMemo(() => rows, [rows]);
+  const filtered = rows;
 
   return (
     <div>
@@ -178,8 +177,21 @@ export function SesizariPublice() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="py-20 text-center text-[var(--color-text-muted)]">
-          <p>Nicio sesizare găsită cu aceste filtre.</p>
+        <div className="py-20 text-center">
+          <p className="text-[var(--color-text-muted)] mb-4">
+            Nicio sesizare găsită cu aceste filtre.
+          </p>
+          <button
+            onClick={() => {
+              setFilterTip("toate");
+              setFilterStatus("toate");
+              setFilterSector("toate");
+              setSort("recent");
+            }}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
+          >
+            🔄 Resetează filtrele
+          </button>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">

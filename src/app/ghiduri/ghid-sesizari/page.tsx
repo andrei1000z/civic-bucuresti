@@ -4,6 +4,7 @@ import { GhidLayout, Chapter, Callout } from "@/components/ghiduri/GhidLayout";
 export const metadata: Metadata = {
   title: "Ghid sesizări — cum obții rezultate",
   description: "Cum formulezi o sesizare eficientă, cui o trimiți, cum urmărești progresul, ce faci la refuz.",
+  alternates: { canonical: "/ghiduri/ghid-sesizari" },
 };
 
 const chapters = [

@@ -32,6 +32,7 @@ import { SectorScorecard } from "@/components/statistici/SectorScorecard";
 export const metadata: Metadata = {
   title: "Statistici București",
   description: "Date și grafice despre accidente, sesizări, calitate aer, transport, spații verzi.",
+  alternates: { canonical: "/statistici" },
 };
 
 function StatCard({
@@ -68,10 +69,12 @@ function StatCard({
 function Section({
   title,
   subtitle,
+  exportHref,
   children,
 }: {
   title: string;
   subtitle?: string;
+  exportHref?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -85,10 +88,17 @@ function Section({
             <p className="text-sm text-[var(--color-text-muted)]">{subtitle}</p>
           )}
         </div>
-        <button className="hidden md:flex items-center gap-2 h-9 px-3 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] transition-colors">
-          <Download size={14} />
-          Export
-        </button>
+        {exportHref && (
+          <a
+            href={exportHref}
+            download
+            className="hidden md:flex items-center gap-2 h-9 px-3 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] transition-colors"
+            title="Descarcă CSV"
+          >
+            <Download size={14} />
+            Export CSV
+          </a>
+        )}
       </div>
       {children}
     </section>
@@ -147,7 +157,7 @@ export default function StatisticiPage() {
       </Section>
 
       {/* Section 2: Sesizări */}
-      <Section title="Sesizări cetățeni" subtitle="Probleme raportate de bucureșteni">
+      <Section title="Sesizări cetățeni" subtitle="Probleme raportate de bucureșteni" exportHref="/api/sesizari/export?limit=1000">
         <div className="mb-6">
           <SectorScorecard />
         </div>

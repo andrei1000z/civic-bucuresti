@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Mail, Share2, Link2, MessageCircle } from "lucide-react";
+import { MapPin, Mail } from "lucide-react";
 import { SITE_NAME } from "@/lib/constants";
 
 export function Footer() {
@@ -17,36 +17,12 @@ export function Footer() {
             <p className="text-sm text-[var(--color-text-muted)] mb-4 max-w-xs">
               Platformă civică independentă pentru cetățenii Bucureștiului.
             </p>
-            <div className="flex gap-2">
-              <a
-                href="#"
-                aria-label="X / Twitter"
-                className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-primary)] hover:text-white transition-all text-[var(--color-text-muted)]"
-              >
-                <MessageCircle size={16} />
-              </a>
-              <a
-                href="#"
-                aria-label="Facebook"
-                className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-primary)] hover:text-white transition-all text-[var(--color-text-muted)]"
-              >
-                <Share2 size={16} />
-              </a>
-              <a
-                href="#"
-                aria-label="Website"
-                className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-primary)] hover:text-white transition-all text-[var(--color-text-muted)]"
-              >
-                <Link2 size={16} />
-              </a>
-              <a
-                href="mailto:contact@civia.ro"
-                aria-label="Email"
-                className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-primary)] hover:text-white transition-all text-[var(--color-text-muted)]"
-              >
-                <Mail size={16} />
-              </a>
-            </div>
+            <a
+              href="mailto:contact@civia.ro"
+              className="inline-flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+            >
+              <Mail size={14} /> contact@civia.ro
+            </a>
           </div>
 
           <div>

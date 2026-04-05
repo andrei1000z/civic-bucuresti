@@ -6,6 +6,7 @@ import { IstoricInteractive } from "@/components/istoric/IstoricInteractive";
 export const metadata: Metadata = {
   title: "Istoric administrație București",
   description: "Toți primarii Bucureștiului din 1989 până azi: realizări, controverse, proiecte. Interactiv.",
+  alternates: { canonical: "/istoric" },
 };
 
 export default function IstoricPage() {

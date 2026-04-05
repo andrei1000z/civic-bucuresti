@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { addComment, getComments, getSesizareByCode } from "@/lib/sesizari/repository";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { rateLimit, getClientIp } from "@/lib/ratelimit";
+import { rateLimit } from "@/lib/ratelimit";
 import { sanitizeText } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";

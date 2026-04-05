@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Search, ArrowRight, RefreshCw, ExternalLink, Loader2 } from "lucide-react";
+import { Search, ArrowRight, ExternalLink, Loader2 } from "lucide-react";
 import { SOURCE_COLORS } from "@/lib/constants";
 import { Badge } from "@/components/ui/Badge";
 import { timeAgo } from "@/lib/utils";
@@ -43,8 +43,6 @@ const sourceGradients: Record<string, string> = {
 export function StiriList() {
   const [rows, setRows] = useState<StireRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
   const [category, setCategory] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(12);
@@ -69,23 +67,6 @@ export function StiriList() {
   useEffect(() => {
     load();
   }, [load]);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    setRefreshMsg(null);
-    try {
-      const res = await fetch("/api/stiri/fetch", { method: "POST" });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Eroare refresh");
-      setRefreshMsg(`✓ Actualizat: ${json.data.total} articole procesate`);
-      await load();
-    } catch (e) {
-      setRefreshMsg(`✗ ${e instanceof Error ? e.message : "Eroare"}`);
-    } finally {
-      setRefreshing(false);
-      setTimeout(() => setRefreshMsg(null), 4000);
-    }
-  };
 
   const featured = rows.find((r) => r.featured) ?? rows[0];
   const rest = rows.filter((r) => r.id !== featured?.id).slice(0, visible);
@@ -112,34 +93,20 @@ export function StiriList() {
                 </button>
               ))}
             </div>
-            <div className="flex gap-2">
-              <div className="relative flex-1 sm:w-64">
-                <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
-                  size={16}
-                />
-                <input
-                  type="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Caută știri..."
-                  className="w-full h-10 pl-9 pr-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                />
-              </div>
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors inline-flex items-center gap-2 whitespace-nowrap"
-                title="Fetch RSS feeds noi"
-              >
-                <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
-                <span className="hidden sm:inline">Actualizează</span>
-              </button>
+            <div className="relative flex-1 sm:w-64">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
+                size={16}
+              />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Caută știri..."
+                className="w-full h-10 pl-9 pr-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
             </div>
           </div>
-          {refreshMsg && (
-            <p className="text-xs text-[var(--color-text-muted)] mt-2">{refreshMsg}</p>
-          )}
         </div>
       </div>
 
@@ -154,11 +121,11 @@ export function StiriList() {
         </div>
       ) : rows.length === 0 ? (
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-10 text-center">
-          <p className="text-[var(--color-text-muted)] mb-4">
-            Niciun articol în cache. Apasă <strong>Actualizează</strong> să preiei știri din RSS.
+          <p className="text-[var(--color-text-muted)] mb-2">
+            Știrile se actualizează.
           </p>
           <p className="text-xs text-[var(--color-text-muted)]">
-            Dacă nu funcționează, verifică că migrația <code>002_stiri_cache.sql</code> a rulat în Supabase.
+            Revino în câteva minute sau încearcă alt filtru.
           </p>
         </div>
       ) : (

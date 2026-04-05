@@ -69,9 +69,9 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
       {urls.length > 0 && (
         <div className="grid grid-cols-5 gap-2 mt-3">
           {urls.map((url, i) => (
-            // eslint-disable-next-line @next/next/no-img-element
             <div key={i} className="aspect-square rounded-[8px] bg-[var(--color-surface-2)] relative overflow-hidden group">
-              <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
               <button
                 type="button"
                 onClick={() => removeAt(i)}

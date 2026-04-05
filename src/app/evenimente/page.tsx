@@ -9,6 +9,7 @@ import type { EvenimentCategory, EvenimentSeverity } from "@/types";
 export const metadata: Metadata = {
   title: "Evenimente majore București",
   description: "Cronologia incidentelor și evenimentelor semnificative care au marcat Bucureștiul.",
+  alternates: { canonical: "/evenimente" },
 };
 
 const categoryIcons: Record<EvenimentCategory, React.ElementType> = {

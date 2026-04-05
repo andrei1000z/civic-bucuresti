@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Share2, MessageCircle, Send, Link2, QrCode, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/Toast";
 
 interface Props {
   url: string;
@@ -15,13 +16,21 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
   const [copied, setCopied] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
+    const keyHandler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("keydown", keyHandler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("keydown", keyHandler);
+    };
   }, []);
 
   const fullText = `${title} - Civia`;
@@ -34,6 +43,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
     try {
       await navigator.clipboard.writeText(`${fullText}\n${url}`);
       setCopied(true);
+      toast("Link copiat!", "success", 2000);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       window.prompt("Copiază:", url);
@@ -56,13 +66,17 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
             "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)]"
           )}
           aria-label="Distribuie"
+          aria-haspopup="menu"
+          aria-expanded={open}
         >
           <Share2 size={iconSize} />
           <span>Share</span>
         </button>
 
         {open && (
-          <div className="absolute bottom-full right-0 mb-2 w-56 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-xl)] overflow-hidden z-50">
+          <div
+            role="menu"
+            className="absolute bottom-full right-0 mb-2 w-56 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-xl)] overflow-hidden z-50">
             <a
               href={whatsappUrl}
               target="_blank"

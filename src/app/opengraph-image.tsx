@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Civia";
+export const alt = "Civia — Platforma civică a Bucureștiului";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

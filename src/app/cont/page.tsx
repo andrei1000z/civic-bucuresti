@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Save, LogOut, CheckCircle2, Loader2, Plus, ExternalLink } from "lucide-react";
+import { User, Save, LogOut, CheckCircle2, Loader2, Plus, ExternalLink, X, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useToast } from "@/components/Toast";
 import { Badge } from "@/components/ui/Badge";
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
@@ -32,12 +33,15 @@ interface SesizareRow {
 
 export default function ContPage() {
   const { user, loading: authLoading, signOut, openAuthModal } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [sesizari, setSesizari] = useState<SesizareRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({ display_name: "", full_name: "", address: "", phone: "" });
 
   useEffect(() => {
@@ -321,22 +325,94 @@ export default function ContPage() {
             📥 Exportă datele mele (JSON)
           </a>
           <button
-            onClick={async () => {
-              if (!confirm("Ești sigur? Această acțiune NU poate fi anulată. Contul + datele tale vor fi șterse definitiv. Sesizările tale vor rămâne anonimizate.")) return;
-              const res = await fetch("/api/profile/delete", { method: "DELETE" });
-              if (res.ok) {
-                alert("Contul a fost șters. Vei fi redirecționat.");
-                window.location.href = "/";
-              } else {
-                alert("Eroare la ștergere.");
-              }
-            }}
+            onClick={() => setDeleteModal(true)}
             className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] border border-red-300 dark:border-red-900 text-red-700 dark:text-red-400 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-950/30"
           >
             🗑️ Șterge contul definitiv
           </button>
         </div>
       </div>
+
+      {/* Delete confirmation modal */}
+      {deleteModal && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => !deleting && setDeleteModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-modal-title"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-[var(--color-surface)] rounded-[12px] shadow-[var(--shadow-xl)] overflow-hidden"
+          >
+            <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-5 relative">
+              {!deleting && (
+                <button
+                  onClick={() => setDeleteModal(false)}
+                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center"
+                  aria-label="Închide"
+                >
+                  <X size={16} />
+                </button>
+              )}
+              <div className="flex items-start gap-3">
+                <AlertTriangle size={28} className="shrink-0 mt-1" />
+                <div>
+                  <h3 id="delete-modal-title" className="font-[family-name:var(--font-sora)] text-xl font-bold">
+                    Șterge contul definitiv
+                  </h3>
+                  <p className="text-sm text-white/90 mt-1">
+                    Această acțiune NU poate fi anulată.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-[var(--color-text)]">
+                Toate datele personale din contul tău vor fi șterse definitiv:
+              </p>
+              <ul className="text-sm text-[var(--color-text-muted)] space-y-1.5 pl-4">
+                <li>• Numele, emailul, adresa, telefonul</li>
+                <li>• Voturile și comentariile tale</li>
+                <li>• Sesizările urmărite</li>
+              </ul>
+              <p className="text-xs text-[var(--color-text-muted)] bg-[var(--color-surface-2)] rounded-[8px] p-3">
+                Sesizările publice pe care le-ai depus rămân pe platformă, dar vor fi anonimizate
+                (numele înlocuit cu &ldquo;Cetățean&rdquo;).
+              </p>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setDeleteModal(false)}
+                  disabled={deleting}
+                  className="flex-1 h-11 rounded-[8px] bg-[var(--color-surface-2)] text-sm font-medium hover:bg-[var(--color-border)] disabled:opacity-50"
+                >
+                  Anulează
+                </button>
+                <button
+                  onClick={async () => {
+                    setDeleting(true);
+                    try {
+                      const res = await fetch("/api/profile/delete", { method: "DELETE" });
+                      if (!res.ok) throw new Error();
+                      toast("Contul a fost șters. La revedere!", "success");
+                      setTimeout(() => { window.location.href = "/"; }, 1500);
+                    } catch {
+                      toast("Eroare la ștergere. Încearcă din nou.", "error");
+                      setDeleting(false);
+                    }
+                  }}
+                  disabled={deleting}
+                  className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-50"
+                >
+                  {deleting ? <Loader2 size={14} className="animate-spin" /> : null}
+                  Da, șterge definitiv
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

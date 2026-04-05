@@ -4,6 +4,7 @@ import { GhidLayout, Chapter, Callout } from "@/components/ghiduri/GhidLayout";
 export const metadata: Metadata = {
   title: "Ghidul biciclistului din București",
   description: "Ghid complet pentru bicicliști: cum alegi bicicleta, echipament, reguli, trasee, întreținere.",
+  alternates: { canonical: "/ghiduri/ghid-biciclist" },
 };
 
 const chapters = [

@@ -6,6 +6,7 @@ import { SOURCE_COLORS } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Știri verificate București",
   description: "Articole agregate din surse verificate despre București: transport, urbanism, mediu, siguranță.",
+  alternates: { canonical: "/stiri" },
 };
 
 export default function StiriPage() {

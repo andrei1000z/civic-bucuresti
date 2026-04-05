@@ -9,6 +9,8 @@ import {
   ShieldCheck,
   MessageCircle,
   Briefcase,
+  Brain,
+  BookOpen,
   ArrowRight,
   ChevronRight,
   ExternalLink,
@@ -31,6 +33,7 @@ const FAQ_ITEMS = [
 export const metadata: Metadata = {
   title: "Cum funcționează Primăria Municipiului București",
   description: "Structura PMB, Consiliul General, drumul unei sesizări, buget, transparență și participare cetățenească.",
+  alternates: { canonical: "/cum-functioneaza" },
 };
 
 function SectionHeading({
@@ -317,7 +320,7 @@ export default function CumFunctioneazaPage() {
 
       {/* Section 9: Quiz */}
       <section className="mb-16">
-        <SectionHeading number="09" icon={<Briefcase size={22} />} title="Cât știi despre PMB?" />
+        <SectionHeading number="09" icon={<Brain size={22} />} title="Cât știi despre PMB?" />
         <p className="text-[var(--color-text-muted)] mb-6 max-w-3xl">
           Testează-ți cunoștințele cu 10 întrebări despre administrația locală.
         </p>
@@ -326,7 +329,7 @@ export default function CumFunctioneazaPage() {
 
       {/* Section 10: Glosar */}
       <section className="mb-8">
-        <SectionHeading number="10" icon={<Briefcase size={22} />} title="Glosar termeni" />
+        <SectionHeading number="10" icon={<BookOpen size={22} />} title="Glosar termeni" />
         <Glosar />
       </section>
     </div>

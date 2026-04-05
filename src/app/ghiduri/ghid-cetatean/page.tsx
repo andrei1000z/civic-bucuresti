@@ -4,6 +4,7 @@ import { GhidLayout, Chapter, Callout } from "@/components/ghiduri/GhidLayout";
 export const metadata: Metadata = {
   title: "Ghid cetățean — drepturile tale în PMB",
   description: "Petiții, informații publice, consultări, ședințe CG, drepturi de contestație, Legea 544, GDPR, Ombudsman.",
+  alternates: { canonical: "/ghiduri/ghid-cetatean" },
 };
 
 const chapters = [

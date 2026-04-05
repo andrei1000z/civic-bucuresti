@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, X } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useToast } from "@/components/Toast";
 import { PhotoUploader } from "./PhotoUploader";
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 
 export function MarkResolvedButton({ code, status, authorEmail, userId }: Props) {
   const { user, openAuthModal } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [photo, setPhoto] = useState<string[]>([]);
@@ -49,6 +51,7 @@ export function MarkResolvedButton({ code, status, authorEmail, userId }: Props)
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Eroare");
+      toast("Sesizare marcată ca rezolvată! 🎉", "success");
       router.refresh();
       setOpen(false);
     } catch (e) {
