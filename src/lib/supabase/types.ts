@@ -41,6 +41,7 @@ export interface SesizareFeedRow extends SesizareRow {
   nr_comentarii: number;
   verif_da: number;
   verif_nu: number;
+  nr_followers: number;
 }
 
 export interface SesizareVerificationRow {

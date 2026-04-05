@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Bike,
   Clock,
+  CheckCircle2,
 } from "lucide-react";
 import { SesizariMap } from "@/components/maps/SesizariMap";
 import { Badge } from "@/components/ui/Badge";
@@ -21,6 +22,7 @@ import { timeAgo } from "@/lib/utils";
 import { LiveStatsBar } from "@/components/home/LiveStatsBar";
 import { BucurestiStats } from "@/components/home/BucurestiStats";
 import { TopVotedWidget } from "@/components/home/TopVotedWidget";
+import { NearMeWidget } from "@/components/home/NearMeWidget";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 
 export const metadata: Metadata = {
@@ -85,6 +87,13 @@ const quickAccess = [
     title: "Evenimente majore",
     description: "Cronologia incidentelor importante.",
     accent: "#64748B",
+  },
+  {
+    href: "/impact",
+    icon: CheckCircle2,
+    title: "Impact",
+    description: "Probleme rezolvate prin Civia — before/after.",
+    accent: "#10B981",
   },
 ];
 
@@ -334,6 +343,13 @@ export default function HomePage() {
 
       {/* TOP VOTED */}
       <TopVotedWidget />
+
+      {/* NEAR ME WIDGET */}
+      <section className="pb-16">
+        <div className="container-narrow max-w-2xl">
+          <NearMeWidget />
+        </div>
+      </section>
 
       {/* BUCURESTI STATS */}
       <BucurestiStats />

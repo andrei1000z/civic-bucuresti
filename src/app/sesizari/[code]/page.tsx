@@ -9,6 +9,7 @@ import {
   getUserVote,
   getUserVerification,
   getSimilarSesizari,
+  isFollowing,
 } from "@/lib/sesizari/repository";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
@@ -23,6 +24,7 @@ import { ShareMenu } from "@/components/sesizari/ShareMenu";
 import { BeforeAfter } from "@/components/sesizari/BeforeAfter";
 import { VerifyPanel } from "@/components/sesizari/VerifyPanel";
 import { SimilarSesizari } from "@/components/sesizari/SimilarSesizari";
+import { FollowButton } from "@/components/sesizari/FollowButton";
 import { SITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
@@ -73,12 +75,14 @@ export default async function SesizareDetailPage({
   const { data: { user } } = await supabase.auth.getUser();
   let userVote: -1 | 1 | null = null;
   let userVerification: boolean | null = null;
+  let userFollowing = false;
   if (user) {
     userVote = await getUserVote({ sesizareId: sesizare.id, userId: user.id });
     userVerification = await getUserVerification({
       sesizareId: sesizare.id,
       userId: user.id,
     });
+    userFollowing = await isFollowing({ sesizareId: sesizare.id, userId: user.id });
   }
 
   const isAuthor = user
@@ -152,6 +156,11 @@ export default async function SesizareDetailPage({
             status={sesizare.status}
             authorEmail={sesizare.author_email}
             userId={sesizare.user_id}
+          />
+          <FollowButton
+            code={sesizare.code}
+            initialFollowing={userFollowing}
+            initialCount={sesizare.nr_followers ?? 0}
           />
           <ShareMenu
             url={`${SITE_URL}/sesizari/${sesizare.code}`}

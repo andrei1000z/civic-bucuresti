@@ -244,6 +244,20 @@ export async function upsertVerification(params: {
 
 // ========== SESIZĂRI SIMILARE ==========
 
+export async function isFollowing(params: {
+  sesizareId: string;
+  userId: string;
+}): Promise<boolean> {
+  const supabase = await createSupabaseServer();
+  const { data } = await supabase
+    .from("sesizare_follows")
+    .select("sesizare_id")
+    .eq("sesizare_id", params.sesizareId)
+    .eq("user_id", params.userId)
+    .maybeSingle();
+  return !!data;
+}
+
 export async function getSimilarSesizari(
   sesizareId: string,
   radiusM: number = 300

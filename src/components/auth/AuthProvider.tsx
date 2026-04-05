@@ -4,10 +4,13 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { User, Session } from "@supabase/supabase-js";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 
+type OAuthProvider = "google" | "apple";
+
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
   signInWithEmail: (email: string) => Promise<{ error: string | null }>;
+  signInWithOAuth: (provider: OAuthProvider) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   openAuthModal: () => void;
   isAuthModalOpen: boolean;
@@ -39,10 +42,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithEmail = async (email: string) => {
     const supabase = createSupabaseBrowser();
     const siteUrl = typeof window !== "undefined" ? window.location.origin : "";
+    // Persist intended return URL so auth/callback redirects back here.
+    const returnTo = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/";
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${siteUrl}/auth/callback`,
+        emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(returnTo)}`,
+      },
+    });
+    return { error: error?.message ?? null };
+  };
+
+  const signInWithOAuth = async (provider: OAuthProvider) => {
+    const supabase = createSupabaseBrowser();
+    const siteUrl = typeof window !== "undefined" ? window.location.origin : "";
+    const returnTo = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/";
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(returnTo)}`,
       },
     });
     return { error: error?.message ?? null };
@@ -59,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         loading,
         signInWithEmail,
+        signInWithOAuth,
         signOut,
         openAuthModal: () => setAuthModalOpen(true),
         isAuthModalOpen,

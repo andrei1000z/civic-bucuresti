@@ -33,6 +33,7 @@ export function Footer() {
               <li><Link href="/bilete" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Bilete</Link></li>
               <li><Link href="/statistici" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Statistici</Link></li>
               <li><Link href="/stiri" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Știri</Link></li>
+              <li><Link href="/impact" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Impact</Link></li>
               <li><Link href="/istoric" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Istoric</Link></li>
             </ul>
           </div>
