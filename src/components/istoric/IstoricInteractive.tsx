@@ -210,12 +210,24 @@ export function IstoricInteractive({ primari }: Props) {
             </button>
 
             <div className="flex items-start gap-3 mb-3">
-              <div
-                className="w-12 h-12 rounded-[8px] text-white font-bold flex items-center justify-center shrink-0"
-                style={{ background: primar.culoarePartid }}
-              >
-                {primar.initiale}
-              </div>
+              {primar.photo ? (
+                <div className="w-12 h-12 rounded-[8px] overflow-hidden shrink-0 ring-2" style={{ '--tw-ring-color': primar.culoarePartid } as React.CSSProperties}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/images/primari/${primar.photo}.webp`}
+                    alt={primar.nume}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              ) : (
+                <div
+                  className="w-12 h-12 rounded-[8px] text-white font-bold flex items-center justify-center shrink-0"
+                  style={{ background: primar.culoarePartid }}
+                >
+                  {primar.initiale}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-sm mb-0.5 truncate">{primar.nume}</h3>
                 <p className="text-xs text-[var(--color-text-muted)]">{primar.perioada}</p>
@@ -304,9 +316,20 @@ function PrimarModal({
             <X size={16} />
           </button>
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-[12px] bg-white/20 flex items-center justify-center text-3xl font-bold backdrop-blur">
-              {primar.initiale}
-            </div>
+            {primar.photo ? (
+              <div className="w-20 h-20 rounded-[12px] overflow-hidden ring-2 ring-white/30">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/images/primari/${primar.photo}.webp`}
+                  alt={primar.nume}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="w-20 h-20 rounded-[12px] bg-white/20 flex items-center justify-center text-3xl font-bold backdrop-blur">
+                {primar.initiale}
+              </div>
+            )}
             <div>
               <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-1">{primar.nume}</h2>
               <p className="text-sm text-white/80">{primar.perioada}</p>

@@ -11,6 +11,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Explozie puternică într-un bloc din cartierul Rahova urmată de incendiu. 14 apartamente afectate, 50+ persoane evacuate.",
     gradient: "from-red-600 via-orange-700 to-red-900",
+    image: "rahova-2025",
     victime: 4,
     evacuati: 52,
     echipaje: 14,
@@ -25,6 +26,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Furtună severă cu vânturi de peste 100 km/h, copaci căzuți în tot orașul, inundații masive.",
     gradient: "from-slate-600 via-blue-800 to-slate-900",
+    image: "furtuna-august-2023",
     victime: 2,
     evacuati: 180,
     echipaje: 45,
@@ -53,6 +55,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Peste 500.000 de oameni adunați în Piața Victoriei — cea mai mare manifestație din România post-1989.",
     gradient: "from-purple-700 via-violet-800 to-indigo-900",
+    image: "protest-oug13-2017",
     victime: 0,
     evacuati: 0,
     echipaje: 0,
@@ -67,6 +70,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Cutremur de 7.4 Richter care a distrus peste 33.000 de apartamente. 1.391 morți în București.",
     gradient: "from-red-900 via-stone-900 to-slate-900",
+    image: "cutremur-1977",
     victime: 1578,
     evacuati: 11000,
     echipaje: 300,
@@ -81,6 +85,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Incendiul de la clubul Colectiv a schimbat istoria modernă a României. Tratat cu respect pentru victime.",
     gradient: "from-gray-800 via-stone-900 to-black",
+    image: "colectiv-2015",
     victime: 64,
     evacuati: 0,
     echipaje: 20,
@@ -109,6 +114,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Ploaia torențială a inundat mai multe străzi și subsoluri din Vitan. ApaNova a intervenit cu 12 echipaje.",
     gradient: "from-blue-600 via-cyan-700 to-blue-900",
+    image: "inundatie-vitan-2023",
     victime: 0,
     evacuati: 25,
     echipaje: 12,
@@ -123,6 +129,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Protest de amploare încheiat cu intervenție controversată a jandarmeriei. Peste 400 de răniți.",
     gradient: "from-red-700 via-slate-800 to-stone-900",
+    image: "protest-10-august-2018",
     victime: 452,
     evacuati: 0,
     echipaje: 0,
@@ -137,6 +144,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Cutremur de 7.7 Richter. Prăbușirea blocului Carlton pe Bd. Magheru a marcat colectiv Bucureștiul interbelic.",
     gradient: "from-stone-700 via-slate-800 to-zinc-900",
+    image: "cutremur-1940-carlton",
     victime: 300,
     evacuati: 5000,
     echipaje: 0,

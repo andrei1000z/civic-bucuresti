@@ -45,11 +45,24 @@ export default function GhiduriPage() {
                 href={`/ghiduri/${ghid.slug}`}
                 className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] transition-all"
               >
-                <div className={`relative h-48 bg-gradient-to-br ${ghid.gradient} flex items-center justify-center overflow-hidden`}>
-                  <div className="absolute inset-0 bg-grid-pattern opacity-20" />
-                  <span className="text-7xl relative z-10 group-hover:scale-110 transition-transform duration-300">
-                    {ghid.icon}
-                  </span>
+                <div className={`relative h-48 bg-gradient-to-br ${ghid.gradient} overflow-hidden`}>
+                  {ghid.image && (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`/images/ghiduri/${ghid.image}.webp`}
+                        alt={ghid.titlu}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                    </>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-7xl relative z-10 drop-shadow-2xl group-hover:scale-110 transition-transform duration-300">
+                      {ghid.icon}
+                    </span>
+                  </div>
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-2 mb-3">

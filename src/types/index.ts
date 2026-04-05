@@ -102,6 +102,7 @@ export interface Eveniment {
   severity: EvenimentSeverity;
   descriere: string;
   gradient: string;
+  image?: string; // relative path under /images/evenimente/ (without extension)
   victime?: number;
   evacuati?: number;
   echipaje?: number;
@@ -147,6 +148,7 @@ export interface Primar {
   proiecte: string[];
   rating: number;
   initiale: string;
+  photo?: string; // filename (without extension) under /images/primari/
 }
 
 export interface ConsiliuGeneral {
@@ -164,6 +166,7 @@ export interface Ghid {
   timpCitire: number;
   icon: string;
   gradient: string;
+  image?: string; // filename (without extension) under /images/ghiduri/
 }
 
 export interface GhidChapter {

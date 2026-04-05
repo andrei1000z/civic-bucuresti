@@ -199,6 +199,7 @@ export const primari: Primar[] = [
     ],
     rating: 2.4,
     initiale: "GF",
+    photo: "firea",
   },
   {
     id: "nicusor-dan",
@@ -232,6 +233,7 @@ export const primari: Primar[] = [
     ],
     rating: 3.7,
     initiale: "ND",
+    photo: "nicusor-dan",
   },
   {
     id: "stelian-bujduveanu",

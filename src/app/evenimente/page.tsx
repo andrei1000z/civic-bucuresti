@@ -76,15 +76,30 @@ export default function EvenimentePage() {
                   href={`/evenimente/${ev.slug}`}
                   className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] transition-all"
                 >
-                  <div className={`relative h-48 bg-gradient-to-br ${ev.gradient} flex items-center justify-center overflow-hidden`}>
-                    <div className="absolute inset-0 bg-grid-pattern opacity-10" />
-                    <Icon size={72} strokeWidth={1.2} className="text-white/50 relative z-10" />
-                    <div className="absolute top-3 left-3">
+                  <div className={`relative h-48 bg-gradient-to-br ${ev.gradient} overflow-hidden`}>
+                    {ev.image ? (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`/images/evenimente/${ev.image}.webp`}
+                          alt={ev.titlu}
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      </>
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="absolute inset-0 bg-grid-pattern opacity-10" />
+                        <Icon size={72} strokeWidth={1.2} className="text-white/50 relative z-10" />
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 z-10">
                       <Badge bgColor="rgba(0,0,0,0.5)" color="white">
                         {categoryLabels[ev.category]}
                       </Badge>
                     </div>
-                    <div className="absolute bottom-3 right-3">
+                    <div className="absolute bottom-3 right-3 z-10">
                       <Badge
                         bgColor={severityColors[ev.severity]}
                         color="white"

@@ -12,6 +12,7 @@ export const ghiduri: Ghid[] = [
     timpCitire: 35,
     icon: "🚲",
     gradient: "from-emerald-500 to-teal-700",
+    image: "ghid-biciclist",
   },
   {
     id: "gh-2",
@@ -24,6 +25,7 @@ export const ghiduri: Ghid[] = [
     timpCitire: 18,
     icon: "☀️",
     gradient: "from-amber-500 to-orange-700",
+    image: "ghid-vara",
   },
   {
     id: "gh-3",
@@ -36,6 +38,7 @@ export const ghiduri: Ghid[] = [
     timpCitire: 22,
     icon: "🌍",
     gradient: "from-red-600 to-rose-800",
+    image: "ghid-cutremur",
   },
   {
     id: "gh-4",
@@ -48,6 +51,7 @@ export const ghiduri: Ghid[] = [
     timpCitire: 20,
     icon: "🚇",
     gradient: "from-blue-600 to-indigo-800",
+    image: "ghid-transport",
   },
   {
     id: "gh-5",
@@ -60,6 +64,7 @@ export const ghiduri: Ghid[] = [
     timpCitire: 15,
     icon: "📮",
     gradient: "from-purple-600 to-fuchsia-800",
+    image: "ghid-sesizari",
   },
   {
     id: "gh-6",
@@ -72,5 +77,6 @@ export const ghiduri: Ghid[] = [
     timpCitire: 28,
     icon: "⚖️",
     gradient: "from-slate-600 to-zinc-800",
+    image: "ghid-cetatean",
   },
 ];

@@ -132,7 +132,15 @@ export default async function HomePage() {
     <>
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#1C4ED8] via-[#1e3a8a] to-[#0F172A] text-white">
-        <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/home/hero-bucuresti.webp"
+          alt="București"
+          className="absolute inset-0 w-full h-full object-cover opacity-20"
+          loading="eager"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1C4ED8]/70 via-[#1e3a8a]/80 to-[#0F172A]/95" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-20" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent" />
 
         {/* Floating cards — static brand info */}
