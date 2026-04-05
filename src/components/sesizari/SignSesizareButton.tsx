@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserPlus, X, AlertCircle, ArrowRight } from "lucide-react";
 import { getRecipientsLabel } from "@/lib/sesizari/mailto";
 import { EmailChoicePanel } from "./EmailChoicePanel";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -37,6 +38,7 @@ export function SignSesizareButton({
   code,
   variant = "primary",
 }: Props) {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<"form" | "send">("form");
   // Lazy initializer — reads localStorage sync on first render, no useEffect needed
@@ -53,6 +55,25 @@ export function SignSesizareButton({
     return { name: "", address: "", email: "" };
   });
   const [remember, setRemember] = useState(true);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
+  // Auto-fill from user profile when logged in (overrides localStorage if profile has data)
+  useEffect(() => {
+    if (!user || profileLoaded) return;
+    fetch("/api/profile")
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.data) {
+          setData((prev) => ({
+            name: j.data.full_name || j.data.display_name || prev.name,
+            address: j.data.address || prev.address,
+            email: j.data.email || prev.email,
+          }));
+        }
+        setProfileLoaded(true);
+      })
+      .catch(() => setProfileLoaded(true));
+  }, [user, profileLoaded]);
 
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault();

@@ -7,6 +7,7 @@ import { Menu, X, ChevronDown, AlertCircle, MapPin } from "lucide-react";
 import { NAV_LINKS, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { LiveWeatherAqi } from "@/components/home/LiveWeatherAqi";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
@@ -119,6 +120,9 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <div className="hidden xl:block">
+              <LiveWeatherAqi />
+            </div>
             <ThemeToggle />
             <UserMenu />
             <Link

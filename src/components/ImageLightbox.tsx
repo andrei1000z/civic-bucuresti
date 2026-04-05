@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Download } from "lucide-react";
 
 interface Props {
   urls: string[];
@@ -36,13 +36,27 @@ export function ImageLightbox({ urls, initialIndex = 0, onClose }: Props) {
       className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
       onClick={onClose}
     >
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
-        aria-label="Închide (Esc)"
-      >
-        <X size={22} />
-      </button>
+      <div className="absolute top-4 right-4 flex gap-2 z-10">
+        <a
+          href={urls[index]}
+          download
+          target="_blank"
+          rel="noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+          aria-label="Salvează"
+          title="Salvează imaginea"
+        >
+          <Download size={20} />
+        </a>
+        <button
+          onClick={onClose}
+          className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+          aria-label="Închide (Esc)"
+        >
+          <X size={22} />
+        </button>
+      </div>
       {urls.length > 1 && (
         <>
           <button

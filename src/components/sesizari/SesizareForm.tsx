@@ -605,6 +605,16 @@ ${data.nume || "[NUMELE]"}`;
 
         <Field label="Fotografii (max 5)">
           <PhotoUploader urls={imagini} onChange={setImagini} max={5} />
+          {imagini.length > 0 && (
+            <div className="mt-2 flex items-start gap-2 p-3 rounded-[8px] bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-300">
+              <span className="shrink-0 mt-0.5">⚠️</span>
+              <p>
+                <strong>Atașează pozele și la emailul pe care-l trimiți către autorități</strong> —
+                aici sunt salvate pentru platformă, dar nu se pot atașa automat în email. Când
+                deschizi emailul, apasă &quot;Atașează fișier&quot; și urcă-le manual.
+              </p>
+            </div>
+          )}
         </Field>
 
         <label className="flex items-center gap-3 p-4 bg-[var(--color-surface-2)] rounded-[12px] cursor-pointer">
@@ -617,7 +627,7 @@ ${data.nume || "[NUMELE]"}`;
           <div className="flex-1">
             <p className="text-sm font-medium">Publică pe platformă</p>
             <p className="text-xs text-[var(--color-text-muted)]">
-              Alți cetățeni pot vota și comenta.
+              Alți cetățeni pot vota, comenta și <strong>trimite și ei aceeași sesizare</strong> la autorități — cu cât mai multe voci, cu atât răspunsul e mai rapid.
             </p>
           </div>
         </label>

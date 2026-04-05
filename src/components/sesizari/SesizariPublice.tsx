@@ -213,6 +213,11 @@ export function SesizariPublice() {
                       <span className="mr-1">{tipIcon}</span>
                       {tipLabel}
                     </Badge>
+                    {s.formal_text && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 text-[10px] font-medium">
+                        ✨ AI
+                      </span>
+                    )}
                   </div>
                   <span className="text-xs text-[var(--color-text-muted)] shrink-0">
                     {timeAgo(s.created_at)}
@@ -225,7 +230,11 @@ export function SesizariPublice() {
                   <span>·</span>
                   <span>{s.sector}</span>
                 </div>
-                <p className="text-sm text-[var(--color-text)] mb-3 line-clamp-2">{s.descriere}</p>
+                <p className="text-sm text-[var(--color-text)] mb-3 line-clamp-2">
+                  {s.formal_text
+                    ? s.formal_text.replace(/\n+/g, " ").replace(/^Bună ziua,\s*/i, "").replace(/^Subsemnat[ua]\(?a?\)?\s+[^,]+,\s*domiciliat\(?ă?\)?\s+[^.]+\.\s*/i, "")
+                    : s.descriere}
+                </p>
                 {(s.imagini.length > 0 || s.resolved_photo_url) && (
                   <div className="flex gap-1 mb-3">
                     {s.imagini.slice(0, s.resolved_photo_url ? 2 : 3).map((url, i) => (

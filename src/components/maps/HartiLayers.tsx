@@ -1,7 +1,8 @@
 "use client";
 
-import { Circle } from "react-leaflet";
+import { useMemo } from "react";
 import { GeoJsonLayer } from "./GeoJsonLayer";
+import { AqiHeatmapLayer } from "./AqiHeatmapLayer";
 import { METRO_COLORS } from "@/lib/constants";
 import type { PathOptions } from "leaflet";
 import type { Feature } from "geojson";
@@ -16,22 +17,6 @@ interface HartiLayersProps {
   showTraversari: boolean;
   visibleLines: string[];
   statsMode: "accidente" | "aer" | "densitate";
-}
-
-const aerSectors = [
-  { center: [44.465, 26.08] as [number, number], aqi: 68, radius: 2000 },
-  { center: [44.458, 26.12] as [number, number], aqi: 82, radius: 2000 },
-  { center: [44.42, 26.15] as [number, number], aqi: 94, radius: 2200 },
-  { center: [44.4, 26.12] as [number, number], aqi: 75, radius: 2000 },
-  { center: [44.4, 26.05] as [number, number], aqi: 108, radius: 2200 },
-  { center: [44.44, 26.02] as [number, number], aqi: 71, radius: 2000 },
-];
-
-function aqiColor(aqi: number): string {
-  if (aqi < 50) return "#059669";
-  if (aqi < 80) return "#EAB308";
-  if (aqi < 100) return "#F97316";
-  return "#DC2626";
 }
 
 // Categorize bike path by OSM tags
@@ -177,15 +162,19 @@ export default function HartiLayers(props: HartiLayersProps) {
     statsMode,
   } = props;
 
+  // Memoize style functions — stable references prevent GeoJSON re-creation on every map pan/zoom
+  const memoizedBikeStyle = useMemo(
+    () => bikeStyle({ dedicata: showDedicate, marcata: showMarcate, recomandata: showRecomandate }),
+    [showDedicate, showMarcate, showRecomandate]
+  );
+  const memoizedMetroStyle = useMemo(() => metroLineStyle(visibleLines), [visibleLines]);
+
   if (activeTab === "bicicleta") {
     return (
       <GeoJsonLayer
+        key="bike"
         url="/geojson/bicicleta.json"
-        style={bikeStyle({
-          dedicata: showDedicate,
-          marcata: showMarcate,
-          recomandata: showRecomandate,
-        })}
+        style={memoizedBikeStyle}
         popupFormatter={bikePopup}
       />
     );
@@ -195,12 +184,12 @@ export default function HartiLayers(props: HartiLayersProps) {
     return (
       <>
         {showParcuri && (
-          <GeoJsonLayer url="/geojson/parcuri.json" style={parkStyle} popupFormatter={parkPopup} />
+          <GeoJsonLayer key="parks" url="/geojson/parcuri.json" style={parkStyle} popupFormatter={parkPopup} />
         )}
         {showPietonal && (
-          <GeoJsonLayer url="/geojson/pietonal-accesibil.json" style={pedestrianAccessStyle} popupFormatter={pedestrianPopup} />
+          <GeoJsonLayer key="ped-ok" url="/geojson/pietonal-accesibil.json" style={pedestrianAccessStyle} popupFormatter={pedestrianPopup} />
         )}
-        <GeoJsonLayer url="/geojson/pietonal-neaccesibil.json" style={pedestrianRestrictedStyle} popupFormatter={pedestrianRestrictedPopup} />
+        <GeoJsonLayer key="ped-no" url="/geojson/pietonal-neaccesibil.json" style={pedestrianRestrictedStyle} popupFormatter={pedestrianRestrictedPopup} />
       </>
     );
   }
@@ -208,8 +197,8 @@ export default function HartiLayers(props: HartiLayersProps) {
   if (activeTab === "auto") {
     return (
       <>
-        <GeoJsonLayer url="/geojson/auto-accesibil.json" style={autoAccessStyle} popupFormatter={autoPopup} />
-        <GeoJsonLayer url="/geojson/auto-restrictionat.json" style={autoRestrictedStyle} popupFormatter={autoPopup} />
+        <GeoJsonLayer key="auto-ok" url="/geojson/auto-accesibil.json" style={autoAccessStyle} popupFormatter={autoPopup} />
+        <GeoJsonLayer key="auto-no" url="/geojson/auto-restrictionat.json" style={autoRestrictedStyle} popupFormatter={autoPopup} />
       </>
     );
   }
@@ -217,31 +206,15 @@ export default function HartiLayers(props: HartiLayersProps) {
   if (activeTab === "transport") {
     return (
       <>
-        <GeoJsonLayer url="/geojson/metrou.json" style={metroLineStyle(visibleLines)} popupFormatter={metroLinePopup} />
-        <GeoJsonLayer url="/geojson/metrou-statii.json" style={metroStationStyle()} popupFormatter={metroStationPopup} />
-        <GeoJsonLayer url="/geojson/tramvai.json" style={tramStyle} />
+        <GeoJsonLayer key="metro-lines" url="/geojson/metrou.json" style={memoizedMetroStyle} popupFormatter={metroLinePopup} />
+        <GeoJsonLayer key="metro-stations" url="/geojson/metrou-statii.json" style={metroStationStyle()} popupFormatter={metroStationPopup} />
+        <GeoJsonLayer key="trams" url="/geojson/tramvai.json" style={tramStyle} />
       </>
     );
   }
 
   if (activeTab === "statistici" && statsMode === "aer") {
-    return (
-      <>
-        {aerSectors.map((s, i) => (
-          <Circle
-            key={i}
-            center={s.center}
-            radius={s.radius}
-            pathOptions={{
-              color: aqiColor(s.aqi),
-              fillColor: aqiColor(s.aqi),
-              fillOpacity: 0.3,
-              weight: 2,
-            }}
-          />
-        ))}
-      </>
-    );
+    return <AqiHeatmapLayer key="aqi-heatmap" />;
   }
 
   return null;

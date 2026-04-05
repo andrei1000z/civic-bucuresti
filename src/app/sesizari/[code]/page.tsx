@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, MapPin, Calendar, User, Clock, CheckCircle2, Image as ImgIcon } from "lucide-react";
+import { ChevronLeft, MapPin, Calendar, User, Clock, CheckCircle2 } from "lucide-react";
 import {
   getSesizareByCode,
   getTimeline,
@@ -25,6 +25,7 @@ import { BeforeAfter } from "@/components/sesizari/BeforeAfter";
 import { VerifyPanel } from "@/components/sesizari/VerifyPanel";
 import { SimilarSesizari } from "@/components/sesizari/SimilarSesizari";
 import { FollowButton } from "@/components/sesizari/FollowButton";
+import { PhotoGallery } from "@/components/sesizari/PhotoGallery";
 import { SITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
@@ -206,20 +207,7 @@ export default async function SesizareDetailPage({
           {sesizare.imagini.length > 0 && (
             <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
               <h2 className="font-semibold mb-3">Fotografii</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {sesizare.imagini.map((url, i) => (
-                  <div key={i} className="aspect-video rounded-[8px] bg-[var(--color-surface-2)] overflow-hidden">
-                    {url.startsWith("http") ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <ImgIcon size={24} className="text-[var(--color-text-muted)]" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <PhotoGallery urls={sesizare.imagini} title="Fotografie" />
             </section>
           )}
 
