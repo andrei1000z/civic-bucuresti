@@ -180,7 +180,7 @@ export default function StatisticiPage() {
       </Section>
 
       {/* Section 3: Calitate aer */}
-      <Section title="Calitate aer" subtitle="Indicele AQI per sector, date live">
+      <Section title="Calitate aer" subtitle="Indicele AQI per sector — date orientative, actualizate periodic">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
           {aqiPeSector.map((sector) => {
             const color =

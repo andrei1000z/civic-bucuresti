@@ -39,7 +39,7 @@ export function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // Cmd+K / Ctrl+K global shortcut
+  // Cmd+K / Ctrl+K global shortcut + custom event from Navbar search button
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.key === "k" || e.key === "K") && (e.metaKey || e.ctrlKey)) {
@@ -50,8 +50,13 @@ export function CommandPalette() {
         setOpen(false);
       }
     };
+    const customHandler = () => setOpen(true);
     document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
+    document.addEventListener("open-command-palette", customHandler);
+    return () => {
+      document.removeEventListener("keydown", handler);
+      document.removeEventListener("open-command-palette", customHandler);
+    };
   }, [open]);
 
   // Focus input on open

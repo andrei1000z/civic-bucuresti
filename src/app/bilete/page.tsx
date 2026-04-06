@@ -68,7 +68,7 @@ export default function BiletePage() {
       {/* Header */}
       <div className="mb-10">
         <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4">
-          Bilete & Abonamente STB / Metrorex 2026
+          Bilete & Abonamente STB / Metrorex {new Date().getFullYear()}
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] mb-3">
           Tarife, abonamente și puncte de vânzare pentru toate operatorii de transport public.
@@ -143,7 +143,7 @@ export default function BiletePage() {
               </tr>
             </thead>
             <tbody>
-              {bilete.slice(0, 10).map((b, i) => (
+              {bilete.map((b, i) => (
                 <tr
                   key={b.id}
                   className={i % 2 === 0 ? "bg-[var(--color-surface)]" : "bg-[var(--color-surface-2)]/50"}

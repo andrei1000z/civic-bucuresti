@@ -18,6 +18,10 @@ create extension if not exists "pgcrypto";
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null default 'Cetățean',
+  full_name text,
+  address text,
+  phone text,
+  role text not null default 'user' check (role in ('user','admin','moderator')),
   created_at timestamptz default now()
 );
 
@@ -28,7 +32,7 @@ create table if not exists public.sesizari (
   user_id uuid references public.profiles(id) on delete set null,
   author_name text not null,
   author_email text,
-  tip text not null check (tip in ('groapa','trotuar','iluminat','copac','gunoi','parcare','graffiti','altele')),
+  tip text not null check (tip in ('groapa','trotuar','iluminat','copac','gunoi','parcare','stalpisori','canalizare','semafor','pietonal','graffiti','mobilier','zgomot','animale','transport','altele')),
   titlu text not null,
   locatie text not null,
   sector text not null check (sector in ('S1','S2','S3','S4','S5','S6')),
@@ -40,6 +44,9 @@ create table if not exists public.sesizari (
   imagini text[] default '{}',
   publica boolean default true,
   moderation_status text default 'approved' check (moderation_status in ('pending','approved','rejected')),
+  resolved_at timestamptz,
+  resolved_by_author boolean default false,
+  resolved_photo_url text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -72,18 +79,46 @@ create table if not exists public.sesizare_timeline (
   created_at timestamptz default now()
 );
 
--- chat sessions (civic assistant)
-create table if not exists public.chat_sessions (
+-- sesizare verifications (community confirms/disputes resolution)
+create table if not exists public.sesizare_verifications (
+  sesizare_id uuid references public.sesizari(id) on delete cascade,
+  user_id uuid references public.profiles(id) on delete cascade,
+  agrees boolean not null,
+  created_at timestamptz default now(),
+  primary key (sesizare_id, user_id)
+);
+
+-- sesizare follows (subscribe to status updates)
+create table if not exists public.sesizare_follows (
+  sesizare_id uuid references public.sesizari(id) on delete cascade,
+  user_id uuid references public.profiles(id) on delete cascade,
+  created_at timestamptz default now(),
+  primary key (sesizare_id, user_id)
+);
+
+-- newsletter subscribers
+create table if not exists public.newsletter_subscribers (
   id uuid primary key default gen_random_uuid(),
+  email text unique not null,
+  sectors text[] default '{}',
+  confirmed boolean default false,
   created_at timestamptz default now()
 );
 
-create table if not exists public.chat_messages (
+-- stiri cache (RSS aggregation)
+create table if not exists public.stiri_cache (
   id uuid primary key default gen_random_uuid(),
-  session_id uuid references public.chat_sessions(id) on delete cascade,
-  role text not null check (role in ('user','assistant','system')),
-  content text not null,
-  created_at timestamptz default now()
+  url text unique not null,
+  title text not null,
+  excerpt text,
+  content text,
+  source text not null,
+  category text not null default 'administratie',
+  author text,
+  image_url text,
+  published_at timestamptz not null,
+  fetched_at timestamptz default now(),
+  featured boolean default false
 );
 
 -- ============================================================
@@ -96,7 +131,11 @@ create index if not exists idx_sesizari_code on public.sesizari(code);
 create index if not exists idx_votes_sesizare on public.sesizare_votes(sesizare_id);
 create index if not exists idx_comments_sesizare on public.sesizare_comments(sesizare_id, created_at);
 create index if not exists idx_timeline_sesizare on public.sesizare_timeline(sesizare_id, created_at);
-create index if not exists idx_chat_messages_session on public.chat_messages(session_id, created_at);
+create index if not exists idx_verifications_sesizare on public.sesizare_verifications(sesizare_id);
+create index if not exists idx_follows_user on public.sesizare_follows(user_id, created_at desc);
+create index if not exists idx_follows_sesizare on public.sesizare_follows(sesizare_id);
+create index if not exists idx_newsletter_email on public.newsletter_subscribers(email);
+create index if not exists idx_stiri_published on public.stiri_cache(published_at desc);
 
 -- ============================================================
 -- 4. VIEWS
@@ -106,7 +145,10 @@ create or replace view public.sesizari_feed as
     coalesce(sum(case when v.value = 1 then 1 else 0 end), 0)::int as upvotes,
     coalesce(sum(case when v.value = -1 then 1 else 0 end), 0)::int as downvotes,
     coalesce(sum(v.value), 0)::int as voturi_net,
-    (select count(*) from public.sesizare_comments c where c.sesizare_id = s.id)::int as nr_comentarii
+    (select count(*) from public.sesizare_comments c where c.sesizare_id = s.id)::int as nr_comentarii,
+    (select count(*) from public.sesizare_verifications ver where ver.sesizare_id = s.id and ver.agrees = true)::int as verif_da,
+    (select count(*) from public.sesizare_verifications ver where ver.sesizare_id = s.id and ver.agrees = false)::int as verif_nu,
+    (select count(*) from public.sesizare_follows f where f.sesizare_id = s.id)::int as nr_followers
   from public.sesizari s
   left join public.sesizare_votes v on v.sesizare_id = s.id
   where s.moderation_status = 'approved' and s.publica = true
@@ -182,8 +224,10 @@ alter table public.sesizari enable row level security;
 alter table public.sesizare_votes enable row level security;
 alter table public.sesizare_comments enable row level security;
 alter table public.sesizare_timeline enable row level security;
-alter table public.chat_sessions enable row level security;
-alter table public.chat_messages enable row level security;
+alter table public.sesizare_verifications enable row level security;
+alter table public.sesizare_follows enable row level security;
+alter table public.newsletter_subscribers enable row level security;
+alter table public.stiri_cache enable row level security;
 
 -- profiles
 drop policy if exists "profiles_read_all" on public.profiles;
@@ -204,9 +248,11 @@ drop policy if exists "sesizari_read_own" on public.sesizari;
 create policy "sesizari_read_own" on public.sesizari for select
   using (auth.uid() is not null and auth.uid() = user_id);
 
--- Anyone can insert (anonymous submission allowed) — moderation handled server-side
+-- Authenticated users can insert (anonymous goes via service role in API)
+drop policy if exists "sesizari_insert_authenticated" on public.sesizari;
 drop policy if exists "sesizari_insert_anyone" on public.sesizari;
-create policy "sesizari_insert_anyone" on public.sesizari for insert with check (true);
+create policy "sesizari_insert_authenticated" on public.sesizari for insert
+  with check (auth.uid() is not null and auth.uid() = user_id);
 
 -- Update only by owner within 1h
 drop policy if exists "sesizari_update_own" on public.sesizari;
@@ -240,12 +286,29 @@ create policy "comments_delete_own" on public.sesizare_comments for delete using
 drop policy if exists "timeline_read_all" on public.sesizare_timeline;
 create policy "timeline_read_all" on public.sesizare_timeline for select using (true);
 
--- chat: open access (session-scoped, no user_id)
-drop policy if exists "chat_sessions_all" on public.chat_sessions;
-create policy "chat_sessions_all" on public.chat_sessions for all using (true) with check (true);
+-- verifications: anyone reads, auth insert/update/delete own
+drop policy if exists "verifications_read_all" on public.sesizare_verifications;
+create policy "verifications_read_all" on public.sesizare_verifications for select using (true);
+drop policy if exists "verifications_insert_auth" on public.sesizare_verifications;
+create policy "verifications_insert_auth" on public.sesizare_verifications for insert with check (auth.uid() = user_id);
+drop policy if exists "verifications_delete_own" on public.sesizare_verifications;
+create policy "verifications_delete_own" on public.sesizare_verifications for delete using (auth.uid() = user_id);
 
-drop policy if exists "chat_messages_all" on public.chat_messages;
-create policy "chat_messages_all" on public.chat_messages for all using (true) with check (true);
+-- follows: own reads, auth insert/delete
+drop policy if exists "follows_read_own" on public.sesizare_follows;
+create policy "follows_read_own" on public.sesizare_follows for select using (auth.uid() = user_id);
+drop policy if exists "follows_insert_auth" on public.sesizare_follows;
+create policy "follows_insert_auth" on public.sesizare_follows for insert with check (auth.uid() = user_id);
+drop policy if exists "follows_delete_own" on public.sesizare_follows;
+create policy "follows_delete_own" on public.sesizare_follows for delete using (auth.uid() = user_id);
+
+-- newsletter: anyone can subscribe, only admin reads
+drop policy if exists "newsletter_insert_anyone" on public.newsletter_subscribers;
+create policy "newsletter_insert_anyone" on public.newsletter_subscribers for insert with check (true);
+
+-- stiri: public reads
+drop policy if exists "stiri_read_all" on public.stiri_cache;
+create policy "stiri_read_all" on public.stiri_cache for select using (true);
 
 -- ============================================================
 -- 9. STORAGE BUCKET
@@ -268,18 +331,49 @@ drop policy if exists "photos_read_public" on storage.objects;
 create policy "photos_read_public" on storage.objects for select
   using (bucket_id = 'sesizari-photos');
 
+-- Upload: authenticated users only, restricted to public/ path
 drop policy if exists "photos_upload_anyone" on storage.objects;
-create policy "photos_upload_anyone" on storage.objects for insert
-  with check (bucket_id = 'sesizari-photos');
+drop policy if exists "photos_upload_auth" on storage.objects;
+create policy "photos_upload_auth" on storage.objects for insert
+  with check (bucket_id = 'sesizari-photos' and (storage.foldername(name))[1] = 'public');
+
+-- Delete: service role only (cleanup via API)
+drop policy if exists "photos_delete_service" on storage.objects;
+create policy "photos_delete_service" on storage.objects for delete
+  using (bucket_id = 'sesizari-photos');
 
 -- ============================================================
 -- 10. REALTIME
 -- ============================================================
--- Enable realtime for sesizari, comments, timeline
-alter publication supabase_realtime add table public.sesizari;
-alter publication supabase_realtime add table public.sesizare_comments;
-alter publication supabase_realtime add table public.sesizare_timeline;
-alter publication supabase_realtime add table public.sesizare_votes;
+do $$ begin
+  alter publication supabase_realtime add table public.sesizari;
+exception when duplicate_object then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.sesizare_comments;
+exception when duplicate_object then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.sesizare_timeline;
+exception when duplicate_object then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.sesizare_votes;
+exception when duplicate_object then null; end $$;
+
+-- ============================================================
+-- 11. HELPER FUNCTIONS
+-- ============================================================
+-- Role check for admin operations
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'admin'
+  );
+$$;
 
 -- Done!
-select 'Schema Civic București instalată cu succes.' as status;
+select 'Schema Civia instalată cu succes.' as status;

@@ -30,6 +30,9 @@ export function timeAgo(input: string | Date, locale = "ro-RO"): string {
   const now = new Date();
   const diff = (now.getTime() - date.getTime()) / 1000;
 
+  // Guard against future dates (clock skew / timezone issues)
+  if (diff < 0) return "chiar acum";
+
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
 
   if (diff < 60) return rtf.format(-Math.round(diff), "second");
@@ -56,12 +59,14 @@ export function formatNumber(num: number): string {
 export function slugify(text: string): string {
   return text
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    // Romanian diacritics BEFORE NFD (since NFD decomposes them)
     .replace(/[ăâ]/g, "a")
     .replace(/[î]/g, "i")
     .replace(/[șş]/g, "s")
     .replace(/[țţ]/g, "t")
+    // Then strip any remaining combining marks (for other languages)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }

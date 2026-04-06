@@ -4,7 +4,7 @@ import { SYSTEM_PROMPT_CIVIC_ASSISTANT } from "@/lib/groq/prompts";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 30; // aligned with vercel.json
 
 const schema = z.object({
   messages: z.array(

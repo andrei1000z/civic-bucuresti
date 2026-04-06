@@ -755,8 +755,13 @@ function SuccessScreen({
           setAutoOpened(true);
         }
       } else {
-        // mailto: — navigate same window (doesn't trigger popup blocker)
-        window.location.href = url;
+        // mailto: — use invisible link click to avoid page navigation loss
+        const a = document.createElement("a");
+        a.href = url;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         setAutoOpened(true);
       }
     } catch {
