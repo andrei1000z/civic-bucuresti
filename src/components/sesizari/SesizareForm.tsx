@@ -416,16 +416,19 @@ ${data.nume || "[NUMELE]"}`;
     <div className="grid lg:grid-cols-[1fr_1.1fr] gap-8">
       {/* Form */}
       <div className="space-y-5">
-        {/* Honeypot — hidden from humans, bots fill it */}
-        <input
-          type="text"
-          tabIndex={-1}
-          autoComplete="off"
-          value={honey}
-          onChange={(e) => setHoney(e.target.value)}
-          style={{ position: "absolute", left: "-9999px", opacity: 0, height: 0, width: 0 }}
-          aria-hidden="true"
-        />
+        {/* Honeypot — hidden from humans, bots fill it.
+            name="website" tricks autofill into ignoring it (no real "website" field).
+            autocomplete="new-password" prevents mobile autofill. */}
+        <div style={{ position: "absolute", left: "-9999px", height: 0, overflow: "hidden" }} aria-hidden="true">
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="new-password"
+            value={honey}
+            onChange={(e) => setHoney(e.target.value)}
+          />
+        </div>
 
         <Field label="Numele tău" required>
           <input

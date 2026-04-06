@@ -30,8 +30,9 @@ const createSchema = z.object({
   formal_text: z.string().max(5000).optional().nullable(),
   imagini: z.array(z.string().url()).max(5).default([]),
   publica: z.boolean().default(true),
-  // Honeypot: bots fill all fields, humans don't see this
-  _honey: z.string().max(0).optional().default(""),
+  // Honeypot: bots fill all fields, humans don't see this.
+  // Accept any value here (mobile autofill sometimes fills it) — we check manually below.
+  _honey: z.string().optional().default(""),
 });
 
 export async function GET(req: Request) {
@@ -68,6 +69,12 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const parsed = createSchema.parse(body);
+
+    // Honeypot check: if filled, silently reject (bot detected).
+    // Don't show the field name to the user — just generic error.
+    if (parsed._honey && parsed._honey.length > 0) {
+      return NextResponse.json({ error: "Sesizare invalidă" }, { status: 400 });
+    }
 
     const supabase = await createSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
