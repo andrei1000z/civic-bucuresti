@@ -13,14 +13,18 @@ function escapeXml(unsafe: string): string {
     .replace(/'/g, "&apos;");
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const sector = searchParams.get("sector"); // ?sector=S3
   try {
     const supabase = await createSupabaseServer();
-    const { data } = await supabase
+    let query = supabase
       .from("sesizari_feed")
       .select("code, titlu, descriere, locatie, sector, status, tip, created_at")
       .order("created_at", { ascending: false })
       .limit(50);
+    if (sector && /^S[1-6]$/.test(sector)) query = query.eq("sector", sector);
+    const { data } = await query;
 
     const rows = (data ?? []) as Array<{
       code: string;
@@ -38,7 +42,7 @@ export async function GET() {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${escapeXml(SITE_NAME)} — Sesizări Publice</title>
+    <title>${escapeXml(SITE_NAME)} — Sesizări Publice${sector ? ` ${sector}` : ""}</title>
     <link>${SITE_URL}</link>
     <description>${escapeXml(SITE_DESCRIPTION)}</description>
     <language>ro-RO</language>

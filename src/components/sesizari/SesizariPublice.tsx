@@ -17,6 +17,8 @@ import type { SesizareFeedRow } from "@/lib/supabase/types";
 type SortKey = "recent" | "votate";
 type ViewMode = "list" | "map";
 
+const PAGE_SIZE = 20;
+
 export function SesizariPublice() {
   const [rows, setRows] = useState<SesizareFeedRow[]>([]);
   const [filterTip, setFilterTip] = useState<string>("toate");
@@ -24,6 +26,8 @@ export function SesizariPublice() {
   const [filterSector, setFilterSector] = useState<string>("toate");
   const [sort, setSort] = useState<SortKey>("recent");
   const [view, setView] = useState<ViewMode>("list");
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   // "loading" is derived: true when last-fetched key differs from current filter key
   const fetchKey = `${filterTip}|${filterStatus}|${filterSector}|${sort}`;
@@ -38,12 +42,15 @@ export function SesizariPublice() {
     if (filterStatus !== "toate") params.set("status", filterStatus);
     if (filterSector !== "toate") params.set("sector", filterSector);
     params.set("sort", sort);
-    params.set("limit", "50");
+    params.set("limit", String(PAGE_SIZE));
+    params.set("offset", "0");
 
     fetch(`/api/sesizari?${params.toString()}`, { signal: controller.signal })
       .then((r) => r.json())
       .then((j) => {
-        setRows(j.data ?? []);
+        const data = j.data ?? [];
+        setRows(data);
+        setHasMore(data.length >= PAGE_SIZE);
         setLastFetchedKey(fetchKey);
       })
       .catch((err) => {
@@ -195,6 +202,7 @@ export function SesizariPublice() {
           </button>
         </div>
       ) : (
+        <>
         <div className="grid md:grid-cols-2 gap-4">
           {filtered.map((s) => {
             const tipLabel = SESIZARE_TIPURI.find((t) => t.value === s.tip)?.label ?? s.tip;
@@ -282,6 +290,44 @@ export function SesizariPublice() {
             );
           })}
         </div>
+
+        {/* Load more */}
+        {hasMore && filtered.length >= PAGE_SIZE && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={async () => {
+                setLoadingMore(true);
+                const params = new URLSearchParams();
+                if (filterTip !== "toate") params.set("tip", filterTip);
+                if (filterStatus !== "toate") params.set("status", filterStatus);
+                if (filterSector !== "toate") params.set("sector", filterSector);
+                params.set("sort", sort);
+                params.set("limit", String(PAGE_SIZE));
+                params.set("offset", String(rows.length));
+                try {
+                  const res = await fetch(`/api/sesizari?${params.toString()}`);
+                  const j = await res.json();
+                  const newRows = (j.data ?? []) as SesizareFeedRow[];
+                  setRows((prev) => [...prev, ...newRows]);
+                  setHasMore(newRows.length >= PAGE_SIZE);
+                } catch {
+                  // silent
+                } finally {
+                  setLoadingMore(false);
+                }
+              }}
+              disabled={loadingMore}
+              className="inline-flex items-center gap-2 h-11 px-6 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] disabled:opacity-50 transition-colors"
+            >
+              {loadingMore ? (
+                <><Loader2 size={14} className="animate-spin" /> Se încarcă...</>
+              ) : (
+                <>Încarcă mai multe sesizări</>
+              )}
+            </button>
+          </div>
+        )}
+        </>
       )}
     </div>
   );
