@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchSensorCommunity } from "./sources/sensor-community";
+import { fetchSensorCommunityV2 } from "./sources/sensor-community-v2";
 import { fetchOpenAQ } from "./sources/openaq";
 import { fetchWaqi } from "./sources/waqi";
 import type { UnifiedSensor, AirDataResponse } from "@/lib/aer/types";
@@ -57,6 +58,7 @@ export async function GET() {
   // Fetch all sources in parallel — don't fail if one is down
   const results = await Promise.allSettled([
     fetchSensorCommunity(),
+    fetchSensorCommunityV2(),
     fetchOpenAQ(),
     fetchWaqi(),
   ]);
@@ -65,7 +67,7 @@ export async function GET() {
   const bySource: Record<string, number> = {};
   const errors: string[] = [];
 
-  const sourceNames = ["sensor-community", "openaq", "waqi"];
+  const sourceNames = ["sensor-community", "sensor-community-v2", "openaq", "waqi"];
   for (let i = 0; i < results.length; i++) {
     const result = results[i];
     const name = sourceNames[i];
