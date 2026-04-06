@@ -1,24 +1,34 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Circle } from "react-leaflet";
 import type { UnifiedSensor } from "@/lib/aer/types";
 import { getAqiColor } from "@/lib/aer/colors";
 
 /**
- * Dense heatmap grid covering all of Romania with IDW interpolation
- * from real sensor data. Same visual style as the București AQI heatmap
- * on /harti but at national scale.
+ * Dense heatmap grid covering Romania, masked to the real border polygon.
+ * IDW interpolation from real sensor data. 100×100 grid.
  */
 
-const GRID_SIZE = 80; // 80×80 = 6400 cells (performant enough)
-const LAT_MIN = 43.6;
-const LAT_MAX = 48.2;
-const LNG_MIN = 20.3;
-const LNG_MAX = 29.8;
+const GRID_SIZE = 100;
+const LAT_MIN = 43.5;
+const LAT_MAX = 48.3;
+const LNG_MIN = 20.2;
+const LNG_MAX = 30.0;
 
 interface Props {
   sensors: UnifiedSensor[];
+}
+
+function pointInRing(lat: number, lng: number, ring: number[][]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i];
+    const [xj, yj] = ring[j];
+    const intersect = yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
+    if (intersect) inside = !inside;
+  }
+  return inside;
 }
 
 function idw(lat: number, lng: number, sensors: { lat: number; lng: number; aqi: number }[]): number {
@@ -28,24 +38,35 @@ function idw(lat: number, lng: number, sensors: { lat: number; lng: number; aqi:
     const dLat = (lat - s.lat) * 111;
     const dLng = (lng - s.lng) * 111 * Math.cos((lat * Math.PI) / 180);
     const dist = Math.sqrt(dLat * dLat + dLng * dLng);
-    if (dist < 0.5) return s.aqi; // point-on-sensor
-    if (dist > 100) continue; // ignore sensors >100km away
+    if (dist < 0.3) return s.aqi;
+    if (dist > 80) continue;
     const w = 1 / (dist * dist);
     num += w * s.aqi;
     den += w;
   }
-  if (den === 0) return -1; // no nearby sensors
+  if (den === 0) return -1;
   return Math.round(num / den);
 }
 
 export function AirHeatGrid({ sensors }: Props) {
+  const [border, setBorder] = useState<number[][] | null>(null);
+
+  useEffect(() => {
+    fetch("/geojson/romania-border.json")
+      .then((r) => r.json())
+      .then((j) => {
+        const geom = j.geometry;
+        if (geom.type === "Polygon") setBorder(geom.coordinates[0]);
+        else if (geom.type === "MultiPolygon") setBorder(geom.coordinates[0][0]);
+      })
+      .catch(() => null);
+  }, []);
+
   const cells = useMemo(() => {
-    // Filter to sensors with valid AQI
-    const validSensors = sensors
+    const valid = sensors
       .filter((s) => s.aqi != null && s.aqi > 0)
       .map((s) => ({ lat: s.lat, lng: s.lng, aqi: s.aqi! }));
-
-    if (validSensors.length === 0) return [];
+    if (valid.length === 0) return [];
 
     const latStep = (LAT_MAX - LAT_MIN) / GRID_SIZE;
     const lngStep = (LNG_MAX - LNG_MIN) / GRID_SIZE;
@@ -55,20 +76,18 @@ export function AirHeatGrid({ sensors }: Props) {
       for (let j = 0; j < GRID_SIZE; j++) {
         const lat = LAT_MIN + (i + 0.5) * latStep;
         const lng = LNG_MIN + (j + 0.5) * lngStep;
-        const aqi = idw(lat, lng, validSensors);
-        if (aqi >= 0) {
-          result.push({ lat, lng, aqi });
-        }
+        if (border && !pointInRing(lat, lng, border)) continue;
+        const aqi = idw(lat, lng, valid);
+        if (aqi >= 0) result.push({ lat, lng, aqi });
       }
     }
     return result;
-  }, [sensors]);
+  }, [sensors, border]);
 
   if (cells.length === 0) return null;
 
-  // Cell radius to overlap slightly for smooth look
-  const cellSizeKm = ((LAT_MAX - LAT_MIN) / GRID_SIZE) * 111;
-  const radius = cellSizeKm * 1000 * 0.65;
+  const cellKm = ((LAT_MAX - LAT_MIN) / GRID_SIZE) * 111;
+  const radius = cellKm * 1000 * 0.62;
 
   return (
     <>
@@ -80,7 +99,7 @@ export function AirHeatGrid({ sensors }: Props) {
           pathOptions={{
             color: getAqiColor(c.aqi),
             fillColor: getAqiColor(c.aqi),
-            fillOpacity: 0.3,
+            fillOpacity: 0.35,
             weight: 0,
             stroke: false,
           }}
