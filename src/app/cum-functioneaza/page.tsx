@@ -203,7 +203,7 @@ export default function CumFunctioneazaPage() {
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
           <p className="text-sm mb-4">
             Bugetul anual este propus de Primar și aprobat de Consiliul General. În 2026 bugetul
-            PMB depășește 8.4 miliarde lei.
+            PMB depășește aproximativ 8 miliarde lei (din care PMB primește ~3.6 miliarde, restul merge la sectoare).
           </p>
           <h4 className="font-semibold mb-3">Etape</h4>
           <ol className="space-y-2 text-sm">

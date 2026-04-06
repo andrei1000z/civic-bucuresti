@@ -42,10 +42,10 @@ export const QUIZ: QuizQuestion[] = [
   },
   {
     id: "q5",
-    question: "Care este bugetul PMB 2026?",
-    options: ["4.2 mld lei", "6.1 mld lei", "8.4 mld lei", "12 mld lei"],
+    question: "Care este bugetul total al Bucureștiului (PMB + sectoare) în 2026?",
+    options: ["4.2 mld lei", "6.1 mld lei", "~8 mld lei", "12 mld lei"],
     correct: 2,
-    explanation: "Bugetul PMB 2026 a fost aprobat la 8.4 miliarde lei — investiții 2.1 mld, termoficare 1.8 mld, transport 950 mil.",
+    explanation: "Bugetul total al Bucureștiului în 2026 este de ~8 miliarde lei din impozit pe venit. PMB primește ~3.6 miliarde, restul se împarte între cele 6 sectoare.",
   },
   {
     id: "q6",
