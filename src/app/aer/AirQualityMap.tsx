@@ -1,0 +1,327 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import { Wind, Thermometer, Droplets, RefreshCw, Layers, Navigation, X } from "lucide-react";
+import type { UnifiedSensor, AirDataResponse } from "@/lib/aer/types";
+import { getAqiColor, getAqiLevel, AQI_LEVELS } from "@/lib/aer/colors";
+import { RO_CENTER, DEFAULT_ZOOM, REFRESH_INTERVAL } from "@/lib/aer/constants";
+
+function FlyToLocation({ target }: { target: [number, number] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (target) map.flyTo(target, 12, { duration: 1 });
+  }, [target, map]);
+  return null;
+}
+
+export default function AirQualityMap() {
+  const [sensors, setSensors] = useState<UnifiedSensor[]>([]);
+  const [meta, setMeta] = useState<AirDataResponse["meta"] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [lastFetch, setLastFetch] = useState<Date | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null);
+  const [selectedPollutant, setSelectedPollutant] = useState<"aqi" | "pm25" | "pm10">("aqi");
+  const [showSources, setShowSources] = useState<Record<string, boolean>>({
+    "sensor-community": true,
+    openaq: true,
+    waqi: true,
+  });
+
+  const fetchData = useCallback(async () => {
+    try {
+      const res = await fetch("/api/aer");
+      const data = (await res.json()) as AirDataResponse;
+      setSensors(data.sensors);
+      setMeta(data.meta);
+      setLastFetch(new Date());
+    } catch {
+      // silent
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+    const id = setInterval(fetchData, REFRESH_INTERVAL);
+    return () => clearInterval(id);
+  }, [fetchData]);
+
+  const handleLocate = () => {
+    navigator.geolocation?.getCurrentPosition(
+      (pos) => setFlyTarget([pos.coords.latitude, pos.coords.longitude]),
+      () => {},
+      { timeout: 8000 }
+    );
+  };
+
+  const filteredSensors = sensors.filter((s) => showSources[s.source] !== false);
+
+  const getValue = (s: UnifiedSensor) => {
+    if (selectedPollutant === "pm25") return s.pm25;
+    if (selectedPollutant === "pm10") return s.pm10;
+    return s.aqi;
+  };
+
+  // Top 10 most polluted
+  const top10 = [...filteredSensors]
+    .filter((s) => s.aqi != null)
+    .sort((a, b) => (b.aqi ?? 0) - (a.aqi ?? 0))
+    .slice(0, 10);
+
+  return (
+    <div className="flex h-full relative">
+      {/* Map */}
+      <div className="flex-1 relative">
+        <MapContainer
+          center={RO_CENTER}
+          zoom={DEFAULT_ZOOM}
+          className="w-full h-full"
+          zoomControl={true}
+          scrollWheelZoom={true}
+        >
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
+          />
+          <FlyToLocation target={flyTarget} />
+
+          {filteredSensors.map((sensor) => {
+            const val = getValue(sensor);
+            const color = getAqiColor(sensor.aqi);
+            const radius = sensor.isOfficial ? 8 : 5;
+
+            return (
+              <CircleMarker
+                key={sensor.id}
+                center={[sensor.lat, sensor.lng]}
+                radius={radius}
+                pathOptions={{
+                  color: "#fff",
+                  weight: 2,
+                  fillColor: color,
+                  fillOpacity: 0.85,
+                }}
+              >
+                <Popup maxWidth={280}>
+                  <div className="text-xs space-y-2 min-w-[200px]">
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="inline-block px-2 py-0.5 rounded-full text-white font-bold text-xs"
+                        style={{ backgroundColor: color }}
+                      >
+                        AQI {sensor.aqi ?? "—"}
+                      </span>
+                      <span className="text-[10px] text-gray-500 capitalize">{sensor.source}</span>
+                    </div>
+                    {sensor.stationName && (
+                      <p className="font-semibold text-sm">{sensor.stationName}</p>
+                    )}
+                    <div className="grid grid-cols-2 gap-1 text-[11px]">
+                      {sensor.pm25 != null && <span>PM2.5: <strong>{sensor.pm25.toFixed(1)}</strong> µg/m³</span>}
+                      {sensor.pm10 != null && <span>PM10: <strong>{sensor.pm10.toFixed(1)}</strong> µg/m³</span>}
+                      {sensor.no2 != null && <span>NO₂: <strong>{sensor.no2.toFixed(1)}</strong></span>}
+                      {sensor.o3 != null && <span>O₃: <strong>{sensor.o3.toFixed(1)}</strong></span>}
+                      {sensor.temperature != null && <span>🌡️ {sensor.temperature.toFixed(1)}°C</span>}
+                      {sensor.humidity != null && <span>💧 {sensor.humidity.toFixed(0)}%</span>}
+                    </div>
+                    {sensor.sensorType && (
+                      <p className="text-[10px] text-gray-400">Senzor: {sensor.sensorType}</p>
+                    )}
+                    <p className="text-[10px] text-gray-400">
+                      Actualizat: {new Date(sensor.updatedAt).toLocaleTimeString("ro-RO")}
+                    </p>
+                  </div>
+                </Popup>
+              </CircleMarker>
+            );
+          })}
+        </MapContainer>
+
+        {/* Overlay controls */}
+        <div className="absolute top-4 left-14 z-[40] flex gap-2">
+          <button
+            onClick={handleLocate}
+            className="h-10 w-10 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex items-center justify-center hover:bg-[var(--color-surface-2)]"
+            title="Locația mea"
+          >
+            <Navigation size={16} />
+          </button>
+          <button
+            onClick={fetchData}
+            disabled={loading}
+            className="h-10 px-3 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex items-center gap-2 text-xs font-medium hover:bg-[var(--color-surface-2)] disabled:opacity-50"
+          >
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            Refresh
+          </button>
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="h-10 w-10 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex items-center justify-center hover:bg-[var(--color-surface-2)] lg:hidden"
+          >
+            <Layers size={16} />
+          </button>
+        </div>
+
+        {/* Loading indicator */}
+        {loading && sensors.length === 0 && (
+          <div className="absolute inset-0 z-[30] flex items-center justify-center bg-black/20 backdrop-blur-sm">
+            <div className="bg-[var(--color-surface)] rounded-[12px] p-6 shadow-xl text-center">
+              <RefreshCw size={24} className="animate-spin mx-auto mb-3 text-[var(--color-primary)]" />
+              <p className="text-sm font-medium">Se încarcă senzorii...</p>
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">Agregăm date din mai multe surse</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Sidebar */}
+      <aside
+        className={`${
+          sidebarOpen ? "translate-x-0" : "translate-x-full"
+        } fixed right-0 top-16 bottom-0 w-[340px] lg:w-[360px] lg:relative lg:translate-x-0 z-[45] bg-[var(--color-surface)] border-l border-[var(--color-border)] overflow-y-auto transition-transform duration-200`}
+      >
+        <div className="p-5 space-y-5">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-[family-name:var(--font-sora)] font-bold text-lg">Calitatea aerului</h2>
+              <p className="text-xs text-[var(--color-text-muted)]">
+                {meta ? `${meta.total} senzori · AQI mediu: ${meta.avgAqi ?? "—"}` : "Se încarcă..."}
+              </p>
+            </div>
+            <button onClick={() => setSidebarOpen(false)} className="lg:hidden">
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* AQI Overview */}
+          {meta?.avgAqi != null && (
+            <div
+              className="rounded-[12px] p-4 text-center"
+              style={{ backgroundColor: `${getAqiColor(meta.avgAqi)}20` }}
+            >
+              <p className="text-4xl font-bold" style={{ color: getAqiColor(meta.avgAqi) }}>
+                {meta.avgAqi}
+              </p>
+              <p className="text-sm font-medium mt-1">{getAqiLevel(meta.avgAqi).label}</p>
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">Media România</p>
+            </div>
+          )}
+
+          {/* Pollutant selector */}
+          <div>
+            <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+              Colorează după
+            </p>
+            <div className="flex gap-1">
+              {(["aqi", "pm25", "pm10"] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setSelectedPollutant(p)}
+                  className={`flex-1 h-8 rounded-[6px] text-xs font-medium transition-colors ${
+                    selectedPollutant === p
+                      ? "bg-[var(--color-primary)] text-white"
+                      : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)]"
+                  }`}
+                >
+                  {p === "aqi" ? "AQI" : p === "pm25" ? "PM2.5" : "PM10"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Source toggles */}
+          <div>
+            <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+              Surse de date
+            </p>
+            <div className="space-y-2">
+              {Object.entries(meta?.bySource ?? {}).map(([source, count]) => (
+                <label key={source} className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showSources[source] !== false}
+                    onChange={(e) => setShowSources((prev) => ({ ...prev, [source]: e.target.checked }))}
+                    className="w-4 h-4 rounded accent-[var(--color-primary)]"
+                  />
+                  <span className="text-sm flex-1 capitalize">{source.replace("-", " ")}</span>
+                  <span className="text-xs text-[var(--color-text-muted)]">{count}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div>
+            <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+              Legendă AQI
+            </p>
+            <div className="space-y-1">
+              {AQI_LEVELS.map((level) => (
+                <div key={level.min} className="flex items-center gap-2 text-xs">
+                  <span
+                    className="w-4 h-4 rounded-full shrink-0"
+                    style={{ backgroundColor: level.color }}
+                  />
+                  <span className="flex-1">{level.label}</span>
+                  <span className="text-[var(--color-text-muted)]">
+                    {level.min}–{level.max}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Top 10 most polluted */}
+          {top10.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+                Top 10 — Cei mai poluați
+              </p>
+              <div className="space-y-1">
+                {top10.map((s, i) => (
+                  <button
+                    key={s.id}
+                    onClick={() => setFlyTarget([s.lat, s.lng])}
+                    className="w-full flex items-center gap-2 p-2 rounded-[6px] hover:bg-[var(--color-surface-2)] transition-colors text-left"
+                  >
+                    <span className="text-xs font-bold text-[var(--color-text-muted)] w-5">{i + 1}.</span>
+                    <span
+                      className="w-3 h-3 rounded-full shrink-0"
+                      style={{ backgroundColor: getAqiColor(s.aqi) }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">
+                        {s.stationName || `${s.lat.toFixed(2)}, ${s.lng.toFixed(2)}`}
+                      </p>
+                      <p className="text-[10px] text-[var(--color-text-muted)] capitalize">{s.source}</p>
+                    </div>
+                    <span className="text-xs font-bold" style={{ color: getAqiColor(s.aqi) }}>
+                      {s.aqi}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Last update */}
+          <div className="pt-3 border-t border-[var(--color-border)]">
+            <p className="text-[10px] text-[var(--color-text-muted)] text-center">
+              Actualizat: {lastFetch?.toLocaleTimeString("ro-RO") ?? "—"}
+              <br />
+              Se reîmprospătează automat la 5 minute
+            </p>
+            <p className="text-[9px] text-[var(--color-text-muted)] text-center mt-2">
+              Date: Sensor.Community · OpenAQ · WAQI/AQICN
+            </p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  );
+}

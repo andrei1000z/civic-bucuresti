@@ -19,6 +19,7 @@ export const BUCHAREST_BOUNDS: [[number, number], [number, number]] = [
 ];
 
 export const NAV_LINKS = [
+  { href: "/aer", label: "Calitate aer" },
   { href: "/harti", label: "Hărți" },
   { href: "/bilete", label: "Bilete" },
   { href: "/sesizari", label: "Sesizări" },
