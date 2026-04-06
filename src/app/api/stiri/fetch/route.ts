@@ -50,6 +50,15 @@ export async function POST(req: Request) {
     }
 
     const supabase = createSupabaseAdmin();
+
+    // Delete articles older than 48h to keep DB small
+    const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+    const { count: deleted } = await supabase
+      .from("stiri_cache")
+      .delete({ count: "exact" })
+      .lt("published_at", cutoff);
+
+    // Insert new articles
     const { error, count } = await supabase
       .from("stiri_cache")
       .upsert(articles, { onConflict: "url", ignoreDuplicates: true, count: "exact" });
@@ -60,6 +69,7 @@ export async function POST(req: Request) {
       data: {
         total: articles.length,
         inserted: count ?? 0,
+        deleted: deleted ?? 0,
         sources: [...new Set(articles.map((a) => a.source))],
       },
     });

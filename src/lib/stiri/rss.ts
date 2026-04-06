@@ -79,6 +79,10 @@ function cleanText(html: string | undefined): string {
     .replace(/&#039;/g, "'")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
+    // Decode ALL numeric HTML entities: &#124; → |, &#8222; → „, etc.
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    // Decode hex entities: &#x2018; → '
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
     .trim();
 }
 

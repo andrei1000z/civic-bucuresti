@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { Search, ArrowRight, ExternalLink, Loader2 } from "lucide-react";
 import { SOURCE_COLORS } from "@/lib/constants";
 import { Badge } from "@/components/ui/Badge";
@@ -132,10 +133,8 @@ export function StiriList() {
         <>
           {/* Featured */}
           {featured && (
-            <a
-              href={featured.url}
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              href={`/stiri/${featured.id}`}
               className="group block mb-8 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden hover:shadow-[var(--shadow-lg)] transition-all"
             >
               <div className="grid md:grid-cols-[1.2fr_1fr]">
@@ -176,17 +175,15 @@ export function StiriList() {
                   </div>
                 </div>
               </div>
-            </a>
+            </Link>
           )}
 
           {/* Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {rest.map((stire) => (
-              <a
+              <Link
                 key={stire.id}
-                href={stire.url}
-                target="_blank"
-                rel="noreferrer"
+                href={`/stiri/${stire.id}`}
                 className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] transition-all cursor-pointer"
               >
                 <div
@@ -223,12 +220,12 @@ export function StiriList() {
                   <p className="text-sm text-[var(--color-text-muted)] line-clamp-2 mb-4">{stire.excerpt}</p>
                   <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)] pt-3 border-t border-[var(--color-border)]">
                     <span className="truncate">{stire.author ?? "Redacție"}</span>
-                    <span className="shrink-0 ml-2 flex items-center gap-1">
-                      {timeAgo(stire.published_at)} <ExternalLink size={11} />
+                    <span className="shrink-0 ml-2">
+                      {timeAgo(stire.published_at)}
                     </span>
                   </div>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
 
