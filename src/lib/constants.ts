@@ -29,6 +29,7 @@ export const NAV_LINKS = [
   { href: "/evenimente", label: "Evenimente" },
   { href: "/istoric", label: "Istoric" },
   { href: "/cum-functioneaza", label: "Despre PMB" },
+  { href: "/judete", label: "Județe" },
 ] as const;
 
 export const GHID_DROPDOWN = [

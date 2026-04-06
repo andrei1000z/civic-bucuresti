@@ -21,6 +21,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/ghiduri`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/evenimente`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/impact`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/aer`, lastModified: now, changeFrequency: "hourly", priority: 0.9 },
+    { url: `${SITE_URL}/judete`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/contribuie`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/legal/confidentialitate`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/legal/termeni`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
@@ -68,5 +71,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Silent fail if DB not available at build time
   }
 
-  return [...staticRoutes, ...ghiduriRoutes, ...evenimenteRoutes, ...sesizariRoutes];
+  // Dynamic: county pages
+  let countyRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const admin = createSupabaseAdmin();
+    const { data } = await admin.from("counties").select("id").order("id");
+    if (data) {
+      countyRoutes = (data as { id: string }[]).map((c) => ({
+        url: `${SITE_URL}/judete/${c.id.toLowerCase()}`,
+        lastModified: now,
+        changeFrequency: "weekly" as const,
+        priority: 0.6,
+      }));
+    }
+  } catch {}
+
+  return [...staticRoutes, ...ghiduriRoutes, ...evenimenteRoutes, ...sesizariRoutes, ...countyRoutes];
 }
