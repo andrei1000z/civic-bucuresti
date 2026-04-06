@@ -6,6 +6,7 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
 import { sanitizeText } from "@/lib/sanitize";
 import { humanizeSupabaseError } from "@/lib/supabase/errors";
+import { sendEmail, emailTemplate } from "@/lib/email/resend";
 
 export const dynamic = "force-dynamic";
 
@@ -90,6 +91,33 @@ export async function POST(req: Request) {
         locatie: sanitizeText(parsed.locatie, 300),
         descriere: sanitizeText(parsed.descriere, 2000),
       });
+
+      // Send confirmation email (non-blocking — don't delay response)
+      const authorEmail = parsed.author_email;
+      if (authorEmail) {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://civia.ro";
+        sendEmail({
+          to: authorEmail,
+          subject: `Sesizare ${code} — înregistrată pe Civia`,
+          html: emailTemplate({
+            title: "Sesizare înregistrată",
+            preheader: `Codul tău: ${code}. Urmărește statusul pe civia.ro.`,
+            body: `
+              <p>Salut <strong>${parsed.author_name}</strong>,</p>
+              <p>Sesizarea ta a fost înregistrată cu succes pe Civia.</p>
+              <table style="background:#f1f5f9;border-radius:8px;padding:16px;width:100%;margin:16px 0">
+                <tr><td style="color:#64748b;font-size:12px;padding:4px 0">Cod unic</td><td style="font-weight:700;font-size:18px;color:#1C4ED8">${code}</td></tr>
+                <tr><td style="color:#64748b;font-size:12px;padding:4px 0">Titlu</td><td>${sanitizeText(parsed.titlu, 100)}</td></tr>
+                <tr><td style="color:#64748b;font-size:12px;padding:4px 0">Locație</td><td>${sanitizeText(parsed.locatie, 100)}</td></tr>
+              </table>
+              <p>Poți urmări statusul sesizării oricând:</p>
+            `,
+            ctaText: "Vezi sesizarea ta",
+            ctaUrl: `${siteUrl}/sesizari/${code}`,
+          }),
+        }).catch(() => {}); // fire-and-forget
+      }
+
       return NextResponse.json({ data: row });
     } catch (dbErr) {
       const human = humanizeSupabaseError(dbErr);
