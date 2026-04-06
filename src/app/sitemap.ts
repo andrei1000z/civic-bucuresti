@@ -32,12 +32,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  const evenimenteRoutes: MetadataRoute.Sitemap = evenimente.map((e) => ({
-    url: `${SITE_URL}/evenimente/${e.slug}`,
-    lastModified: new Date(e.data),
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
-  }));
+  const evenimenteRoutes: MetadataRoute.Sitemap = evenimente.map((e) => {
+    // Use build date as lastModified — NOT the historical event date (1940/1977
+    // would produce "Dată nevalidă" errors in Google Search Console).
+    return {
+      url: `${SITE_URL}/evenimente/${e.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    };
+  });
 
   // Dynamic: top approved public sesizari (SEO value for long-tail)
   let sesizariRoutes: MetadataRoute.Sitemap = [];
@@ -51,12 +55,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .order("created_at", { ascending: false })
       .limit(500);
     if (data) {
-      sesizariRoutes = (data as { code: string; updated_at: string }[]).map((s) => ({
-        url: `${SITE_URL}/sesizari/${s.code}`,
-        lastModified: new Date(s.updated_at),
-        changeFrequency: "weekly" as const,
-        priority: 0.5,
-      }));
+      sesizariRoutes = (data as { code: string; updated_at: string }[])
+        .filter((s) => s.updated_at && !isNaN(new Date(s.updated_at).getTime()))
+        .map((s) => ({
+          url: `${SITE_URL}/sesizari/${s.code}`,
+          lastModified: new Date(s.updated_at),
+          changeFrequency: "weekly" as const,
+          priority: 0.5,
+        }));
     }
   } catch {
     // Silent fail if DB not available at build time
