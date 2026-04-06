@@ -1,7 +1,8 @@
 /**
  * Strip private info from text before public display.
  * Removes:
- *   - "domiciliat(ă) în [ADDRESS]" → "domiciliat(ă) în [adresă protejată]"
+ *   - "domiciliat(ă) în [ADDRESS], mă adresez" → "[adresă protejată], mă adresez"
+ *   - Full "Subsemnatul X, domiciliat în Y" identification block
  *   - Phone numbers (07xx, +407xx)
  *   - Email addresses
  *   - Apartment/bloc/scara/etaj details
@@ -12,21 +13,25 @@ export function stripPrivateAddress(text: string): string {
 
   let result = text;
 
-  // Remove "domiciliat(ă) în [address until next comma or period]"
-  // Pattern: domiciliat/domiciliată în ANYTHING, | domiciliat/domiciliată în ANYTHING.
+  // AGGRESSIVE: Replace the ENTIRE identification sentence.
+  // Pattern: "Subsemnat(ul/a) NUME, domiciliat(ă) în ADRESA, mă adresez..."
+  // → "Mă adresez..."
   result = result.replace(
-    /domiciliat[ăa]?\s+în\s+[^,.]+[,.]/gi,
-    "domiciliat(ă) în [adresă protejată],"
+    /Subsemnat[ua]\(?[aă]?\)?\s+[^,]+,\s*domiciliat[ăa]?\(?[ăa]?\)?\s+în\s+[^,]+(?:,\s*(?:bl\.?\s*\w+|sc\.?\s*\w+|et\.?\s*\w+|ap\.?\s*\d+|nr\.?\s*[\w-]+|sector\s*\d)[^,]*)*,\s*/gi,
+    ""
   );
 
-  // Also catch "Subsemnatul X, domiciliat în Y, mă adresez"
-  // Already handled by the above regex
-
-  // Strip standalone address patterns: "Str. X nr. Y, bl. Z, sc. A, et. B, ap. C"
-  // Replace apartment/block/scara/etaj details
+  // Catch remaining "domiciliat(ă) în ADDRESS" that wasn't part of Subsemnatul pattern
+  // Match from "domiciliat" all the way to "mă adresez" or end of sentence
   result = result.replace(
-    /\b(bl\.?\s*\w+[\s,]*|sc\.?\s*\w+[\s,]*|et\.?\s*\w+[\s,]*|ap\.?\s*\d+[\s,]*)/gi,
-    ""
+    /domiciliat[ăa]?\(?[ăa]?\)?\s+în\s+[^.]+?\s*(?=mă adresez|$)/gi,
+    "[adresă protejată] "
+  );
+
+  // Strip any remaining standalone address fragments: Str. X nr. Y, bl. Z, ap. W
+  result = result.replace(
+    /\b(?:str\.?|strada|bd\.?|bdul\.?|bulevardul|calea|aleea|șos\.?|șoseaua|splaiul|piața|intrarea)\s+[^,.\n]+(?:,\s*(?:nr\.?\s*[\w-]+|bl\.?\s*[\w-]+|sc\.?\s*\w+|et\.?\s*\w+|ap\.?\s*\d+|sector\s*\d)[^,.\n]*)*/gi,
+    "[adresă protejată]"
   );
 
   // Strip phone numbers (Romanian format)
@@ -41,8 +46,12 @@ export function stripPrivateAddress(text: string): string {
     "[email protejat]"
   );
 
-  // Clean up multiple spaces/commas left by removals
-  result = result.replace(/,\s*,/g, ",").replace(/\s{2,}/g, " ").trim();
+  // Clean up double spaces, orphan commas, leading commas
+  result = result
+    .replace(/,\s*,/g, ",")
+    .replace(/^\s*,\s*/gm, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 
   return result;
 }
@@ -55,10 +64,9 @@ export function stripForPreview(formalText: string): string {
   if (!formalText) return "";
 
   // Remove everything before "Vă aduc la cunoștință" (the problem description paragraph)
-  // Use [\s\S]* instead of /s flag for dotAll (avoids ES2018 target requirement)
-  const match = formalText.match(/Vă aduc la cunoștință[^.]*\.\s*([\s\S]*)/);
+  const match = formalText.match(/Vă aduc la cunoștință([\s\S]*)/);
   if (match) {
-    return stripPrivateAddress(match[1].replace(/\n+/g, " ").trim());
+    return stripPrivateAddress(match[0].replace(/\n+/g, " ").trim());
   }
 
   // Fallback: strip the first two paragraphs (greeting + identification)
