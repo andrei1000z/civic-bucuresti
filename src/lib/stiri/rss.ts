@@ -19,20 +19,41 @@ interface Feed {
   mustInclude?: string[];
 }
 
+const BUCHAREST_KEYWORDS = [
+  "bucurești", "bucuresti", "capitală", "capitala",
+  "pmb", "stb", "metrorex", "metrou",
+  "sector 1", "sector 2", "sector 3", "sector 4", "sector 5", "sector 6",
+  "s1", "s2", "s3", "s4", "s5", "s6",
+  "nicușor", "bujduveanu",
+  "unirii", "victoriei", "herăstrău", "pipera", "berceni", "rahova", "militari", "titan",
+  "cotroceni", "floreasca", "dorobanți", "colentina", "pantelimon", "drumul taberei",
+];
+
 const FEEDS: Feed[] = [
   {
     url: "https://www.digi24.ro/rss",
     source: "Digi24",
-    mustInclude: ["bucurești", "bucuresti", "capitală", "pmb", "stb", "metrorex", "firea", "nicușor"],
+    mustInclude: BUCHAREST_KEYWORDS,
   },
   {
     url: "https://b365.ro/feed/",
     source: "B365.ro",
+    // B365 e deja focused pe București — nu filtrez
   },
   {
     url: "https://www.hotnews.ro/rss",
     source: "Hotnews București",
-    mustInclude: ["bucurești", "bucuresti", "capitală", "pmb", "stb", "metrorex"],
+    mustInclude: BUCHAREST_KEYWORDS,
+  },
+  {
+    url: "https://www.g4media.ro/feed",
+    source: "G4Media",
+    mustInclude: BUCHAREST_KEYWORDS,
+  },
+  {
+    url: "https://www.europa-libera.org/api/",
+    source: "Europa Liberă",
+    mustInclude: [...BUCHAREST_KEYWORDS, "primărie", "primaria"],
   },
 ];
 
