@@ -25,8 +25,10 @@ import { BeforeAfter } from "@/components/sesizari/BeforeAfter";
 import { VerifyPanel } from "@/components/sesizari/VerifyPanel";
 import { SimilarSesizari } from "@/components/sesizari/SimilarSesizari";
 import { FollowButton } from "@/components/sesizari/FollowButton";
+import { DeleteSesizareButton } from "@/components/sesizari/DeleteSesizareButton";
 import { PhotoGallery } from "@/components/sesizari/PhotoGallery";
 import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
+import { stripPrivateAddress } from "@/lib/privacy";
 import { SITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
@@ -174,6 +176,11 @@ export default async function SesizareDetailPage({
             title={sesizare.titlu}
             size="md"
           />
+          <DeleteSesizareButton
+            code={sesizare.code}
+            authorEmail={sesizare.author_email}
+            userId={sesizare.user_id}
+          />
         </div>
       </div>
 
@@ -194,7 +201,7 @@ export default async function SesizareDetailPage({
             <p className="text-sm leading-relaxed whitespace-pre-wrap">{sesizare.descriere}</p>
           </section>
 
-          {/* Formal text */}
+          {/* Formal text — address stripped for privacy */}
           {sesizare.formal_text && (
             <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
               <h2 className="font-semibold mb-3 flex items-center gap-2">
@@ -204,8 +211,11 @@ export default async function SesizareDetailPage({
                 Text formal
               </h2>
               <div className="bg-[var(--color-surface-2)] rounded-[8px] p-4 text-xs font-mono whitespace-pre-wrap">
-                {sesizare.formal_text}
+                {stripPrivateAddress(sesizare.formal_text)}
               </div>
+              <p className="text-[10px] text-[var(--color-text-muted)] mt-2 italic">
+                Adresa de domiciliu a fost ascunsă automat pentru protecția datelor personale.
+              </p>
             </section>
           )}
 

@@ -9,6 +9,7 @@ import { ShareButton } from "./ShareButton";
 const SesizariMap = dynamic(() => import("@/components/maps/SesizariMap").then((m) => m.SesizariMap), { ssr: false });
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI, SECTOARE } from "@/lib/constants";
 import { timeAgo, cn } from "@/lib/utils";
+import { stripForPreview } from "@/lib/privacy";
 import { Badge } from "@/components/ui/Badge";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import type { SesizareFeedRow } from "@/lib/supabase/types";
@@ -231,9 +232,7 @@ export function SesizariPublice() {
                   <span>{s.sector}</span>
                 </div>
                 <p className="text-sm text-[var(--color-text)] mb-3 line-clamp-2">
-                  {s.formal_text
-                    ? s.formal_text.replace(/\n+/g, " ").replace(/^Bună ziua,\s*/i, "").replace(/^Subsemnat[ua]\(?a?\)?\s+[^,]+,\s*domiciliat\(?ă?\)?\s+[^.]+\.\s*/i, "")
-                    : s.descriere}
+                  {s.formal_text ? stripForPreview(s.formal_text) : s.descriere}
                 </p>
                 {(s.imagini.length > 0 || s.resolved_photo_url) && (
                   <div className="flex gap-1 mb-3">
