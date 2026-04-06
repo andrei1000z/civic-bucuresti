@@ -3,10 +3,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { Wind, Thermometer, Droplets, RefreshCw, Layers, Navigation, X } from "lucide-react";
+import { RefreshCw, Layers, Navigation, X } from "lucide-react";
 import type { UnifiedSensor, AirDataResponse } from "@/lib/aer/types";
 import { getAqiColor, getAqiLevel, AQI_LEVELS } from "@/lib/aer/colors";
 import { RO_CENTER, DEFAULT_ZOOM, REFRESH_INTERVAL } from "@/lib/aer/constants";
+import { AirHeatGrid } from "./AirHeatGrid";
 
 function FlyToLocation({ target }: { target: [number, number] | null }) {
   const map = useMap();
@@ -29,6 +30,8 @@ export default function AirQualityMap() {
     openaq: true,
     waqi: true,
   });
+  const [showHeatmap, setShowHeatmap] = useState(true);
+  const [showMarkers, setShowMarkers] = useState(true);
 
   const fetchData = useCallback(async () => {
     try {
@@ -84,12 +87,18 @@ export default function AirQualityMap() {
           scrollWheelZoom={true}
         >
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
           />
           <FlyToLocation target={flyTarget} />
 
-          {filteredSensors.map((sensor) => {
+          {/* Heatmap grid layer (below markers) */}
+          {showHeatmap && filteredSensors.length > 0 && (
+            <AirHeatGrid sensors={filteredSensors} />
+          )}
+
+          {/* Station markers (on top of heatmap) */}
+          {showMarkers && filteredSensors.map((sensor) => {
             const val = getValue(sensor);
             const color = getAqiColor(sensor.aqi);
             const radius = sensor.isOfficial ? 8 : 5;
@@ -139,6 +148,20 @@ export default function AirQualityMap() {
               </CircleMarker>
             );
           })}
+          {/* Sensor station dots (always visible, small, white border) */}
+          {filteredSensors.map((s) => (
+            <CircleMarker
+              key={`dot-${s.id}`}
+              center={[s.lat, s.lng]}
+              radius={3}
+              pathOptions={{
+                color: "#fff",
+                weight: 1.5,
+                fillColor: getAqiColor(s.aqi),
+                fillOpacity: 1,
+              }}
+            />
+          ))}
         </MapContainer>
 
         {/* Overlay controls */}
@@ -231,6 +254,23 @@ export default function AirQualityMap() {
                   {p === "aqi" ? "AQI" : p === "pm25" ? "PM2.5" : "PM10"}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Layer toggles */}
+          <div>
+            <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+              Straturi
+            </p>
+            <div className="space-y-2 mb-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={showHeatmap} onChange={(e) => setShowHeatmap(e.target.checked)} className="w-4 h-4 rounded accent-[var(--color-primary)]" />
+                <span className="text-sm flex-1">Heatmap interpolare</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={showMarkers} onChange={(e) => setShowMarkers(e.target.checked)} className="w-4 h-4 rounded accent-[var(--color-primary)]" />
+                <span className="text-sm flex-1">Markere senzori</span>
+              </label>
             </div>
           </div>
 
