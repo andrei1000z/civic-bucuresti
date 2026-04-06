@@ -67,6 +67,11 @@ export function SesizareForm() {
   const [honey, setHoney] = useState(""); // anti-bot honeypot
   const classifyTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // National geocoding state
+  const [detectedCounty, setDetectedCounty] = useState<string | null>(null);
+  const [detectedCountyName, setDetectedCountyName] = useState<string | null>(null);
+  const [detectedLocality, setDetectedLocality] = useState<string | null>(null);
+
   const update = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setData((d) => ({ ...d, [key]: value }));
     setError(null);
@@ -154,14 +159,38 @@ export function SesizareForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.descriere, data.locatie]);
 
-  // Auto-detect sector from GPS coords (whenever lat/lng change)
+  // Auto-detect county + locality + sector from GPS coords via reverse geocoding
   useEffect(() => {
     if (data.lat == null || data.lng == null) return;
+
+    // Quick local sector detection (instant, for București)
     const s = detectSectorFromCoords(data.lat, data.lng);
     if (s && s !== data.sector) {
       setData((d) => ({ ...d, sector: s }));
     }
-  }, [data.lat, data.lng, data.sector]);
+
+    // Full reverse geocode (async, for all of Romania)
+    const ctrl = new AbortController();
+    fetch(`/api/geocode?lat=${data.lat}&lng=${data.lng}`, { signal: ctrl.signal })
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.data) {
+          if (j.data.countyCode) setDetectedCounty(j.data.countyCode);
+          if (j.data.countyName) setDetectedCountyName(j.data.countyName);
+          if (j.data.locality) setDetectedLocality(j.data.locality);
+          if (j.data.sector && !data.sector) {
+            setData((d) => ({ ...d, sector: j.data.sector }));
+          }
+          // Auto-fill location if empty
+          if (j.data.address && !data.locatie) {
+            setData((d) => ({ ...d, locatie: j.data.address.split(",").slice(0, 3).join(",").trim() }));
+          }
+        }
+      })
+      .catch(() => {});
+    return () => ctrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.lat, data.lng]);
 
   const handleAIImprove = async () => {
     if (data.descriere.length < 10) {
@@ -597,9 +626,9 @@ ${data.nume || "[NUMELE]"}`;
                   </span>
                 )}
               </p>
-              {data.sector && (
+              {(detectedCountyName || detectedLocality || data.sector) && (
                 <p className="text-xs text-[var(--color-text-muted)]">
-                  🏙️ Sector {data.sector.slice(1)} (detectat automat)
+                  🏙️ {detectedLocality ?? ""}{detectedCountyName ? `, jud. ${detectedCountyName}` : ""}{data.sector && detectedCounty === "B" ? ` (${data.sector})` : ""} — detectat automat
                 </p>
               )}
             </div>

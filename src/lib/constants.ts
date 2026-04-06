@@ -1,10 +1,17 @@
 export const SITE_NAME = "Civia";
-export const SITE_TAGLINE = "Platforma civică a Bucureștiului";
+export const SITE_TAGLINE = "Platforma civică a României";
 export const SITE_DESCRIPTION =
-  "Hărți, sesizări, ghiduri, știri și statistici despre Bucureștiul tău — într-un singur loc.";
+  "Sesizări, hărți, ghiduri și statistici despre orașul tău — într-un singur loc. Funcționează în toată România.";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://civia.ro";
 
-// Bucharest geographic center
+// Romania geographic center
+export const ROMANIA_CENTER: [number, number] = [45.9432, 24.9668];
+export const ROMANIA_BOUNDS: [[number, number], [number, number]] = [
+  [43.5, 20.2],
+  [48.3, 30.0],
+];
+
+// Bucharest geographic center (used for default map view)
 export const BUCHAREST_CENTER: [number, number] = [44.4268, 26.1025];
 export const BUCHAREST_BOUNDS: [[number, number], [number, number]] = [
   [44.33, 25.97],

@@ -30,6 +30,8 @@ export interface SesizareRow {
   resolved_at: string | null;
   resolved_by_author: boolean;
   resolved_photo_url: string | null;
+  county: string | null;
+  locality: string | null;
   created_at: string;
   updated_at: string;
 }

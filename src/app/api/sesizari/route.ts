@@ -24,9 +24,11 @@ const createSchema = z.object({
   tip: z.enum(VALID_TIPURI),
   titlu: z.string().min(3, "Titlul trebuie să aibă minim 3 caractere").max(200),
   locatie: z.string().min(3, "Locația trebuie să aibă minim 3 caractere").max(300),
-  sector: z.enum(["S1", "S2", "S3", "S4", "S5", "S6"]),
-  lat: z.number().min(43).max(46),
-  lng: z.number().min(25).max(27),
+  sector: z.enum(["S1", "S2", "S3", "S4", "S5", "S6"]).optional().default("S3"),
+  county: z.string().max(3).optional().nullable(),       // "CJ", "B", etc.
+  locality: z.string().max(100).optional().nullable(),    // "Cluj-Napoca", etc.
+  lat: z.number().min(43).max(49),  // Romania lat range
+  lng: z.number().min(20).max(30),  // Romania lng range
   descriere: z.string().min(10, "Descrierea trebuie să aibă minim 10 caractere").max(2000),
   formal_text: z.string().max(5000).optional().nullable(),
   imagini: z.array(z.string().url()).max(5).default([]),
