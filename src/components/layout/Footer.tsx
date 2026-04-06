@@ -33,19 +33,22 @@ export function Footer() {
               <li><Link href="/bilete" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Bilete</Link></li>
               <li><Link href="/statistici" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Statistici</Link></li>
               <li><Link href="/stiri" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Știri</Link></li>
+              <li><Link href="/evenimente" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Evenimente</Link></li>
               <li><Link href="/impact" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Impact</Link></li>
               <li><Link href="/istoric" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Istoric</Link></li>
+              <li><Link href="/cum-functioneaza" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Cum funcționează</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">Ghiduri</h4>
             <ul className="space-y-2 text-sm">
+              <li><Link href="/ghiduri/ghid-cetatean" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Drepturile cetățeanului</Link></li>
+              <li><Link href="/ghiduri/ghid-sesizari" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Ghid sesizări</Link></li>
               <li><Link href="/ghiduri/ghid-biciclist" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Biciclist</Link></li>
-              <li><Link href="/ghiduri/ghid-vara" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Vara</Link></li>
+              <li><Link href="/ghiduri/ghid-vara" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Vară / caniculă</Link></li>
               <li><Link href="/ghiduri/ghid-cutremur" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Cutremur</Link></li>
-              <li><Link href="/ghiduri/ghid-transport" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Transport</Link></li>
-              <li><Link href="/cum-functioneaza" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Cum funcționează primăria</Link></li>
+              <li><Link href="/ghiduri/ghid-transport" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Transport public</Link></li>
             </ul>
           </div>
 
@@ -63,7 +66,7 @@ export function Footer() {
 
         <div className="mt-10 pt-6 border-t border-[var(--color-border)] flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
           <p className="text-xs text-[var(--color-text-muted)] max-w-3xl">
-            <strong className="text-[var(--color-text)]">Disclaimer:</strong> {SITE_NAME} este o platformă independentă, neafiliată Primăriei Municipiului București sau oricărei autorități locale. Datele afișate sunt agregate din surse publice și comunitate. Pentru informații oficiale, vă rugăm să consultați site-urile instituționale.
+            <strong className="text-[var(--color-text)]">Disclaimer:</strong> {SITE_NAME} este o platformă independentă, neafiliată Primăriei Municipiului București sau niciunei alte autorități publice. Datele afișate sunt agregate din surse publice și comunitate. Pentru informații oficiale, consultați site-urile instituționale.
           </p>
           <div className="flex items-center gap-4 text-xs text-[var(--color-text-muted)]">
             <Link href="/legal/confidentialitate" className="hover:text-[var(--color-primary)]">
@@ -72,7 +75,7 @@ export function Footer() {
             <Link href="/legal/termeni" className="hover:text-[var(--color-primary)]">
               Termeni
             </Link>
-            <span className="whitespace-nowrap">© 2026 {SITE_NAME}</span>
+            <span className="whitespace-nowrap">© {new Date().getFullYear()} {SITE_NAME}</span>
           </div>
         </div>
       </div>

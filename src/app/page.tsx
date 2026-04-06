@@ -159,8 +159,8 @@ export default async function HomePage() {
         >
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[12px] p-4 shadow-2xl min-w-[200px]">
             <p className="text-xs text-white/60 mb-1">Metrou București</p>
-            <p className="text-3xl font-bold">55 stații</p>
-            <p className="text-xs text-emerald-300 mt-1">M1 • M2 • M3 • M4 • M5</p>
+            <p className="text-3xl font-bold">63 stații</p>
+            <p className="text-xs text-emerald-300 mt-1">M1–M5 (M6 în construcție)</p>
           </div>
         </div>
         <div

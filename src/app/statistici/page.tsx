@@ -242,7 +242,7 @@ export default function StatisticiPage() {
         </div>
         <div className="mt-6 bg-amber-50 dark:bg-amber-950/20 border-l-4 border-amber-400 rounded-[12px] p-4 text-sm">
           <p className="text-amber-900 dark:text-amber-200">
-            <strong>Observație:</strong> Recomandarea OMS este 9 mp spații verzi per locuitor. Sectorul 5 este sub acest prag cu 11.8 mp.
+            <strong>Observație:</strong> Recomandarea minimă OMS este 9 mp spații verzi per locuitor. Toate sectoarele depășesc acest prag, dar Sectorul 5 are cel mai puțin (11.8 mp) — sub media europeană de ~25 mp/locuitor.
           </p>
         </div>
       </Section>

@@ -6,7 +6,7 @@ import { Bike, Footprints, Bus, BarChart3, Car, Layers, ChevronLeft, Locate, Loa
 import { cn } from "@/lib/utils";
 import { METRO_COLORS } from "@/lib/constants";
 
-// Metrorex București — 5 magistrale, 55 stații total (confirmat 2025)
+// Metrorex București — 5 magistrale, 63 stații total (confirmat 2025)
 const METRO_INFO = [
   { id: "M1", name: "Magistrala 1 (Galben)", stations: 22 },
   { id: "M2", name: "Magistrala 2 (Roșu)", stations: 14 },
@@ -234,7 +234,7 @@ export function HartiMap() {
                 Metrou București
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                55 stații Metrorex + linii tramvai. Click pe stație pentru detalii.
+                63 stații Metrorex + linii tramvai. Click pe stație pentru detalii.
               </p>
               <div className="space-y-2 mb-5">
                 {METRO_INFO.map((line) => {

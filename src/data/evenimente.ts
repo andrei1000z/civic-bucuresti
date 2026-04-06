@@ -68,7 +68,7 @@ export const evenimente: Eveniment[] = [
     category: "cutremur",
     severity: "critic",
     descriere:
-      "Cutremur de 7.4 Richter care a distrus peste 33.000 de apartamente. 1.391 morți în București.",
+      "Cutremur de 7.4 Richter care a distrus peste 33.000 de apartamente. 1.578 morți la nivel național, majoritatea în București.",
     gradient: "from-red-900 via-stone-900 to-slate-900",
     image: "cutremur-1977",
     victime: 1578,
