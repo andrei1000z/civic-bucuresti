@@ -1,11 +1,9 @@
 /**
- * Strip private info from text before public display.
- * Removes:
- *   - "domiciliat(ă) în [ADDRESS], mă adresez" → "[adresă protejată], mă adresez"
- *   - Full "Subsemnatul X, domiciliat în Y" identification block
- *   - Phone numbers (07xx, +407xx)
- *   - Email addresses
- *   - Apartment/bloc/scara/etaj details
+ * Strip ONLY the address from formal text, keeping everything else intact
+ * (name, paragraph structure, line breaks, signature).
+ *
+ * "domiciliată în Str. Țintasului 17-19, ap 14, mă adresez"
+ *   → "domiciliată în [adresă protejată], mă adresez"
  */
 
 export function stripPrivateAddress(text: string): string {
@@ -13,25 +11,18 @@ export function stripPrivateAddress(text: string): string {
 
   let result = text;
 
-  // AGGRESSIVE: Replace the ENTIRE identification sentence.
-  // Pattern: "Subsemnat(ul/a) NUME, domiciliat(ă) în ADRESA, mă adresez..."
-  // → "Mă adresez..."
+  // Replace the address between "domiciliat(ă) în" and ", mă adresez"
+  // This keeps the name + "domiciliată în" prefix + ", mă adresez" suffix
   result = result.replace(
-    /Subsemnat[ua]\(?[aă]?\)?\s+[^,]+,\s*domiciliat[ăa]?\(?[ăa]?\)?\s+în\s+[^,]+(?:,\s*(?:bl\.?\s*\w+|sc\.?\s*\w+|et\.?\s*\w+|ap\.?\s*\d+|nr\.?\s*[\w-]+|sector\s*\d)[^,]*)*,\s*/gi,
-    ""
+    /(domiciliat[ăa]?\(?[ăa]?\)?\s+în\s+)([^]*?)(,\s*mă adresez)/gi,
+    "$1[adresă protejată]$3"
   );
 
-  // Catch remaining "domiciliat(ă) în ADDRESS" that wasn't part of Subsemnatul pattern
-  // Match from "domiciliat" all the way to "mă adresez" or end of sentence
+  // Fallback: if "mă adresez" pattern didn't match, catch simpler patterns
+  // "domiciliată în ADDR, ADDR, ADDR." (ends with period)
   result = result.replace(
-    /domiciliat[ăa]?\(?[ăa]?\)?\s+în\s+[^.]+?\s*(?=mă adresez|$)/gi,
-    "[adresă protejată] "
-  );
-
-  // Strip any remaining standalone address fragments: Str. X nr. Y, bl. Z, ap. W
-  result = result.replace(
-    /\b(?:str\.?|strada|bd\.?|bdul\.?|bulevardul|calea|aleea|șos\.?|șoseaua|splaiul|piața|intrarea)\s+[^,.\n]+(?:,\s*(?:nr\.?\s*[\w-]+|bl\.?\s*[\w-]+|sc\.?\s*\w+|et\.?\s*\w+|ap\.?\s*\d+|sector\s*\d)[^,.\n]*)*/gi,
-    "[adresă protejată]"
+    /(domiciliat[ăa]?\(?[ăa]?\)?\s+în\s+)((?:(?!\[adresă)[^.])+)(\.)/gi,
+    "$1[adresă protejată]$3"
   );
 
   // Strip phone numbers (Romanian format)
@@ -40,37 +31,33 @@ export function stripPrivateAddress(text: string): string {
     "[telefon protejat]"
   );
 
-  // Strip email addresses
+  // Strip email addresses from body text (but not the signature name)
   result = result.replace(
     /[\w.+-]+@[\w.-]+\.\w{2,}/g,
     "[email protejat]"
   );
-
-  // Clean up double spaces, orphan commas, leading commas
-  result = result
-    .replace(/,\s*,/g, ",")
-    .replace(/^\s*,\s*/gm, "")
-    .replace(/\s{2,}/g, " ")
-    .trim();
 
   return result;
 }
 
 /**
  * Strip private info for short preview (listing cards).
- * More aggressive — removes the entire opening paragraph.
+ * More aggressive — shows only the problem description paragraph.
  */
 export function stripForPreview(formalText: string): string {
   if (!formalText) return "";
 
-  // Remove everything before "Vă aduc la cunoștință" (the problem description paragraph)
-  const match = formalText.match(/Vă aduc la cunoștință([\s\S]*)/);
+  // Extract the problem paragraph: "Vă aduc la cunoștință ... accidente."
+  const match = formalText.match(/Vă aduc la cunoștință([\s\S]*?)(?=Vă propun|Vă mulțumesc|Cu respect|$)/);
   if (match) {
-    return stripPrivateAddress(match[0].replace(/\n+/g, " ").trim());
+    return match[0].replace(/\n+/g, " ").trim();
   }
 
-  // Fallback: strip the first two paragraphs (greeting + identification)
+  // Fallback: skip first 2 paragraphs, show the rest
   const paragraphs = formalText.split(/\n\n+/);
-  const relevantText = paragraphs.slice(2).join(" ").replace(/\n+/g, " ").trim();
-  return stripPrivateAddress(relevantText || formalText.slice(0, 200));
+  if (paragraphs.length > 2) {
+    return paragraphs[2].replace(/\n+/g, " ").trim();
+  }
+
+  return stripPrivateAddress(formalText.replace(/\n+/g, " ").slice(0, 200));
 }
