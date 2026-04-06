@@ -15,7 +15,10 @@ export async function GET(req: Request) {
       .order("voturi_net", { ascending: false })
       .limit(limit);
     if (error) throw error;
-    return NextResponse.json({ data: data ?? [] });
+    return NextResponse.json(
+      { data: data ?? [] },
+      { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60" } }
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.json({ error: msg }, { status: 500 });

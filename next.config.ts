@@ -33,6 +33,17 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://plausible.io",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https: http:",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.groq.com https://api.open-meteo.com https://overpass-api.de https://plausible.io https://api.openaq.org",
+      "frame-ancestors 'self'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; ");
     return [
       {
         source: "/(.*)",
@@ -43,7 +54,16 @@ const nextConfig: NextConfig = {
           { key: "X-DNS-Prefetch-Control", value: "on" },
           { key: "Permissions-Policy", value: "geolocation=(self), camera=(), microphone=()" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          // same-origin-allow-popups is needed for Supabase OAuth popup flow
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+          { key: "Content-Security-Policy", value: csp },
+        ],
+      },
+      {
+        // Long-lived cache for GeoJSON (they rarely change + committed to repo)
+        source: "/geojson/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400" },
         ],
       },
     ];

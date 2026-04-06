@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 300; // 5 minutes
+export const revalidate = 300; // 5 minutes (ISR caching)
 
 /**
  * Lightweight count-based summary for homepage widgets.

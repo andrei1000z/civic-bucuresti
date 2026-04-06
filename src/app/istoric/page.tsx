@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { primari, consiliiGenerale } from "@/data/primari";
-import { DurateMandateChart, CompozitieCGChart } from "@/components/charts/IstoricCharts";
 import { IstoricInteractive } from "@/components/istoric/IstoricInteractive";
+
+// Lazy-load recharts — saves ~170KB from /istoric initial bundle
+const ChartLoading = () => <div className="h-[260px] rounded-[8px] bg-[var(--color-surface-2)] animate-pulse" />;
+const DurateMandateChart = dynamic(() => import("@/components/charts/IstoricCharts").then((m) => ({ default: m.DurateMandateChart })), { loading: ChartLoading });
+const CompozitieCGChart = dynamic(() => import("@/components/charts/IstoricCharts").then((m) => ({ default: m.CompozitieCGChart })), { loading: ChartLoading });
 
 export const metadata: Metadata = {
   title: "Istoric administrație București",

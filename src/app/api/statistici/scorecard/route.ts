@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
 
-export const dynamic = "force-dynamic";
 export const revalidate = 300; // 5 min cache
 
 interface SesRow {
@@ -17,7 +16,8 @@ export async function GET() {
     const { data, error } = await supabase
       .from("sesizari_feed")
       .select("sector, status, created_at, resolved_at")
-      .limit(5000);
+      .order("created_at", { ascending: false })
+      .limit(1000);
     if (error) throw error;
 
     const rows = (data ?? []) as unknown as SesRow[];
@@ -44,7 +44,10 @@ export async function GET() {
       return { sector, total, rezolvate, in_lucru, noi, percent_rezolvate, avg_days };
     });
 
-    return NextResponse.json({ data: stats });
+    return NextResponse.json(
+      { data: stats },
+      { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60" } }
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown";
     return NextResponse.json({ error: msg }, { status: 500 });

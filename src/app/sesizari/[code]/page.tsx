@@ -26,6 +26,7 @@ import { VerifyPanel } from "@/components/sesizari/VerifyPanel";
 import { SimilarSesizari } from "@/components/sesizari/SimilarSesizari";
 import { FollowButton } from "@/components/sesizari/FollowButton";
 import { PhotoGallery } from "@/components/sesizari/PhotoGallery";
+import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
 import { SITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
@@ -101,6 +102,11 @@ export default async function SesizareDetailPage({
 
   return (
     <div className="container-narrow py-8 md:py-12">
+      <BreadcrumbJsonLd items={[
+        { name: "Civia", url: SITE_URL },
+        { name: "Sesizări", url: `${SITE_URL}/sesizari` },
+        { name: sesizare.titlu, url: `${SITE_URL}/sesizari/${sesizare.code}` },
+      ]} />
       <Link
         href="/sesizari"
         className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"

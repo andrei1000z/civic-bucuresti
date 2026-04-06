@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 600; // 10 minutes
+export const revalidate = 600; // 10 minutes (ISR caching)
 
 /**
  * Fetch current weather for Bucharest from Open-Meteo (free, no API key).

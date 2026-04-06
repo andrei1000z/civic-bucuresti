@@ -19,17 +19,21 @@ describe("Groq system prompts", () => {
     expect(SYSTEM_PROMPT_FORMAL).toContain("OG 27/2002");
   });
 
-  it("SYSTEM_PROMPT_CLASSIFIER lists all 8 types", () => {
-    const types = ["groapa", "trotuar", "iluminat", "copac", "gunoi", "parcare", "graffiti", "altele"];
+  it("SYSTEM_PROMPT_CLASSIFIER lists all 16 types", () => {
+    const types = [
+      "groapa", "trotuar", "iluminat", "copac", "gunoi", "parcare",
+      "stalpisori", "canalizare", "semafor", "pietonal",
+      "graffiti", "mobilier", "zgomot", "animale", "transport", "altele",
+    ];
     for (const t of types) {
       expect(SYSTEM_PROMPT_CLASSIFIER).toContain(t);
     }
   });
 
-  it("SYSTEM_PROMPT_CLASSIFIER lists all 6 sectors", () => {
-    for (let i = 1; i <= 6; i++) {
-      expect(SYSTEM_PROMPT_CLASSIFIER).toContain(`S${i}`);
-    }
+  it("SYSTEM_PROMPT_CLASSIFIER returns only tip, no sector", () => {
+    // Classifier was simplified to return {"tip": "..."} only
+    expect(SYSTEM_PROMPT_CLASSIFIER).toContain('"tip"');
+    expect(SYSTEM_PROMPT_CLASSIFIER).not.toContain('"sector"');
   });
 
   it("SYSTEM_PROMPT_CIVIC_ASSISTANT covers key topics", () => {

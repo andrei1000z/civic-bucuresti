@@ -82,11 +82,10 @@ export const aqiPeSector = [
 ];
 export const aqiPeSectorSource = "calitate-aer";
 
-// Last 30 days — average AQI — pattern modelat după date reale București (variație sezonieră)
-export const aqiTrend30Zile: MonthlyData[] = Array.from({ length: 30 }, (_, i) => ({
-  month: `Z${i + 1}`,
-  value: Math.round(55 + 25 * Math.sin((i / 30) * Math.PI * 2) + 10 * Math.cos((i / 7) * Math.PI)),
-}));
+// AQI 30-day trend — was previously generated with Math.sin() (misleading).
+// Component fetches live daily-average from /api/statistici/aqi-history instead.
+// This empty array is kept so imports don't break during refactor.
+export const aqiTrend30Zile: MonthlyData[] = [];
 export const aqiTrendSource = "calitate-aer";
 
 // ============================================

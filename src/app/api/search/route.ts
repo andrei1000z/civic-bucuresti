@@ -3,7 +3,7 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { ghiduri } from "@/data/ghiduri";
 import { evenimente } from "@/data/evenimente";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60; // 1 min cache
 
 interface SearchResult {
   type: "sesizare" | "ghid" | "eveniment" | "stire" | "page";
@@ -26,10 +26,22 @@ const STATIC_PAGES: SearchResult[] = [
   { type: "page", title: "Contul tău", url: "/cont", excerpt: "Profil + sesizările tale" },
 ];
 
+/**
+ * Sanitize query for PostgREST .or() interpolation.
+ * Strip characters that would let an attacker inject additional operators:
+ *   , ( ) . * : — these are PostgREST filter syntax separators.
+ */
+function sanitizeForPostgrest(q: string): string {
+  return q.replace(/[,()*.:\\]/g, "").slice(0, 64);
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const q = (searchParams.get("q") ?? "").trim().toLowerCase();
-  if (!q || q.length < 2) return NextResponse.json({ data: [] });
+  const qRaw = (searchParams.get("q") ?? "").trim().toLowerCase();
+  if (!qRaw || qRaw.length < 2) return NextResponse.json({ data: [] });
+  const q = qRaw; // used for client-side includes() on static data
+  const qSafe = sanitizeForPostgrest(qRaw); // for PostgREST .or() filters
+  if (!qSafe || qSafe.length < 2) return NextResponse.json({ data: [] });
 
   const results: SearchResult[] = [];
 
@@ -77,7 +89,7 @@ export async function GET(req: Request) {
     const { data } = await supabase
       .from("sesizari_feed")
       .select("code, titlu, locatie, sector, status, descriere")
-      .or(`titlu.ilike.%${q}%,locatie.ilike.%${q}%,descriere.ilike.%${q}%`)
+      .or(`titlu.ilike.%${qSafe}%,locatie.ilike.%${qSafe}%,descriere.ilike.%${qSafe}%`)
       .limit(10);
     for (const s of (data ?? []) as Array<{ code: string; titlu: string; locatie: string; sector: string; status: string; descriere: string }>) {
       results.push({
@@ -98,7 +110,7 @@ export async function GET(req: Request) {
     const { data } = await supabase
       .from("stiri_cache")
       .select("title, url, excerpt, source")
-      .or(`title.ilike.%${q}%,excerpt.ilike.%${q}%`)
+      .or(`title.ilike.%${qSafe}%,excerpt.ilike.%${qSafe}%`)
       .limit(5);
     for (const s of (data ?? []) as Array<{ title: string; url: string; excerpt: string; source: string }>) {
       results.push({
@@ -113,5 +125,8 @@ export async function GET(req: Request) {
     // ignore
   }
 
-  return NextResponse.json({ data: results.slice(0, 30) });
+  return NextResponse.json(
+    { data: results.slice(0, 30) },
+    { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" } }
+  );
 }

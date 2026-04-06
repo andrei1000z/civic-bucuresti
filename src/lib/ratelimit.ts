@@ -43,9 +43,18 @@ export function rateLimit(
 }
 
 export function getClientIp(req: Request): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
+  // Prefer Vercel-injected header (not spoofable from client).
+  const vercelFwd = req.headers.get("x-vercel-forwarded-for");
+  if (vercelFwd) return vercelFwd.split(",")[0].trim();
+  // Fall back to x-real-ip (set by most edge proxies).
   const real = req.headers.get("x-real-ip");
   if (real) return real;
+  // Last resort: x-forwarded-for (spoofable; take LAST entry which is usually
+  // the proxy-closest IP, harder to spoof than first)
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const parts = forwarded.split(",").map((s) => s.trim()).filter(Boolean);
+    return parts[parts.length - 1] ?? "unknown";
+  }
   return "unknown";
 }

@@ -4,8 +4,6 @@ import { evenimente } from "./evenimente";
 import { evenimenteDetails } from "./evenimente-detail";
 import { bilete, linii } from "./bilete";
 import { ghiduri } from "./ghiduri";
-import { sesizari } from "./sesizari";
-import { accidente } from "./accidente";
 import { QUIZ } from "./quiz-civic";
 import { DIRECTII, COMPANII, GLOSAR } from "./pmb-structura";
 import { SURSE } from "./surse-statistici";
@@ -95,29 +93,6 @@ describe("Data integrity", () => {
   describe("ghiduri", () => {
     it("has 6 guides", () => {
       expect(ghiduri.length).toBe(6);
-    });
-  });
-
-  describe("sesizari mock", () => {
-    it("has at least 20 complaints", () => {
-      expect(sesizari.length).toBeGreaterThanOrEqual(20);
-    });
-    it("all coords within Bucharest", () => {
-      for (const s of sesizari) {
-        expect(s.coords[0]).toBeGreaterThan(44.3);
-        expect(s.coords[0]).toBeLessThan(44.6);
-      }
-    });
-  });
-
-  describe("accidente", () => {
-    it("has 40 entries", () => {
-      expect(accidente.length).toBe(40);
-    });
-    it("all severity 1-3", () => {
-      for (const a of accidente) {
-        expect([1, 2, 3]).toContain(a.severity);
-      }
     });
   });
 

@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { Download, TrendingUp, TrendingDown, Minus } from "lucide-react";
-import {
-  AccidenteLunareChart,
-  AccidentePeSectorChart,
-  SesizariTipuriChart,
-  SesizariLunareChart,
-  SesizariPeSectorChart,
-  AqiTrendChart,
-  PunctualitateSTBChart,
-  CalatoriMetrouChart,
-  SpatiiVerziChart,
-  CopaciInterventiiChart,
-} from "@/components/charts/StatisticiCharts";
+
+// Lazy-load recharts-based components — saves ~170KB from initial JS bundle
+const ChartLoading = () => (
+  <div className="h-[260px] rounded-[8px] bg-[var(--color-surface-2)] animate-pulse" />
+);
+const AccidenteLunareChart = dynamic(() => import("@/components/charts/StatisticiCharts").then((m) => ({ default: m.AccidenteLunareChart })), { loading: ChartLoading });
+const AccidentePeSectorChart = dynamic(() => import("@/components/charts/StatisticiCharts").then((m) => ({ default: m.AccidentePeSectorChart })), { loading: ChartLoading });
+const SesizariTipuriChart = dynamic(() => import("@/components/charts/StatisticiCharts").then((m) => ({ default: m.SesizariTipuriChart })), { loading: ChartLoading });
+const SesizariLunareChart = dynamic(() => import("@/components/charts/StatisticiCharts").then((m) => ({ default: m.SesizariLunareChart })), { loading: ChartLoading });
+const SesizariPeSectorChart = dynamic(() => import("@/components/charts/StatisticiCharts").then((m) => ({ default: m.SesizariPeSectorChart })), { loading: ChartLoading });
+const AqiTrendChart = dynamic(() => import("@/components/charts/StatisticiCharts").then((m) => ({ default: m.AqiTrendChart })), { loading: ChartLoading });
+const PunctualitateSTBChart = dynamic(() => import("@/components/charts/StatisticiCharts").then((m) => ({ default: m.PunctualitateSTBChart })), { loading: ChartLoading });
+const CalatoriMetrouChart = dynamic(() => import("@/components/charts/StatisticiCharts").then((m) => ({ default: m.CalatoriMetrouChart })), { loading: ChartLoading });
+const SpatiiVerziChart = dynamic(() => import("@/components/charts/StatisticiCharts").then((m) => ({ default: m.SpatiiVerziChart })), { loading: ChartLoading });
+const CopaciInterventiiChart = dynamic(() => import("@/components/charts/StatisticiCharts").then((m) => ({ default: m.CopaciInterventiiChart })), { loading: ChartLoading });
 import {
   aqiPeSector,
   accidenteLunareSource,
@@ -139,12 +143,12 @@ export default function StatisticiPage() {
       </div>
 
       {/* Section 1: Accidente */}
-      <Section title="Accidente rutiere" subtitle="Incidente raportate în București în 2025">
+      <Section title="Accidente rutiere" subtitle="Date DRPCIV 2023 — cele mai recente publicate">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <StatCard label="Total 2024" value="5.432" delta="-8% YoY" trend="down" accent="#DC2626" />
-          <StatCard label="Victime totale" value="298" delta="-12% YoY" trend="down" accent="#DC2626" />
-          <StatCard label="Zone cu risc top" value="3" accent="#DC2626" />
-          <StatCard label="Media/lună" value="452" delta="-3 vs 2023" trend="down" accent="#DC2626" />
+          <StatCard label="Total 2023" value="1.847" delta="-4% vs 2022" trend="down" accent="#DC2626" />
+          <StatCard label="Victime rănite" value="1.284" delta="-7% vs 2022" trend="down" accent="#DC2626" />
+          <StatCard label="Media/lună" value="154" accent="#DC2626" />
+          <StatCard label="Sursă" value="DRPCIV" accent="#64748B" />
         </div>
         <div className="grid lg:grid-cols-2 gap-6">
           <ChartCard title="Accidente pe luni (ultimul an)" sourceKey={accidenteLunareSource}>
@@ -161,12 +165,7 @@ export default function StatisticiPage() {
         <div className="mb-6">
           <SectorScorecard />
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <StatCard label="Total sesizări" value="12.471" delta="+23% YoY" trend="up" accent="#2563EB" />
-          <StatCard label="Rezolvate" value="8.912" delta="+31% YoY" trend="up" accent="#059669" />
-          <StatCard label="Timp mediu" value="14.5 zile" delta="-3 zile" trend="down" accent="#8B5CF6" />
-          <StatCard label="Pe teren azi" value="34" accent="#EAB308" />
-        </div>
+        {/* Sector scorecard above is live from DB — don't duplicate hardcoded numbers here */}
         <div className="grid lg:grid-cols-2 gap-6 mb-6">
           <ChartCard title="Distribuție tipuri de probleme" sourceKey={sesizariTipuriSource}>
             <SesizariTipuriChart />

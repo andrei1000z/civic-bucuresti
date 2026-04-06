@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, X, ChevronDown, AlertCircle, MapPin } from "lucide-react";
+import { Menu, X, ChevronDown, AlertCircle, MapPin, Search } from "lucide-react";
 import { NAV_LINKS, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/auth/UserMenu";
@@ -123,6 +123,17 @@ export function Navbar() {
             <div className="hidden xl:block">
               <LiveWeatherAqi />
             </div>
+            <button
+              onClick={() => {
+                // Trigger CommandPalette via custom event (same as Cmd+K)
+                document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, ctrlKey: true }));
+              }}
+              className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+              aria-label="Caută (Ctrl+K)"
+              title="Caută (Ctrl+K)"
+            >
+              <Search size={16} />
+            </button>
             <ThemeToggle />
             <UserMenu />
             <Link

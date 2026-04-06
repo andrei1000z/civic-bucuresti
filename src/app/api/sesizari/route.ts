@@ -45,7 +45,10 @@ export async function GET(req: Request) {
       limit: Number(searchParams.get("limit") ?? 50),
       offset: Number(searchParams.get("offset") ?? 0),
     });
-    return NextResponse.json({ data: rows });
+    return NextResponse.json(
+      { data: rows },
+      { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } }
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.json({ error: msg }, { status: 500 });

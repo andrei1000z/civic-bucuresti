@@ -133,6 +133,24 @@ export default function ContPage() {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="container-narrow py-20 max-w-md text-center">
+        <AlertTriangle size={32} className="mx-auto mb-4 text-red-500" />
+        <h1 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-2">
+          Nu s-a putut încărca contul
+        </h1>
+        <p className="text-[var(--color-text-muted)] mb-6">{loadError}</p>
+        <button
+          onClick={loadData}
+          className="inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
+        >
+          Încearcă din nou
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="container-narrow py-12 md:py-16">
       <div className="mb-10 flex items-start justify-between">

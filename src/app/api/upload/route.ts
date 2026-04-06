@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { createSupabaseServer } from "@/lib/supabase/server";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
 import { isValidImage } from "@/lib/sanitize";
 
@@ -47,11 +47,21 @@ export async function POST(req: Request) {
       }
     }
 
-    const supabase = createSupabaseAdmin();
+    // Use anon key client — storage policy `photos_upload_anyone` allows public uploads
+    // to the sesizari-photos bucket. No need for service_role here.
+    const supabase = await createSupabaseServer();
     const uploaded: string[] = [];
 
+    // Map MIME type → safe extension (don't trust client filename)
+    const extFromMime: Record<string, string> = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+      "image/gif": "gif",
+    };
+
     for (const file of files) {
-      const ext = file.name.split(".").pop() || "jpg";
+      const ext = extFromMime[file.type] ?? "jpg";
       const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const path = `public/${filename}`;
 

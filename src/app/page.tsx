@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Map as MapIcon,
   Ticket,
@@ -132,12 +133,13 @@ export default async function HomePage() {
     <>
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#1C4ED8] via-[#1e3a8a] to-[#0F172A] text-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/images/home/hero-bucuresti.webp"
           alt="București"
+          fill
+          priority
+          sizes="100vw"
           className="absolute inset-0 w-full h-full object-cover opacity-20"
-          loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-[#1C4ED8]/70 via-[#1e3a8a]/80 to-[#0F172A]/95" />
         <div className="absolute inset-0 bg-grid-pattern opacity-20" />
@@ -190,14 +192,14 @@ export default async function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/harti"
-                className="inline-flex items-center justify-center gap-2 h-13 px-7 rounded-[8px] bg-white text-[#1C4ED8] font-semibold hover:bg-blue-50 shadow-xl transition-all"
+                className="inline-flex items-center justify-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[#1C4ED8] font-semibold hover:bg-blue-50 shadow-xl transition-all"
               >
                 <MapIcon size={20} />
                 Explorează harta
               </Link>
               <Link
                 href="/sesizari"
-                className="inline-flex items-center justify-center gap-2 h-13 px-7 rounded-[8px] border-2 border-white/30 text-white font-semibold hover:bg-white/10 backdrop-blur transition-all"
+                className="inline-flex items-center justify-center gap-2 h-12 px-7 rounded-[8px] border-2 border-white/30 text-white font-semibold hover:bg-white/10 backdrop-blur transition-all"
               >
                 <AlertCircle size={20} />
                 Fă o sesizare

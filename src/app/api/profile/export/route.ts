@@ -12,12 +12,25 @@ export async function GET() {
 
   const admin = createSupabaseAdmin();
 
-  const [profile, sesizari, votes, comments] = await Promise.all([
+  // Split into two queries instead of .or() to avoid PostgREST filter injection
+  // via email addresses containing commas/parens/dots.
+  const [profile, byUserId, byEmail, votes, comments] = await Promise.all([
     admin.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-    admin.from("sesizari").select("*").or(`user_id.eq.${user.id},author_email.eq.${user.email}`),
+    admin.from("sesizari").select("*").eq("user_id", user.id),
+    user.email
+      ? admin.from("sesizari").select("*").eq("author_email", user.email)
+      : Promise.resolve({ data: [] as Array<{ id: string }> }),
     admin.from("sesizare_votes").select("*").eq("user_id", user.id),
     admin.from("sesizare_comments").select("*").eq("user_id", user.id),
   ]);
+  // De-dup by id
+  const seen = new Set<string>();
+  const sesizariAll = [...(byUserId.data ?? []), ...(byEmail.data ?? [])].filter((s) => {
+    const id = (s as { id: string }).id;
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
 
   const exportData = {
     export_date: new Date().toISOString(),
@@ -27,7 +40,7 @@ export async function GET() {
       created_at: user.created_at,
     },
     profile: profile.data,
-    sesizari: sesizari.data ?? [],
+    sesizari: sesizariAll,
     votes: votes.data ?? [],
     comments: comments.data ?? [],
   };

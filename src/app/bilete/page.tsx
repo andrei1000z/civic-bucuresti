@@ -68,10 +68,17 @@ export default function BiletePage() {
       {/* Header */}
       <div className="mb-10">
         <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4">
-          Bilete & Abonamente București
+          Bilete & Abonamente STB / Metrorex 2026
         </h1>
-        <p className="text-lg text-[var(--color-text-muted)] mb-4">
+        <p className="text-lg text-[var(--color-text-muted)] mb-3">
           Tarife, abonamente și puncte de vânzare pentru toate operatorii de transport public.
+        </p>
+        <p className="text-xs text-[var(--color-text-muted)] mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
+          ⚠️ Prețurile se pot modifica. Verifică pe{" "}
+          <a href="https://stbsa.ro/tarife" target="_blank" rel="noreferrer" className="text-[var(--color-primary)] hover:underline font-medium">stbsa.ro/tarife</a>
+          {" "}/{" "}
+          <a href="https://metrorex.ro" target="_blank" rel="noreferrer" className="text-[var(--color-primary)] hover:underline font-medium">metrorex.ro</a>
+          .
         </p>
         <div className="flex flex-wrap gap-3">
           <a

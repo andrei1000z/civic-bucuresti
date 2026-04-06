@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
 
-export const dynamic = "force-dynamic";
 export const revalidate = 120;
 
 // Public API — CORS enabled for third-party civic apps, journalists, researchers
