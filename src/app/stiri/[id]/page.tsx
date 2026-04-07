@@ -6,7 +6,6 @@ import { createClient } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/Badge";
 import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
-import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
 
 export const dynamic = "force-dynamic";
 
@@ -31,13 +30,31 @@ function getSupabase() {
 }
 
 async function getStire(id: string): Promise<StireRow | null> {
-  const { data } = await getSupabase()
-    .from("stiri_cache")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-  return data as StireRow | null;
+  try {
+    const { data, error } = await getSupabase()
+      .from("stiri_cache")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    if (error) {
+      console.error("Supabase error fetching stire:", error.message);
+      return null;
+    }
+    return data as StireRow | null;
+  } catch (e) {
+    console.error("Failed to fetch stire:", e);
+    return null;
+  }
 }
+
+const categoryLabels: Record<string, string> = {
+  transport: "Transport",
+  urbanism: "Urbanism",
+  mediu: "Mediu",
+  siguranta: "Siguranță",
+  administratie: "Administrație",
+  eveniment: "Evenimente",
+};
 
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
@@ -64,22 +81,7 @@ export default async function StireDetailPage({
   const stire = await getStire(id);
   if (!stire) notFound();
 
-  const categoryLabels: Record<string, string> = {
-    transport: "Transport",
-    urbanism: "Urbanism",
-    mediu: "Mediu",
-    siguranta: "Siguranță",
-    administratie: "Administrație",
-    eveniment: "Evenimente",
-  };
-
   return (
-    <>
-      <BreadcrumbJsonLd items={[
-        { name: "Civia", url: SITE_URL },
-        { name: "Știri", url: `${SITE_URL}/stiri` },
-        { name: stire.title, url: `${SITE_URL}/stiri/${stire.id}` },
-      ]} />
     <div className="container-narrow py-8 md:py-12 max-w-3xl">
       <Link
         href="/stiri"
@@ -96,7 +98,6 @@ export default async function StireDetailPage({
             src={stire.image_url}
             alt={stire.title}
             className="w-full h-full object-cover"
-            onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           <div className="absolute bottom-4 left-4 flex gap-2">
@@ -110,37 +111,39 @@ export default async function StireDetailPage({
         </div>
       )}
 
-      {/* Header */}
-      <div className="mb-6">
-        {!stire.image_url && (
-          <div className="flex gap-2 mb-3">
-            <Badge bgColor={SOURCE_COLORS[stire.source] ?? "#64748b"} color="white">
-              {stire.source}
-            </Badge>
-            <Badge variant="neutral" className="uppercase text-[10px]">
-              {categoryLabels[stire.category] ?? stire.category}
-            </Badge>
-          </div>
-        )}
-        <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold mb-4 leading-tight">
-          {stire.title}
-        </h1>
-        <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-muted)]">
-          <span className="flex items-center gap-1.5">
-            <Calendar size={14} />
-            {formatDateTime(stire.published_at)}
-          </span>
-          {stire.author && (
-            <span className="flex items-center gap-1.5">
-              <User size={14} />
-              {stire.author}
-            </span>
-          )}
-          <span className="flex items-center gap-1.5">
-            <Tag size={14} />
+      {/* No image — show source badge */}
+      {!stire.image_url && (
+        <div className="flex gap-2 mb-4">
+          <Badge bgColor={SOURCE_COLORS[stire.source] ?? "#64748b"} color="white">
+            {stire.source}
+          </Badge>
+          <Badge variant="neutral" className="uppercase text-[10px]">
             {categoryLabels[stire.category] ?? stire.category}
-          </span>
+          </Badge>
         </div>
+      )}
+
+      {/* Title */}
+      <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold mb-4 leading-tight">
+        {stire.title}
+      </h1>
+
+      {/* Meta */}
+      <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-muted)] mb-6">
+        <span className="flex items-center gap-1.5">
+          <Calendar size={14} />
+          {formatDateTime(stire.published_at)}
+        </span>
+        {stire.author && (
+          <span className="flex items-center gap-1.5">
+            <User size={14} />
+            {stire.author}
+          </span>
+        )}
+        <span className="flex items-center gap-1.5">
+          <Tag size={14} />
+          {categoryLabels[stire.category] ?? stire.category}
+        </span>
       </div>
 
       {/* Content */}
@@ -157,7 +160,7 @@ export default async function StireDetailPage({
         )}
       </article>
 
-      {/* CTA: Read original */}
+      {/* CTA */}
       <div className="bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 rounded-[12px] p-6 text-white text-center">
         <p className="text-sm text-white/80 mb-3">
           Conținutul aparține publicației originale.
@@ -171,11 +174,7 @@ export default async function StireDetailPage({
           Citește articolul complet pe {stire.source}
           <ExternalLink size={16} />
         </a>
-        <p className="text-[10px] text-white/60 mt-3">
-          Civia agregează știri din surse verificate. Nu modificăm conținutul editorial.
-        </p>
       </div>
     </div>
-    </>
   );
 }
