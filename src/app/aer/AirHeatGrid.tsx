@@ -1,30 +1,26 @@
 "use client";
 
-import { useMemo, useEffect, useState, useRef } from "react";
-import { ImageOverlay, useMap } from "react-leaflet";
+import { useEffect, useState } from "react";
+import { ImageOverlay } from "react-leaflet";
 import type { UnifiedSensor } from "@/lib/aer/types";
 import { getAqiColor } from "@/lib/aer/colors";
 
 /**
- * Dense AQI heatmap rendered as a SINGLE Canvas image overlay.
- * No SVG circles = zero DOM elements = instant scrolling.
- *
- * Strategy:
- * 1. Compute IDW grid (500×500 = 250K cells)
- * 2. Render to offscreen Canvas
- * 3. Display as ImageOverlay on the map
+ * Dense AQI heatmap as a single Canvas image with Gaussian blur.
+ * - 600×600 grid = 360K cells
+ * - IDW power 1.5 (smoother spread, no bullseye)
+ * - 2-pass Gaussian blur on the canvas for natural transitions
+ * - Masked to Romania border
  */
 
-const GRID = 500;
+const GRID = 600;
 const LAT_MIN = 43.4;
 const LAT_MAX = 48.4;
 const LNG_MIN = 20.0;
 const LNG_MAX = 30.2;
 const BOUNDS: [[number, number], [number, number]] = [[LAT_MIN, LNG_MIN], [LAT_MAX, LNG_MAX]];
 
-interface Props {
-  sensors: UnifiedSensor[];
-}
+interface Props { sensors: UnifiedSensor[]; }
 
 function pointInRing(lat: number, lng: number, ring: number[][]): boolean {
   let inside = false;
@@ -37,32 +33,34 @@ function pointInRing(lat: number, lng: number, ring: number[][]): boolean {
   return inside;
 }
 
+/** IDW with power 1.5 — much smoother spread, no sharp bullseye */
 function idw(
   lat: number, lng: number,
   sensors: { lat: number; lng: number; aqi: number }[],
-  nationalAvg: number
+  nationalAvg: number,
 ): number {
   let num = 0, den = 0, closestDist = Infinity;
   for (const s of sensors) {
     const dLat = (lat - s.lat) * 111;
     const dLng = (lng - s.lng) * 111 * Math.cos((lat * Math.PI) / 180);
     const dist = Math.sqrt(dLat * dLat + dLng * dLng);
-    if (dist < 0.2) return s.aqi;
+    if (dist < 0.5) return s.aqi;
     if (dist < closestDist) closestDist = dist;
-    const w = 1 / (dist * dist);
+    // Power 1.5 instead of 2 — much smoother, wider influence
+    const w = 1 / Math.pow(dist, 1.5);
     num += w * s.aqi;
     den += w;
   }
   if (den === 0) return nationalAvg;
-  const interpolated = num / den;
-  if (closestDist > 100) {
-    const blend = Math.min(1, (closestDist - 100) / 200);
-    return Math.round(interpolated * (1 - blend) + nationalAvg * blend);
+  const val = num / den;
+  // Blend to national avg for far-away cells
+  if (closestDist > 80) {
+    const blend = Math.min(1, (closestDist - 80) / 150);
+    return Math.round(val * (1 - blend) + nationalAvg * blend);
   }
-  return Math.round(interpolated);
+  return Math.round(val);
 }
 
-/** Parse hex color "#RRGGBB" → [r,g,b] */
 function hexToRgb(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
@@ -83,7 +81,6 @@ export function AirHeatGrid({ sensors }: Props) {
       .catch(() => null);
   }, []);
 
-  // Compute grid + render to canvas
   useEffect(() => {
     if (!border || sensors.length === 0) return;
 
@@ -96,40 +93,62 @@ export function AirHeatGrid({ sensors }: Props) {
     const latStep = (LAT_MAX - LAT_MIN) / GRID;
     const lngStep = (LNG_MAX - LNG_MIN) / GRID;
 
-    // Create offscreen canvas
+    // Build pixel data
     const canvas = document.createElement("canvas");
     canvas.width = GRID;
     canvas.height = GRID;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Clear transparent
-    ctx.clearRect(0, 0, GRID, GRID);
-
     const imageData = ctx.createImageData(GRID, GRID);
     const data = imageData.data;
 
+    // Track which pixels are inside Romania for the mask
+    const mask = new Uint8Array(GRID * GRID);
+
     for (let row = 0; row < GRID; row++) {
       for (let col = 0; col < GRID; col++) {
-        // Map pixel to geo coords (row 0 = top = LAT_MAX)
         const lat = LAT_MAX - (row + 0.5) * latStep;
         const lng = LNG_MIN + (col + 0.5) * lngStep;
 
-        // Check if inside Romania
         if (!pointInRing(lat, lng, border)) continue;
 
+        mask[row * GRID + col] = 1;
         const aqi = idw(lat, lng, valid, nationalAvg);
         const color = hexToRgb(getAqiColor(aqi));
         const idx = (row * GRID + col) * 4;
         data[idx] = color[0];
         data[idx + 1] = color[1];
         data[idx + 2] = color[2];
-        data[idx + 3] = 115; // ~45% opacity
+        data[idx + 3] = 130; // ~51% opacity
       }
     }
 
     ctx.putImageData(imageData, 0, 0);
-    setImageUrl(canvas.toDataURL());
+
+    // Apply Gaussian blur for smooth transitions (no bullseye)
+    // Use CSS filter on a second canvas
+    const blurred = document.createElement("canvas");
+    blurred.width = GRID;
+    blurred.height = GRID;
+    const bCtx = blurred.getContext("2d");
+    if (bCtx) {
+      bCtx.filter = "blur(4px)";
+      bCtx.drawImage(canvas, 0, 0);
+
+      // Re-apply mask — blur spreads outside Romania border, clip it
+      const blurredData = bCtx.getImageData(0, 0, GRID, GRID);
+      const bd = blurredData.data;
+      for (let i = 0; i < GRID * GRID; i++) {
+        if (mask[i] === 0) {
+          bd[i * 4 + 3] = 0; // transparent outside Romania
+        }
+      }
+      bCtx.putImageData(blurredData, 0, 0);
+      setImageUrl(blurred.toDataURL());
+    } else {
+      setImageUrl(canvas.toDataURL());
+    }
   }, [sensors, border]);
 
   if (!imageUrl) return null;
