@@ -1,7 +1,7 @@
 "use client";
 
 import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMap } from "react-leaflet";
-import L from "leaflet";
+import L, { Canvas } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, type ReactNode } from "react";
 import { BUCHAREST_CENTER } from "@/lib/constants";
@@ -107,6 +107,8 @@ export default function LeafletMap({
       scrollWheelZoom={scrollWheelZoom}
       className={className}
       zoomControl={true}
+      renderer={new Canvas({ padding: 0.5 })}
+      preferCanvas={true}
     >
       <TileLayer
         key={tileStyle}
