@@ -186,13 +186,13 @@ export default function HartiLayers(props: HartiLayersProps) {
   }
 
   if (activeTab === "auto") {
-    // OpenTopoMap shows roads clearly with topo coloring
+    // Replace base map with OSM standard (bright, roads visible)
     return (
       <TileLayer
-        key="topo-tiles"
-        url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
-        opacity={0.8}
+        key="osm-standard"
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        zIndex={500}
       />
     );
   }
