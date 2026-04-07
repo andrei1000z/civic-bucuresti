@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink, Calendar, User, Tag } from "lucide-react";
-import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { createSupabaseServer } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/Badge";
 import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
@@ -24,8 +24,8 @@ interface StireRow {
 }
 
 async function getStire(id: string): Promise<StireRow | null> {
-  const admin = createSupabaseAdmin();
-  const { data } = await admin
+  const supabase = await createSupabaseServer();
+  const { data } = await supabase
     .from("stiri_cache")
     .select("*")
     .eq("id", id)
