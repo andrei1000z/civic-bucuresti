@@ -176,9 +176,11 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <div className="hidden xl:block">
-              <LiveWeatherAqi />
-            </div>
+            {countySlug && (
+              <div className="hidden xl:block">
+                <LiveWeatherAqi />
+              </div>
+            )}
             <button
               onClick={() => {
                 document.dispatchEvent(new CustomEvent("open-command-palette"));

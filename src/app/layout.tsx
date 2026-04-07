@@ -19,6 +19,9 @@ import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/constants";
 const CivicAssistant = dynamic(
   () => import("@/components/ai/CivicAssistant").then((m) => ({ default: m.CivicAssistant }))
 );
+const CommandPalette = dynamic(
+  () => import("@/components/CommandPalette").then((m) => ({ default: m.CommandPalette }))
+);
 
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
@@ -123,6 +126,7 @@ export default function RootLayout({
               <main id="main-content" className="flex-1 flex flex-col">{children}</main>
               <Footer />
               <CivicAssistant />
+              <CommandPalette />
               <AuthModal />
               <CookieBanner />
               <BackToTop />

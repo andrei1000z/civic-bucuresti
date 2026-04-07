@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, ExternalLink } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { SITE_NAME } from "@/lib/constants";
 
 const linkCls =
@@ -24,14 +24,6 @@ export function Footer() {
             <p className="text-sm text-[var(--color-text-muted)] mb-4 max-w-xs">
               Platformă civică independentă pentru cetățenii din România.
             </p>
-            <a
-              href="https://github.com/andrei1000z/civic-bucuresti"
-              target="_blank"
-              rel="noreferrer"
-              className={`inline-flex items-center gap-2 text-sm ${linkCls}`}
-            >
-              <ExternalLink size={14} /> GitHub
-            </a>
           </div>
 
           {/* Column 2 — Platformă */}
@@ -99,32 +91,11 @@ export function Footer() {
           </div>
         </div>
 
-        {/* ── Disclaimer ────────────────────────────────────── */}
-        <div className="mt-10 pt-6 border-t border-[var(--color-border)]">
-          <p className="text-xs text-[var(--color-text-muted)] max-w-3xl mb-4">
-            <strong className="text-[var(--color-text)]">Disclaimer:</strong>{" "}
-            {SITE_NAME} este o platformă independentă, neafiliată niciunei
-            autorități publice din România. Datele afișate sunt agregate din surse
-            publice și comunitate. Pentru informații oficiale, consultați site-urile
-            instituționale.
-          </p>
-        </div>
-
         {/* ── Bottom bar ────────────────────────────────────── */}
-        <div className="pt-4 border-t border-[var(--color-border)] flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <p className="text-xs text-[var(--color-text-muted)]">
-            &copy; 2024&ndash;2026 {SITE_NAME} &middot; Open-source &middot;
-            Făcut cu <span className="text-red-500">&#10084;</span> în România
+        <div className="mt-10 pt-6 border-t border-[var(--color-border)]">
+          <p className="text-xs text-[var(--color-text-muted)] text-center">
+            &copy; 2026 Civia.ro
           </p>
-          <a
-            href="https://github.com/andrei1000z/civic-bucuresti"
-            target="_blank"
-            rel="noreferrer"
-            className={`inline-flex items-center gap-1.5 text-xs ${linkCls}`}
-          >
-            <ExternalLink size={14} />
-            GitHub
-          </a>
         </div>
       </div>
     </footer>
