@@ -3,6 +3,9 @@
 import { useMemo } from "react";
 import { GeoJsonLayer } from "./GeoJsonLayer";
 import { NationalAqiLayer } from "./NationalAqiLayer";
+import dynamic from "next/dynamic";
+
+const DynamicRoadsLayer = dynamic(() => import("./DynamicRoadsLayer").then(m => ({ default: m.DynamicRoadsLayer })), { ssr: false });
 import { METRO_COLORS } from "@/lib/constants";
 import type { PathOptions } from "leaflet";
 import type { Feature } from "geojson";
@@ -187,23 +190,14 @@ export default function HartiLayers(props: HartiLayersProps) {
   if (activeTab === "auto") {
     return (
       <>
-        {/* Bottom to top: comunale → județene → naționale → autostrăzi */}
+        {/* Static layers: autostrăzi + naționale (always visible, lightweight) */}
         <GeoJsonLayer
-          key="comunale"
-          url="/geojson/comunale-romania.json"
-          style={() => ({ color: "#94A3B8", weight: 1, opacity: 0.5 })}
+          key="autostrazi"
+          url="/geojson/autostrazi-romania.json"
+          style={() => ({ color: "#DC2626", weight: 3, opacity: 0.9 })}
           popupFormatter={(f: Feature) => {
             const p = f.properties ?? {};
-            return `<b>${p.ref || p.name || "Drum comunal"}</b>`;
-          }}
-        />
-        <GeoJsonLayer
-          key="judetene"
-          url="/geojson/judetene-romania.json"
-          style={() => ({ color: "#FBBF24", weight: 1.5, opacity: 0.7 })}
-          popupFormatter={(f: Feature) => {
-            const p = f.properties ?? {};
-            return `<b>${p.ref || "DJ"}</b><br/><span style="font-size:11px;color:#64748b">${p.name || "Drum județean"}</span>`;
+            return `<b>${p.ref || "Autostradă"}</b><br/><span style="font-size:11px;color:#64748b">${p.name || ""}</span>`;
           }}
         />
         <GeoJsonLayer
@@ -211,23 +205,16 @@ export default function HartiLayers(props: HartiLayersProps) {
           url="/geojson/nationale-romania.json"
           style={(f?: Feature) => {
             const hw = f?.properties?.highway;
-            if (hw === "trunk") return { color: "#F97316", weight: 2.5, opacity: 0.85 };
-            return { color: "#EAB308", weight: 2, opacity: 0.8 };
+            if (hw === "trunk") return { color: "#F97316", weight: 2, opacity: 0.8 };
+            return { color: "#EAB308", weight: 1.5, opacity: 0.7 };
           }}
           popupFormatter={(f: Feature) => {
             const p = f.properties ?? {};
             return `<b>${p.ref || "DN"}</b><br/><span style="font-size:11px;color:#64748b">${p.name || "Drum național"}</span>`;
           }}
         />
-        <GeoJsonLayer
-          key="autostrazi"
-          url="/geojson/autostrazi-romania.json"
-          style={() => ({ color: "#DC2626", weight: 3.5, opacity: 0.9 })}
-          popupFormatter={(f: Feature) => {
-            const p = f.properties ?? {};
-            return `<b>${p.ref || "Autostradă"}</b><br/><span style="font-size:11px;color:#64748b">${p.name || ""}</span>`;
-          }}
-        />
+        {/* Dynamic: streets load from Overpass API when zoomed in (zoom >= 13) */}
+        <DynamicRoadsLayer />
       </>
     );
   }
