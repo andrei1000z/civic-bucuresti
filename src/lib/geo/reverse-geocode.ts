@@ -71,47 +71,63 @@ export async function reverseGeocode(lat: number, lng: number): Promise<Geocoded
     const data = await res.json();
 
     const addr = data.address ?? {};
-    const displayName = data.display_name ?? null;
+    const displayName = (data.display_name ?? "") as string;
 
-    // Extract county
-    const countyRaw = (addr.county || addr.state || "").toLowerCase().trim();
-    const countyCode = COUNTY_NAME_TO_CODE[countyRaw] ?? null;
+    // Extract county — try multiple Nominatim fields
+    // Nominatim returns "county" for most areas, "state" for București
+    const countyRaw = (addr.county || "").toLowerCase().trim();
+    const stateRaw = (addr.state || "").toLowerCase().trim();
+    // Try county first, then state, also handle "municipiul bucurești"
+    let countyCode = COUNTY_NAME_TO_CODE[countyRaw]
+      ?? COUNTY_NAME_TO_CODE[stateRaw]
+      ?? COUNTY_NAME_TO_CODE[stateRaw.replace("municipiul ", "")]
+      ?? null;
+
+    // Fallback: if display_name contains "București", it's B
+    if (!countyCode && displayName.toLowerCase().includes("bucurești")) {
+      countyCode = "B";
+    }
+
     const countyName = addr.county || addr.state || null;
 
     // Extract locality
     const locality = addr.city || addr.town || addr.village || addr.municipality || null;
 
-    // Detect sector for București
+    // Detect sector — check EVERYWHERE in address and display_name
     let sector: string | null = null;
-    if (countyCode === "B" || countyCode === "IF") {
-      const suburb = (addr.suburb || addr.city_district || "").toLowerCase();
-      const sectorMatch = suburb.match(/sector\s*(\d)/i) || displayName?.match(/sector\s*(\d)/i);
-      if (sectorMatch) {
-        sector = `S${sectorMatch[1]}`;
-      }
+    const allText = `${addr.suburb || ""} ${addr.city_district || ""} ${addr.quarter || ""} ${displayName}`.toLowerCase();
+    const sectorMatch = allText.match(/sector\s*(\d)/i);
+    if (sectorMatch) {
+      sector = `S${sectorMatch[1]}`;
     }
 
     // Extract street details
     const street = addr.road || addr.pedestrian || addr.footway || null;
     const houseNumber = addr.house_number || null;
 
-    // Build clean short address: "Strada X nr. Y, Localitate, Județ"
+    // Build clean short address: "Strada X nr. Y, Sector Z, București"
     const parts: string[] = [];
     if (street) {
-      parts.push(houseNumber ? `${street} ${houseNumber}` : street);
+      parts.push(houseNumber ? `${street} nr. ${houseNumber}` : street);
     }
-    if (sector && (countyCode === "B" || countyCode === "IF")) {
+    // Add sector for București
+    if (sector) {
       parts.push(`Sector ${sector.replace("S", "")}`);
     }
-    if (locality && locality !== "București") {
-      parts.push(locality);
-    }
-    if (countyCode === "B") {
+    // Add locality
+    if (countyCode === "B" || (locality && locality.toLowerCase().includes("bucurești"))) {
       parts.push("București");
+    } else if (locality) {
+      parts.push(locality);
+      if (countyName) {
+        // Clean county name: remove "Județul" prefix if present
+        const cleanCounty = (countyName as string).replace(/^județ(ul)?\s*/i, "");
+        parts.push(`jud. ${cleanCounty}`);
+      }
     } else if (countyName) {
-      parts.push(`jud. ${countyName}`);
+      parts.push(`jud. ${(countyName as string).replace(/^județ(ul)?\s*/i, "")}`);
     }
-    const shortAddress = parts.length > 0 ? parts.join(", ") : null;
+    const shortAddress = parts.length > 0 ? parts.join(", ") : displayName;
 
     return {
       countyCode,
