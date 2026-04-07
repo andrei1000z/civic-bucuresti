@@ -34,13 +34,13 @@ export function NationalAqiLayer() {
           <CircleMarker
             key={s.id}
             center={[s.lat, s.lng]}
-            radius={5}
+            radius={3}
             pathOptions={{
               fillColor: getAqiColor(s.aqi!),
-              fillOpacity: 0.9,
+              fillOpacity: 1,
               color: "#fff",
-              weight: 1,
-              opacity: 0.7,
+              weight: 0.5,
+              opacity: 0.6,
             }}
           >
             <Popup>
