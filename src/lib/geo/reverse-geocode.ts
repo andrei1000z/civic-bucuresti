@@ -51,7 +51,10 @@ export interface GeocodedLocation {
   countyName: string | null;  // "Cluj", "București"
   locality: string | null;    // "Cluj-Napoca", "Sector 3"
   sector: string | null;      // "S1"-"S6" for București only
-  address: string | null;     // full formatted address
+  address: string | null;     // full formatted address from Nominatim
+  shortAddress: string | null; // clean: "Strada X nr. Y, Localitate, Județ"
+  street: string | null;       // street name
+  houseNumber: string | null;  // house number
 }
 
 /**
@@ -88,14 +91,39 @@ export async function reverseGeocode(lat: number, lng: number): Promise<Geocoded
       }
     }
 
+    // Extract street details
+    const street = addr.road || addr.pedestrian || addr.footway || null;
+    const houseNumber = addr.house_number || null;
+
+    // Build clean short address: "Strada X nr. Y, Localitate, Județ"
+    const parts: string[] = [];
+    if (street) {
+      parts.push(houseNumber ? `${street} ${houseNumber}` : street);
+    }
+    if (sector && (countyCode === "B" || countyCode === "IF")) {
+      parts.push(`Sector ${sector.replace("S", "")}`);
+    }
+    if (locality && locality !== "București") {
+      parts.push(locality);
+    }
+    if (countyCode === "B") {
+      parts.push("București");
+    } else if (countyName) {
+      parts.push(`jud. ${countyName}`);
+    }
+    const shortAddress = parts.length > 0 ? parts.join(", ") : null;
+
     return {
       countyCode,
       countyName,
       locality,
       sector,
       address: displayName,
+      shortAddress,
+      street,
+      houseNumber,
     };
   } catch {
-    return { countyCode: null, countyName: null, locality: null, sector: null, address: null };
+    return { countyCode: null, countyName: null, locality: null, sector: null, address: null, shortAddress: null, street: null, houseNumber: null };
   }
 }

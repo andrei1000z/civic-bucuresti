@@ -237,32 +237,33 @@ export function SesizareForm() {
     setGeoLoading(true);
     setError(null);
 
-    let reverseCalled = false;
     let lastAccuracy = Infinity;
     let hasAnyPosition = false;
-    const target = 10; // meters — stop refining at 10m precision
+    let geocodeCount = 0;
+    const target = 10;
     setGpsAccuracy(null);
 
-    // Reverse geocode to get address from coordinates
-    const maybeReverseGeocode = async (lat: number, lng: number) => {
-      if (reverseCalled) return;
-      reverseCalled = true;
+    // Reverse geocode — can be called multiple times as precision improves
+    const doReverseGeocode = async (lat: number, lng: number, acc: number) => {
+      geocodeCount++;
+      const thisCall = geocodeCount;
       try {
         const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
         const json = await res.json();
-        if (json.data) {
+        if (json.data && thisCall === geocodeCount) {
+          // Use shortAddress (clean format) or fall back to full address
+          const addr = json.data.shortAddress || json.data.address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
           setData((d) => ({
             ...d,
-            locatie: d.locatie || json.data.address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
-            sector: d.sector || json.data.sector || d.sector,
+            locatie: addr,
+            sector: json.data.sector || d.sector,
           }));
           if (json.data.countyCode) setDetectedCounty(json.data.countyCode);
           if (json.data.countyName) setDetectedCountyName(json.data.countyName);
           if (json.data.locality) setDetectedLocality(json.data.locality);
-        } else {
-          setData((d) => ({ ...d, locatie: d.locatie || `${lat.toFixed(5)}, ${lng.toFixed(5)}` }));
         }
       } catch {
+        // Keep coordinates as fallback
         setData((d) => ({ ...d, locatie: d.locatie || `${lat.toFixed(5)}, ${lng.toFixed(5)}` }));
       }
     };
@@ -280,8 +281,15 @@ export function SesizareForm() {
           setData((d) => ({ ...d, lat, lng }));
           setGpsAccuracy(acc);
 
-          // Reverse geocode on first reasonable fix
-          if (acc < 150) maybeReverseGeocode(lat, lng);
+          // Instant: show coordinates while waiting for geocode
+          if (geocodeCount === 0) {
+            setData((d) => ({ ...d, locatie: `Coordonate: ${lat.toFixed(5)}, ${lng.toFixed(5)} (se detectează adresa...)` }));
+          }
+
+          // Geocode at different accuracy thresholds for progressive refinement
+          if (acc < 500 && geocodeCount === 0) doReverseGeocode(lat, lng, acc);
+          if (acc < 50 && geocodeCount === 1) doReverseGeocode(lat, lng, acc);
+          if (acc <= target && geocodeCount <= 2) doReverseGeocode(lat, lng, acc);
 
           // Reached target — stop
           if (acc <= target) {
