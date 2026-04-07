@@ -2,63 +2,50 @@
 
 import { useEffect, useState } from "react";
 import { CircleMarker, Popup } from "react-leaflet";
-
-interface Sensor {
-  id: string;
-  lat: number;
-  lng: number;
-  aqi: number | null;
-  pm25: number | null;
-  pm10: number | null;
-  source: string;
-}
-
-function aqiColor(aqi: number): string {
-  if (aqi <= 50) return "#059669";
-  if (aqi <= 100) return "#EAB308";
-  if (aqi <= 150) return "#F97316";
-  return "#DC2626";
-}
-
-function aqiLabel(aqi: number): string {
-  if (aqi <= 50) return "Bun";
-  if (aqi <= 100) return "Moderat";
-  if (aqi <= 150) return "Nesănătos (grupe sensibile)";
-  return "Nesănătos";
-}
+import { AirHeatGrid } from "@/app/aer/AirHeatGrid";
+import type { UnifiedSensor, AirDataResponse } from "@/lib/aer/types";
+import { getAqiColor } from "@/lib/aer/colors";
 
 export function NationalAqiLayer() {
-  const [sensors, setSensors] = useState<Sensor[]>([]);
+  const [sensors, setSensors] = useState<UnifiedSensor[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/aer")
       .then((r) => r.json())
-      .then((j) => {
+      .then((j: AirDataResponse) => {
         if (j.sensors) setSensors(j.sensors);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading || sensors.length === 0) return null;
 
   return (
     <>
+      {/* Dense heatmap grid — 120×120 = 14,400 points covering all Romania */}
+      <AirHeatGrid sensors={sensors} />
+
+      {/* Sensor markers on top */}
       {sensors
         .filter((s) => s.aqi != null)
         .map((s) => (
           <CircleMarker
             key={s.id}
             center={[s.lat, s.lng]}
-            radius={8}
+            radius={5}
             pathOptions={{
-              fillColor: aqiColor(s.aqi!),
-              fillOpacity: 0.8,
-              color: aqiColor(s.aqi!),
+              fillColor: getAqiColor(s.aqi!),
+              fillOpacity: 0.9,
+              color: "#fff",
               weight: 1,
-              opacity: 0.9,
+              opacity: 0.7,
             }}
           >
             <Popup>
               <div style={{ minWidth: 150 }}>
-                <b>AQI: {Math.round(s.aqi!)}</b> — {aqiLabel(s.aqi!)}
+                <b>AQI: {Math.round(s.aqi!)}</b>
                 <br />
                 <span style={{ fontSize: 11, color: "#64748b" }}>
                   {s.pm25 != null && `PM2.5: ${s.pm25.toFixed(1)} · `}
