@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { TileLayer } from "react-leaflet";
 import { GeoJsonLayer } from "./GeoJsonLayer";
 import { NationalAqiLayer } from "./NationalAqiLayer";
 import { METRO_COLORS } from "@/lib/constants";
@@ -186,15 +185,31 @@ export default function HartiLayers(props: HartiLayersProps) {
   }
 
   if (activeTab === "auto") {
-    // Bright OSM tiles overlaid — className removes dark mode invert filter
     return (
-      <TileLayer
-        key="osm-bright"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        zIndex={500}
-        className="leaflet-tile-bright"
-      />
+      <>
+        <GeoJsonLayer
+          key="motorways"
+          url="/geojson/autostrazi-romania.json"
+          style={() => ({ color: "#DC2626", weight: 3, opacity: 0.9 })}
+          popupFormatter={(f: Feature) => {
+            const p = f.properties ?? {};
+            return `<b>${p.ref || "Autostradă"}</b><br/><span style="font-size:11px;color:#64748b">${p.name || ""}</span>`;
+          }}
+        />
+        <GeoJsonLayer
+          key="national-roads"
+          url="/geojson/nationale-romania.json"
+          style={(f?: Feature) => {
+            const hw = f?.properties?.highway;
+            if (hw === "trunk") return { color: "#F97316", weight: 2.5, opacity: 0.8 };
+            return { color: "#EAB308", weight: 2, opacity: 0.7 };
+          }}
+          popupFormatter={(f: Feature) => {
+            const p = f.properties ?? {};
+            return `<b>${p.ref || "DN"}</b><br/><span style="font-size:11px;color:#64748b">${p.name || "Drum național"}</span>`;
+          }}
+        />
+      </>
     );
   }
 
