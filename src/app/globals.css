@@ -204,14 +204,10 @@ h1, h2, h3, h4, h5, h6 {
   filter: var(--map-tile-filter, none);
 }
 
-.dark .leaflet-tile {
+.dark .leaflet-tile-pane > .leaflet-layer:first-child .leaflet-tile {
   filter: brightness(0.7) invert(1) contrast(1) hue-rotate(200deg) saturate(0.4) brightness(0.9);
 }
-/* Override: no dark filter on bright overlay tile layers */
-.dark .leaflet-tile-bright .leaflet-tile,
-.dark .leaflet-tile-bright.leaflet-tile {
-  filter: none !important;
-}
+/* Only the FIRST (base) tile layer gets dark filter. Overlay layers stay bright. */
 
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
