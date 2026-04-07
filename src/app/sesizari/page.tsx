@@ -1,89 +1,69 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Zap, FileText, Eye, CheckCircle2, ArrowRight } from "lucide-react";
+import { Eye, FileText, CheckCircle2 } from "lucide-react";
+import { SesizareForm } from "@/components/sesizari/SesizareForm";
 
 export const metadata: Metadata = {
   title: "Sesizări — Civia",
-  description: "Trimite sesizări formale la autorități, vezi sesizările publice, urmărește statusul sau vezi sesizările rezolvate.",
+  description: "Trimite o sesizare formală la autorități. AI-ul generează textul cu temei legal. Detectăm automat județul din locația ta.",
   alternates: { canonical: "/sesizari" },
 };
 
 export default function SesizariPage() {
   return (
     <div className="container-narrow py-12 md:py-16">
-      <div className="mb-10">
+      <div className="mb-8">
         <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
           Sesizări
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">
-          Alege județul tău și trimite o sesizare formală la autorități. AI-ul generează textul cu temei legal.
+          Descrie problema, pune locația, iar AI-ul generează o sesizare formală gata de trimis. Județul se detectează automat din adresă.
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-5 mb-10">
-        <Link
-          href="/#county-picker"
-          className="group bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 rounded-[12px] p-6 text-white hover:shadow-[var(--shadow-lg)] transition-all"
-        >
-          <Zap size={28} className="mb-3 text-blue-200" />
-          <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2">
-            Fă o sesizare
-          </h2>
-          <p className="text-white/80 text-sm mb-4">
-            Alege județul, descrie problema, iar AI-ul generează o sesizare formală gata de trimis.
-          </p>
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-blue-200 group-hover:gap-2 transition-all">
-            Alege județul <ArrowRight size={14} />
-          </span>
-        </Link>
-
+      {/* Quick links */}
+      <div className="grid sm:grid-cols-3 gap-3 mb-10">
         <Link
           href="/sesizari-publice"
-          className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 hover:shadow-[var(--shadow-lg)] transition-all"
+          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all"
         >
-          <Eye size={28} className="mb-3 text-[var(--color-primary)]" />
-          <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2">
-            Sesizări publice
-          </h2>
-          <p className="text-[var(--color-text-muted)] text-sm mb-4">
-            Vezi ce probleme semnalează alți cetățeni din toată România.
-          </p>
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-primary)] group-hover:gap-2 transition-all">
-            Vezi sesizările <ArrowRight size={14} />
-          </span>
+          <Eye size={20} className="text-[var(--color-primary)] shrink-0" />
+          <div>
+            <p className="text-sm font-semibold">Sesizări publice</p>
+            <p className="text-[10px] text-[var(--color-text-muted)]">Vezi ce semnalează alții</p>
+          </div>
         </Link>
-
         <Link
           href="/urmareste"
-          className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 hover:shadow-[var(--shadow-lg)] transition-all"
+          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all"
         >
-          <FileText size={28} className="mb-3 text-amber-500" />
-          <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2">
-            Urmărește sesizarea
-          </h2>
-          <p className="text-[var(--color-text-muted)] text-sm mb-4">
-            Ai trimis deja o sesizare? Introdu codul pentru a vedea statusul.
-          </p>
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-amber-600 group-hover:gap-2 transition-all">
-            Verifică status <ArrowRight size={14} />
-          </span>
+          <FileText size={20} className="text-amber-500 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold">Urmărește sesizarea</p>
+            <p className="text-[10px] text-[var(--color-text-muted)]">Verifică statusul cu codul tău</p>
+          </div>
         </Link>
-
         <Link
           href="/sesizari-rezolvate"
-          className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 hover:shadow-[var(--shadow-lg)] transition-all"
+          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all"
         >
-          <CheckCircle2 size={28} className="mb-3 text-emerald-500" />
-          <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2">
-            Sesizări rezolvate
-          </h2>
-          <p className="text-[var(--color-text-muted)] text-sm mb-4">
-            Galerie before & after cu problemele rezolvate. Dovada că funcționează.
-          </p>
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 group-hover:gap-2 transition-all">
-            Vezi rezultatele <ArrowRight size={14} />
-          </span>
+          <CheckCircle2 size={20} className="text-emerald-500 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold">Rezolvate</p>
+            <p className="text-[10px] text-[var(--color-text-muted)]">Galerie before & after</p>
+          </div>
         </Link>
+      </div>
+
+      {/* Sesizare form */}
+      <SesizareForm />
+
+      {/* Info */}
+      <div className="mt-8 bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-400 rounded-[12px] p-4 text-sm">
+        <p className="text-blue-900 dark:text-blue-200">
+          <strong>Conform OG 27/2002</strong>, autoritățile au obligația să răspundă în 30 de zile calendaristice.
+          Sesizarea generată include temei legal și este adresată instituției competente.
+        </p>
       </div>
     </div>
   );
