@@ -3,8 +3,8 @@ import { z } from "zod";
 import { listSesizari, createSesizare } from "@/lib/sesizari/repository";
 import { generateUniqueCode } from "@/lib/sesizari/codes";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { rateLimit, getClientIp } from "@/lib/ratelimit";
-import { sanitizeText } from "@/lib/sanitize";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
+import { sanitizeText, escapeHtml } from "@/lib/sanitize";
 import { humanizeSupabaseError } from "@/lib/supabase/errors";
 import { sendEmail, emailTemplate } from "@/lib/email/resend";
 
@@ -24,7 +24,7 @@ const createSchema = z.object({
   tip: z.enum(VALID_TIPURI),
   titlu: z.string().min(3, "Titlul trebuie să aibă minim 3 caractere").max(200),
   locatie: z.string().min(3, "Locația trebuie să aibă minim 3 caractere").max(300),
-  sector: z.enum(["S1", "S2", "S3", "S4", "S5", "S6"]).optional().default("S3"),
+  sector: z.enum(["S1", "S2", "S3", "S4", "S5", "S6"]).optional().nullable().default(null),
   county: z.string().max(3).optional().nullable(),       // "CJ", "B", etc.
   locality: z.string().max(100).optional().nullable(),    // "Cluj-Napoca", etc.
   lat: z.number().min(43).max(49),  // Romania lat range
@@ -45,6 +45,7 @@ export async function GET(req: Request) {
       tip: searchParams.get("tip") ?? undefined,
       status: searchParams.get("status") ?? undefined,
       sector: searchParams.get("sector") ?? undefined,
+      county: searchParams.get("county") ?? undefined,
       sort: (searchParams.get("sort") as "recent" | "votate") ?? "recent",
       limit: Number(searchParams.get("limit") ?? 50),
       offset: Number(searchParams.get("offset") ?? 0),
@@ -61,7 +62,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
-  const rl = rateLimit(`sesizari-create:${ip}`, { limit: 5, windowMs: 10 * 60_000 });
+  const rl = await rateLimitAsync(`sesizari-create:${ip}`, { limit: 5, windowMs: 10 * 60_000 });
   if (!rl.success) {
     return NextResponse.json(
       { error: "Prea multe sesizări create. Încearcă în 10 min." },
@@ -105,12 +106,12 @@ export async function POST(req: Request) {
             title: "Sesizare înregistrată",
             preheader: `Codul tău: ${code}. Urmărește statusul pe civia.ro.`,
             body: `
-              <p>Salut <strong>${parsed.author_name}</strong>,</p>
+              <p>Salut <strong>${escapeHtml(parsed.author_name)}</strong>,</p>
               <p>Sesizarea ta a fost înregistrată cu succes pe Civia.</p>
               <table style="background:#f1f5f9;border-radius:8px;padding:16px;width:100%;margin:16px 0">
-                <tr><td style="color:#64748b;font-size:12px;padding:4px 0">Cod unic</td><td style="font-weight:700;font-size:18px;color:#1C4ED8">${code}</td></tr>
-                <tr><td style="color:#64748b;font-size:12px;padding:4px 0">Titlu</td><td>${sanitizeText(parsed.titlu, 100)}</td></tr>
-                <tr><td style="color:#64748b;font-size:12px;padding:4px 0">Locație</td><td>${sanitizeText(parsed.locatie, 100)}</td></tr>
+                <tr><td style="color:#64748b;font-size:12px;padding:4px 0">Cod unic</td><td style="font-weight:700;font-size:18px;color:#1C4ED8">${escapeHtml(code)}</td></tr>
+                <tr><td style="color:#64748b;font-size:12px;padding:4px 0">Titlu</td><td>${escapeHtml(sanitizeText(parsed.titlu, 100))}</td></tr>
+                <tr><td style="color:#64748b;font-size:12px;padding:4px 0">Locație</td><td>${escapeHtml(sanitizeText(parsed.locatie, 100))}</td></tr>
               </table>
               <p>Poți urmări statusul sesizării oricând:</p>
             `,

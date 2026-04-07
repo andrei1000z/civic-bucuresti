@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getGroqClient, GROQ_MODEL_FAST } from "@/lib/groq/client";
 import { SYSTEM_PROMPT_CLASSIFIER } from "@/lib/groq/prompts";
-import { rateLimit, getClientIp } from "@/lib/ratelimit";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 15;
@@ -19,7 +19,7 @@ const VALID_TIPURI = [
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
-  const rl = rateLimit(`ai-classify:${ip}`, { limit: 30, windowMs: 60_000 });
+  const rl = await rateLimitAsync(`ai-classify:${ip}`, { limit: 30, windowMs: 60_000 });
   if (!rl.success) {
     return NextResponse.json({ error: "Rate limited" }, { status: 429 });
   }

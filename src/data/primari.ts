@@ -1,17 +1,19 @@
 import type { Primar, ConsiliuGeneral } from "@/types";
 
+// Rating-uri orientative bazate pe sondaje publice și evaluări media.
+// Nu reprezintă o poziție oficială Civia.
 export const primari: Primar[] = [
   {
-    id: "dan-ioan-popescu",
-    nume: "Dan Ioan Popescu",
+    id: "dan-predescu",
+    nume: "Dan Predescu",
     partid: "FSN",
     culoarePartid: "#6366F1",
     perioada: "1990 - 1992",
     anInceput: 1990,
     anSfarsit: 1992,
-    viceprimari: ["Ion Jinga", "Mihai Teodorescu"],
+    viceprimari: [],
     realizari: [
-      "Primul primar ales democratic după 1989",
+      "Numit de CPUN după Revoluție, primul administrator al Capitalei post-1989",
       "A gestionat tranziția administrativă post-comunistă",
       "Reorganizarea aparatului primăriei",
       "Deschiderea contactelor cu administrații europene",
@@ -150,7 +152,7 @@ export const primari: Primar[] = [
     perioada: "2008 - 2015",
     anInceput: 2008,
     anSfarsit: 2015,
-    viceprimari: ["Răzvan Murgeanu", "Ioana Mihăilă", "Octavian Berceanu"],
+    viceprimari: ["Răzvan Murgeanu", "Radu-Mihai Rușinaru"],
     realizari: [
       "Finalizarea Pasajului Basarab (cel mai mare pod suspendat din România)",
       "Deschiderea Pasajului Mihai Bravu",
@@ -176,7 +178,7 @@ export const primari: Primar[] = [
     perioada: "2016 - 2020",
     anInceput: 2016,
     anSfarsit: 2020,
-    viceprimari: ["Aurelian Bădulescu", "Mihai Goțiu"],
+    viceprimari: ["Aurelian Bădulescu", "Marian Orlando Culea"],
     realizari: [
       "Achiziția a 400 autobuze hibrid și diesel pentru STB",
       "Înființarea companiilor municipale (peste 20)",

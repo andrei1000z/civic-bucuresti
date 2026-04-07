@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import type { SesizareFeedRow } from "@/lib/supabase/types";
+import { useCountyOptional } from "@/lib/county-context";
 
 const LeafletMap = dynamic(() => import("./LeafletMap"), {
   ssr: false,
@@ -36,6 +37,7 @@ interface MarkerData {
 }
 
 export function SesizariMap({ limit = 15, height = "400px", zoom = 12 }: SesizariMapProps) {
+  const county = useCountyOptional();
   const [markers, setMarkers] = useState<MarkerData[]>([]);
 
   useEffect(() => {
@@ -98,7 +100,7 @@ export function SesizariMap({ limit = 15, height = "400px", zoom = 12 }: Sesizar
       style={{ height }}
       className="w-full rounded-[12px] overflow-hidden border border-[var(--color-border)] relative"
     >
-      <LeafletMap zoom={zoom}>
+      <LeafletMap center={county?.center} zoom={county ? 10 : zoom}>
         <MarkerLayer data={markers} />
       </LeafletMap>
       <div className="absolute bottom-3 left-3 z-[400] bg-[var(--color-surface)] backdrop-blur border border-[var(--color-border)] rounded-[8px] p-3 shadow-[var(--shadow-md)]">

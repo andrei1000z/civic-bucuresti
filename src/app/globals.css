@@ -280,6 +280,21 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 4px;
 }
 
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-bounce,
+  .animate-ticker,
+  .animate-spin,
+  .animate-fade-in-up {
+    animation: none !important;
+  }
+  html.theme-ready,
+  html.theme-ready * {
+    transition-duration: 0s !important;
+  }
+}
+
 /* Screen reader only (skip-to-content, a11y) */
 .sr-only {
   position: absolute;

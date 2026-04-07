@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { rateLimit, getClientIp } from "@/lib/ratelimit";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 import { isValidImage } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +11,7 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
-  const rl = rateLimit(`upload:${ip}`, { limit: 15, windowMs: 5 * 60_000 });
+  const rl = await rateLimitAsync(`upload:${ip}`, { limit: 15, windowMs: 5 * 60_000 });
   if (!rl.success) {
     return NextResponse.json(
       { error: "Prea multe uploads. Așteaptă câteva minute." },

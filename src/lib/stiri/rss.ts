@@ -1,4 +1,5 @@
 import Parser from "rss-parser";
+import { detectCounties } from "./county-keywords";
 
 export interface RssArticle {
   url: string;
@@ -10,61 +11,34 @@ export interface RssArticle {
   author: string | null;
   image_url: string | null;
   published_at: string;
+  counties: string[]; // county IDs matched from content
 }
 
 interface Feed {
   url: string;
   source: string;
-  // Keywords to filter Bucharest-related content (empty = all articles)
-  mustInclude?: string[];
 }
 
-const BUCHAREST_KEYWORDS = [
-  "bucurești", "bucuresti", "capitală", "capitala",
-  "pmb", "stb", "metrorex", "metrou",
-  "sector 1", "sector 2", "sector 3", "sector 4", "sector 5", "sector 6",
-  "s1", "s2", "s3", "s4", "s5", "s6",
-  "nicușor", "bujduveanu",
-  "unirii", "victoriei", "herăstrău", "pipera", "berceni", "rahova", "militari", "titan",
-  "cotroceni", "floreasca", "dorobanți", "colentina", "pantelimon", "drumul taberei",
-];
-
+/**
+ * National RSS feeds — no keyword filtering at fetch time.
+ * County tagging happens via detectCounties() on the full text.
+ */
 const FEEDS: Feed[] = [
-  {
-    url: "https://www.digi24.ro/rss",
-    source: "Digi24",
-    mustInclude: BUCHAREST_KEYWORDS,
-  },
-  {
-    url: "https://b365.ro/feed/",
-    source: "B365.ro",
-    // B365 e deja focused pe București — nu filtrez
-  },
-  {
-    url: "https://www.hotnews.ro/rss",
-    source: "Hotnews București",
-    mustInclude: BUCHAREST_KEYWORDS,
-  },
-  {
-    url: "https://www.g4media.ro/feed",
-    source: "G4Media",
-    mustInclude: BUCHAREST_KEYWORDS,
-  },
-  {
-    url: "https://www.europa-libera.org/api/",
-    source: "Europa Liberă",
-    mustInclude: [...BUCHAREST_KEYWORDS, "primărie", "primaria"],
-  },
+  { url: "https://www.digi24.ro/rss", source: "Digi24" },
+  { url: "https://b365.ro/feed/", source: "B365.ro" },
+  { url: "https://www.hotnews.ro/rss", source: "Hotnews" },
+  { url: "https://www.g4media.ro/feed", source: "G4Media" },
+  { url: "https://www.europa-libera.org/api/", source: "Europa Liberă" },
 ];
 
 // Simple category classifier from keywords in title + excerpt
 function classifyCategory(text: string): string {
   const lower = text.toLowerCase();
-  if (/metrou|metrorex|stb|autobuz|tramvai|bilet|abonament|trafic|pasaj|centură/.test(lower)) return "transport";
+  if (/metrou|metrorex|stb|autobuz|tramvai|bilet|abonament|trafic|pasaj|centură|transport public/.test(lower)) return "transport";
   if (/urbanism|pug|puz|construcții|construire|imobiliar|cartier|bloc/.test(lower)) return "urbanism";
-  if (/aer|poluare|parc|verde|copac|mediu|deșeu|salubri/.test(lower)) return "mediu";
+  if (/aer|poluare|parc|verde|copac|mediu|deșeu|salubri|climă/.test(lower)) return "mediu";
   if (/accident|incendiu|poliție|furt|siguranță|violență|jandarm/.test(lower)) return "siguranta";
-  if (/primar|consiliu|buget|primărie|pmb|hotărâre|taxe/.test(lower)) return "administratie";
+  if (/primar|consiliu|buget|primărie|pmb|hotărâre|taxe|alegeri|guvern|ministru/.test(lower)) return "administratie";
   if (/festival|concert|protest|manifest|eveniment|paradă/.test(lower)) return "eveniment";
   return "administratie";
 }
@@ -79,20 +53,15 @@ function cleanText(html: string | undefined): string {
     .replace(/&#039;/g, "'")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
-    // Decode ALL numeric HTML entities: &#124; → |, &#8222; → „, etc.
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
-    // Decode hex entities: &#x2018; → '
     .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
     .trim();
 }
 
 function extractImage(item: { content?: string; enclosure?: { url?: string }; [key: string]: unknown }): string | null {
-  // Try enclosure first
   if (item.enclosure?.url) return item.enclosure.url;
-  // Try media:content
   const mediaContent = item["media:content"] as { $?: { url?: string } } | undefined;
   if (mediaContent?.$?.url) return mediaContent.$.url;
-  // Try to extract from content HTML
   const content = (item.content || "") as string;
   const match = content.match(/<img[^>]+src=["']([^"']+)["']/);
   if (match) return match[1];
@@ -120,13 +89,10 @@ export async function fetchFeed(feed: Feed): Promise<RssArticle[]> {
       const title = item.title;
       const content = cleanText(item["contentEncoded"] as string) || cleanText(item.content) || "";
       const excerpt = cleanText(item.contentSnippet) || content.slice(0, 240);
-      const searchText = `${title} ${excerpt}`.toLowerCase();
+      const searchText = `${title} ${excerpt}`;
 
-      // Filter by keywords if specified
-      if (feed.mustInclude && feed.mustInclude.length > 0) {
-        const hasKeyword = feed.mustInclude.some((kw) => searchText.includes(kw));
-        if (!hasKeyword) continue;
-      }
+      // Detect counties from article text
+      const counties = detectCounties(searchText);
 
       const itemAny = item as unknown as Record<string, unknown>;
       articles.push({
@@ -139,6 +105,7 @@ export async function fetchFeed(feed: Feed): Promise<RssArticle[]> {
         author: (itemAny.creator as string) || (itemAny.author as string) || null,
         image_url: extractImage(itemAny as { content?: string; enclosure?: { url?: string }; [key: string]: unknown }),
         published_at: item.isoDate || item.pubDate || new Date().toISOString(),
+        counties,
       });
     }
     return articles;

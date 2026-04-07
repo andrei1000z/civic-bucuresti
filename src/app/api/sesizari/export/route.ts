@@ -1,5 +1,5 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { rateLimit, getClientIp } from "@/lib/ratelimit";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export async function GET(req: Request) {
 
   // Rate limit bulk exports: 5 requests per IP per minute
   const ip = getClientIp(req);
-  const rl = rateLimit(`export:${ip}`, { limit: 5, windowMs: 60_000 });
+  const rl = await rateLimitAsync(`export:${ip}`, { limit: 5, windowMs: 60_000 });
   if (!rl.success) {
     return new Response(
       JSON.stringify({ error: "Prea multe cereri. Încearcă în câteva secunde." }),

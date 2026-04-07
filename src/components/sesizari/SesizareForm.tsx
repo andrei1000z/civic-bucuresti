@@ -21,6 +21,7 @@ import { PhotoUploader } from "./PhotoUploader";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { EmailChoicePanel } from "./EmailChoicePanel";
 import { buildGmailLink, buildMailtoLink, type MailtoInput } from "@/lib/sesizari/mailto";
+import { useCountyOptional } from "@/lib/county-context";
 
 interface FormData {
   nume: string;
@@ -54,6 +55,7 @@ const INITIAL: FormData = {
 
 export function SesizareForm() {
   const { user } = useAuth();
+  const county = useCountyOptional();
   const [data, setData] = useState<FormData>(INITIAL);
   const [imagini, setImagini] = useState<string[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
@@ -67,9 +69,9 @@ export function SesizareForm() {
   const [honey, setHoney] = useState(""); // anti-bot honeypot
   const classifyTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // National geocoding state
-  const [detectedCounty, setDetectedCounty] = useState<string | null>(null);
-  const [detectedCountyName, setDetectedCountyName] = useState<string | null>(null);
+  // National geocoding state — pre-fill from county context if available
+  const [detectedCounty, setDetectedCounty] = useState<string | null>(county?.id ?? null);
+  const [detectedCountyName, setDetectedCountyName] = useState<string | null>(county?.name ?? null);
   const [detectedLocality, setDetectedLocality] = useState<string | null>(null);
 
   const update = <K extends keyof FormData>(key: K, value: FormData[K]) => {
@@ -334,10 +336,11 @@ export function SesizareForm() {
     setSubmitting(true);
     setError(null);
 
-    const lat = data.lat ?? 44.4268;
-    const lng = data.lng ?? 26.1025;
-    // Auto-detect sector from coords; fallback to S3 (centrul istoric) if detection fails
-    const sector = data.sector || detectSectorFromCoords(lat, lng) || "S3";
+    const lat = data.lat ?? 45.9432; // Romania center as fallback
+    const lng = data.lng ?? 24.9668;
+    // Auto-detect sector from coords — only for București, null elsewhere
+    const isInBucharest = lat >= 44.33 && lat <= 44.55 && lng >= 25.97 && lng <= 26.25;
+    const sector = isInBucharest ? (data.sector || detectSectorFromCoords(lat, lng) || "S3") : null;
 
     try {
       const res = await fetch("/api/sesizari", {

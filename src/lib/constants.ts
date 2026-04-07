@@ -1,35 +1,42 @@
 export const SITE_NAME = "Civia";
 export const SITE_TAGLINE = "Platforma civică a României";
 export const SITE_DESCRIPTION =
-  "Sesizări, hărți, ghiduri și statistici despre orașul tău — într-un singur loc. Funcționează în toată România.";
+  "Sesizări, calitatea aerului, hărți și ghiduri civice pentru orașul tău — într-un singur loc.";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://civia.ro";
 
-// Romania geographic center
+// Romania geographic center + bounds
 export const ROMANIA_CENTER: [number, number] = [45.9432, 24.9668];
 export const ROMANIA_BOUNDS: [[number, number], [number, number]] = [
   [43.5, 20.2],
   [48.3, 30.0],
 ];
 
-// Bucharest geographic center (used for default map view)
+// București geographic center (fallback for București-specific features)
 export const BUCHAREST_CENTER: [number, number] = [44.4268, 26.1025];
 export const BUCHAREST_BOUNDS: [[number, number], [number, number]] = [
   [44.33, 25.97],
   [44.55, 26.25],
 ];
 
+// ============================================================
+// NAVIGATION — 6 main links + "Mai mult" dropdown
+// ============================================================
 export const NAV_LINKS = [
+  { href: "/sesizari", label: "Sesizări" },
   { href: "/aer", label: "Calitate aer" },
   { href: "/harti", label: "Hărți" },
-  { href: "/bilete", label: "Bilete" },
-  { href: "/sesizari", label: "Sesizări" },
   { href: "/statistici", label: "Statistici" },
-  { href: "/ghiduri", label: "Ghiduri" },
   { href: "/stiri", label: "Știri" },
-  { href: "/evenimente", label: "Evenimente" },
-  { href: "/istoric", label: "Istoric" },
-  { href: "/cum-functioneaza", label: "Despre PMB" },
-  { href: "/judete", label: "Județe" },
+  { href: "/ghiduri", label: "Ghiduri" },
+] as const;
+
+export const NAV_MORE = [
+  { href: "/judete", label: "Județe", icon: "🗺️" },
+  { href: "/bilete", label: "Bilete & Abonamente", icon: "🎫" },
+  { href: "/evenimente", label: "Evenimente", icon: "📅" },
+  { href: "/istoric", label: "Istoric", icon: "📜" },
+  { href: "/cum-functioneaza", label: "Administrația", icon: "🏛️" },
+  { href: "/autoritati", label: "Autorități", icon: "🏢" },
 ] as const;
 
 export const GHID_DROPDOWN = [
@@ -41,6 +48,9 @@ export const GHID_DROPDOWN = [
   { href: "/ghiduri/ghid-transport", label: "Ghid transport", icon: "🚇" },
 ] as const;
 
+// ============================================================
+// SESIZARE TYPES + SECTORS (sectors = București only)
+// ============================================================
 export const SESIZARE_TIPURI = [
   { value: "groapa", label: "Groapă în asfalt", icon: "🕳️" },
   { value: "trotuar", label: "Trotuar degradat", icon: "🧱" },
@@ -60,6 +70,7 @@ export const SESIZARE_TIPURI = [
   { value: "altele", label: "Altele", icon: "📝" },
 ] as const;
 
+// Sectoare — doar pentru municipiul București
 export const SECTOARE = [
   { id: "S1", label: "Sector 1" },
   { id: "S2", label: "Sector 2" },
@@ -92,18 +103,9 @@ export const STATUS_LABELS: Record<string, string> = {
 };
 
 export const SOURCE_COLORS: Record<string, string> = {
-  "Buletin de București": "#2563EB",
   "B365.ro": "#059669",
-  "Hotnews București": "#EAB308",
+  "Hotnews": "#EAB308",
   "Digi24": "#DC2626",
-  "Euronews România": "#8B5CF6",
+  "Europa Liberă": "#8B5CF6",
   "G4Media": "#1F2937",
 };
-
-export const EMAIL_AUTORITATI = [
-  "sesizari@pmb.ro",
-  "dispecerat@pmb.ro",
-  "prefectura@prefecturabucu.ro",
-];
-
-// Use getAuthoritiesFor(tip, sector) from @/lib/sesizari/authorities — this map has been replaced

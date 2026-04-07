@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import { rateLimit, getClientIp } from "@/lib/ratelimit";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
-  const rl = rateLimit(`newsletter:${ip}`, { limit: 3, windowMs: 60 * 60_000 });
+  const rl = await rateLimitAsync(`newsletter:${ip}`, { limit: 3, windowMs: 60 * 60_000 });
   if (!rl.success) {
     return NextResponse.json({ error: "Prea multe încercări. Așteaptă o oră." }, { status: 429 });
   }

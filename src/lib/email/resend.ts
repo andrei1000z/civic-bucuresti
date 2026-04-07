@@ -81,7 +81,7 @@ ${params.preheader ? `<span style="display:none;max-height:0;overflow:hidden">${
   <!-- Footer -->
   <tr><td style="padding:20px 40px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center">
     <p style="color:#94a3b8;font-size:12px;margin:0">
-      <a href="${siteUrl}" style="color:#1C4ED8;text-decoration:none">civia.ro</a> — platforma civică a Bucureștiului
+      <a href="${siteUrl}" style="color:#1C4ED8;text-decoration:none">civia.ro</a> — platforma civică a României
     </p>
   </td></tr>
 </table>

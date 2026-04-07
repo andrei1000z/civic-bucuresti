@@ -58,10 +58,22 @@ export async function POST(req: Request) {
       .delete({ count: "exact" })
       .lt("published_at", cutoff);
 
-    // Insert new articles
+    // Insert new articles (include counties array)
+    const rows = articles.map((a) => ({
+      url: a.url,
+      title: a.title,
+      excerpt: a.excerpt,
+      content: a.content,
+      source: a.source,
+      category: a.category,
+      author: a.author,
+      image_url: a.image_url,
+      published_at: a.published_at,
+      counties: a.counties ?? [],
+    }));
     const { error, count } = await supabase
       .from("stiri_cache")
-      .upsert(articles, { onConflict: "url", ignoreDuplicates: true, count: "exact" });
+      .upsert(rows, { onConflict: "url", ignoreDuplicates: true, count: "exact" });
 
     if (error) throw error;
 

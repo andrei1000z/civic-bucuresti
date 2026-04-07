@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Civia — Platforma civică a României
 
-## Getting Started
+Platformă civică independentă pentru cetățenii din România. Sesizări cu AI, calitatea aerului live, hărți, statistici și ghiduri civice pentru toate cele 42 de județe.
 
-First, run the development server:
+**Live**: [civia.ro](https://civia.ro)
+
+## Stack tehnic
+
+- **Framework**: Next.js 16 (App Router, Turbopack, React 19)
+- **Bază de date**: Supabase (PostgreSQL, Auth, Storage, Realtime)
+- **AI**: Groq (Llama 3.3 70B pentru text formal, Llama 3.1 8B pentru clasificare)
+- **Hărți**: Leaflet + react-leaflet cu date OSM reale
+- **Styling**: Tailwind CSS v4 cu CSS variables (dark mode complet)
+- **Email**: Resend
+- **Rate limiting**: Upstash Redis
+- **Analytics**: Plausible (privacy-friendly)
+- **Erori**: Sentry
+- **Deploy**: Vercel
+
+## Funcționalități principale
+
+- **Sesizări cu AI** — Descrii problema, AI-ul generează o sesizare formală conform OG 27/2002
+- **Calitate aer live** — Hartă cu sute de senzori (Sensor.Community, OpenAQ, WAQI), heatmap IDW
+- **42 județe** — Fiecare județ are: sesizări, aer, hărți, statistici, știri, ghiduri, autorități, bilete, impact, evenimente, istoric, cum funcționează administrația
+- **Știri agregate** — RSS din Digi24, Hotnews, G4Media, B365, cu tagging per județ
+- **Hărți mobilitate** — Piste biciclete, metrou, STB, zone pietonale (București)
+- **Ghiduri** — 6 ghiduri complete: cetățean, sesizări, biciclist, vară, cutremur, transport
+- **PWA** — Instalabil pe mobil cu service worker
+
+## Setup local
 
 ```bash
+git clone https://github.com/andrei/civic-bucuresti.git
+cd civic-bucuresti
+npm install
+cp .env.local.example .env.local
+# Completează variabilele din .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Variabile de mediu necesare
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variabilă | Descriere |
+|-----------|-----------|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL-ul proiectului Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Cheia anonimă Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | Cheia de serviciu (server-only) |
+| `GROQ_API_KEY` | API key pentru Groq AI |
+| `UPSTASH_REDIS_REST_URL` | URL Redis pentru rate limiting |
+| `UPSTASH_REDIS_REST_TOKEN` | Token Redis |
+| `CRON_SECRET` | Secret pentru cron job-uri Vercel |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Opțional: `RESEND_API_KEY`, `OPENAQ_API_KEY`, `WAQI_TOKEN`, `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`, `NEXT_PUBLIC_SENTRY_DSN`
 
-## Learn More
+## Structură
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/                    # Next.js App Router pages
+    [judet]/              # 14 pagini per județ × 42 județe
+    api/                  # 35+ API endpoints
+  components/             # React components
+  data/                   # Date statice (statistici, evenimente, ghiduri)
+  lib/                    # Utilități, Supabase, AI, email
+  types/                  # TypeScript interfaces
+supabase/
+  migrations/             # 12 migrații SQL
+public/
+  geojson/                # Date OSM pentru hărți București
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Date și surse
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Populație**: INS Recensământ 2021
+- **Accidente rutiere**: DRPCIV 2023 (estimări proporționale per județ)
+- **Calitate aer**: ANPM / calitateaer.ro (medii anuale)
+- **Primari**: BEC, alegeri locale 2024
+- **Transport**: Site-uri oficiale operatori
 
-## Deploy on Vercel
+**Notă**: Datele despre accidente și sesizări per județ sunt estimări bazate pe totaluri naționale, nu statistici oficiale detaliate per județ.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contribuie
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Vezi [civia.ro/contribuie](https://civia.ro/contribuie) pentru cum poți ajuta cu:
+- Emailuri oficiale ale primăriilor
+- Verificarea datelor existente
+- Raportarea erorilor
+- Pull requests pe GitHub
+
+## Licență
+
+Open-source. Codul este disponibil pentru audit și contribuții.

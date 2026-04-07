@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Wind, Droplets, Thermometer, Wind as WindIcon } from "lucide-react";
+import { useCountyOptional } from "@/lib/county-context";
 
 interface Weather {
   temp: number;
@@ -37,24 +38,27 @@ function aqiColor(aqi: number): string {
 }
 
 export function LiveWeatherAqi() {
+  const county = useCountyOptional();
   const [weather, setWeather] = useState<Weather | null>(null);
   const [aqi, setAqi] = useState<Aqi | null>(null);
 
   useEffect(() => {
+    const params = county?.center
+      ? `?lat=${county.center[0]}&lng=${county.center[1]}`
+      : "";
     const load = () => {
       Promise.all([
-        fetch("/api/weather").then((r) => r.json()).catch(() => null),
+        fetch(`/api/weather${params}`).then((r) => r.json()).catch(() => null),
         fetch("/api/statistici/aqi").then((r) => r.json()).catch(() => null),
       ]).then(([w, a]) => {
         if (w?.data) setWeather(w.data);
-        if (a?.data) setAqi({ aqi: a.data.aqi ?? 65, quality: a.data.quality ?? "Moderat" });
+        if (a?.data && a.data.aqi != null) setAqi({ aqi: a.data.aqi, quality: a.data.quality ?? "Moderat" });
       });
     };
     load();
-    // refresh every 10 minutes
     const id = setInterval(load, 10 * 60 * 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [county]);
 
   if (!weather && !aqi) {
     return (
@@ -107,7 +111,7 @@ export function LiveWeatherCard() {
         fetch("/api/statistici/aqi").then((r) => r.json()).catch(() => null),
       ]).then(([w, a]) => {
         if (w?.data) setWeather(w.data);
-        if (a?.data) setAqi({ aqi: a.data.aqi ?? 65, quality: a.data.quality ?? "Moderat" });
+        if (a?.data && a.data.aqi != null) setAqi({ aqi: a.data.aqi, quality: a.data.quality ?? "Moderat" });
       });
     };
     load();

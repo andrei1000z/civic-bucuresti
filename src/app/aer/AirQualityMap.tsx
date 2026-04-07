@@ -17,7 +17,13 @@ function FlyToLocation({ target }: { target: [number, number] | null }) {
   return null;
 }
 
-export default function AirQualityMap() {
+export default function AirQualityMap({
+  initialCenter,
+  initialZoom,
+}: {
+  initialCenter?: [number, number];
+  initialZoom?: number;
+} = {}) {
   const [sensors, setSensors] = useState<UnifiedSensor[]>([]);
   const [meta, setMeta] = useState<AirDataResponse["meta"] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,8 +86,8 @@ export default function AirQualityMap() {
       {/* Map */}
       <div className="flex-1 relative">
         <MapContainer
-          center={RO_CENTER}
-          zoom={DEFAULT_ZOOM}
+          center={initialCenter ?? RO_CENTER}
+          zoom={initialZoom ?? DEFAULT_ZOOM}
           className="w-full h-full"
           zoomControl={true}
           scrollWheelZoom={true}

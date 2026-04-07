@@ -21,6 +21,8 @@ import { evenimente } from "@/data/evenimente";
 import { evenimenteDetails } from "@/data/evenimente-detail";
 import { formatDate } from "@/lib/utils";
 import type { EvenimentCategory, EvenimentSeverity } from "@/types";
+import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
+import { SITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-static";
 
@@ -92,6 +94,11 @@ export default async function EvenimentDetailPage({
 
   return (
     <>
+      <BreadcrumbJsonLd items={[
+        { name: "Civia", url: SITE_URL },
+        { name: "Evenimente", url: `${SITE_URL}/evenimente` },
+        { name: eveniment.titlu, url: `${SITE_URL}/evenimente/${eveniment.slug}` },
+      ]} />
       {/* Hero */}
       <section className={`relative bg-gradient-to-br ${eveniment.gradient} text-white overflow-hidden`}>
         <div className="absolute inset-0 bg-grid-pattern opacity-10" />

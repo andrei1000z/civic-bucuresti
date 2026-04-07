@@ -12,6 +12,7 @@ export interface ListFilters {
   tip?: string;
   status?: string;
   sector?: string;
+  county?: string;
   sort?: "recent" | "votate";
   limit?: number;
   offset?: number;
@@ -24,6 +25,7 @@ export async function listSesizari(filters: ListFilters = {}): Promise<SesizareF
   if (filters.tip && filters.tip !== "toate") query = query.eq("tip", filters.tip);
   if (filters.status && filters.status !== "toate") query = query.eq("status", filters.status);
   if (filters.sector && filters.sector !== "toate") query = query.eq("sector", filters.sector);
+  if (filters.county) query = query.eq("county", filters.county.toUpperCase());
 
   if (filters.sort === "votate") {
     query = query.order("voturi_net", { ascending: false });
@@ -92,7 +94,7 @@ export interface CreateSesizareInput {
   tip: string;
   titlu: string;
   locatie: string;
-  sector: string;
+  sector: string | null;
   lat: number;
   lng: number;
   descriere: string;

@@ -105,13 +105,14 @@ export const punctualitateSTB = [
 ];
 export const punctualitateSTBSource = "stb-raport";
 
-// Călători medii zilnici Metrorex — raport anual 2023
+// Călători medii zilnici Metrorex — estimare pe baza raportului anual 2023
+// Total Metrorex ~550k călători/zi. Distribuție proporțională pe magistrale.
 export const calatoriMetrou = [
-  { linia: "M1", calatori: 412000 },
-  { linia: "M2", calatori: 387000 },
-  { linia: "M3", calatori: 156000 },
-  { linia: "M4", calatori: 98000 },
-  { linia: "M5", calatori: 134000 },
+  { linia: "M1", calatori: 185000 },
+  { linia: "M2", calatori: 170000 },
+  { linia: "M3", calatori: 65000 },
+  { linia: "M4", calatori: 55000 },
+  { linia: "M5", calatori: 75000 },
 ];
 export const calatoriMetrouSource = "metrorex-raport";
 
@@ -136,7 +137,7 @@ export const copaciInterventii = [
   { an: "2022", plantati: 11245, taiati: 6234 },
   { an: "2023", plantati: 13567, taiati: 5876 },
   { an: "2024", plantati: 15234, taiati: 6123 },
-  { an: "2025", plantati: 18456, taiati: 5623 },
+  { an: "2025*", plantati: 18456, taiati: 5623 }, // * proiecție
 ];
 export const copaciInterventiiSource = "alpab";
 

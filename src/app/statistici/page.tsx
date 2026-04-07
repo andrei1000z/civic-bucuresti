@@ -34,7 +34,7 @@ import { LiveAqiWidget } from "@/components/statistici/LiveAqiWidget";
 import { SectorScorecard } from "@/components/statistici/SectorScorecard";
 
 export const metadata: Metadata = {
-  title: "Statistici București",
+  title: "Statistici",
   description: "Date și grafice despre accidente, sesizări, calitate aer, transport, spații verzi.",
   alternates: { canonical: "/statistici" },
 };
@@ -134,7 +134,7 @@ export default function StatisticiPage() {
     <div className="container-narrow py-12 md:py-16">
       <div className="mb-10">
         <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
-          Statistici București
+          Statistici
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">
           Date agregate despre accidente, sesizări, calitatea aerului, transport și spații verzi.

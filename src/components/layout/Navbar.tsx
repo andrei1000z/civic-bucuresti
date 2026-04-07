@@ -2,19 +2,38 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Menu, X, ChevronDown, AlertCircle, MapPin, Search } from "lucide-react";
-import { NAV_LINKS, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
+import { useEffect, useState, useRef } from "react";
+import { Menu, X, ChevronDown, AlertCircle, MapPin, Search, MoreHorizontal } from "lucide-react";
+import { NAV_LINKS, NAV_MORE, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/auth/UserMenu";
-import { LiveWeatherAqi } from "@/components/home/LiveWeatherAqi";
+import { useCountyOptional } from "@/lib/county-context";
 import { cn } from "@/lib/utils";
+import { LiveWeatherAqi } from "@/components/home/LiveWeatherAqi";
+import { ALL_COUNTIES } from "@/data/counties";
 
 export function Navbar() {
   const pathname = usePathname();
+  const county = useCountyOptional();
   const [scrolled, setScrolled] = useState(false);
+
+  // Detect county slug from pathname if context not available.
+  // The regex matches both /ar/statistici AND /ar (county homepage, no trailing slash).
+  const pathSlug = pathname.match(/^\/([a-z]{1,2})(?:\/|$)/)?.[1] ?? null;
+  // Validate it's an actual county slug — not a random 2-letter path
+  const validatedSlug = pathSlug && ALL_COUNTIES.some((c) => c.slug === pathSlug) ? pathSlug : null;
+  const countySlug = county?.slug ?? validatedSlug;
+  const countyObj = county ?? (validatedSlug ? ALL_COUNTIES.find((c) => c.slug === validatedSlug) : null);
+  const countyName = countyObj?.name ?? null;
+
+  // Prefix links with county slug if we're inside a county route
+  const prefixedLinks = NAV_LINKS.map((l) => ({
+    ...l,
+    href: countySlug ? `/${countySlug}${l.href}` : l.href,
+  }));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [ghidDropdown, setGhidDropdown] = useState(false);
+  const [moreDropdown, setMoreDropdown] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -45,19 +64,23 @@ export function Navbar() {
         )}
       >
         <div className="container-narrow flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2 shrink-0">
+          <Link href={countySlug ? `/${countySlug}` : "/"} className="flex items-center gap-2 shrink-0">
             <div className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 flex items-center justify-center text-white">
               <MapPin size={18} strokeWidth={2.5} />
             </div>
             <span className="font-[family-name:var(--font-sora)] font-bold text-lg text-[var(--color-text)]">
               {SITE_NAME}
             </span>
+            {countyName && (
+              <span className="text-xs text-[var(--color-text-muted)] font-medium">· {countyName}</span>
+            )}
           </Link>
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-1">
-            {NAV_LINKS.map((link) => {
-              if (link.href === "/ghiduri") {
+            {prefixedLinks.map((link) => {
+              const ghiduriHref = countySlug ? `/${countySlug}/ghiduri` : "/ghiduri";
+              if (link.href === ghiduriHref) {
                 return (
                   <div
                     key={link.href}
@@ -88,7 +111,7 @@ export function Navbar() {
                       {GHID_DROPDOWN.map((ghid) => (
                         <Link
                           key={ghid.href}
-                          href={ghid.href}
+                          href={countySlug ? `/${countySlug}${ghid.href}` : ghid.href}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
                         >
                           <span className="text-xl">{ghid.icon}</span>
@@ -115,6 +138,41 @@ export function Navbar() {
                 </Link>
               );
             })}
+            {/* "Mai mult" dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setMoreDropdown(true)}
+              onMouseLeave={() => setMoreDropdown(false)}
+            >
+              <button
+                className={cn(
+                  "flex items-center gap-1 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all",
+                  "text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
+                )}
+              >
+                <MoreHorizontal size={16} />
+                <ChevronDown size={14} className={cn("transition-transform", moreDropdown && "rotate-180")} />
+              </button>
+              <div
+                className={cn(
+                  "absolute top-full right-0 w-56 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-lg)] overflow-hidden py-2 origin-top transition-all duration-150",
+                  moreDropdown
+                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+                    : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
+                )}
+              >
+                {NAV_MORE.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={countySlug ? `/${countySlug}${item.href}` : item.href}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
+                  >
+                    <span className="text-lg">{item.icon}</span>
+                    <span className="text-[var(--color-text)]">{item.label}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -134,7 +192,7 @@ export function Navbar() {
             <ThemeToggle />
             <UserMenu />
             <Link
-              href="/sesizari"
+              href={countySlug ? `/${countySlug}/sesizari` : "/b/sesizari"}
               className="hidden md:inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-button)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] shadow-md transition-all"
             >
               <AlertCircle size={16} />
@@ -176,7 +234,7 @@ export function Navbar() {
           </button>
         </div>
         <nav className="container-narrow py-6 flex flex-col gap-1">
-          {NAV_LINKS.map((link, i) => (
+          {prefixedLinks.map((link, i) => (
             <Link
               key={link.href}
               href={link.href}
@@ -194,14 +252,32 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-          <div className="pt-4 mt-4 border-t border-[var(--color-border)]">
+          {/* More links */}
+          {countySlug && NAV_MORE.map((link, i) => (
             <Link
-              href="/sesizari"
+              key={link.href}
+              href={`/${countySlug}${link.href}`}
+              className="block px-4 py-2 rounded-[var(--radius-button)] text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
+            >
+              {link.icon} {link.label}
+            </Link>
+          ))}
+          <div className="pt-4 mt-4 border-t border-[var(--color-border)] space-y-2">
+            <Link
+              href={countySlug ? `/${countySlug}/sesizari` : "/b/sesizari"}
               className="flex items-center justify-center gap-2 h-12 rounded-[var(--radius-button)] bg-[var(--color-primary)] text-white font-medium"
             >
               <AlertCircle size={18} />
               Fă sesizare acum
             </Link>
+            {countySlug && (
+              <Link
+                href="/"
+                className="flex items-center justify-center gap-2 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] text-sm font-medium text-[var(--color-text-muted)]"
+              >
+                Schimbă județul
+              </Link>
+            )}
           </div>
         </nav>
       </div>

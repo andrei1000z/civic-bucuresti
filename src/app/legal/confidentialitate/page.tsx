@@ -90,10 +90,10 @@ export default function ConfidentialitatePage() {
 
         <h2>Contact</h2>
         <p>
-          Pentru întrebări sau solicitări GDPR:{" "}
-          <a href="mailto:contact@civia.ro" className="text-[var(--color-primary)]">
-            contact@civia.ro
-          </a>
+          Pentru întrebări sau solicitări GDPR, deschide un issue pe{" "}
+          <a href="https://github.com/andrei1000z/civic-bucuresti/issues" target="_blank" rel="noreferrer" className="text-[var(--color-primary)]">
+            GitHub
+          </a>.
         </p>
       </article>
     </div>

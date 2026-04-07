@@ -7,6 +7,7 @@ import { SOURCE_COLORS } from "@/lib/constants";
 import { Badge } from "@/components/ui/Badge";
 import { timeAgo } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { useCountyOptional } from "@/lib/county-context";
 
 interface StireRow {
   id: string;
@@ -35,13 +36,14 @@ const categories = [
 const sourceGradients: Record<string, string> = {
   Digi24: "from-red-600 to-orange-800",
   "B365.ro": "from-emerald-600 to-teal-800",
+  Hotnews: "from-amber-500 to-orange-700",
   "Hotnews București": "from-amber-500 to-orange-700",
-  "Buletin de București": "from-blue-600 to-indigo-800",
   "G4Media": "from-slate-700 to-zinc-900",
-  "Euronews România": "from-purple-600 to-indigo-800",
+  "Europa Liberă": "from-purple-600 to-indigo-800",
 };
 
 export function StiriList() {
+  const county = useCountyOptional();
   const [rows, setRows] = useState<StireRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<string>("all");
@@ -53,6 +55,7 @@ export function StiriList() {
     const params = new URLSearchParams();
     if (category !== "all") params.set("category", category);
     if (query) params.set("q", query);
+    if (county) params.set("county", county.id);
     params.set("limit", "100");
     try {
       const res = await fetch(`/api/stiri?${params.toString()}`);
@@ -63,7 +66,7 @@ export function StiriList() {
     } finally {
       setLoading(false);
     }
-  }, [category, query]);
+  }, [category, query, county]);
 
   useEffect(() => {
     load();

@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink, Calendar, User, Tag } from "lucide-react";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { Badge } from "@/components/ui/Badge";
-import { SOURCE_COLORS } from "@/lib/constants";
+import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
+import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +68,12 @@ export default async function StireDetailPage({
   };
 
   return (
+    <>
+      <BreadcrumbJsonLd items={[
+        { name: "Civia", url: SITE_URL },
+        { name: "Știri", url: `${SITE_URL}/stiri` },
+        { name: stire.title, url: `${SITE_URL}/stiri/${stire.id}` },
+      ]} />
     <div className="container-narrow py-8 md:py-12 max-w-3xl">
       <Link
         href="/stiri"
@@ -163,5 +170,6 @@ export default async function StireDetailPage({
         </p>
       </div>
     </div>
+    </>
   );
 }

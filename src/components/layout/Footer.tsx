@@ -1,82 +1,130 @@
 import Link from "next/link";
-import { MapPin, Mail } from "lucide-react";
+import { MapPin, ExternalLink } from "lucide-react";
 import { SITE_NAME } from "@/lib/constants";
+
+const linkCls =
+  "text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors";
 
 export function Footer() {
   return (
     <footer className="bg-[var(--color-surface)] border-t border-[var(--color-border)] mt-auto">
       <div className="container-narrow py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          <div className="col-span-2 md:col-span-1">
+        {/* ── 5-column grid ─────────────────────────────────── */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+          {/* Column 1 — Brand */}
+          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <div className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 flex items-center justify-center text-white">
                 <MapPin size={18} strokeWidth={2.5} />
               </div>
-              <span className="font-[family-name:var(--font-sora)] font-bold text-lg">{SITE_NAME}</span>
+              <span className="font-[family-name:var(--font-sora)] font-bold text-lg">
+                {SITE_NAME}
+              </span>
             </Link>
             <p className="text-sm text-[var(--color-text-muted)] mb-4 max-w-xs">
-              Platformă civică independentă pentru cetățenii Bucureștiului.
+              Platformă civică independentă pentru cetățenii din România.
             </p>
             <a
-              href="mailto:contact@civia.ro"
-              className="inline-flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+              href="https://github.com/andrei1000z/civic-bucuresti"
+              target="_blank"
+              rel="noreferrer"
+              className={`inline-flex items-center gap-2 text-sm ${linkCls}`}
             >
-              <Mail size={14} /> contact@civia.ro
+              <ExternalLink size={14} /> GitHub
             </a>
           </div>
 
+          {/* Column 2 — Platformă */}
           <div>
-            <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">Navigare</h4>
+            <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">
+              Platformă
+            </h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/harti" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Hărți</Link></li>
-              <li><Link href="/sesizari" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Sesizări</Link></li>
-              <li><Link href="/bilete" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Bilete</Link></li>
-              <li><Link href="/statistici" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Statistici</Link></li>
-              <li><Link href="/stiri" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Știri</Link></li>
-              <li><Link href="/evenimente" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Evenimente</Link></li>
-              <li><Link href="/impact" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Impact</Link></li>
-              <li><Link href="/istoric" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Istoric</Link></li>
-              <li><Link href="/cum-functioneaza" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Cum funcționează</Link></li>
+              <li><Link href="/sesizari" className={linkCls}>Sesizări</Link></li>
+              <li><Link href="/aer" className={linkCls}>Calitate aer</Link></li>
+              <li><Link href="/harti" className={linkCls}>Hărți</Link></li>
+              <li><Link href="/statistici" className={linkCls}>Statistici</Link></li>
+              <li><Link href="/stiri" className={linkCls}>Știri</Link></li>
+              <li><Link href="/evenimente" className={linkCls}>Evenimente</Link></li>
             </ul>
           </div>
 
+          {/* Column 3 — Ghiduri */}
           <div>
-            <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">Ghiduri</h4>
+            <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">
+              Ghiduri
+            </h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/ghiduri/ghid-cetatean" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Drepturile cetățeanului</Link></li>
-              <li><Link href="/ghiduri/ghid-sesizari" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Ghid sesizări</Link></li>
-              <li><Link href="/ghiduri/ghid-biciclist" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Biciclist</Link></li>
-              <li><Link href="/ghiduri/ghid-vara" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Vară / caniculă</Link></li>
-              <li><Link href="/ghiduri/ghid-cutremur" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Cutremur</Link></li>
-              <li><Link href="/ghiduri/ghid-transport" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">Transport public</Link></li>
+              <li><Link href="/ghiduri/ghid-cetatean" className={linkCls}>Drepturile cetățeanului</Link></li>
+              <li><Link href="/ghiduri/ghid-sesizari" className={linkCls}>Ghid sesizări</Link></li>
+              <li><Link href="/ghiduri/ghid-biciclist" className={linkCls}>Ghidul biciclistului</Link></li>
+              <li><Link href="/ghiduri/ghid-vara" className={linkCls}>Ghid de vară</Link></li>
+              <li><Link href="/ghiduri/ghid-cutremur" className={linkCls}>Ghid cutremur</Link></li>
+              <li><Link href="/ghiduri/ghid-transport" className={linkCls}>Ghid transport</Link></li>
             </ul>
           </div>
 
+          {/* Column 4 — Mai mult */}
           <div>
-            <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">Resurse oficiale</h4>
+            <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">
+              Mai mult
+            </h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="https://www.pmb.ro" target="_blank" rel="noreferrer" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">pmb.ro</a></li>
-              <li><a href="https://stbsa.ro" target="_blank" rel="noreferrer" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">stbsa.ro</a></li>
-              <li><a href="https://www.metrorex.ro" target="_blank" rel="noreferrer" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">metrorex.ro</a></li>
-              <li><a href="https://data.gov.ro" target="_blank" rel="noreferrer" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">data.gov.ro</a></li>
-              <li><a href="https://www.igsu.ro" target="_blank" rel="noreferrer" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]">igsu.ro</a></li>
+              <li><Link href="/judete" className={linkCls}>Județe</Link></li>
+              <li><Link href="/cum-functioneaza" className={linkCls}>Administrația</Link></li>
+              <li><Link href="/istoric" className={linkCls}>Istoric</Link></li>
+              <li><Link href="/autoritati" className={linkCls}>Autorități</Link></li>
+              <li><Link href="/bilete" className={linkCls}>Bilete transport</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 5 — Legal */}
+          <div>
+            <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">
+              Legal
+            </h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/legal/confidentialitate" className={linkCls}>Confidențialitate</Link></li>
+              <li><Link href="/legal/termeni" className={linkCls}>Termeni</Link></li>
+            </ul>
+            <h4 className="font-semibold mt-5 mb-3 text-[var(--color-text)] text-sm">
+              Resurse oficiale
+            </h4>
+            <ul className="space-y-2 text-sm">
+              <li><a href="https://data.gov.ro" target="_blank" rel="noreferrer" className={linkCls}>data.gov.ro</a></li>
+              <li><a href="https://www.anpm.ro" target="_blank" rel="noreferrer" className={linkCls}>anpm.ro</a></li>
+              <li><a href="https://www.politiaromana.ro" target="_blank" rel="noreferrer" className={linkCls}>politiaromana.ro</a></li>
+              <li><a href="https://www.ghiseul.ro" target="_blank" rel="noreferrer" className={linkCls}>ghiseul.ro</a></li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-[var(--color-border)] flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-          <p className="text-xs text-[var(--color-text-muted)] max-w-3xl">
-            <strong className="text-[var(--color-text)]">Disclaimer:</strong> {SITE_NAME} este o platformă independentă, neafiliată Primăriei Municipiului București sau niciunei alte autorități publice. Datele afișate sunt agregate din surse publice și comunitate. Pentru informații oficiale, consultați site-urile instituționale.
+        {/* ── Disclaimer ────────────────────────────────────── */}
+        <div className="mt-10 pt-6 border-t border-[var(--color-border)]">
+          <p className="text-xs text-[var(--color-text-muted)] max-w-3xl mb-4">
+            <strong className="text-[var(--color-text)]">Disclaimer:</strong>{" "}
+            {SITE_NAME} este o platformă independentă, neafiliată niciunei
+            autorități publice din România. Datele afișate sunt agregate din surse
+            publice și comunitate. Pentru informații oficiale, consultați site-urile
+            instituționale.
           </p>
-          <div className="flex items-center gap-4 text-xs text-[var(--color-text-muted)]">
-            <Link href="/legal/confidentialitate" className="hover:text-[var(--color-primary)]">
-              Confidențialitate
-            </Link>
-            <Link href="/legal/termeni" className="hover:text-[var(--color-primary)]">
-              Termeni
-            </Link>
-            <span className="whitespace-nowrap">© {new Date().getFullYear()} {SITE_NAME}</span>
-          </div>
+        </div>
+
+        {/* ── Bottom bar ────────────────────────────────────── */}
+        <div className="pt-4 border-t border-[var(--color-border)] flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <p className="text-xs text-[var(--color-text-muted)]">
+            &copy; 2024&ndash;2026 {SITE_NAME} &middot; Open-source &middot;
+            Făcut cu <span className="text-red-500">&#10084;</span> în România
+          </p>
+          <a
+            href="https://github.com/andrei1000z/civic-bucuresti"
+            target="_blank"
+            rel="noreferrer"
+            className={`inline-flex items-center gap-1.5 text-xs ${linkCls}`}
+          >
+            <ExternalLink size={14} />
+            GitHub
+          </a>
         </div>
       </div>
     </footer>

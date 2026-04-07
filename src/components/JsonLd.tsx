@@ -22,13 +22,11 @@ export function OrganizationJsonLd() {
     description: SITE_DESCRIPTION,
     address: {
       "@type": "PostalAddress",
-      addressLocality: "București",
-      addressRegion: "București",
       addressCountry: "RO",
     },
     areaServed: {
-      "@type": "City",
-      name: "București",
+      "@type": "Country",
+      name: "România",
     },
   };
   return (

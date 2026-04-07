@@ -7,8 +7,8 @@ import { formatDate } from "@/lib/utils";
 import type { EvenimentCategory, EvenimentSeverity } from "@/types";
 
 export const metadata: Metadata = {
-  title: "Evenimente majore București",
-  description: "Cronologia incidentelor și evenimentelor semnificative care au marcat Bucureștiul.",
+  title: "Evenimente majore",
+  description: "Cronologia incidentelor și evenimentelor semnificative din România.",
   alternates: { canonical: "/evenimente" },
 };
 
@@ -55,7 +55,7 @@ export default function EvenimentePage() {
             📚 Arhivă cronologică
           </Badge>
           <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
-            Evenimentele care au marcat Bucureștiul
+            Evenimentele care au marcat România
           </h1>
           <p className="text-lg text-white/80 max-w-2xl">
             Accidente, incendii, inundații, cutremure și proteste — o arhivă documentată a

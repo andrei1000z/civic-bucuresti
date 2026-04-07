@@ -1,438 +1,283 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import {
-  Map as MapIcon,
-  Ticket,
-  AlertCircle,
-  BarChart3,
-  BookOpen,
-  Newspaper,
-  History,
-  Siren,
   ArrowRight,
-  Bike,
-  Clock,
+  Sparkles,
+  Wind,
+  MapPin,
+  FileText,
   CheckCircle2,
+  Zap,
 } from "lucide-react";
-import { SesizariMap } from "@/components/maps/SesizariMap";
-import { Badge } from "@/components/ui/Badge";
+import { SITE_NAME } from "@/lib/constants";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import { SOURCE_COLORS } from "@/lib/constants";
-import { timeAgo } from "@/lib/utils";
-import { LiveStatsBar } from "@/components/home/LiveStatsBar";
-import { BucurestiStats } from "@/components/home/BucurestiStats";
-import { TopVotedWidget } from "@/components/home/TopVotedWidget";
-import { NearMeWidget } from "@/components/home/NearMeWidget";
-import { NewsletterSignup } from "@/components/NewsletterSignup";
+import { CountyPicker } from "./CountyPicker";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: { absolute: "Civia — Platforma civică a Bucureștiului" },
-  description: "Hărți, sesizări, ghiduri, știri și statistici despre Bucureștiul tău — într-un singur loc.",
+  title: { absolute: `${SITE_NAME} — Platforma civică a României` },
+  description:
+    "Sesizări cu AI, calitatea aerului live, hărți și ghiduri civice pentru toate cele 42 de județe ale României.",
   alternates: { canonical: "/" },
 };
 
-const quickAccess = [
-  {
-    href: "/harti",
-    icon: MapIcon,
-    title: "Hărți de mobilitate",
-    description: "Piste de biciclete, metrou, STB, trasee pe jos.",
-    accent: "#1C4ED8",
-  },
-  {
-    href: "/bilete",
-    icon: Ticket,
-    title: "Bilete & Abonamente",
-    description: "STB, Metrorex, Ilfov - toate tarifele într-un loc.",
-    accent: "#059669",
-  },
-  {
-    href: "/sesizari",
-    icon: AlertCircle,
-    title: "Sesizări",
-    description: "Generează și trimite sesizări formale la PMB.",
-    accent: "#DC2626",
-  },
-  {
-    href: "/statistici",
-    icon: BarChart3,
-    title: "Statistici",
-    description: "Accidente, aer, transport, spații verzi.",
-    accent: "#8B5CF6",
-  },
-  {
-    href: "/ghiduri",
-    icon: BookOpen,
-    title: "Ghiduri cetățean",
-    description: "Biciclist, cutremur, caniculă, transport.",
-    accent: "#F59E0B",
-  },
-  {
-    href: "/stiri",
-    icon: Newspaper,
-    title: "Știri verificate",
-    description: "Agregare din surse locale, fără clickbait.",
-    accent: "#0EA5E9",
-  },
-  {
-    href: "/istoric",
-    icon: History,
-    title: "Istoric administrație",
-    description: "Primarii București din 1989 până azi.",
-    accent: "#EC4899",
-  },
-  {
-    href: "/evenimente",
-    icon: Siren,
-    title: "Evenimente majore",
-    description: "Cronologia incidentelor importante.",
-    accent: "#64748B",
-  },
-  {
-    href: "/impact",
-    icon: CheckCircle2,
-    title: "Impact",
-    description: "Probleme rezolvate prin Civia — before/after.",
-    accent: "#10B981",
-  },
-];
-
-
-interface StireRow {
-  id: string;
-  url: string;
-  title: string;
-  excerpt: string | null;
-  source: string;
-  category: string;
-  published_at: string;
-  image_url: string | null;
-}
-
-async function getLatestStiri(): Promise<StireRow[]> {
+async function getStats() {
   try {
     const admin = createSupabaseAdmin();
-    const { data } = await admin
-      .from("stiri_cache")
-      .select("id, url, title, excerpt, source, category, published_at, image_url")
-      .order("published_at", { ascending: false })
-      .limit(3);
-    return (data as StireRow[]) ?? [];
+    const [totalRes, resolvedRes] = await Promise.all([
+      admin.from("sesizari").select("*", { count: "exact", head: true }),
+      admin.from("sesizari").select("*", { count: "exact", head: true }).eq("status", "rezolvat"),
+    ]);
+    return { total: totalRes.count ?? 0, resolved: resolvedRes.count ?? 0 };
   } catch {
-    return [];
+    return { total: 0, resolved: 0 };
   }
 }
 
-export const revalidate = 900; // revalidate homepage every 15 min
-
 export default async function HomePage() {
-  const latestStiri = await getLatestStiri();
+  const stats = await getStats();
 
   return (
     <>
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#1C4ED8] via-[#1e3a8a] to-[#0F172A] text-white">
-        <Image
-          src="/images/home/hero-bucuresti.webp"
-          alt="București"
-          fill
-          priority
-          sizes="100vw"
-          className="absolute inset-0 w-full h-full object-cover opacity-20"
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1C4ED8]/70 via-[#1e3a8a]/80 to-[#0F172A]/95" />
-        <div className="absolute inset-0 bg-grid-pattern opacity-20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.3),transparent)]" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/80 via-transparent to-transparent" />
 
-        {/* Floating cards — static brand info */}
-        <div className="absolute top-20 right-8 hidden lg:block animate-float">
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[12px] p-4 shadow-2xl min-w-[220px]">
-            <p className="text-xs text-white/60 mb-1">Hărți bazate pe</p>
-            <p className="text-2xl font-bold">OpenStreetMap</p>
-            <p className="text-xs text-emerald-300 mt-1">date deschise, real-time</p>
-          </div>
-        </div>
-        <div
-          className="absolute top-48 right-40 hidden lg:block animate-float"
-          style={{ animationDelay: "1s" }}
-        >
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[12px] p-4 shadow-2xl min-w-[200px]">
-            <p className="text-xs text-white/60 mb-1">Metrou București</p>
-            <p className="text-3xl font-bold">63 stații</p>
-            <p className="text-xs text-emerald-300 mt-1">M1–M5 (M6 în construcție)</p>
-          </div>
-        </div>
-        <div
-          className="absolute bottom-32 right-24 hidden lg:block animate-float"
-          style={{ animationDelay: "2s" }}
-        >
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[12px] p-4 shadow-2xl min-w-[180px]">
-            <p className="text-xs text-white/60 mb-1">Platformă</p>
-            <p className="text-2xl font-bold">open-source</p>
-            <p className="text-xs text-white/70 mt-1">MIT license</p>
-          </div>
-        </div>
+        <div className="container-narrow relative z-10 py-20 md:py-28 lg:py-32">
+          <div className="max-w-3xl mx-auto text-center">
+            <p className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-white border border-white/20 text-xs font-semibold mb-8 backdrop-blur-sm">
+              🇷🇴 Platformă civică pentru toată România
+            </p>
 
-        <div className="container-narrow relative z-10 py-24 md:py-32">
-          <div className="max-w-3xl">
-            <Badge className="mb-6 bg-white/10 text-white border border-white/20">
-              🇷🇴 Platformă civică independentă
-            </Badge>
-            <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl lg:text-7xl font-bold mb-6 leading-[1.05]">
-              București,
-              <br />
-              <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-                mai ușor de înțeles.
+            <h1 className="font-[family-name:var(--font-sora)] text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.08] tracking-tight">
+              România,{" "}
+              <span className="bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">
+                în mâinile tale.
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-blue-100/90 mb-8 max-w-2xl">
-              Hărți, sesizări, ghiduri, știri și statistici despre orașul tău — într-un singur loc.
+
+            <p className="text-lg md:text-xl text-blue-100/90 mb-3 max-w-2xl mx-auto leading-relaxed">
+              Depune sesizări formale generate de AI, monitorizează calitatea
+              aerului în timp real și ține autoritățile responsabile.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+
+            <p className="text-blue-200/70 text-sm mb-10">
+              42 de județe · Sute de senzori · Un singur loc
+            </p>
+
+            {/* Hero CTA */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
               <Link
-                href="/harti"
-                className="inline-flex items-center justify-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[#1C4ED8] font-semibold hover:bg-blue-50 shadow-xl transition-all"
+                href="/#county-picker"
+                className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
               >
-                <MapIcon size={20} />
-                Explorează harta
+                Alege județul <ArrowRight size={18} />
               </Link>
               <Link
-                href="/sesizari"
-                className="inline-flex items-center justify-center gap-2 h-12 px-7 rounded-[8px] border-2 border-white/30 text-white font-semibold hover:bg-white/10 backdrop-blur transition-all"
+                href="/cum-functioneaza"
+                className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 transition-colors"
               >
-                <AlertCircle size={20} />
-                Fă o sesizare
+                Cum funcționează?
               </Link>
             </div>
+
+            {/* Live counter */}
+            {stats.total > 0 && (
+              <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-sm">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
+                </span>
+                <span className="text-sm font-medium">
+                  <span className="text-white font-bold tabular-nums">
+                    {stats.total.toLocaleString("ro-RO")}
+                  </span>{" "}
+                  <span className="text-blue-200/80">sesizări depuse</span>
+                </span>
+              </div>
+            )}
           </div>
         </div>
+
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[var(--color-bg)] to-transparent" />
       </section>
 
-      {/* LIVE STATS BAR */}
-      <LiveStatsBar />
-
-      {/* QUICK ACCESS GRID */}
+      {/* 3 FEATURE CARDS */}
       <section className="py-16 md:py-20">
         <div className="container-narrow">
-          <div className="text-center mb-10">
-            <h2 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold mb-3">
-              Ce poți face aici
+          <div className="grid md:grid-cols-3 gap-5">
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 hover:shadow-[var(--shadow-lg)] transition-all">
+              <div className="w-11 h-11 rounded-[10px] bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4">
+                <Sparkles size={20} className="text-white" />
+              </div>
+              <h3 className="font-[family-name:var(--font-sora)] text-lg font-bold mb-2">
+                Sesizări cu AI
+              </h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+                Descrii problema în cuvintele tale, iar AI-ul generează o
+                sesizare formală cu temei legal, adresată autorității competente.
+              </p>
+            </div>
+
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 hover:shadow-[var(--shadow-lg)] transition-all">
+              <div className="w-11 h-11 rounded-[10px] bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4">
+                <Wind size={20} className="text-white" />
+              </div>
+              <h3 className="font-[family-name:var(--font-sora)] text-lg font-bold mb-2">
+                Calitate aer live
+              </h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+                Hartă națională cu sute de senzori — AQI în timp real, PM2.5,
+                PM10 și alte particule, cu heatmap interpolat pe toată România.
+              </p>
+            </div>
+
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 hover:shadow-[var(--shadow-lg)] transition-all">
+              <div className="w-11 h-11 rounded-[10px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-4">
+                <MapPin size={20} className="text-white" />
+              </div>
+              <h3 className="font-[family-name:var(--font-sora)] text-lg font-bold mb-2">
+                42 de județe
+              </h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+                Fiecare județ are sesizări, statistici locale, autorități
+                mapate, hărți și știri civice — totul într-un singur loc.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* COUNTY PICKER */}
+      <section id="county-picker" className="py-12 md:py-16 bg-[var(--color-surface)]">
+        <div className="container-narrow">
+          <div className="text-center mb-8">
+            <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-2">
+              Alege județul tău
             </h2>
-            <p className="text-[var(--color-text-muted)] max-w-2xl mx-auto">
-              Tot ce îți trebuie pentru a fi un cetățean informat și activ al Bucureștiului.
+            <p className="text-[var(--color-text-muted)]">
+              Caută după nume sau folosește GPS-ul pentru detectare automată.
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {quickAccess.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="group relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] transition-all overflow-hidden"
-                  style={{ borderLeft: `4px solid ${item.accent}` }}
-                >
-                  <div
-                    className="w-11 h-11 rounded-[8px] flex items-center justify-center mb-3"
-                    style={{ background: `${item.accent}15`, color: item.accent }}
-                  >
-                    <Icon size={22} />
-                  </div>
-                  <h3 className="font-semibold text-base mb-1 text-[var(--color-text)]">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-[var(--color-text-muted)] mb-3 min-h-[2.5rem]">
-                    {item.description}
-                  </p>
-                  <div className="flex items-center gap-1 text-xs font-medium text-[var(--color-primary)] group-hover:gap-2 transition-all">
-                    <span>Vezi mai mult</span>
-                    <ArrowRight size={14} />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
         </div>
+        <CountyPicker />
       </section>
 
-      {/* FEATURED GUIDE */}
-      <section className="py-12">
+      {/* HOW IT WORKS */}
+      <section className="py-16 md:py-20">
         <div className="container-narrow">
-          <div className="relative bg-gradient-to-r from-emerald-600 to-teal-700 rounded-[20px] overflow-hidden text-white">
-            <div className="absolute inset-0 bg-grid-pattern opacity-20" />
-            <div className="relative grid md:grid-cols-[1fr_auto] gap-6 p-8 md:p-12 items-center">
-              <div>
-                <Badge className="mb-4 bg-white/15 text-white border border-white/20">
-                  Ghid recomandat
-                </Badge>
-                <h2 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold mb-3">
-                  Ghidul biciclistului din București
-                </h2>
-                <p className="text-white/90 mb-6 max-w-xl">
-                  10 capitole complete — de la cum îți alegi bicicleta după buget, până la regulile de circulație și cum repari o pană de cauciuc în plin trafic.
-                </p>
-                <div className="flex flex-wrap gap-4 items-center mb-6 text-sm">
-                  <span className="flex items-center gap-1.5">
-                    <BookOpen size={16} /> 10 capitole
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Clock size={16} /> 35 minute
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Bike size={16} /> Nivel mediu
-                  </span>
-                </div>
-                <Link
-                  href="/ghiduri/ghid-biciclist"
-                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white text-emerald-700 font-semibold hover:bg-emerald-50 shadow-xl transition-all"
-                >
-                  Citește ghidul
-                  <ArrowRight size={18} />
-                </Link>
+          <div className="text-center mb-12">
+            <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-2">
+              Cum funcționează
+            </h2>
+            <p className="text-[var(--color-text-muted)]">
+              Trei pași simpli până la o sesizare formală.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-14 h-14 rounded-full bg-[var(--color-primary-soft)] flex items-center justify-center mx-auto mb-4">
+                <span className="text-lg font-bold text-[var(--color-primary)]">1</span>
               </div>
-              <div className="hidden md:block">
-                <Bike size={180} strokeWidth={1} className="opacity-30" />
+              <h3 className="font-[family-name:var(--font-sora)] font-bold text-base mb-2">
+                Alege județul
+              </h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+                Selectează județul din listă sau lasă GPS-ul să te detecteze automat.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 rounded-full bg-[var(--color-primary-soft)] flex items-center justify-center mx-auto mb-4">
+                <span className="text-lg font-bold text-[var(--color-primary)]">2</span>
               </div>
+              <h3 className="font-[family-name:var(--font-sora)] font-bold text-base mb-2">
+                Descrie problema
+              </h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+                Spune-ne în cuvintele tale ce e în neregulă — o groapă, un copac căzut, gunoi necolectat.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 rounded-full bg-[var(--color-primary-soft)] flex items-center justify-center mx-auto mb-4">
+                <span className="text-lg font-bold text-[var(--color-primary)]">3</span>
+              </div>
+              <h3 className="font-[family-name:var(--font-sora)] font-bold text-base mb-2">
+                AI generează sesizarea
+              </h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+                Primești o sesizare formală cu temei legal, gata de trimis la primărie sau instituția competentă.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* LATEST NEWS */}
-      <section className="py-16">
+      {/* STATS */}
+      <section className="py-16 md:py-20 bg-[var(--color-surface)]">
         <div className="container-narrow">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold mb-2">
-                Ultimele știri
+          <div className="text-center mb-10">
+            <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-2">
+              Civia în cifre
+            </h2>
+            <p className="text-[var(--color-text-muted)]">
+              Date reale, actualizate automat.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+            <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[12px] p-5 text-center">
+              <FileText size={24} className="mx-auto mb-3 text-[var(--color-primary)]" />
+              <p className="text-2xl md:text-3xl font-bold text-[var(--color-primary)] tabular-nums">
+                {stats.total > 0 ? stats.total.toLocaleString("ro-RO") : "—"}
+              </p>
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">Sesizări depuse</p>
+            </div>
+            <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[12px] p-5 text-center">
+              <CheckCircle2 size={24} className="mx-auto mb-3 text-emerald-500" />
+              <p className="text-2xl md:text-3xl font-bold text-emerald-600 tabular-nums">
+                {stats.resolved > 0 ? stats.resolved.toLocaleString("ro-RO") : "—"}
+              </p>
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">Rezolvate</p>
+            </div>
+            <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[12px] p-5 text-center">
+              <MapPin size={24} className="mx-auto mb-3 text-amber-500" />
+              <p className="text-2xl md:text-3xl font-bold text-amber-600">42</p>
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">Județe acoperite</p>
+            </div>
+            <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[12px] p-5 text-center">
+              <Wind size={24} className="mx-auto mb-3 text-teal-500" />
+              <p className="text-2xl md:text-3xl font-bold text-teal-600">500+</p>
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">Senzori aer live</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 md:py-24">
+        <div className="container-narrow">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#1C4ED8] via-[#1e3a8a] to-[#0F172A] rounded-[16px] p-10 md:p-14 text-white text-center">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_110%,rgba(120,119,198,0.25),transparent)]" />
+            <div className="relative z-10">
+              <Zap size={32} className="mx-auto mb-4 text-blue-200" />
+              <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-3">
+                Fă prima ta sesizare
               </h2>
-              <p className="text-[var(--color-text-muted)]">
-                Agregate din surse verificate, actualizate zilnic.
+              <p className="text-blue-100/80 mb-8 max-w-lg mx-auto leading-relaxed">
+                Ia atitudine. Descrie problema, iar Civia generează o sesizare
+                formală pe care o poți trimite direct la autorități.
               </p>
-            </div>
-            <Link
-              href="/stiri"
-              className="hidden md:flex items-center gap-2 text-sm font-medium text-[var(--color-primary)] hover:gap-3 transition-all"
-            >
-              Vezi toate știrile <ArrowRight size={16} />
-            </Link>
-          </div>
-          {latestStiri.length === 0 ? (
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-10 text-center">
-              <p className="text-[var(--color-text-muted)] mb-4">
-                Știrile se actualizează automat din surse verificate.
-              </p>
-              <Link href="/stiri" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-primary)] hover:underline">
-                Vezi toate știrile disponibile <ArrowRight size={14} />
+              <Link
+                href="/#county-picker"
+                className="inline-flex items-center gap-2 h-12 px-8 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
+              >
+                Alege județul <ArrowRight size={18} />
               </Link>
             </div>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-5">
-              {latestStiri.map((stire) => (
-                <a
-                  key={stire.id}
-                  href={stire.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] transition-all"
-                >
-                  <div className="h-40 bg-gradient-to-br from-slate-600 to-slate-800 relative">
-                    {stire.image_url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={stire.image_url} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" loading="lazy" />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                    <div className="absolute top-3 left-3">
-                      <Badge bgColor={SOURCE_COLORS[stire.source] ?? "#64748b"} color="white">
-                        {stire.source}
-                      </Badge>
-                    </div>
-                    <div className="absolute bottom-3 left-3">
-                      <Badge className="bg-black/40 text-white border border-white/20">
-                        {stire.category}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <h3 className="font-semibold text-base mb-2 line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
-                      {stire.title}
-                    </h3>
-                    {stire.excerpt && (
-                      <p className="text-sm text-[var(--color-text-muted)] line-clamp-2 mb-3">
-                        {stire.excerpt}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)]">
-                      <span>{timeAgo(stire.published_at)}</span>
-                      <span>Citește →</span>
-                    </div>
-                  </div>
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* SESIZĂRI MAP PREVIEW */}
-      <section className="py-16 bg-[var(--color-surface)]">
-        <div className="container-narrow">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold mb-2">
-                Sesizări recente pe hartă
-              </h2>
-              <p className="text-[var(--color-text-muted)]">
-                Vezi în timp real problemele semnalate de cetățeni.
-              </p>
-            </div>
-            <Link
-              href="/sesizari"
-              className="hidden md:flex items-center gap-2 text-sm font-medium text-[var(--color-primary)] hover:gap-3 transition-all"
-            >
-              Toate sesizările <ArrowRight size={16} />
-            </Link>
-          </div>
-          <SesizariMap limit={15} height="480px" zoom={12} />
-        </div>
-      </section>
-
-      {/* TOP VOTED */}
-      <TopVotedWidget />
-
-      {/* NEAR ME WIDGET */}
-      <section className="pb-16">
-        <div className="container-narrow max-w-2xl">
-          <NearMeWidget />
-        </div>
-      </section>
-
-      {/* BUCURESTI STATS */}
-      <BucurestiStats />
-
-      {/* NEWSLETTER */}
-      <section className="py-16">
-        <div className="container-narrow">
-          <NewsletterSignup />
-        </div>
-      </section>
-
-      {/* PARTNERS STRIP */}
-      <section className="py-12 border-t border-[var(--color-border)]">
-        <div className="container-narrow">
-          <p className="text-center text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-6">
-            Date din surse publice
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-60">
-            {["PMB", "STB", "Metrorex", "IGSU", "ANM", "data.gov.ro"].map((p) => (
-              <div
-                key={p}
-                className="font-[family-name:var(--font-sora)] font-bold text-lg md:text-xl text-[var(--color-text-muted)]"
-              >
-                {p}
-              </div>
-            ))}
           </div>
         </div>
       </section>

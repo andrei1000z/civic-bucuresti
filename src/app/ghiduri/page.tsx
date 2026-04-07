@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 
 export const metadata: Metadata = {
   title: "Ghiduri pentru cetățeni",
-  description: "Ghiduri complete pentru cetățenii Bucureștiului: bicicletă, caniculă, cutremur, transport, sesizări.",
+  description: "Ghiduri complete pentru cetățeni: bicicletă, caniculă, cutremur, transport, sesizări.",
   alternates: { canonical: "/ghiduri" },
 };
 
@@ -30,7 +30,7 @@ export default function GhiduriPage() {
             Ghiduri pentru cetățeni
           </h1>
           <p className="text-lg md:text-xl text-white/85 max-w-2xl">
-            Informații clare, structurate și verificate pentru a naviga mai ușor prin București — de la bicicletă la cutremur.
+            Informații clare, structurate și verificate pentru a naviga mai ușor prin orașul tău — de la bicicletă la cutremur.
           </p>
         </div>
       </section>

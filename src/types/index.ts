@@ -98,6 +98,7 @@ export interface Eveniment {
   slug: string;
   titlu: string;
   data: string;
+  county: string; // county ID e.g. "B", "CJ", "GL"
   category: EvenimentCategory;
   severity: EvenimentSeverity;
   descriere: string;

@@ -133,7 +133,7 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
                 Încă nu avem autorități înregistrate pentru acest județ.
               </p>
               <Link
-                href="/contribuie"
+                href="https://github.com/andrei1000z/civic-bucuresti/issues"
                 className="inline-flex items-center gap-2 text-sm text-[var(--color-primary)] hover:underline"
               >
                 Ajută-ne să completăm baza de date <ArrowRight size={14} />
@@ -236,7 +236,7 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
               Ajută-ne să completăm baza de date cu emailuri oficiale ale primăriilor din {county.name}.
             </p>
             <Link
-              href="/contribuie"
+              href="https://github.com/andrei1000z/civic-bucuresti/issues"
               className="inline-flex items-center gap-2 text-xs text-[var(--color-primary)] font-medium hover:underline"
             >
               Contribuie cu date <ArrowRight size={12} />

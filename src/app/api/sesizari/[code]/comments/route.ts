@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { addComment, getComments, getSesizareByCode } from "@/lib/sesizari/repository";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { rateLimit } from "@/lib/ratelimit";
+import { rateLimitAsync } from "@/lib/ratelimit";
 import { sanitizeText } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
@@ -56,7 +56,7 @@ export async function POST(
       .maybeSingle();
     const displayName = (profile as { display_name: string } | null)?.display_name;
 
-    const rl = rateLimit(`comment:${user.id}`, { limit: 10, windowMs: 60_000 });
+    const rl = await rateLimitAsync(`comment:${user.id}`, { limit: 10, windowMs: 60_000 });
     if (!rl.success) {
       return NextResponse.json({ error: "Prea multe comentarii" }, { status: 429 });
     }

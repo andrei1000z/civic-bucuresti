@@ -15,6 +15,12 @@ const AirQualityMap = dynamic(() => import("./AirQualityMap"), {
   ),
 });
 
-export function AerMapWrapper() {
-  return <AirQualityMap />;
+export function AerMapWrapper({
+  initialCenter,
+  initialZoom,
+}: {
+  initialCenter?: [number, number];
+  initialZoom?: number;
+} = {}) {
+  return <AirQualityMap initialCenter={initialCenter} initialZoom={initialZoom} />;
 }

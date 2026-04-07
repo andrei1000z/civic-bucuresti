@@ -44,7 +44,7 @@ export async function GET(
 </head>
 <body>
 <div class="header">
-  <h1>CIVIA — Platforma Civică a Bucureștiului</h1>
+  <h1>CIVIA — Platforma Civică a României</h1>
   <p>Sesizare formală generată automat · civia.ro</p>
 </div>
 

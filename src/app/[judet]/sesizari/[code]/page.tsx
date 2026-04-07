@@ -1,0 +1,182 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ChevronLeft, MapPin, Calendar, User } from "lucide-react";
+import { getSesizareByCode } from "@/lib/sesizari/repository";
+import { getCountyBySlug } from "@/data/counties";
+import { createSupabaseServer } from "@/lib/supabase/server";
+import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI, SITE_URL } from "@/lib/constants";
+import { formatDate } from "@/lib/utils";
+import { Badge } from "@/components/ui/Badge";
+import { VoteButtons } from "@/components/sesizari/VoteButtons";
+import { CommentsSection } from "@/components/sesizari/CommentsSection";
+import { ShareMenu } from "@/components/sesizari/ShareMenu";
+import { FollowButton } from "@/components/sesizari/FollowButton";
+import { EvenimentMap } from "@/components/maps/EvenimentMap";
+import { stripPrivateAddress } from "@/lib/privacy";
+import { getUserVote, isFollowing, getComments } from "@/lib/sesizari/repository";
+import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ judet: string; code: string }>;
+}): Promise<Metadata> {
+  const { judet, code } = await params;
+  const county = getCountyBySlug(judet);
+  const s = await getSesizareByCode(code);
+  if (!s) return { title: "Sesizare negăsită" };
+  return {
+    title: s.titlu,
+    description: s.descriere.slice(0, 160),
+    alternates: { canonical: `/${judet}/sesizari/${code}` },
+  };
+}
+
+export default async function CountySesizareDetail({
+  params,
+}: {
+  params: Promise<{ judet: string; code: string }>;
+}) {
+  const { judet, code } = await params;
+  const county = getCountyBySlug(judet);
+  const sesizare = await getSesizareByCode(code);
+  if (!sesizare) notFound();
+
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const [comments, userVote, userFollowing] = await Promise.all([
+    getComments(sesizare.id),
+    user ? getUserVote({ sesizareId: sesizare.id, userId: user.id }) : null,
+    user ? isFollowing({ sesizareId: sesizare.id, userId: user.id }) : false,
+  ]);
+
+  const tipLabel = SESIZARE_TIPURI.find((t) => t.value === sesizare.tip)?.label ?? sesizare.tip;
+  const tipIcon = SESIZARE_TIPURI.find((t) => t.value === sesizare.tip)?.icon ?? "📝";
+
+  return (
+    <div className="container-narrow py-8 md:py-12">
+      <BreadcrumbJsonLd items={[
+        { name: "Civia", url: SITE_URL },
+        { name: county?.name ?? "Sesizări", url: `${SITE_URL}/${judet}/sesizari` },
+        { name: sesizare.titlu, url: `${SITE_URL}/${judet}/sesizari/${code}` },
+      ]} />
+
+      <Link
+        href={`/${judet}/sesizari`}
+        className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"
+      >
+        <ChevronLeft size={16} /> Sesizări {county?.name}
+      </Link>
+
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <Badge bgColor={STATUS_COLORS[sesizare.status] ?? "#64748B"} color="white">
+            {STATUS_LABELS[sesizare.status] ?? sesizare.status}
+          </Badge>
+          <Badge variant="neutral">
+            <span className="mr-1">{tipIcon}</span>
+            {tipLabel}
+          </Badge>
+          {sesizare.sector && <Badge variant="neutral">{sesizare.sector}</Badge>}
+          <span className="font-mono text-xs text-[var(--color-text-muted)] ml-auto">
+            {sesizare.code}
+          </span>
+        </div>
+        <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold mb-3">
+          {sesizare.titlu}
+        </h1>
+        <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-muted)] mb-4">
+          <span className="flex items-center gap-1.5">
+            <MapPin size={14} />
+            {sesizare.locatie}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <User size={14} />
+            {sesizare.author_name}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Calendar size={14} />
+            {formatDate(sesizare.created_at)}
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <FollowButton
+            code={sesizare.code}
+            initialFollowing={userFollowing}
+            initialCount={sesizare.nr_followers ?? 0}
+          />
+          <ShareMenu
+            url={`${SITE_URL}/${judet}/sesizari/${sesizare.code}`}
+            title={sesizare.titlu}
+            size="md"
+          />
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-[1fr_340px] gap-8">
+        <div>
+          {/* Description */}
+          <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
+            <h2 className="font-semibold mb-3">Descriere</h2>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{sesizare.descriere}</p>
+          </section>
+
+          {sesizare.formal_text && (
+            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
+              <h2 className="font-semibold mb-3 flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 text-xs font-medium">
+                  ✨ AI
+                </span>
+                Text formal
+              </h2>
+              <div className="bg-[var(--color-surface-2)] rounded-[8px] p-4 text-xs font-mono whitespace-pre-wrap">
+                {stripPrivateAddress(sesizare.formal_text)}
+              </div>
+            </section>
+          )}
+
+          {/* Map */}
+          <section className="mb-6">
+            <h2 className="font-semibold mb-3">Localizare</h2>
+            <EvenimentMap
+              coords={[sesizare.lat, sesizare.lng]}
+              label={sesizare.titlu}
+              color={STATUS_COLORS[sesizare.status] ?? "#64748B"}
+              zoom={16}
+              height="320px"
+            />
+          </section>
+
+          <CommentsSection code={sesizare.code} initialComments={comments} />
+        </div>
+
+        {/* Sidebar */}
+        <aside className="space-y-4">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+            <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3">
+              Sprijină sesizarea
+            </p>
+            <VoteButtons
+              code={sesizare.code}
+              initialUpvotes={sesizare.upvotes}
+              initialDownvotes={sesizare.downvotes}
+              initialUserVote={userVote}
+            />
+          </div>
+
+          <Link
+            href={`/sesizari/${code}`}
+            className="block text-center text-sm text-[var(--color-primary)] hover:underline"
+          >
+            Vezi pagina completă a sesizării →
+          </Link>
+        </aside>
+      </div>
+    </div>
+  );
+}

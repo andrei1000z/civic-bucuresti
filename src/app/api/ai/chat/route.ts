@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { getGroqClient, GROQ_MODEL } from "@/lib/groq/client";
 import { SYSTEM_PROMPT_CIVIC_ASSISTANT } from "@/lib/groq/prompts";
-import { rateLimit, getClientIp } from "@/lib/ratelimit";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30; // aligned with vercel.json
@@ -17,7 +17,7 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
-  const rl = rateLimit(`ai-chat:${ip}`, { limit: 20, windowMs: 60_000 });
+  const rl = await rateLimitAsync(`ai-chat:${ip}`, { limit: 20, windowMs: 60_000 });
   if (!rl.success) {
     return Response.json({ error: "Prea multe mesaje. Așteaptă 1 minut." }, { status: 429 });
   }

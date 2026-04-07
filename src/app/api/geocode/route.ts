@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { reverseGeocode } from "@/lib/geo/reverse-geocode";
-import { rateLimit, getClientIp } from "@/lib/ratelimit";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,7 @@ export async function GET(req: Request) {
 
   // Rate limit: 2 req/sec per IP (Nominatim allows 1/sec, we buffer)
   const ip = getClientIp(req);
-  const rl = rateLimit(`geocode:${ip}`, { limit: 2, windowMs: 1000 });
+  const rl = await rateLimitAsync(`geocode:${ip}`, { limit: 2, windowMs: 1000 });
   if (!rl.success) {
     return NextResponse.json({ error: "Prea rapid — așteaptă o secundă" }, { status: 429 });
   }

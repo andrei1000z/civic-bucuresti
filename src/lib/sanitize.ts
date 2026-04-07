@@ -1,5 +1,15 @@
 // Lightweight HTML sanitizer — strips all tags + dangerous URL schemes
 
+/** Escape HTML entities for safe interpolation into HTML templates */
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export function sanitizeText(input: string, maxLength = 2000): string {
   if (!input) return "";
   return input

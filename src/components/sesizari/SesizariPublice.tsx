@@ -13,6 +13,7 @@ import { stripForPreview } from "@/lib/privacy";
 import { Badge } from "@/components/ui/Badge";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import type { SesizareFeedRow } from "@/lib/supabase/types";
+import { useCountyOptional } from "@/lib/county-context";
 
 type SortKey = "recent" | "votate";
 type ViewMode = "list" | "map";
@@ -20,6 +21,7 @@ type ViewMode = "list" | "map";
 const PAGE_SIZE = 20;
 
 export function SesizariPublice() {
+  const county = useCountyOptional();
   const [rows, setRows] = useState<SesizareFeedRow[]>([]);
   const [filterTip, setFilterTip] = useState<string>("toate");
   const [filterStatus, setFilterStatus] = useState<string>("toate");
@@ -30,7 +32,7 @@ export function SesizariPublice() {
   const [loadingMore, setLoadingMore] = useState(false);
 
   // "loading" is derived: true when last-fetched key differs from current filter key
-  const fetchKey = `${filterTip}|${filterStatus}|${filterSector}|${sort}`;
+  const fetchKey = `${filterTip}|${filterStatus}|${filterSector}|${sort}|${county?.id ?? "all"}`;
   const [lastFetchedKey, setLastFetchedKey] = useState<string | null>(null);
   const loading = lastFetchedKey !== fetchKey;
 
@@ -41,6 +43,7 @@ export function SesizariPublice() {
     if (filterTip !== "toate") params.set("tip", filterTip);
     if (filterStatus !== "toate") params.set("status", filterStatus);
     if (filterSector !== "toate") params.set("sector", filterSector);
+    if (county) params.set("county", county.id);
     params.set("sort", sort);
     params.set("limit", String(PAGE_SIZE));
     params.set("offset", "0");
@@ -301,6 +304,7 @@ export function SesizariPublice() {
                 if (filterTip !== "toate") params.set("tip", filterTip);
                 if (filterStatus !== "toate") params.set("status", filterStatus);
                 if (filterSector !== "toate") params.set("sector", filterSector);
+                if (county) params.set("county", county.id);
                 params.set("sort", sort);
                 params.set("limit", String(PAGE_SIZE));
                 params.set("offset", String(rows.length));

@@ -42,16 +42,15 @@ export async function GET() {
     // fall through to mock
   }
 
-  // Deterministic fallback — varies per hour, plausible range
-  const hour = new Date().getUTCHours();
-  const baseAqi = 65 + Math.round(Math.sin((hour / 24) * Math.PI * 2) * 20) + Math.round(Math.random() * 10);
+  // No live data available — return explicit unavailable status
   return NextResponse.json({
     data: {
-      aqi: baseAqi,
-      pm25: Math.round(baseAqi * 0.4 * 10) / 10,
-      source: "estimare",
-      quality: aqiLabel(baseAqi),
+      aqi: null,
+      pm25: null,
+      source: "indisponibil",
+      quality: "Date temporar indisponibile",
       stations: 0,
+      fallback: true,
     },
   });
 }
