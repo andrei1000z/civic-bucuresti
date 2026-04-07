@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink, Calendar, User, Tag } from "lucide-react";
-import { createSupabaseServer } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/Badge";
 import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
@@ -23,9 +23,15 @@ interface StireRow {
   published_at: string;
 }
 
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+}
+
 async function getStire(id: string): Promise<StireRow | null> {
-  const supabase = await createSupabaseServer();
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from("stiri_cache")
     .select("*")
     .eq("id", id)
