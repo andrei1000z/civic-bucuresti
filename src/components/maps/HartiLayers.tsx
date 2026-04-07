@@ -19,29 +19,21 @@ interface HartiLayersProps {
   statsMode: "accidente" | "aer" | "densitate";
 }
 
-// Categorize bike path by OSM tags
-function bikePathCategory(feature: Feature): "dedicata" | "marcata" | "recomandata" {
+// All bike paths shown as green — no categories, no "recomandate"
+function bikePathFilter(feature: Feature): boolean {
   const p = feature.properties ?? {};
-  if (p.highway === "cycleway" || p.cycleway === "track") return "dedicata";
-  if (p.cycleway === "lane" || p.cycleway === "opposite") return "marcata";
-  return "recomandata";
+  // Only show dedicated cycleways and marked lanes, NOT recommended routes
+  return p.highway === "cycleway" || p.cycleway === "track" || p.cycleway === "lane" || p.cycleway === "opposite" || p.bicycle === "designated";
 }
 
-const bikeStyle = (show: { dedicata: boolean; marcata: boolean; recomandata: boolean }) =>
+const bikeStyle = () =>
   (feature?: Feature): PathOptions => {
     if (!feature) return { weight: 0 };
-    const cat = bikePathCategory(feature);
-    const visible =
-      (cat === "dedicata" && show.dedicata) ||
-      (cat === "marcata" && show.marcata) ||
-      (cat === "recomandata" && show.recomandata);
-    if (!visible) return { weight: 0, opacity: 0 };
-    const colors = { dedicata: "#059669", marcata: "#EAB308", recomandata: "#2563EB" };
+    if (!bikePathFilter(feature)) return { weight: 0, opacity: 0 };
     return {
-      color: colors[cat],
+      color: "#059669",
       weight: 4,
       opacity: 0.85,
-      dashArray: cat === "recomandata" ? "8 6" : undefined,
     };
   };
 
@@ -110,9 +102,7 @@ const tramStyle: PathOptions = {
 function bikePopup(feature: Feature): string {
   const p = feature.properties ?? {};
   const name = p.name ?? "Pistă de bicicletă";
-  const cat = bikePathCategory(feature);
-  const catLabel = { dedicata: "Dedicată", marcata: "Marcată", recomandata: "Recomandată" }[cat];
-  return `<div style="min-width:180px"><b>${name}</b><br/><span style="font-size:11px;color:#64748b">${catLabel}</span></div>`;
+  return `<div style="min-width:180px"><b>${name}</b><br/><span style="font-size:11px;color:#64748b">Pistă ciclism</span></div>`;
 }
 
 function metroLinePopup(feature: Feature): string {
@@ -164,7 +154,7 @@ export default function HartiLayers(props: HartiLayersProps) {
 
   // Memoize style functions — stable references prevent GeoJSON re-creation on every map pan/zoom
   const memoizedBikeStyle = useMemo(
-    () => bikeStyle({ dedicata: showDedicate, marcata: showMarcate, recomandata: showRecomandate }),
+    () => bikeStyle(),
     [showDedicate, showMarcate, showRecomandate]
   );
   const memoizedMetroStyle = useMemo(() => metroLineStyle(visibleLines), [visibleLines]);

@@ -134,27 +134,11 @@ export function HartiMap() {
                 Piste de biciclete
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                Piste de biciclete din România — date reale OpenStreetMap. Momentan acoperire completă pentru București.
+                Piste de biciclete și benzi marcate din toată România — date OpenStreetMap.
               </p>
-              <div className="bg-[var(--color-surface-2)] rounded-[12px] p-3 mb-4">
-                <p className="text-xs text-[var(--color-text-muted)] mb-1">Total piste București</p>
-                <p className="text-2xl font-bold text-[var(--color-primary)]">
-                  {totalPisteKm.toFixed(1)} km
-                </p>
-              </div>
-              <div className="space-y-2 mb-4">
-                <div className="flex items-start gap-3">
-                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#059669" }} />
-                  <p className="text-xs text-[var(--color-text-muted)]">Piste dedicate (cycleway)</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#EAB308" }} />
-                  <p className="text-xs text-[var(--color-text-muted)]">Benzi marcate (lane)</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="w-4 h-1 rounded-full mt-2 shrink-0 border border-dashed border-blue-500" />
-                  <p className="text-xs text-[var(--color-text-muted)]">Trasee recomandate</p>
-                </div>
+              <div className="flex items-start gap-3 mb-4">
+                <span className="w-6 h-1 rounded-full mt-2 shrink-0" style={{ background: "#059669" }} />
+                <p className="text-sm text-[var(--color-text-muted)]">Piste dedicate + benzi marcate</p>
               </div>
             </div>
           )}
