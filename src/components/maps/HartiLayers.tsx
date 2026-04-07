@@ -185,12 +185,9 @@ export default function HartiLayers(props: HartiLayersProps) {
   }
 
   if (activeTab === "auto") {
-    return (
-      <>
-        <GeoJsonLayer key="auto-ok" url="/geojson/auto-accesibil.json" style={autoAccessStyle} popupFormatter={autoPopup} />
-        <GeoJsonLayer key="auto-no" url="/geojson/auto-restrictionat.json" style={autoRestrictedStyle} popupFormatter={autoPopup} />
-      </>
-    );
+    // No custom overlay — OSM tiles already show all roads nationally.
+    // The sidebar explains what the map shows.
+    return null;
   }
 
   if (activeTab === "transport") {

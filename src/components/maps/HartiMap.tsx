@@ -36,8 +36,8 @@ const tabs = [
   { id: "statistici" as const, label: "Aer", icon: BarChart3 },
 ];
 
-export function HartiMap() {
-  const [activeTab, setActiveTab] = useState<Tab>("bicicleta");
+export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}) {
+  const [activeTab, setActiveTab] = useState<Tab>(defaultTab);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Bicycle layer toggles
@@ -181,27 +181,32 @@ export function HartiMap() {
           {activeTab === "auto" && (
             <div>
               <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Drumuri
+                Drumuri România
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                Rețeaua rutieră colorată după tip de acces.
+                Rețeaua rutieră completă din România — autostrăzi, drumuri naționale, județene și locale. Date OpenStreetMap live.
               </p>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#2563EB" }} />
-                  <div>
-                    <p className="text-sm font-medium">Acces normal</p>
-                    <p className="text-xs text-[var(--color-text-muted)]">Străzi de cartier, secundare, livezi</p>
-                  </div>
+                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#E07000" }} />
+                  <p className="text-xs text-[var(--color-text-muted)]">Autostrăzi și drumuri expres</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#F97316" }} />
-                  <div>
-                    <p className="text-sm font-medium">Drumuri majore</p>
-                    <p className="text-xs text-[var(--color-text-muted)]">Bulevarde, autostrăzi, ieșiri — pietonii nu au voie</p>
-                  </div>
+                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#D04040" }} />
+                  <p className="text-xs text-[var(--color-text-muted)]">Drumuri naționale</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#FFD700" }} />
+                  <p className="text-xs text-[var(--color-text-muted)]">Drumuri județene</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#CCCCCC" }} />
+                  <p className="text-xs text-[var(--color-text-muted)]">Drumuri locale și străzi</p>
                 </div>
               </div>
+              <p className="text-xs text-[var(--color-text-muted)] mt-4 italic">
+                Culorile sunt cele standard din harta OpenStreetMap. Dă zoom pentru detalii.
+              </p>
             </div>
           )}
 
