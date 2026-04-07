@@ -53,6 +53,22 @@ const INITIAL: FormData = {
   publica: true,
 };
 
+/** Capitalize each word: "ion POPESCU" → "Ion Popescu" */
+function capitalizeName(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/** Clean up address: trim, capitalize first letter */
+function formatAddress(addr: string): string {
+  const trimmed = addr.trim();
+  if (!trimmed) return trimmed;
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+}
+
 export function SesizareForm() {
   const { user } = useAuth();
   const county = useCountyOptional();
@@ -400,7 +416,7 @@ export function SesizareForm() {
   };
 
   const tipInfo = SESIZARE_TIPURI.find((t) => t.value === data.tip);
-  const recipients = data.tip ? getAuthoritiesFor(data.tip, data.sector) : null;
+  const recipients = data.tip ? getAuthoritiesFor(data.tip, data.sector, detectedCounty) : null;
 
   const gen = data.nume ? detectGen(data.nume) : null;
   const subsemnatul = gen ? subsemnatulForm(gen) : "Subsemnatul(a)";
@@ -548,6 +564,7 @@ ${today}`;
             autoComplete="name"
             value={data.nume}
             onChange={(e) => update("nume", e.target.value)}
+            onBlur={() => { if (data.nume) update("nume", capitalizeName(data.nume)); }}
             placeholder="Ex: Maria Popescu"
             className={inputClass}
           />
@@ -559,7 +576,8 @@ ${today}`;
             autoComplete="street-address"
             value={data.adresa}
             onChange={(e) => update("adresa", e.target.value)}
-            placeholder="Str. Exemplu 12, Sector 3"
+            onBlur={() => { if (data.adresa) update("adresa", formatAddress(data.adresa)); }}
+            placeholder="Str. Exemplu nr. 12, Sector 3, București"
             className={inputClass}
           />
         </Field>

@@ -50,10 +50,15 @@ export interface ResolvedRecipients {
 }
 
 /**
- * Returns the list of real authorities to contact based on problem type + sector.
- * Always includes sector primărie + PMB. Adds specialized authorities based on tip.
+ * Returns the list of real authorities to contact based on problem type + sector + county.
+ * For București: uses sector-specific authorities.
+ * For other counties: uses county contacts from autoritati-contact.ts.
  */
-export function getAuthoritiesFor(tip: string, sector: string | null): ResolvedRecipients {
+export function getAuthoritiesFor(tip: string, sector: string | null, countyCode?: string | null): ResolvedRecipients {
+  // If not București, route to county authorities
+  if (countyCode && countyCode !== "B") {
+    return getCountyAuthorities(tip, countyCode);
+  }
   const primary: Authority[] = [];
   const cc: Authority[] = [];
 
@@ -180,5 +185,54 @@ export function getAuthoritiesFor(tip: string, sector: string | null): ResolvedR
   });
   const label = names.join(" + ") + (cc.length > 0 ? ` (+ ${cc.length} în CC)` : "");
 
+  return { primary, cc, label };
+}
+
+/**
+ * Route complaints to county-specific authorities for non-București locations.
+ */
+function getCountyAuthorities(tip: string, countyCode: string): ResolvedRecipients {
+  // Try to import county contacts dynamically
+  let PRIMARII: Record<string, { email?: string; phone?: string; website?: string }> = {};
+  let PREFECTURI: Record<string, { email?: string; phone?: string }> = {};
+  let POLITIE: Record<string, { email?: string; phone?: string }> = {};
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const contacts = require("@/data/autoritati-contact");
+    PRIMARII = contacts.PRIMARII ?? {};
+    PREFECTURI = contacts.PREFECTURI ?? {};
+    POLITIE = contacts.POLITIE ?? {};
+  } catch {
+    // Fallback if module not available
+  }
+
+  const primary: Authority[] = [];
+  const cc: Authority[] = [];
+
+  const primarie = PRIMARII[countyCode];
+  const prefectura = PREFECTURI[countyCode];
+  const politie = POLITIE[countyCode];
+
+  // Generic county routing
+  if (primarie?.email) {
+    primary.push({ id: `primarie-${countyCode}`, name: `Primăria ${countyCode}`, email: primarie.email });
+  }
+
+  // Add specialized authorities based on tip
+  if (["parcare", "zgomot", "graffiti"].includes(tip) && politie?.email) {
+    primary.unshift({ id: `politie-${countyCode}`, name: `IPJ ${countyCode}`, email: politie.email });
+  }
+
+  if (prefectura?.email) {
+    cc.push({ id: `prefectura-${countyCode}`, name: `Prefectura ${countyCode}`, email: prefectura.email });
+  }
+
+  // Fallback: if no specific contacts, generic
+  if (primary.length === 0) {
+    primary.push({ id: "generic", name: "Primăria locală", email: `registratura@primaria${countyCode.toLowerCase()}.ro` });
+  }
+
+  const names = primary.map((a) => a.name);
+  const label = names.join(" + ") + (cc.length > 0 ? ` (+ ${cc.length} în CC)` : "");
   return { primary, cc, label };
 }
