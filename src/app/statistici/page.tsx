@@ -35,6 +35,25 @@ export default function StatisticiPage() {
     .sort((a, b) => b.perCapita - a.perCapita)
     .slice(0, 10);
 
+  // Most green spaces
+  const topByGreen = ALL_COUNTIES
+    .map((c) => ({ ...c, stats: getCountyStats(c.id) }))
+    .sort((a, b) => b.stats.spatiiVerziMpPerLocuitor - a.stats.spatiiVerziMpPerLocuitor)
+    .slice(0, 10);
+
+  // Dataset JSON-LD
+  const datasetJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    name: "Statistici România — Civia",
+    description: "Date statistice naționale: accidente rutiere, calitate aer, spații verzi, sesizări cetățeni din toate cele 42 de județe.",
+    url: "https://civia.ro/statistici",
+    spatialCoverage: { "@type": "Country", name: "România" },
+    temporalCoverage: "2023/2024",
+    creator: { "@type": "Organization", name: "Civia", url: "https://civia.ro" },
+    license: "https://creativecommons.org/licenses/by/4.0/",
+  };
+
   return (
     <div className="container-narrow py-12 md:py-16">
       <div className="mb-10">
@@ -138,6 +157,28 @@ export default function StatisticiPage() {
         </div>
       </div>
 
+      {/* Top green spaces */}
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 mb-12">
+        <h2 className="font-[family-name:var(--font-sora)] font-bold text-base mb-4 flex items-center gap-2">
+          <TreePine size={18} className="text-emerald-500" /> Top 10 — spații verzi (m²/locuitor)
+        </h2>
+        <div className="grid sm:grid-cols-2 gap-2">
+          {topByGreen.map((c, i) => (
+            <Link key={c.id} href={`/${c.slug}/statistici`} className="flex items-center justify-between py-2 px-3 rounded-[8px] hover:bg-[var(--color-surface-2)] transition-colors">
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-[var(--color-text-muted)] w-5 tabular-nums">{i + 1}.</span>
+                <span className="text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-1.5 py-0.5 rounded">{c.id}</span>
+                <span className="text-sm font-medium">{c.name}</span>
+              </div>
+              <span className="text-sm tabular-nums font-semibold text-emerald-600">{c.stats.spatiiVerziMpPerLocuitor} m²</span>
+            </Link>
+          ))}
+        </div>
+        <p className="text-xs text-[var(--color-text-muted)] mt-3">
+          Recomandarea OMS: minim 9 m² spații verzi per locuitor. Media UE: ~25 m²/locuitor.
+        </p>
+      </div>
+
       {/* CTA */}
       <div className="bg-gradient-to-br from-[#1C4ED8] via-[#1e3a8a] to-[#0F172A] rounded-[16px] p-8 md:p-12 text-white text-center">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-3">
@@ -154,8 +195,14 @@ export default function StatisticiPage() {
         </Link>
       </div>
 
+      {/* Dataset JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetJsonLd) }}
+      />
+
       <p className="text-xs text-[var(--color-text-muted)] mt-6 text-center">
-        Surse: INS Recensământ 2021, DRPCIV 2023, ANPM/calitateaer.ro · Ultima actualizare: aprilie 2026
+        Surse: INS Recensământul 2021, DRPCIV 2023, ANPM/calitateaer.ro · Ultima actualizare: aprilie 2026
       </p>
     </div>
   );

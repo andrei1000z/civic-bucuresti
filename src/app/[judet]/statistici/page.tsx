@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import dynamic from "next/dynamic";
-import { getCountyBySlug } from "@/data/counties";
+import { getCountyBySlug, ALL_COUNTIES } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
-import { TrendingUp, TrendingDown, Minus, Users, MapPin, Building2, TreePine, Wind, Car } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Users, MapPin, Building2, TreePine, Wind, Car, Award } from "lucide-react";
+import { SITE_URL } from "@/lib/constants";
 
 const ChartLoading = () => (
   <div className="h-[260px] rounded-[8px] bg-[var(--color-surface-2)] animate-pulse" />
@@ -138,6 +140,35 @@ export default async function StatisticiPage({
     stats.aqiMediu < 80 ? "#EAB308" :
     stats.aqiMediu < 100 ? "#F97316" : "#DC2626";
 
+  // Cleanliness grade: A-E based on AQI + green spaces
+  const gradeScore = (stats.aqiMediu <= 40 ? 3 : stats.aqiMediu <= 60 ? 2 : stats.aqiMediu <= 80 ? 1 : 0)
+    + (stats.spatiiVerziMpPerLocuitor >= 35 ? 2 : stats.spatiiVerziMpPerLocuitor >= 20 ? 1 : 0);
+  const grades = [
+    { grade: "E", color: "#DC2626", label: "Critic" },
+    { grade: "D", color: "#F97316", label: "Slab" },
+    { grade: "C", color: "#EAB308", label: "Moderat" },
+    { grade: "B", color: "#059669", label: "Bun" },
+    { grade: "A", color: "#059669", label: "Foarte bun" },
+    { grade: "A+", color: "#059669", label: "Excelent" },
+  ];
+  const gradeInfo = grades[Math.min(gradeScore, grades.length - 1)];
+
+  // Neighbors data
+  const neighbors = stats.judeteVecine ?? [];
+
+  // Dataset JSON-LD
+  const datasetJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    name: `Statistici ${county.name} — Civia`,
+    description: `Date statistice pentru ${county.name}: accidente rutiere, calitate aer, spații verzi, sesizări.`,
+    url: `${SITE_URL}/${county.slug}/statistici`,
+    spatialCoverage: { "@type": "Place", name: county.name },
+    temporalCoverage: "2023/2024",
+    creator: { "@type": "Organization", name: "Civia", url: SITE_URL },
+    license: "https://creativecommons.org/licenses/by/4.0/",
+  };
+
   return (
     <div className="container-narrow py-12 md:py-16">
       {/* Header */}
@@ -156,7 +187,7 @@ export default async function StatisticiPage({
       </div>
 
       {/* Overview cards */}
-      <Section title="Informații generale" subtitle={`Date oficiale INS — Recensamânt 2021 + actualizări 2023`}>
+      <Section title="Informații generale" subtitle={`Date oficiale INS — Recensământul 2021 + actualizări 2023`}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard label="Populație" value={stats.populatie.toLocaleString("ro-RO")} icon={Users} accent="#6366F1" />
           <StatCard label="Suprafață" value={`${stats.suprafataKmp.toLocaleString("ro-RO")} km²`} icon={MapPin} accent="#6366F1" />
@@ -276,6 +307,75 @@ export default async function StatisticiPage({
           />
         </div>
       </Section>
+
+      {/* Cleanliness grade */}
+      <Section title="Grad de curățenie" subtitle="Calculat din calitatea aerului + spațiile verzi per locuitor">
+        <div className="flex items-center gap-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+          <div
+            className="w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-3xl shrink-0"
+            style={{ backgroundColor: gradeInfo.color }}
+          >
+            {gradeInfo.grade}
+          </div>
+          <div>
+            <p className="font-[family-name:var(--font-sora)] text-xl font-bold" style={{ color: gradeInfo.color }}>
+              {gradeInfo.label}
+            </p>
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">
+              AQI mediu: {stats.aqiMediu} · Spații verzi: {stats.spatiiVerziMpPerLocuitor} m²/locuitor
+            </p>
+            <p className="text-xs text-[var(--color-text-muted)] mt-2">
+              Scorul combină calitatea aerului (ANPM) cu suprafața spațiilor verzi (INS).
+              Media OMS recomandă minim 9 m²/locuitor și AQI sub 50.
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      {/* Neighbor comparison */}
+      {neighbors.length > 0 && (
+        <Section title="Context regional" subtitle="Comparație cu județele vecine">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+            <div className="space-y-2">
+              {[{ name: county.name, populatie: stats.populatie, isCurrent: true }, ...neighbors.map(n => ({ ...n, isCurrent: false }))].map((n) => {
+                const maxPop = Math.max(stats.populatie, ...neighbors.map(v => v.populatie));
+                const width = Math.max(15, (n.populatie / maxPop) * 100);
+                const slug = !n.isCurrent ? ALL_COUNTIES.find(c => c.name === n.name)?.slug : null;
+                const Wrapper = slug ? Link : "div" as unknown as typeof Link;
+                return (
+                  <Wrapper
+                    key={n.name}
+                    href={slug ? `/${slug}/statistici` : "#"}
+                    className={`flex items-center gap-3 py-2 px-3 rounded-[8px] ${!n.isCurrent ? "hover:bg-[var(--color-surface-2)]" : "bg-[var(--color-primary-soft)]"} transition-colors`}
+                  >
+                    <span className="text-sm font-medium w-32 shrink-0 truncate">
+                      {n.isCurrent ? `📍 ${n.name}` : n.name}
+                    </span>
+                    <div className="flex-1 h-5 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${width}%`,
+                          backgroundColor: n.isCurrent ? "var(--color-primary)" : "#94A3B8",
+                        }}
+                      />
+                    </div>
+                    <span className="text-xs tabular-nums text-[var(--color-text-muted)] w-24 text-right shrink-0">
+                      {n.populatie.toLocaleString("ro-RO")} loc.
+                    </span>
+                  </Wrapper>
+                );
+              })}
+            </div>
+          </div>
+        </Section>
+      )}
+
+      {/* Dataset JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetJsonLd) }}
+      />
 
       {/* Footer note */}
       <div className="mt-8 bg-[var(--color-surface-2)] rounded-[12px] p-4 text-xs text-[var(--color-text-muted)]">
