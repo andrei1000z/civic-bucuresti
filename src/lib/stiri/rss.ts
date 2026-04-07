@@ -61,12 +61,25 @@ function cleanText(html: string | undefined): string {
 }
 
 function extractImage(item: { content?: string; enclosure?: { url?: string }; [key: string]: unknown }): string | null {
+  // Try enclosure
   if (item.enclosure?.url) return item.enclosure.url;
+  // Try media:content
   const mediaContent = item["media:content"] as { $?: { url?: string } } | undefined;
   if (mediaContent?.$?.url) return mediaContent.$.url;
+  // Try media:thumbnail
+  const mediaThumbnail = item["media:thumbnail"] as { $?: { url?: string } } | undefined;
+  if (mediaThumbnail?.$?.url) return mediaThumbnail.$.url;
+  // Try itunes:image
+  const itunesImage = item["itunes:image"] as { $?: { href?: string } } | undefined;
+  if (itunesImage?.$?.href) return itunesImage.$.href;
+  // Try to extract from content HTML
   const content = (item.content || "") as string;
   const match = content.match(/<img[^>]+src=["']([^"']+)["']/);
   if (match) return match[1];
+  // Try og:image from description HTML
+  const desc = (item["content:encoded"] || item.content || "") as string;
+  const ogMatch = desc.match(/og:image[^>]+content=["']([^"']+)["']/);
+  if (ogMatch) return ogMatch[1];
   return null;
 }
 
@@ -76,6 +89,7 @@ export async function fetchFeed(feed: Feed): Promise<RssArticle[]> {
     customFields: {
       item: [
         ["media:content", "media:content"],
+        ["media:thumbnail", "media:thumbnail"],
         ["content:encoded", "contentEncoded"],
       ],
     },

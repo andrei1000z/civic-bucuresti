@@ -32,14 +32,15 @@ const categories = [
   { id: "eveniment", label: "Evenimente" },
 ];
 
-// Fallback gradient per source
+// Fallback gradient per source (when no image)
 const sourceGradients: Record<string, string> = {
-  Digi24: "from-red-600 to-orange-800",
-  "B365.ro": "from-emerald-600 to-teal-800",
-  Hotnews: "from-amber-500 to-orange-700",
-  "Hotnews București": "from-amber-500 to-orange-700",
-  "G4Media": "from-slate-700 to-zinc-900",
-  "Europa Liberă": "from-purple-600 to-indigo-800",
+  Digi24: "from-red-600 to-red-900",
+  "B365.ro": "from-emerald-600 to-emerald-900",
+  Hotnews: "from-amber-600 to-amber-900",
+  "G4Media": "from-slate-600 to-slate-900",
+  Mediafax: "from-sky-600 to-sky-900",
+  "News.ro": "from-green-600 to-green-900",
+  Agerpres: "from-violet-600 to-violet-900",
 };
 
 export function StiriList() {
@@ -72,14 +73,17 @@ export function StiriList() {
     load();
   }, [load]);
 
-  const featured = rows.find((r) => r.featured) ?? rows[0];
+  // Prefer featured articles with images, then any with images, then first
+  const featured = rows.find((r) => r.featured && r.image_url)
+    ?? rows.find((r) => r.image_url)
+    ?? rows[0];
   const rest = rows.filter((r) => r.id !== featured?.id).slice(0, visible);
 
   return (
     <div>
       {/* Filter bar */}
-      <div className="sticky top-16 z-30 -mx-4 md:mx-0 bg-[var(--color-bg)]/95 backdrop-blur py-4 mb-6 border-b border-[var(--color-border)]">
-        <div className="container-narrow md:px-0">
+      <div className="sticky top-16 z-30 bg-[var(--color-bg)]/95 backdrop-blur py-4 mb-6 border-b border-[var(--color-border)]">
+        <div>
           <div className="flex flex-col lg:flex-row gap-3">
             <div className="flex gap-2 overflow-x-auto no-scrollbar flex-1">
               {categories.map((cat) => (
@@ -195,7 +199,7 @@ export function StiriList() {
                     sourceGradients[stire.source] ?? "from-slate-600 to-slate-800"
                   )}
                 >
-                  {stire.image_url && (
+                  {stire.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={stire.image_url}
@@ -203,6 +207,12 @@ export function StiriList() {
                       className="absolute inset-0 w-full h-full object-cover opacity-90"
                       onError={(e) => (e.currentTarget.style.display = "none")}
                     />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-5xl font-bold text-white/20 select-none">
+                        {stire.source.charAt(0)}
+                      </span>
+                    </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <div className="absolute top-3 left-3">
