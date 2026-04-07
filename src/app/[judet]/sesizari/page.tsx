@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getCountyBySlug } from "@/data/counties";
-import { getCountyStats } from "@/data/statistici-judete";
-import { Tabs } from "@/components/ui/Tabs";
+import { Zap, FileText, Eye, CheckCircle2, ArrowRight } from "lucide-react";
 import { SesizareForm } from "@/components/sesizari/SesizareForm";
-import { SesizariPublice } from "@/components/sesizari/SesizariPublice";
-import { UrmarireSesizare } from "@/components/sesizari/UrmarireSesizare";
-import { FileText, CheckCircle2, Clock, Users } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -17,7 +14,7 @@ export async function generateMetadata({
   if (!county) return {};
   return {
     title: "Sesizări",
-    description: `Generează sesizări formale cu AI, vezi sesizările publice și urmărește statusul în ${county.name}.`,
+    description: `Trimite sesizări formale la autoritățile din ${county.name}. AI-ul generează textul cu temei legal.`,
     alternates: { canonical: `/${county.slug}/sesizari` },
   };
 }
@@ -30,81 +27,72 @@ export default async function SesizariPage({
   const { judet } = await params;
   const county = getCountyBySlug(judet);
   const countyName = county?.name ?? judet;
-  const stats = county ? getCountyStats(county.id) : null;
-
-  const resolvedPct = stats
-    ? Math.round((stats.sesizariRezolvate / stats.sesizariTotal) * 100)
-    : 0;
 
   return (
     <div className="container-narrow py-12 md:py-16">
-      {/* Hero */}
       <div className="mb-8">
         <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
           Sesizări — {countyName}
         </h1>
-        <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-6">
-          Generează o sesizare formală cu AI, urmărește-o sau vezi ce semnalează alți cetățeni în {countyName}.
-        </p>
-
-        {/* Stats bar */}
-        {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-2">
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 flex items-center gap-3">
-              <FileText size={20} className="text-blue-500 shrink-0" />
-              <div>
-                <p className="text-xl font-bold">{stats.sesizariTotal.toLocaleString("ro-RO")}</p>
-                <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Sesizări estimate</p>
-              </div>
-            </div>
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 flex items-center gap-3">
-              <CheckCircle2 size={20} className="text-emerald-500 shrink-0" />
-              <div>
-                <p className="text-xl font-bold text-emerald-600">{resolvedPct}%</p>
-                <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Rata rezolvare</p>
-              </div>
-            </div>
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 flex items-center gap-3">
-              <Clock size={20} className="text-amber-500 shrink-0" />
-              <div>
-                <p className="text-xl font-bold">30 zile</p>
-                <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Termen legal</p>
-              </div>
-            </div>
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 flex items-center gap-3">
-              <Users size={20} className="text-purple-500 shrink-0" />
-              <div>
-                <p className="text-xl font-bold truncate">{stats.primarName}</p>
-                <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Primar ({stats.primarPartid})</p>
-              </div>
-            </div>
-          </div>
-        )}
-        <p className="text-[10px] text-[var(--color-text-muted)] mb-4">
-          Conform OG 27/2002, autoritățile au obligația să răspundă în 30 de zile calendaristice.
+        <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">
+          Trimite o sesizare formală la autoritățile din {countyName}. AI-ul generează textul cu temei legal, tu doar apeși trimite.
         </p>
       </div>
 
-      <Tabs
-        variant="pills"
-        items={[
-          {
-            id: "form",
-            label: "Fă o sesizare",
-            content: <SesizareForm />,
-          },
-          {
-            id: "publice",
-            label: "Sesizări publice",
-            content: <SesizariPublice />,
-          },
-          {
-            id: "urmareste",
-            label: "Urmărește sesizarea",
-            content: <UrmarireSesizare />,
-          },
-        ]}
-      />
+      {/* Quick links */}
+      <div className="grid sm:grid-cols-3 gap-3 mb-10">
+        <Link
+          href="/sesizari-publice"
+          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all"
+        >
+          <Eye size={20} className="text-[var(--color-primary)] shrink-0" />
+          <div>
+            <p className="text-sm font-semibold">Sesizări publice</p>
+            <p className="text-[10px] text-[var(--color-text-muted)]">Vezi ce semnalează alții</p>
+          </div>
+        </Link>
+        <Link
+          href="/urmareste"
+          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all"
+        >
+          <FileText size={20} className="text-amber-500 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold">Urmărește sesizarea</p>
+            <p className="text-[10px] text-[var(--color-text-muted)]">Verifică statusul cu codul tău</p>
+          </div>
+        </Link>
+        <Link
+          href="/sesizari-rezolvate"
+          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all"
+        >
+          <CheckCircle2 size={20} className="text-emerald-500 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold">Rezolvate</p>
+            <p className="text-[10px] text-[var(--color-text-muted)]">Galerie before & after</p>
+          </div>
+        </Link>
+      </div>
+
+      {/* Sesizare type choice */}
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-8">
+        <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2">
+          Fă o sesizare
+        </h2>
+        <p className="text-sm text-[var(--color-text-muted)] mb-4">
+          Alege tipul de sesizare. Sesizarea rapidă necesită doar datele minime. Sesizarea completă include detalii suplimentare care ajută autoritățile să rezolve problema mai rapid și mai eficient.
+        </p>
+      </div>
+
+      {/* The actual form */}
+      <SesizareForm />
+
+      {/* Info */}
+      <div className="mt-8 bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-400 rounded-[12px] p-4 text-sm">
+        <p className="text-blue-900 dark:text-blue-200">
+          <strong>Conform OG 27/2002</strong>, autoritățile au obligația să răspundă în 30 de zile calendaristice.
+          Sesizarea generată include temei legal și este adresată instituției competente din {countyName}.
+        </p>
+      </div>
     </div>
   );
 }
