@@ -81,7 +81,7 @@ export function HartiMap() {
         else setLocateError("Timeout");
         setTimeout(() => setLocateError(null), 3000);
       },
-      { enableHighAccuracy: true, timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 
@@ -133,36 +133,29 @@ export function HartiMap() {
               <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
                 Piste de biciclete
               </h3>
+              <p className="text-sm text-[var(--color-text-muted)] mb-4">
+                Piste de biciclete din România — date reale OpenStreetMap. Momentan acoperire completă pentru București.
+              </p>
               <div className="bg-[var(--color-surface-2)] rounded-[12px] p-3 mb-4">
-                <p className="text-xs text-[var(--color-text-muted)] mb-1">Total piste</p>
+                <p className="text-xs text-[var(--color-text-muted)] mb-1">Total piste București</p>
                 <p className="text-2xl font-bold text-[var(--color-primary)]">
                   {totalPisteKm.toFixed(1)} km
                 </p>
               </div>
-              <div className="space-y-3 mb-5">
-                <Toggle
-                  label="Piste dedicate (cycleway)"
-                  color="#059669"
-                  checked={showDedicate}
-                  onChange={setShowDedicate}
-                />
-                <Toggle
-                  label="Benzi marcate (lane)"
-                  color="#EAB308"
-                  checked={showMarcate}
-                  onChange={setShowMarcate}
-                />
-                <Toggle
-                  label="Trasee recomandate"
-                  color="#2563EB"
-                  dashed
-                  checked={showRecomandate}
-                  onChange={setShowRecomandate}
-                />
+              <div className="space-y-2 mb-4">
+                <div className="flex items-start gap-3">
+                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#059669" }} />
+                  <p className="text-xs text-[var(--color-text-muted)]">Piste dedicate (cycleway)</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#EAB308" }} />
+                  <p className="text-xs text-[var(--color-text-muted)]">Benzi marcate (lane)</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-4 h-1 rounded-full mt-2 shrink-0 border border-dashed border-blue-500" />
+                  <p className="text-xs text-[var(--color-text-muted)]">Trasee recomandate</p>
+                </div>
               </div>
-              <button className="w-full h-11 rounded-[8px] border border-[var(--color-primary)] text-[var(--color-primary)] text-sm font-medium hover:bg-[var(--color-primary-soft)] transition-colors">
-                Raportează o problemă pe pistă
-              </button>
             </div>
           )}
 
@@ -172,7 +165,7 @@ export function HartiMap() {
                 Trasee pedestre
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                Zone pietonale din Bucureștiul — date reale OpenStreetMap.
+                Zone pietonale, parcuri și trotuare — date reale OpenStreetMap.
               </p>
               <div className="space-y-3 mb-5">
                 <Toggle
@@ -204,10 +197,10 @@ export function HartiMap() {
           {activeTab === "auto" && (
             <div>
               <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Drumuri București
+                Drumuri
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                Colorăm toate străzile după tip de acces.
+                Rețeaua rutieră colorată după tip de acces.
               </p>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
@@ -231,10 +224,10 @@ export function HartiMap() {
           {activeTab === "transport" && (
             <div>
               <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Metrou București
+                Transport public
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                63 stații Metrorex + linii tramvai. Click pe stație pentru detalii.
+                Metrou București (63 stații) + tramvai. Date OpenStreetMap.
               </p>
               <div className="space-y-2 mb-5">
                 {METRO_INFO.map((line) => {
@@ -303,7 +296,7 @@ export function HartiMap() {
 
       {/* Map */}
       <div className="flex-1 relative">
-        <LeafletMap zoom={12} scrollWheelZoom flyToTarget={flyTarget}>
+        <LeafletMap center={[45.9432, 24.9668]} zoom={7} scrollWheelZoom flyToTarget={flyTarget}>
           <HartiLayers
             activeTab={activeTab}
             showDedicate={showDedicate}
@@ -317,8 +310,9 @@ export function HartiMap() {
           />
         </LeafletMap>
 
-        {/* Layers button */}
+        {/* Layers button — toggles sidebar */}
         <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
           className="absolute top-4 right-4 z-20 h-11 px-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center gap-2 text-sm font-medium shadow-md hover:bg-[var(--color-surface-2)] transition-colors"
           title="Controale hartă"
         >
