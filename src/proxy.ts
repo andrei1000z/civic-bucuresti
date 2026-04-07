@@ -10,18 +10,19 @@ const COUNTY_SLUGS = new Set([
 const COOKIE_NAME = "county";
 const DEFAULT_COUNTY = "b";
 
+/**
+ * Routes that redirect to county-prefixed versions.
+ * Global pages (/stiri, /statistici, /harti, /aer) stay GLOBAL — no redirect.
+ */
 const REDIRECT_EXACT = new Set([
   "/sesizari",
-  "/aer",
-  "/harti",
-  "/statistici",
-  "/stiri",
   "/ghiduri",
   "/autoritati",
   "/bilete",
   "/evenimente",
   "/istoric",
   "/cum-functioneaza",
+  "/aer",
 ]);
 
 export default function proxy(request: NextRequest) {
@@ -38,8 +39,7 @@ export default function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/sesizari", "/aer", "/harti", "/statistici", "/stiri",
-    "/ghiduri", "/autoritati", "/bilete", "/evenimente",
-    "/istoric", "/cum-functioneaza",
+    "/sesizari", "/ghiduri", "/autoritati", "/bilete",
+    "/evenimente", "/istoric", "/cum-functioneaza", "/aer",
   ],
 };

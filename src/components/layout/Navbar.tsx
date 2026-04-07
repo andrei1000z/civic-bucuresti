@@ -138,8 +138,8 @@ export function Navbar() {
                 </Link>
               );
             })}
-            {/* "Mai mult" dropdown */}
-            <div
+            {/* "Mai mult" dropdown — only when inside a county */}
+            {countySlug && <div
               className="relative"
               onMouseEnter={() => setMoreDropdown(true)}
               onMouseLeave={() => setMoreDropdown(false)}
@@ -172,7 +172,7 @@ export function Navbar() {
                   </Link>
                 ))}
               </div>
-            </div>
+            </div>}
           </nav>
 
           <div className="flex items-center gap-2">

@@ -23,15 +23,15 @@ export const BUCHAREST_BOUNDS: [[number, number], [number, number]] = [
 // ============================================================
 export const NAV_LINKS = [
   { href: "/sesizari", label: "Sesizări" },
-  { href: "/aer", label: "Calitate aer" },
   { href: "/harti", label: "Hărți" },
   { href: "/statistici", label: "Statistici" },
   { href: "/stiri", label: "Știri" },
   { href: "/ghiduri", label: "Ghiduri" },
 ] as const;
 
+// "Mai mult" items — shown only when inside a county context
 export const NAV_MORE = [
-  { href: "/judete", label: "Județe", icon: "🗺️" },
+  { href: "/aer", label: "Calitate aer", icon: "🌬️" },
   { href: "/bilete", label: "Bilete & Abonamente", icon: "🎫" },
   { href: "/evenimente", label: "Evenimente", icon: "📅" },
   { href: "/istoric", label: "Istoric", icon: "📜" },
@@ -103,9 +103,11 @@ export const STATUS_LABELS: Record<string, string> = {
 };
 
 export const SOURCE_COLORS: Record<string, string> = {
-  "B365.ro": "#059669",
-  "Hotnews": "#EAB308",
   "Digi24": "#DC2626",
-  "Europa Liberă": "#8B5CF6",
+  "Hotnews": "#EAB308",
   "G4Media": "#1F2937",
+  "Mediafax": "#0369A1",
+  "News.ro": "#059669",
+  "Agerpres": "#7C3AED",
+  "B365.ro": "#059669",
 };

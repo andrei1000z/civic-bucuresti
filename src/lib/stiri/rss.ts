@@ -25,10 +25,12 @@ interface Feed {
  */
 const FEEDS: Feed[] = [
   { url: "https://www.digi24.ro/rss", source: "Digi24" },
-  { url: "https://b365.ro/feed/", source: "B365.ro" },
   { url: "https://www.hotnews.ro/rss", source: "Hotnews" },
   { url: "https://www.g4media.ro/feed", source: "G4Media" },
-  { url: "https://www.europa-libera.org/api/", source: "Europa Liberă" },
+  { url: "https://www.mediafax.ro/rss", source: "Mediafax" },
+  { url: "https://www.news.ro/rss", source: "News.ro" },
+  { url: "https://www.agerpres.ro/flux-documentare/rss", source: "Agerpres" },
+  { url: "https://b365.ro/feed/", source: "B365.ro" },
 ];
 
 // Simple category classifier from keywords in title + excerpt
