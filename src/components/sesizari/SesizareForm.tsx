@@ -539,23 +539,49 @@ ${data.nume || "[NUMELE]"}`;
           />
         </Field>
 
-        <Field label="Email (pentru notificări)">
-          <input
-            type="email"
-            autoComplete="email"
-            value={data.email}
-            onChange={(e) => update("email", e.target.value)}
-            placeholder="nume@exemplu.ro (opțional)"
-            className={inputClass}
-          />
-        </Field>
+        {/* Phone + date/time — only in complet mode */}
+        {mode === "complet" && (
+          <>
+            <Field label="Telefon de contact">
+              <input
+                type="tel"
+                autoComplete="tel"
+                value={data.email} // reuse email field for phone in complet mode
+                onChange={(e) => update("email", e.target.value)}
+                placeholder="07xx xxx xxx"
+                className={inputClass}
+              />
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Data constatării">
+                <input
+                  type="date"
+                  value={new Date().toISOString().split("T")[0]}
+                  className={inputClass}
+                  readOnly
+                />
+              </Field>
+              <Field label="Ora constatării">
+                <input
+                  type="time"
+                  value={new Date().toTimeString().slice(0, 5)}
+                  className={inputClass}
+                  readOnly
+                />
+              </Field>
+            </div>
+          </>
+        )}
 
         <Field label="Descrierea problemei" required>
           <textarea
             value={data.descriere}
             onChange={(e) => update("descriere", e.target.value.slice(0, 2000))}
-            rows={4}
-            placeholder="Scrie liber, natural. AI va clasifica și reformula formal."
+            rows={mode === "complet" ? 6 : 4}
+            placeholder={mode === "complet"
+              ? "Scrie liber și natural. Specifică detalii cât mai precise: dimensiuni aproximative, localizare exactă (între ce intersecții, ce bandă), dacă sunt mai multe probleme pe tronson, dacă afectează siguranța (trecere pietoni, școală, spital). Cu cât mai detaliat, cu atât se rezolvă mai rapid."
+              : "Descrie problema în câteva cuvinte. AI-ul va genera textul formal automat."
+            }
             className={cn(inputClass, "resize-none py-3")}
           />
           <p className="text-xs text-[var(--color-text-muted)] mt-1">
@@ -695,13 +721,15 @@ ${data.nume || "[NUMELE]"}`;
 
         <Field label="Fotografii (max 5)">
           <PhotoUploader urls={imagini} onChange={setImagini} max={5} />
+          <p className="text-xs text-[var(--color-text-muted)] mt-2">
+            Atașează poze clare, cu rezoluție mare și lumină bună. Ideal: o poză apropiată cu problema + o poză de context mai largă cu un reper vizibil (stâlp, clădire, număr casă). Fotografiază din mai multe unghiuri. Cu cât mai multe poze relevante, cu atât mai bine.
+          </p>
           {imagini.length > 0 && (
             <div className="mt-2 flex items-start gap-2 p-3 rounded-[8px] bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-300">
               <span className="shrink-0 mt-0.5">⚠️</span>
               <p>
-                <strong>Atașează pozele și la emailul pe care-l trimiți către autorități</strong> —
-                aici sunt salvate pentru platformă, dar nu se pot atașa automat în email. Când
-                deschizi emailul, apasă &quot;Atașează fișier&quot; și urcă-le manual.
+                <strong>Atașează pozele și la emailul trimis către autorități</strong> —
+                pozele de aici sunt salvate pe platformă, dar trebuie adăugate manual în email.
               </p>
             </div>
           )}
