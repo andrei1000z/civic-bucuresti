@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Bike, Footprints, Bus, BarChart3, Car, Layers, ChevronLeft, Locate, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { METRO_COLORS } from "@/lib/constants";
@@ -29,11 +30,11 @@ const HartiLayers = dynamic(() => import("./HartiLayers"), { ssr: false });
 type Tab = "bicicleta" | "pejos" | "auto" | "transport" | "statistici";
 
 const tabs = [
-  { id: "bicicleta" as const, label: "Bicicletă", icon: Bike },
-  { id: "pejos" as const, label: "Pe jos", icon: Footprints },
-  { id: "auto" as const, label: "Cu mașina", icon: Car },
-  { id: "transport" as const, label: "Transport", icon: Bus },
-  { id: "statistici" as const, label: "Aer", icon: BarChart3 },
+  { id: "bicicleta" as const, label: "Bicicletă", icon: Bike, href: "/harti/bicicleta" },
+  { id: "pejos" as const, label: "Pe jos", icon: Footprints, href: "/harti/pejos" },
+  { id: "auto" as const, label: "Cu mașina", icon: Car, href: "/harti/cumasina" },
+  { id: "transport" as const, label: "Transport", icon: Bus, href: "/harti/transport" },
+  { id: "statistici" as const, label: "Aer", icon: BarChart3, href: "/harti/aer" },
 ];
 
 export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}) {
@@ -112,9 +113,10 @@ export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
-              <button
+              <Link
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                href={tab.href}
+                onClick={(e) => { e.preventDefault(); setActiveTab(tab.id); window.history.pushState(null, "", tab.href); }}
                 className={cn(
                   "flex-1 flex flex-col items-center gap-1 py-3 px-2 text-xs font-medium border-b-2 transition-colors",
                   isActive
@@ -124,7 +126,7 @@ export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}
               >
                 <Icon size={18} />
                 <span className="leading-none">{tab.label}</span>
-              </button>
+              </Link>
             );
           })}
         </div>
