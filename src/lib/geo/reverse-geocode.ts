@@ -63,7 +63,7 @@ export interface GeocodedLocation {
  */
 export async function reverseGeocode(lat: number, lng: number): Promise<GeocodedLocation> {
   try {
-    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=ro&zoom=16`;
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=ro&zoom=18`;
     const res = await fetch(url, {
       headers: { "User-Agent": "Civia/1.0 (civia.ro)" },
     });
