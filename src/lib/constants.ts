@@ -27,13 +27,13 @@ export const NAV_LINKS = [
   { href: "/statistici", label: "Statistici" },
   { href: "/stiri", label: "Știri" },
   { href: "/ghiduri", label: "Ghiduri" },
+  { href: "/evenimente", label: "Evenimente" },
 ] as const;
 
-// "Mai mult" items — shown only when inside a county context
+// Extra items — shown only when inside a county context (no dropdown, just more nav items)
 export const NAV_MORE = [
   { href: "/aer", label: "Calitate aer", icon: "🌬️" },
   { href: "/bilete", label: "Bilete & Abonamente", icon: "🎫" },
-  { href: "/evenimente", label: "Evenimente", icon: "📅" },
   { href: "/istoric", label: "Istoric", icon: "📜" },
   { href: "/cum-functioneaza", label: "Administrația", icon: "🏛️" },
   { href: "/autoritati", label: "Autorități", icon: "🏢" },

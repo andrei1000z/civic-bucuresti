@@ -10,7 +10,7 @@ export function Footer() {
     <footer className="bg-[var(--color-surface)] border-t border-[var(--color-border)] mt-auto">
       <div className="container-narrow py-12">
         {/* ── 5-column grid ─────────────────────────────────── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Column 1 — Brand */}
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
@@ -33,7 +33,6 @@ export function Footer() {
             </h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/sesizari" className={linkCls}>Sesizări</Link></li>
-              <li><Link href="/aer" className={linkCls}>Calitate aer</Link></li>
               <li><Link href="/harti" className={linkCls}>Hărți</Link></li>
               <li><Link href="/statistici" className={linkCls}>Statistici</Link></li>
               <li><Link href="/stiri" className={linkCls}>Știri</Link></li>
@@ -56,21 +55,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Column 4 — Mai mult */}
-          <div>
-            <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">
-              Mai mult
-            </h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/judete" className={linkCls}>Județe</Link></li>
-              <li><Link href="/cum-functioneaza" className={linkCls}>Administrația</Link></li>
-              <li><Link href="/istoric" className={linkCls}>Istoric</Link></li>
-              <li><Link href="/autoritati" className={linkCls}>Autorități</Link></li>
-              <li><Link href="/bilete" className={linkCls}>Bilete transport</Link></li>
-            </ul>
-          </div>
-
-          {/* Column 5 — Legal */}
+          {/* Column 4 — Legal */}
           <div>
             <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">
               Legal

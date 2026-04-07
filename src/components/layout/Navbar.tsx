@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { Menu, X, ChevronDown, AlertCircle, MapPin, Search, MoreHorizontal } from "lucide-react";
+import { Menu, X, ChevronDown, AlertCircle, MapPin, Search } from "lucide-react";
 import { NAV_LINKS, NAV_MORE, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/auth/UserMenu";
@@ -33,7 +33,6 @@ export function Navbar() {
   }));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [ghidDropdown, setGhidDropdown] = useState(false);
-  const [moreDropdown, setMoreDropdown] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -138,41 +137,6 @@ export function Navbar() {
                 </Link>
               );
             })}
-            {/* "Mai mult" dropdown — only when inside a county */}
-            {countySlug && <div
-              className="relative"
-              onMouseEnter={() => setMoreDropdown(true)}
-              onMouseLeave={() => setMoreDropdown(false)}
-            >
-              <button
-                className={cn(
-                  "flex items-center gap-1 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all",
-                  "text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
-                )}
-              >
-                <MoreHorizontal size={16} />
-                <ChevronDown size={14} className={cn("transition-transform", moreDropdown && "rotate-180")} />
-              </button>
-              <div
-                className={cn(
-                  "absolute top-full right-0 w-56 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-lg)] overflow-hidden py-2 origin-top transition-all duration-150",
-                  moreDropdown
-                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-                    : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
-                )}
-              >
-                {NAV_MORE.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={countySlug ? `/${countySlug}${item.href}` : item.href}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
-                  >
-                    <span className="text-lg">{item.icon}</span>
-                    <span className="text-[var(--color-text)]">{item.label}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>}
           </nav>
 
           <div className="flex items-center gap-2">
