@@ -40,6 +40,7 @@ export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}
   const [activeTab, setActiveTab] = useState<Tab>(defaultTab);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [layersOpen, setLayersOpen] = useState(false);
+  const [mapStyle, setMapStyle] = useState<"standard" | "satelit">("standard");
 
   // Bicycle layer toggles
   const [showDedicate, setShowDedicate] = useState(true);
@@ -286,7 +287,7 @@ export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}
 
       {/* Map */}
       <div className="flex-1 relative">
-        <LeafletMap center={[45.9432, 24.9668]} zoom={7} scrollWheelZoom flyToTarget={flyTarget}>
+        <LeafletMap center={[45.9432, 24.9668]} zoom={7} scrollWheelZoom flyToTarget={flyTarget} tileStyle={mapStyle}>
           <HartiLayers
             activeTab={activeTab}
             showDedicate={showDedicate}
@@ -300,7 +301,7 @@ export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}
           />
         </LeafletMap>
 
-        {/* Layers popup */}
+        {/* Map style switcher */}
         <div className="absolute top-4 right-4 z-20">
           <button
             onClick={() => setLayersOpen(!layersOpen)}
@@ -310,26 +311,25 @@ export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}
             Straturi
           </button>
           {layersOpen && (
-            <div className="absolute top-full right-0 mt-2 w-56 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] shadow-xl p-3 space-y-2">
-              <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-2">Secțiuni</p>
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => { setActiveTab(tab.id); setLayersOpen(false); }}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2 rounded-[8px] text-sm transition-colors",
-                      activeTab === tab.id
-                        ? "bg-[var(--color-primary-soft)] text-[var(--color-primary)] font-medium"
-                        : "hover:bg-[var(--color-surface-2)] text-[var(--color-text)]"
-                    )}
-                  >
-                    <Icon size={16} />
-                    {tab.label}
-                  </button>
-                );
-              })}
+            <div className="absolute top-full right-0 mt-2 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] shadow-xl p-2">
+              <button
+                onClick={() => { setMapStyle("standard"); setLayersOpen(false); }}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-[8px] text-sm transition-colors",
+                  mapStyle === "standard" ? "bg-[var(--color-primary-soft)] text-[var(--color-primary)] font-medium" : "hover:bg-[var(--color-surface-2)]"
+                )}
+              >
+                🗺️ Standard
+              </button>
+              <button
+                onClick={() => { setMapStyle("satelit"); setLayersOpen(false); }}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-[8px] text-sm transition-colors",
+                  mapStyle === "satelit" ? "bg-[var(--color-primary-soft)] text-[var(--color-primary)] font-medium" : "hover:bg-[var(--color-surface-2)]"
+                )}
+              >
+                🛰️ Satelit
+              </button>
             </div>
           )}
         </div>

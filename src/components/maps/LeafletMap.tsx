@@ -79,6 +79,17 @@ function FlyTo({ target }: { target: { coords: [number, number]; zoom?: number }
   return null;
 }
 
+const TILE_URLS: Record<string, { url: string; attr: string }> = {
+  standard: {
+    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    attr: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+  },
+  satelit: {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attr: '&copy; <a href="https://www.esri.com/">Esri</a> &copy; Maxar, Earthstar',
+  },
+};
+
 export default function LeafletMap({
   center = BUCHAREST_CENTER,
   zoom = 12,
@@ -86,7 +97,9 @@ export default function LeafletMap({
   className = "w-full h-full",
   scrollWheelZoom = true,
   flyToTarget = null,
-}: LeafletMapProps) {
+  tileStyle = "standard",
+}: LeafletMapProps & { tileStyle?: string }) {
+  const tile = TILE_URLS[tileStyle] ?? TILE_URLS.standard;
   return (
     <MapContainer
       center={center}
@@ -96,8 +109,9 @@ export default function LeafletMap({
       zoomControl={true}
     >
       <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+        key={tileStyle}
+        url={tile.url}
+        attribution={tile.attr}
       />
       <MapResizer />
       <FlyTo target={flyToTarget} />
