@@ -11,7 +11,7 @@ import { getAqiColor } from "@/lib/aer/colors";
  * Grid 120×120 for smooth coverage with NO gaps.
  */
 
-const GRID_SIZE = 200;
+const GRID_SIZE = 350;
 // Slightly padded bounds to ensure full border coverage
 const LAT_MIN = 43.4;
 const LAT_MAX = 48.4;
@@ -116,7 +116,7 @@ export function AirHeatGrid({ sensors }: Props) {
 
   // Cell radius — overlap slightly for no gaps
   const cellKm = ((LAT_MAX - LAT_MIN) / GRID_SIZE) * 111;
-  const radius = cellKm * 1000 * 0.68;
+  const radius = cellKm * 1000 * 0.55;
 
   return (
     <>
@@ -128,7 +128,7 @@ export function AirHeatGrid({ sensors }: Props) {
           pathOptions={{
             color: getAqiColor(c.aqi),
             fillColor: getAqiColor(c.aqi),
-            fillOpacity: 0.38,
+            fillOpacity: 0.45,
             weight: 0,
             stroke: false,
           }}
