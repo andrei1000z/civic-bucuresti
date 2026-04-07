@@ -173,7 +173,7 @@ export default function HartiLayers(props: HartiLayersProps) {
     return (
       <GeoJsonLayer
         key="bike"
-        url="/geojson/bicicleta.json"
+        url="/geojson/bicicleta.json" /* TODO: replace with bicicleta-romania.json when available */
         style={memoizedBikeStyle}
         popupFormatter={bikePopup}
       />
@@ -184,7 +184,7 @@ export default function HartiLayers(props: HartiLayersProps) {
     return (
       <>
         {showParcuri && (
-          <GeoJsonLayer key="parks" url="/geojson/parcuri.json" style={parkStyle} popupFormatter={parkPopup} />
+          <GeoJsonLayer key="parks" url="/geojson/parcuri-romania.json" style={parkStyle} popupFormatter={parkPopup} />
         )}
         {showPietonal && (
           <GeoJsonLayer key="ped-ok" url="/geojson/pietonal-accesibil.json" style={pedestrianAccessStyle} popupFormatter={pedestrianPopup} />
@@ -208,7 +208,7 @@ export default function HartiLayers(props: HartiLayersProps) {
       <>
         <GeoJsonLayer key="metro-lines" url="/geojson/metrou.json" style={memoizedMetroStyle} popupFormatter={metroLinePopup} />
         <GeoJsonLayer key="metro-stations" url="/geojson/metrou-statii.json" style={metroStationStyle()} popupFormatter={metroStationPopup} />
-        <GeoJsonLayer key="trams" url="/geojson/tramvai.json" style={tramStyle} />
+        <GeoJsonLayer key="trams" url="/geojson/tramvai-romania.json" style={tramStyle} />
       </>
     );
   }
