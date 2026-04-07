@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { GeoJsonLayer } from "./GeoJsonLayer";
-import { AqiHeatmapLayer } from "./AqiHeatmapLayer";
+import { NationalAqiLayer } from "./NationalAqiLayer";
 import { METRO_COLORS } from "@/lib/constants";
 import type { PathOptions } from "leaflet";
 import type { Feature } from "geojson";
@@ -204,7 +204,7 @@ export default function HartiLayers(props: HartiLayersProps) {
   }
 
   if (activeTab === "statistici" && statsMode === "aer") {
-    return <AqiHeatmapLayer key="aqi-heatmap" />;
+    return <NationalAqiLayer key="aqi-national" />;
   }
 
   return null;
