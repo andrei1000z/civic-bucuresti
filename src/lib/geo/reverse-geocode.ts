@@ -119,13 +119,6 @@ export async function reverseGeocode(lat: number, lng: number): Promise<Geocoded
       parts.push("București");
     } else if (locality) {
       parts.push(locality);
-      if (countyName) {
-        // Clean county name: remove "Județul" prefix if present
-        const cleanCounty = (countyName as string).replace(/^județ(ul)?\s*/i, "");
-        parts.push(`jud. ${cleanCounty}`);
-      }
-    } else if (countyName) {
-      parts.push(`jud. ${(countyName as string).replace(/^județ(ul)?\s*/i, "")}`);
     }
     const shortAddress = parts.length > 0 ? parts.join(", ") : displayName;
 
