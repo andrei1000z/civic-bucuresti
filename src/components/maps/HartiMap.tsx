@@ -39,6 +39,7 @@ const tabs = [
 export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}) {
   const [activeTab, setActiveTab] = useState<Tab>(defaultTab);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [layersOpen, setLayersOpen] = useState(false);
 
   // Bicycle layer toggles
   const [showDedicate, setShowDedicate] = useState(true);
@@ -299,15 +300,39 @@ export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}
           />
         </LeafletMap>
 
-        {/* Layers button — toggles sidebar */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="absolute top-4 right-4 z-20 h-11 px-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center gap-2 text-sm font-medium shadow-md hover:bg-[var(--color-surface-2)] transition-colors"
-          title="Controale hartă"
-        >
-          <Layers size={16} />
-          Straturi
-        </button>
+        {/* Layers popup */}
+        <div className="absolute top-4 right-4 z-20">
+          <button
+            onClick={() => setLayersOpen(!layersOpen)}
+            className="h-11 px-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center gap-2 text-sm font-medium shadow-md hover:bg-[var(--color-surface-2)] transition-colors"
+          >
+            <Layers size={16} />
+            Straturi
+          </button>
+          {layersOpen && (
+            <div className="absolute top-full right-0 mt-2 w-56 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] shadow-xl p-3 space-y-2">
+              <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-2">Secțiuni</p>
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => { setActiveTab(tab.id); setLayersOpen(false); }}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2 rounded-[8px] text-sm transition-colors",
+                      activeTab === tab.id
+                        ? "bg-[var(--color-primary-soft)] text-[var(--color-primary)] font-medium"
+                        : "hover:bg-[var(--color-surface-2)] text-[var(--color-text)]"
+                    )}
+                  >
+                    <Icon size={16} />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Locate button */}
         <button

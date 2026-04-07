@@ -6,19 +6,20 @@ import type { UnifiedSensor } from "@/lib/aer/types";
 import { getAqiColor } from "@/lib/aer/colors";
 
 /**
- * Dense AQI heatmap as a single Canvas image with Gaussian blur.
- * - 600×600 grid = 360K cells
- * - IDW power 1.5 (smoother spread, no bullseye)
- * - 2-pass Gaussian blur on the canvas for natural transitions
- * - Masked to Romania border
+ * AQI heatmap as a single Canvas ImageOverlay.
+ * - 300×300 grid = 90K cells (fast, no freeze)
+ * - IDW power 1.5 for smooth spread
+ * - Gaussian blur for natural transitions
+ * - Async computation with requestAnimationFrame
  */
 
-const GRID = 600;
-const LAT_MIN = 43.4;
-const LAT_MAX = 48.4;
-const LNG_MIN = 20.0;
-const LNG_MAX = 30.2;
-const BOUNDS: [[number, number], [number, number]] = [[LAT_MIN, LNG_MIN], [LAT_MAX, LNG_MAX]];
+const GRID = 300;
+// Romania bounds — matched EXACTLY to Leaflet ImageOverlay
+const LAT_S = 43.55;
+const LAT_N = 48.27;
+const LNG_W = 20.22;
+const LNG_E = 29.75;
+const BOUNDS: [[number, number], [number, number]] = [[LAT_S, LNG_W], [LAT_N, LNG_E]];
 
 interface Props { sensors: UnifiedSensor[]; }
 
@@ -33,27 +34,31 @@ function pointInRing(lat: number, lng: number, ring: number[][]): boolean {
   return inside;
 }
 
-/** IDW with power 1.5 — much smoother spread, no sharp bullseye */
 function idw(
   lat: number, lng: number,
   sensors: { lat: number; lng: number; aqi: number }[],
   nationalAvg: number,
 ): number {
   let num = 0, den = 0, closestDist = Infinity;
-  for (const s of sensors) {
+  // Only use nearest 30 sensors for speed
+  const nearby = sensors.filter((s) => {
+    const d = Math.abs(s.lat - lat) + Math.abs(s.lng - lng);
+    return d < 5; // rough filter ~500km
+  });
+  const use = nearby.length > 0 ? nearby : sensors.slice(0, 20);
+
+  for (const s of use) {
     const dLat = (lat - s.lat) * 111;
     const dLng = (lng - s.lng) * 111 * Math.cos((lat * Math.PI) / 180);
     const dist = Math.sqrt(dLat * dLat + dLng * dLng);
     if (dist < 0.5) return s.aqi;
     if (dist < closestDist) closestDist = dist;
-    // Power 1.5 instead of 2 — much smoother, wider influence
     const w = 1 / Math.pow(dist, 1.5);
     num += w * s.aqi;
     den += w;
   }
   if (den === 0) return nationalAvg;
   const val = num / den;
-  // Blend to national avg for far-away cells
   if (closestDist > 80) {
     const blend = Math.min(1, (closestDist - 80) / 150);
     return Math.round(val * (1 - blend) + nationalAvg * blend);
@@ -89,76 +94,66 @@ export function AirHeatGrid({ sensors }: Props) {
       .map((s) => ({ lat: s.lat, lng: s.lng, aqi: s.aqi! }));
     if (valid.length === 0) return;
 
-    const nationalAvg = Math.round(valid.reduce((s, v) => s + v.aqi, 0) / valid.length);
-    const latStep = (LAT_MAX - LAT_MIN) / GRID;
-    const lngStep = (LNG_MAX - LNG_MIN) / GRID;
+    // Compute async to avoid freezing the UI
+    requestAnimationFrame(() => {
+      const nationalAvg = Math.round(valid.reduce((s, v) => s + v.aqi, 0) / valid.length);
+      const latStep = (LAT_N - LAT_S) / GRID;
+      const lngStep = (LNG_E - LNG_W) / GRID;
 
-    // Build pixel data
-    const canvas = document.createElement("canvas");
-    canvas.width = GRID;
-    canvas.height = GRID;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+      const canvas = document.createElement("canvas");
+      canvas.width = GRID;
+      canvas.height = GRID;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-    const imageData = ctx.createImageData(GRID, GRID);
-    const data = imageData.data;
+      const imageData = ctx.createImageData(GRID, GRID);
+      const data = imageData.data;
+      const mask = new Uint8Array(GRID * GRID);
 
-    // Track which pixels are inside Romania for the mask
-    const mask = new Uint8Array(GRID * GRID);
+      for (let row = 0; row < GRID; row++) {
+        for (let col = 0; col < GRID; col++) {
+          const lat = LAT_N - (row + 0.5) * latStep;
+          const lng = LNG_W + (col + 0.5) * lngStep;
+          if (!pointInRing(lat, lng, border)) continue;
 
-    for (let row = 0; row < GRID; row++) {
-      for (let col = 0; col < GRID; col++) {
-        const lat = LAT_MAX - (row + 0.5) * latStep;
-        const lng = LNG_MIN + (col + 0.5) * lngStep;
-
-        if (!pointInRing(lat, lng, border)) continue;
-
-        mask[row * GRID + col] = 1;
-        const aqi = idw(lat, lng, valid, nationalAvg);
-        const color = hexToRgb(getAqiColor(aqi));
-        const idx = (row * GRID + col) * 4;
-        data[idx] = color[0];
-        data[idx + 1] = color[1];
-        data[idx + 2] = color[2];
-        data[idx + 3] = 130; // ~51% opacity
-      }
-    }
-
-    ctx.putImageData(imageData, 0, 0);
-
-    // Apply Gaussian blur for smooth transitions (no bullseye)
-    // Use CSS filter on a second canvas
-    const blurred = document.createElement("canvas");
-    blurred.width = GRID;
-    blurred.height = GRID;
-    const bCtx = blurred.getContext("2d");
-    if (bCtx) {
-      bCtx.filter = "blur(4px)";
-      bCtx.drawImage(canvas, 0, 0);
-
-      // Re-apply mask — blur spreads outside Romania border, clip it
-      const blurredData = bCtx.getImageData(0, 0, GRID, GRID);
-      const bd = blurredData.data;
-      for (let i = 0; i < GRID * GRID; i++) {
-        if (mask[i] === 0) {
-          bd[i * 4 + 3] = 0; // transparent outside Romania
+          mask[row * GRID + col] = 1;
+          const aqi = idw(lat, lng, valid, nationalAvg);
+          const color = hexToRgb(getAqiColor(aqi));
+          const idx = (row * GRID + col) * 4;
+          data[idx] = color[0];
+          data[idx + 1] = color[1];
+          data[idx + 2] = color[2];
+          data[idx + 3] = 140;
         }
       }
-      bCtx.putImageData(blurredData, 0, 0);
-      setImageUrl(blurred.toDataURL());
-    } else {
-      setImageUrl(canvas.toDataURL());
-    }
+
+      ctx.putImageData(imageData, 0, 0);
+
+      // Gaussian blur
+      const blurred = document.createElement("canvas");
+      blurred.width = GRID;
+      blurred.height = GRID;
+      const bCtx = blurred.getContext("2d");
+      if (bCtx) {
+        bCtx.filter = "blur(3px)";
+        bCtx.drawImage(canvas, 0, 0);
+        const bd = bCtx.getImageData(0, 0, GRID, GRID).data;
+        const clean = bCtx.createImageData(GRID, GRID);
+        for (let i = 0; i < GRID * GRID; i++) {
+          clean.data[i * 4] = bd[i * 4];
+          clean.data[i * 4 + 1] = bd[i * 4 + 1];
+          clean.data[i * 4 + 2] = bd[i * 4 + 2];
+          clean.data[i * 4 + 3] = mask[i] ? bd[i * 4 + 3] : 0;
+        }
+        bCtx.putImageData(clean, 0, 0);
+        setImageUrl(blurred.toDataURL());
+      } else {
+        setImageUrl(canvas.toDataURL());
+      }
+    });
   }, [sensors, border]);
 
   if (!imageUrl) return null;
 
-  return (
-    <ImageOverlay
-      url={imageUrl}
-      bounds={BOUNDS}
-      opacity={1}
-      zIndex={200}
-    />
-  );
+  return <ImageOverlay url={imageUrl} bounds={BOUNDS} opacity={1} zIndex={200} />;
 }

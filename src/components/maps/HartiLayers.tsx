@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { TileLayer } from "react-leaflet";
 import { GeoJsonLayer } from "./GeoJsonLayer";
 import { NationalAqiLayer } from "./NationalAqiLayer";
 import { METRO_COLORS } from "@/lib/constants";
@@ -185,9 +186,15 @@ export default function HartiLayers(props: HartiLayersProps) {
   }
 
   if (activeTab === "auto") {
-    // No custom overlay — OSM tiles already show all roads nationally.
-    // The sidebar explains what the map shows.
-    return null;
+    // OSM HOT tiles highlight roads better than standard tiles
+    return (
+      <TileLayer
+        key="hot-tiles"
+        url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> HOT'
+        opacity={0.85}
+      />
+    );
   }
 
   if (activeTab === "transport") {
