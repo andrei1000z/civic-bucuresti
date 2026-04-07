@@ -186,13 +186,14 @@ export default function HartiLayers(props: HartiLayersProps) {
   }
 
   if (activeTab === "auto") {
-    // Replace base map with OSM standard (bright, roads visible)
+    // Bright OSM tiles overlaid — className removes dark mode invert filter
     return (
       <TileLayer
-        key="osm-standard"
+        key="osm-bright"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         zIndex={500}
+        className="leaflet-tile-bright"
       />
     );
   }

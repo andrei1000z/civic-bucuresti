@@ -207,6 +207,11 @@ h1, h2, h3, h4, h5, h6 {
 .dark .leaflet-tile {
   filter: brightness(0.7) invert(1) contrast(1) hue-rotate(200deg) saturate(0.4) brightness(0.9);
 }
+/* Override: no dark filter on bright overlay tile layers */
+.dark .leaflet-tile-bright .leaflet-tile,
+.dark .leaflet-tile-bright.leaflet-tile {
+  filter: none !important;
+}
 
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
