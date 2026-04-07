@@ -186,28 +186,47 @@ export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}
                 Drumuri România
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                Rețeaua rutieră completă din România — autostrăzi, drumuri naționale, județene și locale. Date OpenStreetMap live.
+                131.834 segmente de drumuri din toată România — date reale OpenStreetMap.
               </p>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#E07000" }} />
-                  <p className="text-xs text-[var(--color-text-muted)]">Autostrăzi și drumuri expres</p>
+                  <span className="w-6 h-1 rounded-full mt-2 shrink-0" style={{ background: "#DC2626" }} />
+                  <div>
+                    <p className="text-xs font-medium">Autostrăzi</p>
+                    <p className="text-[10px] text-[var(--color-text-muted)]">A1, A2, A3, A10 — 3.328 segmente</p>
+                  </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#D04040" }} />
-                  <p className="text-xs text-[var(--color-text-muted)]">Drumuri naționale</p>
+                  <span className="w-6 h-1 rounded-full mt-2 shrink-0" style={{ background: "#F97316" }} />
+                  <div>
+                    <p className="text-xs font-medium">Drumuri naționale (trunk)</p>
+                    <p className="text-[10px] text-[var(--color-text-muted)]">Drumuri expres, DN principale</p>
+                  </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#FFD700" }} />
-                  <p className="text-xs text-[var(--color-text-muted)]">Drumuri județene</p>
+                  <span className="w-6 h-1 rounded-full mt-2 shrink-0" style={{ background: "#EAB308" }} />
+                  <div>
+                    <p className="text-xs font-medium">Drumuri naționale (primary)</p>
+                    <p className="text-[10px] text-[var(--color-text-muted)]">48.038 segmente DN</p>
+                  </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="w-4 h-1 rounded-full mt-2 shrink-0" style={{ background: "#CCCCCC" }} />
-                  <p className="text-xs text-[var(--color-text-muted)]">Drumuri locale și străzi</p>
+                  <span className="w-6 h-1 rounded-full mt-2 shrink-0" style={{ background: "#FBBF24" }} />
+                  <div>
+                    <p className="text-xs font-medium">Drumuri județene</p>
+                    <p className="text-[10px] text-[var(--color-text-muted)]">43.509 segmente DJ</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-1 rounded-full mt-2 shrink-0" style={{ background: "#94A3B8" }} />
+                  <div>
+                    <p className="text-xs font-medium">Drumuri comunale</p>
+                    <p className="text-[10px] text-[var(--color-text-muted)]">36.959 segmente DC</p>
+                  </div>
                 </div>
               </div>
-              <p className="text-xs text-[var(--color-text-muted)] mt-4 italic">
-                Culorile sunt cele standard din harta OpenStreetMap. Dă zoom pentru detalii.
+              <p className="text-xs text-[var(--color-text-muted)] mt-4">
+                Click pe orice drum pentru a vedea numărul și numele.
               </p>
             </div>
           )}
