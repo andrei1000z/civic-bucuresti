@@ -389,22 +389,26 @@ export function SesizareForm() {
   const subsemnatul = gen ? subsemnatulForm(gen) : "Subsemnatul(a)";
   const domiciliat = gen ? domiciliatForm(gen) : "domiciliat(ă)";
 
-  const previewText = data.formal_text || `Bună ziua,
+  const today = new Date().toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" });
 
-${subsemnatul} ${data.nume || "[NUMELE]"}, ${domiciliat} în ${data.adresa || "[ADRESA]"}, mă adresez instituției dumneavoastră cu următoarea sesizare.
+  const previewText = data.formal_text || `${subsemnatul} ${data.nume || "[NUMELE]"}, ${domiciliat} în ${data.adresa || "[ADRESA]"}, vă adresez prezenta sesizare în temeiul OG 27/2002 privind reglementarea activității de soluționare a petițiilor.
 
-Vă aduc la cunoștință faptul că am observat ${tipInfo?.label.toLowerCase() || "[PROBLEMA]"}, situată la adresa: ${data.locatie || "[LOCAȚIA]"}. ${data.descriere || "[DESCRIEREA PROBLEMEI]"}
+Vă sesizez cu privire la ${tipInfo?.label.toLowerCase() || "[tipul problemei]"}, constatată în data de ${today}, în următoarea locație: ${data.locatie || "[LOCAȚIA]"}.
 
-Vă propun, ca soluție concretă, intervenția echipelor competente pentru remedierea situației semnalate.
+${data.descriere || "[DESCRIEREA DETALIATĂ A PROBLEMEI]"}
 
-Vă mulțumesc anticipat pentru promptitudine. Vă rog să îmi comunicați numărul de înregistrare al prezentei sesizări, precum și termenul estimativ de soluționare, conform prevederilor OG 27/2002.
+Având în vedere cele expuse, vă solicit:
+1. Remedierea problemei semnalate în cel mai scurt timp posibil.
+2. Comunicarea unui răspuns în termenul legal de 30 de zile, conform art. 8 din OG 27/2002.
+3. Confirmarea înregistrării prezentei sesizări cu număr de înregistrare.
 
 Cu respect,
-${data.nume || "[NUMELE]"}`;
+${data.nume || "[NUMELE]"}
+${today}`;
 
   const mailtoLink = () => {
     if (!recipients) return "#";
-    const subject = `Sesizare ${tipInfo?.label ?? ""} - ${data.locatie}`;
+    const subject = `Sesizare — ${tipInfo?.label ?? "problemă"} — ${data.locatie}`;
     const to = recipients.primary.map((a) => a.email).join(",");
     const cc = recipients.cc.length > 0 ? `&cc=${recipients.cc.map((a) => a.email).join(",")}` : "";
     return `mailto:${to}?subject=${encodeURIComponent(subject)}${cc}&body=${encodeURIComponent(previewText)}`;
