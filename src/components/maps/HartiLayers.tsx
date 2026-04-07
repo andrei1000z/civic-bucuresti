@@ -173,7 +173,7 @@ export default function HartiLayers(props: HartiLayersProps) {
     return (
       <GeoJsonLayer
         key="bike"
-        url="/geojson/bicicleta.json" /* TODO: replace with bicicleta-romania.json when available */
+        url="/geojson/bicicleta-romania.json"
         style={memoizedBikeStyle}
         popupFormatter={bikePopup}
       />
@@ -187,7 +187,7 @@ export default function HartiLayers(props: HartiLayersProps) {
           <GeoJsonLayer key="parks" url="/geojson/parcuri-romania.json" style={parkStyle} popupFormatter={parkPopup} />
         )}
         {showPietonal && (
-          <GeoJsonLayer key="ped-ok" url="/geojson/pietonal-accesibil.json" style={pedestrianAccessStyle} popupFormatter={pedestrianPopup} />
+          <GeoJsonLayer key="ped-ok" url="/geojson/pietonal-romania.json" style={pedestrianAccessStyle} popupFormatter={pedestrianPopup} />
         )}
         <GeoJsonLayer key="ped-no" url="/geojson/pietonal-neaccesibil.json" style={pedestrianRestrictedStyle} popupFormatter={pedestrianRestrictedPopup} />
       </>
