@@ -61,12 +61,12 @@ Primești o descriere a unei probleme (1-3 propoziții) și decizi ce tip se pot
 
 LISTA DE TIPURI (alege DOAR UNUL):
 - "groapa" — gropi în asfalt, denivelări carosabil, pietre căzute
-- "trotuar" — trotuar degradat, borduri sparte, plăci ridicate, alee spară
+- "trotuar" — trotuar degradat, borduri sparte, plăci ridicate, alee spartă (NU include montare stâlpișori)
 - "iluminat" — becuri arse, stâlpi defecți, zone întunecate noaptea
 - "copac" — copaci periculoși, căzuți, ramuri rupte, uscați
 - "gunoi" — tomberoane pline, depozitare ilegală, containere, salubrizare
 - "parcare" — mașini parcate ilegal, pe trotuar, blocaje, parcare sălbatică
-- "stalpisori" — nevoie montare stâlpișori anti-parcare, bariere fizice
+- "stalpisori" — ORICE menționează stâlpișori, bollards, anti-parcare, protecție trotuar, bariere fizice pe trotuar. PRIORITATE MAXIMĂ: dacă textul conține "stâlpișori" sau "stâlpisor" → alege NEAPĂRAT "stalpisori", NU "trotuar".
 - "canalizare" — inundație, capace lipsă, gură canal înfundată
 - "semafor" — semafor defect, semnalizare stricată, indicatoare rutiere
 - "pietonal" — traversare periculoasă, zebră ștearsă, lipsă trecere pietoni

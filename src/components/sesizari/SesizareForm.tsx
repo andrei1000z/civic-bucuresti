@@ -240,15 +240,15 @@ export function SesizareForm() {
     let reverseCalled = false;
     let lastAccuracy = Infinity;
     let hasAnyPosition = false;
-    const target = 15; // meters — stop refining when we reach GPS precision
+    const target = 10; // meters — stop refining at 10m precision
     setGpsAccuracy(null);
 
-    // Reverse geocode once we have a reasonable first fix (< 100m accuracy)
+    // Reverse geocode to get address from coordinates
     const maybeReverseGeocode = async (lat: number, lng: number) => {
       if (reverseCalled) return;
       reverseCalled = true;
       try {
-        const res = await fetch(`/api/geocoding?lat=${lat}&lng=${lng}`);
+        const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
         const json = await res.json();
         if (json.data) {
           setData((d) => ({
@@ -256,6 +256,9 @@ export function SesizareForm() {
             locatie: d.locatie || json.data.address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
             sector: d.sector || json.data.sector || d.sector,
           }));
+          if (json.data.countyCode) setDetectedCounty(json.data.countyCode);
+          if (json.data.countyName) setDetectedCountyName(json.data.countyName);
+          if (json.data.locality) setDetectedLocality(json.data.locality);
         } else {
           setData((d) => ({ ...d, locatie: d.locatie || `${lat.toFixed(5)}, ${lng.toFixed(5)}` }));
         }
@@ -271,16 +274,16 @@ export function SesizareForm() {
         const lng = pos.coords.longitude;
         const acc = pos.coords.accuracy;
 
-        // Only update if this fix is more precise than the last one
+        // Only update if more precise
         if (acc < lastAccuracy) {
           lastAccuracy = acc;
           setData((d) => ({ ...d, lat, lng }));
           setGpsAccuracy(acc);
 
-          // First time we get a reasonable fix, do reverse geocode
-          if (acc < 200) maybeReverseGeocode(lat, lng);
+          // Reverse geocode on first reasonable fix
+          if (acc < 150) maybeReverseGeocode(lat, lng);
 
-          // Reached target precision — stop watching
+          // Reached target — stop
           if (acc <= target) {
             navigator.geolocation.clearWatch(watchId);
             setGeoLoading(false);
@@ -292,20 +295,26 @@ export function SesizareForm() {
         setGeoLoading(false);
         if (!hasAnyPosition) {
           if (err.code === 1) {
-            setError("Permisiune refuzată — activează locația în setările browserului.");
+            setError("Permisiune refuzată — activează locația din setările browserului.");
           } else if (err.code === 2) {
-            setError("Locație indisponibilă — verifică dacă e activată locația în browser.");
+            setError("Locație indisponibilă — verifică GPS-ul dispozitivului.");
           } else {
-            setError("Timeout — reîncearcă, sau introdu locația manual.");
+            setError("Timeout — reîncearcă sau introdu adresa manual.");
           }
         }
       },
       {
-        enableHighAccuracy: true, // use GPS for max precision
-        timeout: 20000, // 20s max wait for high-precision fix
-        maximumAge: 0, // always fresh reading
+        enableHighAccuracy: true,
+        timeout: 30000, // 30s max
+        maximumAge: 0,
       }
     );
+
+    // Safety: stop watching after 30s even if target not reached
+    setTimeout(() => {
+      navigator.geolocation.clearWatch(watchId);
+      if (hasAnyPosition) setGeoLoading(false);
+    }, 30000);
 
     // Safety: after 12s, stop watching even if we haven't hit target accuracy
     // (user doesn't want to wait forever; we use whatever best fix we got)
@@ -391,12 +400,16 @@ export function SesizareForm() {
 
   const today = new Date().toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" });
 
+  const evidenceText = imagini.length > 0
+    ? `\nAnexez ${imagini.length} ${imagini.length === 1 ? "fotografie" : "fotografii"} realizate la fața locului.\n`
+    : "";
+
   const previewText = data.formal_text || `${subsemnatul} ${data.nume || "[NUMELE]"}, ${domiciliat} în ${data.adresa || "[ADRESA]"}, vă adresez prezenta sesizare în temeiul OG 27/2002 privind reglementarea activității de soluționare a petițiilor.
 
 Vă sesizez cu privire la ${tipInfo?.label.toLowerCase() || "[tipul problemei]"}, constatată în data de ${today}, în următoarea locație: ${data.locatie || "[LOCAȚIA]"}.
 
 ${data.descriere || "[DESCRIEREA DETALIATĂ A PROBLEMEI]"}
-
+${evidenceText}
 Având în vedere cele expuse, vă solicit:
 1. Remedierea problemei semnalate în cel mai scurt timp posibil.
 2. Comunicarea unui răspuns în termenul legal de 30 de zile, conform art. 8 din OG 27/2002.
