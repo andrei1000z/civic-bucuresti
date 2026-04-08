@@ -31,6 +31,22 @@ function getSupabase() {
   );
 }
 
+async function getRelatedArticles(stire: StireRow): Promise<StireRow[]> {
+  try {
+    // Get articles from same category + same counties, excluding current
+    const { data } = await getSupabase()
+      .from("stiri_cache")
+      .select("*")
+      .neq("id", stire.id)
+      .eq("category", stire.category)
+      .order("published_at", { ascending: false })
+      .limit(4);
+    return (data ?? []) as StireRow[];
+  } catch {
+    return [];
+  }
+}
+
 async function getStire(id: string): Promise<StireRow | null> {
   try {
     const { data, error } = await getSupabase()
@@ -79,6 +95,7 @@ export default async function StireDetailPage({
   const stire = await getStire(id);
   if (!stire) notFound();
 
+  const related = await getRelatedArticles(stire);
   const sourceColor = SOURCE_COLORS[stire.source] ?? "#64748b";
 
   return (
@@ -232,6 +249,48 @@ export default async function StireDetailPage({
           </div>
         </aside>
       </div>
+
+      {/* Related articles */}
+      {related.length > 0 && (
+        <div className="mt-10">
+          <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-5">
+            Știri similare
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {related.map((r) => (
+              <Link
+                key={r.id}
+                href={`/stiri/${r.id}`}
+                className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] overflow-hidden hover:shadow-[var(--shadow-md)] transition-all"
+              >
+                <div className="relative h-32 bg-gradient-to-br from-slate-600 to-slate-800">
+                  {r.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={r.image_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-4xl font-bold text-white/20">{r.source.charAt(0)}</span>
+                    </div>
+                  )}
+                  <div className="absolute top-2 left-2">
+                    <Badge bgColor={SOURCE_COLORS[r.source] ?? "#64748b"} color="white" className="text-[9px]">
+                      {r.source}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="p-3">
+                  <h3 className="text-sm font-semibold line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
+                    {r.title}
+                  </h3>
+                  <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
+                    {formatDateTime(r.published_at)}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
