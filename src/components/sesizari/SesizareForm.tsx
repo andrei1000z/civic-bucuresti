@@ -239,8 +239,23 @@ export function SesizareForm() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "AI eroare");
-      // AI only updates formal_text — NOT titlu/descriere (user's input preserved)
-      setData((d) => ({ ...d, formal_text: json.data.formal_text }));
+      // AI updates formal_text + generates a short formal title
+      const formalText = json.data.formal_text as string;
+      // Extract title: take the "Vă sesizez cu privire la..." part, or first sentence
+      let aiTitle = "";
+      const sesizezMatch = formalText.match(/Vă sesizez cu privire la ([^,.]+)/i);
+      if (sesizezMatch) {
+        aiTitle = sesizezMatch[1].trim();
+        // Capitalize first letter
+        aiTitle = aiTitle.charAt(0).toUpperCase() + aiTitle.slice(1);
+        // Limit to 80 chars
+        if (aiTitle.length > 80) aiTitle = aiTitle.slice(0, 77) + "...";
+      }
+      setData((d) => ({
+        ...d,
+        formal_text: formalText,
+        titlu: aiTitle || d.titlu,
+      }));
     } catch (e) {
       setError(e instanceof Error ? e.message : "AI temporar indisponibil");
     } finally {
