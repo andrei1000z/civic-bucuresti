@@ -425,7 +425,9 @@ export function SesizareForm() {
   const subsemnatul = gen ? subsemnatulForm(gen) : "Subsemnatul(a)";
   const domiciliat = gen ? domiciliatForm(gen) : "domiciliat(ă)";
 
-  const today = new Date().toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" });
+  const LUNI_RO = ["ianuarie","februarie","martie","aprilie","mai","iunie","iulie","august","septembrie","octombrie","noiembrie","decembrie"];
+  const now = new Date();
+  const today = `${now.getDate()} ${LUNI_RO[now.getMonth()]} ${now.getFullYear()}`;
 
   // Format constatare date for email
   const constatareText = unknownDate
@@ -433,7 +435,7 @@ export function SesizareForm() {
     : (() => {
         try {
           const d = new Date(`${dataConstatarii}T${oraConstatarii}`);
-          return `, constatată în data de ${d.toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })} la ora ${oraConstatarii}`;
+          return `, constatată în data de ${d.getDate()} ${LUNI_RO[d.getMonth()]} ${d.getFullYear()} la ora ${oraConstatarii}`;
         } catch {
           return `, constatată în data de ${dataConstatarii} la ora ${oraConstatarii}`;
         }
