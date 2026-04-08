@@ -557,10 +557,16 @@ ${today}`;
             />
             <span className="text-xs text-[var(--color-text-muted)]">Nu știu data/ora exactă</span>
           </label>
-          {!unknownDate && (
+          {!unknownDate && (() => {
+            const [yr, mo, dy] = dataConstatarii.split("-").map(Number);
+            const isLeap = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+            const daysInMonth = [0,31, isLeap(yr) ? 29 : 28, 31,30,31,30,31,31,30,31,30,31][mo] || 31;
+            // Auto-clamp day if month changed
+            if (dy > daysInMonth) setDataConstatarii(`${yr}-${String(mo).padStart(2,"0")}-${String(daysInMonth).padStart(2,"0")}`);
+            return (
             <div className="grid grid-cols-5 gap-1.5">
               <select value={dataConstatarii.split("-")[2] || ""} onChange={(e) => { const p = dataConstatarii.split("-"); setDataConstatarii(`${p[0]}-${p[1]}-${e.target.value.padStart(2,"0")}`); }} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]">
-                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (<option key={d} value={String(d).padStart(2,"0")}>{d}</option>))}
+                {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => (<option key={d} value={String(d).padStart(2,"0")}>{d}</option>))}
               </select>
               <select value={dataConstatarii.split("-")[1] || ""} onChange={(e) => { const p = dataConstatarii.split("-"); setDataConstatarii(`${p[0]}-${e.target.value}-${p[2]}`); }} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)] col-span-2">
                 {["Ian","Feb","Mar","Apr","Mai","Iun","Iul","Aug","Sep","Oct","Nov","Dec"].map((m, i) => (<option key={i} value={String(i+1).padStart(2,"0")}>{m}</option>))}
@@ -572,7 +578,8 @@ ${today}`;
                 {Array.from({ length: 12 }, (_, i) => i * 5).map((m) => (<option key={m} value={String(m).padStart(2,"0")}>{String(m).padStart(2,"0")}m</option>))}
               </select>
             </div>
-          )}
+            );
+          })()}
         </div>
 
         <Field label="Descrierea problemei" required>
