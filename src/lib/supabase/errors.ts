@@ -19,7 +19,12 @@ export function humanizeSupabaseError(err: unknown): { message: string; status: 
   if (code === "23505") return { message: "Înregistrare duplicată — deja există.", status: 409 };
   if (code === "23503") return { message: "Referință invalidă — resursa nu mai există.", status: 400 };
   if (code === "23514") return { message: "Date invalide — nu respectă constrângerile.", status: 400 };
-  if (code === "23502") return { message: "Câmp obligatoriu lipsă.", status: 400 };
+  if (code === "23502") {
+    const detail = (e?.details ?? e?.message ?? "").toLowerCase();
+    if (detail.includes("sector")) return { message: "Sectorul nu a fost detectat. Folosește GPS sau introdu locația manual.", status: 400 };
+    if (detail.includes("titlu")) return { message: "Titlul sesizării lipsește. Adaugă o descriere mai detaliată.", status: 400 };
+    return { message: "Un câmp obligatoriu lipsește. Verifică formularul.", status: 400 };
+  }
   if (code === "PGRST301" || msg.includes("JWT")) return { message: "Sesiune expirată — autentifică-te din nou.", status: 401 };
   if (code === "PGRST116") return { message: "Nu a fost găsit.", status: 404 };
 

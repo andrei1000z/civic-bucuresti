@@ -115,7 +115,7 @@ export async function createSesizare(input: CreateSesizareInput): Promise<Sesiza
       tip: input.tip,
       titlu: input.titlu,
       locatie: input.locatie,
-      sector: input.sector,
+      sector: input.sector ?? "",
       lat: input.lat,
       lng: input.lng,
       descriere: input.descriere,
