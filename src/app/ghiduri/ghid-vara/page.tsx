@@ -20,14 +20,14 @@ export default function GhidVaraPage() {
   return (
     <GhidLayout
       title="Ghid de vară — cum supraviețuiești caniculei"
-      subtitle="Bucureștiul ajunge la 42°C vara. Iată cum treci peste fără probleme de sănătate."
+      subtitle="Temperaturi de peste 40°C în multe zone ale României. Iată cum treci peste fără probleme de sănătate."
       icon="☀️"
       gradient="from-amber-500 via-orange-600 to-red-700"
       chapters={chapters}
       stats={[
-        { label: "Max istoric București", value: "42.4°C" },
-        { label: "Fântâni gratuite", value: "10+" },
-        { label: "Parcuri mari", value: "7" },
+        { label: "Max istoric România", value: "44.5°C" },
+        { label: "Fântâni în parcuri", value: "Verifică local" },
+        { label: "Telefon urgențe", value: "112" },
       ]}
     >
       <Chapter id="cod-rosu" title="Ce e codul roșu de caniculă" number={1}>
@@ -44,7 +44,7 @@ export default function GhidVaraPage() {
           <p>- Evită deplasările între 11:00-18:00.</p>
           <p>- Nu faci efort fizic afară.</p>
           <p>- Fii foarte atent la copii și vârstnici.</p>
-          <p>- Autoritățile deschid puncte de prim-ajutor termic în parcuri.</p>
+          <p>- Autoritățile locale deschid puncte de prim-ajutor termic în parcuri și instituții publice.</p>
         </Callout>
         <h3>Cum primești alertele</h3>
         <ul>
@@ -82,55 +82,63 @@ export default function GhidVaraPage() {
 
       <Chapter id="apa" title="Surse de apă gratuită" number={3}>
         <p>
-          PMB a instalat fântâni arteziene în principalele zone publice. Apa e potabilă,
-          verificată periodic de ApaNova.
+          Multe primării au instalat fântâni arteziene în parcuri și zone publice centrale.
+          Apa este potabilă, verificată periodic de operatorul local de apă.
         </p>
+        <h3>Unde găsești apă gratuită</h3>
         <ul>
-          <li>Parcul Cișmigiu — fântâna centrală</li>
-          <li>Parcul Herăstrău — intrări multiple</li>
-          <li>Parcul Tineretului — lângă terenurile de joacă</li>
-          <li>Parcul IOR — aleea centrală</li>
-          <li>Parcul Carol — lângă Mausoleu</li>
-          <li>Piața Universității — lângă Banca Națională</li>
-          <li>Piața Romană — în mijlocul scuarului</li>
-          <li>Bulevardul Unirii — pe mijloc</li>
-          <li>Parcul Circului — intrarea din Bd. Aviatorilor</li>
-          <li>Piața Constituției — în fața Palatului Parlamentului</li>
+          <li>Fântâni publice din parcurile centrale ale orașului</li>
+          <li>Puncte de hidratare amenajate de primărie în perioadele de caniculă</li>
+          <li>Instituții publice (primărie, bibliotecă, muzee) — poți cere un pahar de apă</li>
+          <li>Biserici și lăcașuri de cult — multe au fântâni în curte</li>
+          <li>Piețe agroalimentare — au de regulă robinete publice</li>
         </ul>
+        <Callout type="tip" title="Verifică pe site-ul primăriei">
+          În perioadele de caniculă, multe primării publică o hartă cu punctele de distribuție
+          gratuită a apei și cu centrele de răcire. Urmărește anunțurile locale.
+        </Callout>
       </Chapter>
 
       <Chapter id="parcuri" title="Parcuri cu umbră recomandate" number={4}>
         <p>
           Nu toate parcurile sunt la fel — unele au mai mulți arbori maturi care oferă umbră
-          reală. Cele mai bune 4 pentru vara:
+          reală. Caută parcuri cu aceste caracteristici:
         </p>
         <ul>
           <li>
-            <strong>Herăstrău (Regele Mihai I)</strong> — 110 ha, cea mai multă umbră și lacul.
+            <strong>Arbori maturi și deși:</strong> parcurile mai vechi au de obicei platani, tei
+            și stejari care oferă umbră densă.
           </li>
           <li>
-            <strong>IOR (Titan)</strong> — alei bogate în copaci maturi, lac.
+            <strong>Prezența apei:</strong> parcurile cu lac sau râu sunt cu câteva grade mai
+            răcoroase în perioadele de caniculă.
           </li>
           <li>
-            <strong>Tineretului</strong> — 80 ha, multe zone umbrite.
+            <strong>Zone cu iarbă:</strong> iarba reflectă mai puțină căldură decât betonul sau
+            asfaltul — caută zone verzi.
           </li>
           <li>
-            <strong>Carol I</strong> — istoric, umbră densă de platani.
+            <strong>Fântâni și jocuri de apă:</strong> excelente pentru copii și pentru a te
+            răcori rapid.
           </li>
         </ul>
       </Chapter>
 
       <Chapter id="piscine" title="Piscine publice" number={5}>
-        <p>Prețuri actuale pentru sezonul estival:</p>
+        <p>
+          Majoritatea orașelor mari din România au cel puțin o piscină publică sau un ștrand.
+          Prețurile variază de obicei între 20 și 60 lei pe zi.
+        </p>
+        <h3>Cum afli ce opțiuni ai</h3>
         <ul>
-          <li><strong>Complexul Lia Manoliu</strong> — 30-40 lei ziua</li>
-          <li><strong>Sala Polivalentă (exterior)</strong> — 25-35 lei</li>
-          <li><strong>Bazinul Olimpic Floreasca</strong> — 35 lei</li>
-          <li><strong>Ștrand Băneasa</strong> — 45-60 lei</li>
+          <li>Verifică site-ul primăriei locale pentru lista piscinelor și ștrandurilor publice</li>
+          <li>Caută pe Google Maps &quot;piscină publică&quot; sau &quot;ștrand&quot; în zona ta</li>
+          <li>Cluburile sportive municipale au adesea prețuri accesibile</li>
+          <li>Unele primării oferă acces gratuit pentru copii și pensionari în perioadele de caniculă</li>
         </ul>
-        <Callout type="info" title="Card cetățean">
-          Unele primării de sector oferă acces redus sau gratuit la piscine pentru copii sub 14
-          ani și pensionari. Întreabă la primăria ta.
+        <Callout type="info" title="Reduceri și gratuități">
+          Prin lege, primăriile pot oferi acces redus sau gratuit la piscine pentru copii sub 14
+          ani și pensionari. Întreabă la primăria ta sau la direcția de sport locală.
         </Callout>
       </Chapter>
 

@@ -3,16 +3,16 @@ import { GhidLayout, Chapter, Callout } from "@/components/ghiduri/GhidLayout";
 
 export const metadata: Metadata = {
   title: "Ghid cutremur — ce faci înainte, în timpul și după",
-  description: "Zona seismică Vrancea, pregătirea casei, rucsacul de urgență, clădirile cu bulină roșie.",
+  description: "Zona seismică Vrancea, pregătirea casei, rucsacul de urgență, clădirile cu risc seismic.",
   alternates: { canonical: "/ghiduri/ghid-cutremur" },
 };
 
 const chapters = [
-  { id: "risc", title: "București și riscul seismic" },
+  { id: "risc", title: "România și riscul seismic" },
   { id: "inainte", title: "Înainte de cutremur" },
   { id: "timpul", title: "În timpul cutremurului" },
   { id: "dupa", title: "După cutremur" },
-  { id: "buline", title: "Clădirile cu bulină roșie" },
+  { id: "buline", title: "Clădirile cu risc seismic" },
   { id: "checklist", title: "Checklist & aplicații" },
 ];
 
@@ -20,26 +20,26 @@ export default function GhidCutremurPage() {
   return (
     <GhidLayout
       title="Ghid cutremur — ce faci înainte, în timpul și după"
-      subtitle="Bucureștiul este într-o zonă cu risc seismic ridicat. Pregătește-te acum, nu după."
+      subtitle="România se află într-o zonă cu risc seismic ridicat. Pregătește-te acum, nu după."
       icon="🌍"
       gradient="from-red-700 via-rose-800 to-red-900"
       chapters={chapters}
       stats={[
-        { label: "Zona seismică", value: "IV" },
+        { label: "Zona seismică", value: "Vrancea" },
         { label: "Magnitudine estimată", value: "7-7.5" },
-        { label: "Clădiri cu risc", value: "1.200+" },
+        { label: "Orașe afectate", value: "Multe" },
       ]}
     >
-      <Chapter id="risc" title="București și riscul seismic" number={1}>
+      <Chapter id="risc" title="România și riscul seismic" number={1}>
         <p>
-          Bucureștiul se află la 160 km de zona seismică Vrancea — una dintre cele mai active
+          România se află în apropierea zonei seismice Vrancea — una dintre cele mai active
           din Europa. Aici se produc cutremure <strong>intermediare</strong> (90-170 km adâncime)
-          care afectează suprafețe foarte mari.
+          care afectează suprafețe foarte mari, fiind resimțite în întreaga țară.
         </p>
         <h3>Istoric</h3>
         <ul>
           <li><strong>1940 (noiembrie):</strong> 7.7 Richter, peste 1.000 morți.</li>
-          <li><strong>1977 (martie):</strong> 7.4 Richter, 1.578 morți în București.</li>
+          <li><strong>1977 (martie):</strong> 7.4 Richter, 1.578 morți, mii de clădiri afectate.</li>
           <li><strong>1986:</strong> 7.1 Richter, pagube reduse.</li>
           <li><strong>1990:</strong> 2 cutremure de 6.7-6.9, pagube moderate.</li>
         </ul>
@@ -128,22 +128,22 @@ export default function GhidCutremurPage() {
         </Callout>
       </Chapter>
 
-      <Chapter id="buline" title="Clădirile cu bulină roșie" number={5}>
+      <Chapter id="buline" title="Clădirile cu risc seismic" number={5}>
         <p>
-          În București există <strong>peste 1.200 de clădiri cu bulină roșie</strong> — încadrate
-          în clasa I de risc seismic. Acestea sunt considerate cu risc major de prăbușire la un
-          cutremur mare.
+          În România există <strong>mii de clădiri încadrate în clase de risc seismic</strong> — de la
+          clasa I (risc major de prăbușire) până la clasa IV. Majoritatea sunt construcții vechi,
+          ridicate înainte de adoptarea normelor moderne de construcție.
         </p>
         <h3>Cum recunoști</h3>
         <ul>
           <li>Autocolant/placă roșie la intrare cu text despre riscul seismic</li>
-          <li>Listă publică pe site-ul PMB → Direcția Imobile</li>
-          <li>Majoritatea în zonele Cotroceni, Calea Moșilor, Rahova, Ferentari — clădiri construite înainte de 1940</li>
+          <li>Lista clădirilor cu risc este publică — verifică pe site-ul primăriei locale, secțiunea urbanism</li>
+          <li>Majoritatea sunt clădiri construite înainte de 1940, cu structură fragilă</li>
         </ul>
         <h3>Ce faci dacă locuiești într-o astfel de clădire</h3>
         <ul>
           <li>Informează-te oficial la asociația de proprietari.</li>
-          <li>PMB oferă fonduri pentru consolidare în anumite programe.</li>
+          <li>Verifică dacă primăria locală are programe de consolidare — unele oferă fonduri prin direcția de urbanism.</li>
           <li>Dacă poți, planifică mutarea temporară în caz de alerte.</li>
           <li>Pregătește un plan rapid de ieșire din clădire.</li>
         </ul>

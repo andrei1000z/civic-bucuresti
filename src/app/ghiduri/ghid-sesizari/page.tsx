@@ -37,26 +37,29 @@ export default function GhidSesizariPage() {
         <ul>
           <li>Sunt <strong>concrete</strong> — au locație exactă și detalii verificabile</li>
           <li>Sunt <strong>documentate</strong> — poze, coordonate GPS, date</li>
-          <li>Țin de <strong>competența PMB/sectorului</strong> (nu de alte instituții)</li>
+          <li>Țin de <strong>competența autorității</strong> căreia te adresezi</li>
           <li>Sunt <strong>formulate politicos</strong> — fără jigniri sau amenințări</li>
-          <li>Cer un lucru <strong>realizabil</strong> (nu "rezolvați sărăcia")</li>
+          <li>Cer un lucru <strong>realizabil</strong> (nu &quot;rezolvați sărăcia&quot;)</li>
         </ul>
 
         <Callout type="warning" title="De ce sunt respinse sesizările">
-          <p>— Prea generice ("gropi pe toate străzile")</p>
+          <p>— Prea generice (&quot;gropi pe toate străzile&quot;)</p>
           <p>— Aparțin altei instituții (ex: Poliție, ISU, ANAF)</p>
-          <p>— Adresate primăriei greșite (PMB vs sector)</p>
+          <p>— Adresate autorității greșite (primărie vs consiliu județean vs prefectură)</p>
           <p>— Lipsă date de contact ale petentului</p>
         </Callout>
 
-        <h3>Unde e granița PMB vs Sector?</h3>
+        <h3>Cum afli cine e responsabil?</h3>
         <p>
-          <strong>PMB gestionează:</strong> bulevarde majore, arterele principale, metroul, STB,
-          termoficarea, parcurile mari (Herăstrău, Cișmigiu, IOR).
+          <strong>Primăria locală gestionează:</strong> străzi locale, trotuare, iluminat public,
+          salubritate, parcuri, școli, grădinițe, transport public local.
         </p>
         <p>
-          <strong>Primăria Sectorului gestionează:</strong> străzi secundare, alei, trotuare,
-          salubritate, parcuri mici, școli, grădinițe, iluminat local.
+          <strong>Consiliul județean gestionează:</strong> drumuri județene, spitale județene,
+          protecția copilului, aeroporturi locale.
+        </p>
+        <p>
+          <strong>Prefectura verifică:</strong> legalitatea actelor emise de primărie și consiliul local.
         </p>
       </Chapter>
 
@@ -64,7 +67,7 @@ export default function GhidSesizariPage() {
         <h3>Structura ideală</h3>
         <ol>
           <li><strong>Identificare petent:</strong> nume complet, adresă, CI, telefon/email</li>
-          <li><strong>Obiect:</strong> "Sesizare privind [problema] pe [locația]"</li>
+          <li><strong>Obiect:</strong> &quot;Sesizare privind [problema] pe [locația]&quot;</li>
           <li><strong>Descriere factuală:</strong> ce ai observat, când, cât durează</li>
           <li><strong>Impact:</strong> cum afectează cetățenii / siguranța</li>
           <li><strong>Cerere:</strong> ce ceri concret să facă autoritatea</li>
@@ -74,67 +77,65 @@ export default function GhidSesizariPage() {
 
         <Callout type="tip" title="AI-ul te poate ajuta">
           Pe această platformă, la <strong>Sesizări → Fă o sesizare</strong>, bagi descrierea
-          colocvial (chiar și cu greșeli) și apesi <strong>✨ Îmbunătățește cu AI</strong>. AI-ul
+          colocvial (chiar și cu greșeli) și apesi <strong>Îmbunătățește cu AI</strong>. AI-ul
           generează textul formal în limbaj juridic corect.
         </Callout>
 
         <h3>Formule magice</h3>
         <ul>
-          <li><em>"În temeiul OG 27/2002, solicit răspuns în termenul legal de 30 de zile."</em></li>
-          <li><em>"Vă rog să dispuneți verificarea la fața locului."</em></li>
-          <li><em>"Anexez fotografii relevante pentru documentare."</em></li>
+          <li><em>&quot;În temeiul OG 27/2002, solicit răspuns în termenul legal de 30 de zile.&quot;</em></li>
+          <li><em>&quot;Vă rog să dispuneți verificarea la fața locului.&quot;</em></li>
+          <li><em>&quot;Anexez fotografii relevante pentru documentare.&quot;</em></li>
         </ul>
 
         <h3>Ce să NU faci</h3>
         <ul>
           <li>Nu scrie în caps lock — arată agresiv</li>
-          <li>Nu ameninți ("mă voi plânge la primul ministru")</li>
+          <li>Nu ameninți (&quot;mă voi plânge la primul ministru&quot;)</li>
           <li>Nu folosi jigniri sau înjurături</li>
           <li>Nu depăși 1 pagină de text</li>
         </ul>
       </Chapter>
 
       <Chapter id="unde-trimiti" title="Unde trimiți sesizarea" number={3}>
-        <h3>Canale oficiale PMB</h3>
+        <h3>Canale oficiale</h3>
         <ul>
-          <li><strong>Email:</strong> sesizari@pmb.ro, dispecerat@pmb.ro</li>
-          <li><strong>Online:</strong> <a href="https://www.pmb.ro" target="_blank" rel="noreferrer">pmb.ro</a> — secțiunea sesizări</li>
-          <li><strong>Telefon:</strong> 0800 820 700 (Call Center PMB)</li>
-          <li><strong>Fizic:</strong> Registratură PMB, Splaiul Independenței 291-293</li>
+          <li><strong>Email:</strong> caută adresa de sesizări pe site-ul primăriei tale (de regulă: registratura@primaria[localitate].ro)</li>
+          <li><strong>Online:</strong> secțiunea &quot;Sesizări&quot; sau &quot;Petiții&quot; de pe site-ul primăriei</li>
+          <li><strong>Telefon:</strong> verifică numărul de dispecerat/call center al primăriei locale</li>
+          <li><strong>Fizic:</strong> registratura primăriei — depui cererea și primești număr de înregistrare</li>
         </ul>
 
-        <h3>Primăriile de sector</h3>
+        <h3>Alte autorități utile</h3>
         <ul>
-          <li>Sectorul 1: sesizari@ps1.ro</li>
-          <li>Sectorul 2: sesizari@ps2.ro</li>
-          <li>Sectorul 3: sesizari@primarie3.ro</li>
-          <li>Sectorul 4: registratura@ps4.ro</li>
-          <li>Sectorul 5: sesizari@sector5.ro</li>
-          <li>Sectorul 6: primarie@primarie6.ro</li>
+          <li><strong>Prefectura județului:</strong> dacă primăria nu răspunde sau acționează ilegal</li>
+          <li><strong>Consiliul județean:</strong> pentru probleme de competență județeană</li>
+          <li><strong>Inspectoratul de Stat în Construcții:</strong> pentru construcții ilegale</li>
+          <li><strong>Garda de Mediu:</strong> pentru poluare și probleme de mediu</li>
         </ul>
 
         <Callout type="info" title="Regula CC">
           <p>Trimite sesizarea <strong>CC la mai multe adrese</strong> simultan:</p>
           <ul className="list-disc pl-5 mt-1">
-            <li>Primăria competentă (PMB sau sector)</li>
-            <li>dispecerat@pmb.ro (backup)</li>
-            <li>prefectura@prefecturabucu.ro (autoritate supraordonată)</li>
+            <li>Primăria locală (autoritatea competentă)</li>
+            <li>Prefectura județului (autoritate supraordonată)</li>
+            <li>Instituția de specialitate, dacă e cazul (Garda de Mediu, ISC etc.)</li>
           </ul>
-          <p className="mt-2">Crește dramatic șansele să nu "se piardă" cererea.</p>
+          <p className="mt-2">Crește dramatic șansele să nu &quot;se piardă&quot; cererea.</p>
         </Callout>
       </Chapter>
 
       <Chapter id="la-refuz" title="Ce faci dacă te refuză sau te ignoră" number={4}>
         <h3>Pasul 1: Reamintire (dacă au trecut 15 zile fără răspuns)</h3>
         <p>
-          Trimite un email scurt: <em>"Reamintesc sesizarea [Nr. înregistrare] din data de [data].
-          Termenul legal de 30 de zile este pe cale să expire."</em>
+          Trimite un email scurt: <em>&quot;Reamintesc sesizarea [Nr. înregistrare] din data de [data].
+          Termenul legal de 30 de zile este pe cale să expire.&quot;</em>
         </p>
 
-        <h3>Pasul 2: Escaladare la primar</h3>
+        <h3>Pasul 2: Escaladare la primar sau prefect</h3>
         <p>
           Dacă în 30 zile nu ai răspuns concret:
-          <em>"Sesizare către Primar General / Prefect privind nerespectarea OG 27/2002 de către Direcția [X]"</em>
+          <em>&quot;Sesizare către Primar / Prefect privind nerespectarea OG 27/2002 de către Direcția [X]&quot;</em>
         </p>
 
         <h3>Pasul 3: Avocatul Poporului</h3>
@@ -182,9 +183,9 @@ export default function GhidSesizariPage() {
 
         <h3>Jurisprudență favorabilă</h3>
         <p>
-          Există precedent: Tribunalul București a obligat în 2023 Sectorul 5 să răspundă
-          la 12 sesizări ignorate, plus daune morale de 2.000 lei per sesizare. Cazul este
-          arhetipal.
+          Există precedent: instanțele au obligat primării să răspundă la sesizări ignorate, cu
+          daune morale de până la 2.000 lei per sesizare. Aceste cazuri sunt din ce în ce mai
+          frecvente și creează jurisprudență favorabilă cetățenilor.
         </p>
       </Chapter>
     </GhidLayout>

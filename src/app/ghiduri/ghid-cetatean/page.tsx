@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { GhidLayout, Chapter, Callout } from "@/components/ghiduri/GhidLayout";
 
 export const metadata: Metadata = {
-  title: "Ghid cetățean — drepturile tale în PMB",
-  description: "Petiții, informații publice, consultări, ședințe CG, drepturi de contestație, Legea 544, GDPR, Ombudsman.",
+  title: "Ghid cetățean — drepturile tale în relația cu administrația locală",
+  description: "Petiții, informații publice, consultări, ședințe consiliu local, drepturi de contestație, Legea 544, GDPR, Ombudsman.",
   alternates: { canonical: "/ghiduri/ghid-cetatean" },
 };
 
@@ -12,7 +12,7 @@ const chapters = [
   { id: "petitii", title: "Petiții și sesizări" },
   { id: "acces-info", title: "Acces la informații publice" },
   { id: "consultari", title: "Consultări publice" },
-  { id: "sedinte-cg", title: "Ședințe Consiliul General" },
+  { id: "sedinte-cl", title: "Ședințe consiliu local" },
   { id: "contestatii", title: "Contestații și recurs" },
   { id: "gdpr", title: "Date personale (GDPR)" },
   { id: "ombudsman", title: "Avocatul Poporului" },
@@ -21,8 +21,8 @@ const chapters = [
 export default function GhidCetateanPage() {
   return (
     <GhidLayout
-      title="Ghid cetățean — drepturile tale în PMB"
-      subtitle="Tot ce trebuie să știi ca să-ți exerciți drepturile în relația cu administrația locală."
+      title="Ghid cetățean — drepturile tale în relația cu administrația locală"
+      subtitle="Tot ce trebuie să știi ca să-ți exerciți drepturile în relația cu primăria și consiliul local."
       icon="⚖️"
       gradient="from-slate-700 via-zinc-800 to-slate-900"
       chapters={chapters}
@@ -35,7 +35,7 @@ export default function GhidCetateanPage() {
       <Chapter id="drepturi" title="Drepturile tale constituționale" number={1}>
         <p>
           Ca cetățean al României, Constituția și legile îți garantează drepturi specifice în
-          relația cu administrația publică locală (primărie, consiliu general). Le poți exercita
+          relația cu administrația publică locală (primărie, consiliu local). Le poți exercita
           GRATUIT, fără avocat.
         </p>
 
@@ -135,7 +135,7 @@ export default function GhidCetateanPage() {
 
         <h3>Cum participi</h3>
         <ol>
-          <li>Urmărește site-ul PMB → secțiunea "Transparență decizională"</li>
+          <li>Urmărește site-ul primăriei locale, secțiunea &quot;Transparență decizională&quot;</li>
           <li>Citește proiectul de act normativ</li>
           <li>Trimite observații scrise în perioada consultării (email sau fizic)</li>
           <li>Poți participa la dezbaterea publică (dacă se organizează)</li>
@@ -149,30 +149,30 @@ export default function GhidCetateanPage() {
         </ul>
       </Chapter>
 
-      <Chapter id="sedinte-cg" title="Ședințe Consiliul General" number={5}>
+      <Chapter id="sedinte-cl" title="Ședințe consiliu local" number={5}>
         <p>
-          Ședințele CGMB sunt <strong>publice</strong>. Poți participa ca cetățean și chiar lua
+          Ședințele consiliului local sunt <strong>publice</strong>. Poți participa ca cetățean și chiar lua
           cuvântul pe anumite subiecte.
         </p>
 
         <h3>Program ședințe</h3>
         <ul>
-          <li>Ordinare: de 2 ori pe lună (de obicei joi)</li>
+          <li>Ordinare: de regulă 1-2 ori pe lună</li>
           <li>Extraordinare: la nevoie</li>
-          <li>Live stream pe pmb.ro + YouTube PMB</li>
+          <li>Multe primării oferă live stream pe site-ul propriu sau YouTube</li>
         </ul>
 
         <h3>Cum iei cuvântul</h3>
         <ol>
-          <li>Te înscrii cu 48 ore înainte pe inscrieri@pmb.ro</li>
+          <li>Te înscrii în prealabil la secretariatul consiliului local (verifică procedura pe site-ul primăriei)</li>
           <li>Specifici subiectul pe care dorești să vorbești</li>
-          <li>Primești 3-5 minute la ședință</li>
+          <li>Primești de regulă 3-5 minute la ședință</li>
         </ol>
       </Chapter>
 
       <Chapter id="contestatii" title="Contestații și recurs (Legea 554/2004)" number={6}>
         <p>
-          Dacă ești nemulțumit de o decizie a PMB (ex: ți-au respins o cerere, nu-ți răspund la
+          Dacă ești nemulțumit de o decizie a primăriei locale (ex: ți-au respins o cerere, nu-ți răspund la
           sesizare), poți contesta.
         </p>
 
@@ -192,7 +192,7 @@ export default function GhidCetateanPage() {
 
       <Chapter id="gdpr" title="Date personale (GDPR)" number={7}>
         <p>
-          PMB prelucrează multe date personale: de la CNP-ul tău, la adresa, la informații
+          Primăria locală prelucrează multe date personale: de la CNP-ul tău, la adresa, la informații
           despre taxe. Ai drepturi specifice GDPR.
         </p>
 
@@ -200,14 +200,14 @@ export default function GhidCetateanPage() {
         <ul>
           <li><strong>Acces:</strong> ce date au despre tine</li>
           <li><strong>Rectificare:</strong> corectare date greșite</li>
-          <li><strong>Ștergere:</strong> "dreptul de a fi uitat" (cu limite)</li>
+          <li><strong>Ștergere:</strong> &quot;dreptul de a fi uitat&quot; (cu limite)</li>
           <li><strong>Portabilitate:</strong> primire date în format electronic</li>
           <li><strong>Restricție:</strong> limitare prelucrare</li>
         </ul>
 
         <h3>Cum depui cerere GDPR</h3>
         <ul>
-          <li>Email la <code>dpo@pmb.ro</code> (Data Protection Officer)</li>
+          <li>Contactează responsabilul DPO (Data Protection Officer) al primăriei — datele de contact se găsesc pe site-ul oficial</li>
           <li>Răspuns în 30 zile</li>
           <li>Dacă refuză: plângere la ANSPDCP (<a href="https://dataprotection.ro" target="_blank" rel="noreferrer">dataprotection.ro</a>)</li>
         </ul>
@@ -231,7 +231,6 @@ export default function GhidCetateanPage() {
         <ul>
           <li>Online: <a href="https://avp.ro" target="_blank" rel="noreferrer">avp.ro</a></li>
           <li>Email: <code>avp@avp.ro</code></li>
-          <li>Fizic: Str. George Vraca nr. 8, sector 1, București</li>
           <li>Telefon gratuit: 0800 810 300</li>
         </ul>
 

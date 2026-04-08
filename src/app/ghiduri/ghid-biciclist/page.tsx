@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { GhidLayout, Chapter, Callout } from "@/components/ghiduri/GhidLayout";
 
 export const metadata: Metadata = {
-  title: "Ghidul biciclistului din București",
+  title: "Ghidul biciclistului în România",
   description: "Ghid complet pentru bicicliști: cum alegi bicicleta, echipament, reguli, trasee, întreținere.",
   alternates: { canonical: "/ghiduri/ghid-biciclist" },
 };
@@ -12,7 +12,7 @@ const chapters = [
   { id: "alegere", title: "Cum îți alegi bicicleta după buget" },
   { id: "echipament", title: "Echipamentul obligatoriu și recomandat" },
   { id: "reguli", title: "Regulile de circulație" },
-  { id: "piste", title: "Cum mergi pe pistele din București" },
+  { id: "piste", title: "Cum mergi pe pistele din orașul tău" },
   { id: "transport", title: "Bicicleta în transport în comun" },
   { id: "parcare", title: "Unde parchezi bicicleta" },
   { id: "intretinere", title: "Întreținere de bază" },
@@ -23,21 +23,21 @@ const chapters = [
 export default function GhidBiciclistPage() {
   return (
     <GhidLayout
-      title="Ghidul biciclistului din București"
-      subtitle="De la alegerea primei biciclete, până la circulația sigură printre șinele de tramvai. Tot ce trebuie să știi."
+      title="Ghidul biciclistului în România"
+      subtitle="De la alegerea primei biciclete, până la circulația sigură în trafic. Tot ce trebuie să știi."
       icon="🚲"
       gradient="from-emerald-600 via-teal-700 to-emerald-900"
       chapters={chapters}
       stats={[
-        { label: "Piste amenajate", value: "38 km" },
-        { label: "Bicicliști estimați", value: "200k" },
+        { label: "Cod Rutier", value: "Obligatoriu" },
+        { label: "Bicicliști estimați", value: "500k+" },
         { label: "Parcare bicicletă", value: "0 lei" },
       ]}
     >
       <Chapter id="de-ce" title="De ce bicicletă?" number={1}>
         <p>
-          Bucureștiul este un oraș dificil pentru mașini — trafic congestionat, lipsa parcărilor,
-          poluare, costuri crescute. Bicicleta rezolvă majoritatea acestor probleme.
+          Orașele din România se confruntă cu trafic congestionat, lipsa parcărilor,
+          poluare și costuri crescute. Bicicleta rezolvă majoritatea acestor probleme.
         </p>
         <p>Sunt patru motive principale pentru care merită să începi:</p>
         <ul>
@@ -46,10 +46,10 @@ export default function GhidBiciclistPage() {
           <li><strong>Timp:</strong> pe distanțe sub 7 km, bicicleta e aproape întotdeauna mai rapidă decât mașina în oraș.</li>
           <li><strong>Mediu:</strong> 0 emisii, reduci ambuteiajele — și pentru ceilalți.</li>
         </ul>
-        <Callout type="info" title="Realitate bucureșteană">
-          Infrastructura pentru bicicliști e încă în dezvoltare. Există zone excelente (Kiseleff,
-          Unirii, IOR) dar și zone periculoase (zone cu tramvaie, intersecții mari). Cu pregătire
-          potrivită, poți pedala sigur.
+        <Callout type="info" title="Situația din România">
+          Infrastructura pentru bicicliști e în dezvoltare în majoritatea orașelor. Există zone
+          cu piste dedicate, dar și zone periculoase (intersecții mari, zone cu linii de tramvai).
+          Cu pregătire potrivită, poți pedala sigur oriunde.
         </Callout>
       </Chapter>
 
@@ -75,8 +75,8 @@ export default function GhidBiciclistPage() {
         <p>
           Aici începi să ai componente decente, cadru ușor, posibil chiar furca cu suspensie.
           Branduri:{" "}
-          <strong>Cube</strong>, <strong>Ghost</strong>, <strong>B'twin (Decathlon)</strong>.
-          Pentru Bucureștiul cu străzi imperfecte, acest buget oferă cel mai bun raport
+          <strong>Cube</strong>, <strong>Ghost</strong>, <strong>B&apos;twin (Decathlon)</strong>.
+          Pentru străzile imperfecte din orașele românești, acest buget oferă cel mai bun raport
           calitate-preț.
         </p>
 
@@ -84,7 +84,7 @@ export default function GhidBiciclistPage() {
         <p>
           Biciclete hibrid sau cu transmisie de nivel mediu (Shimano Alivio/Deore). Branduri:{" "}
           <strong>Trek</strong> (gama FX), <strong>Giant</strong> (Escape), <strong>Specialized</strong>{" "}
-          (Sirrus). Pentru navetiști serioși și trasee mai lungi (Băneasa, Snagov).
+          (Sirrus). Pentru navetiști serioși și trasee mai lungi în afara orașului.
         </p>
 
         <h3>Peste 5.000 lei — performanță</h3>
@@ -107,15 +107,15 @@ export default function GhidBiciclistPage() {
             <tbody>
               <tr><td className="p-3">City entry</td><td className="p-3">Asfalt neted, centru</td><td className="p-3 font-semibold">&lt; 1.000 lei</td></tr>
               <tr className="bg-[var(--color-surface-2)]/50"><td className="p-3">City mid</td><td className="p-3">Oraș + trotuare ocazional</td><td className="p-3 font-semibold">1.000 - 2.500 lei</td></tr>
-              <tr><td className="p-3">Hibrid / trekking</td><td className="p-3">Oraș + Băneasa + trasee</td><td className="p-3 font-semibold">2.500 - 5.000 lei</td></tr>
+              <tr><td className="p-3">Hibrid / trekking</td><td className="p-3">Oraș + trasee periurbane</td><td className="p-3 font-semibold">2.500 - 5.000 lei</td></tr>
               <tr className="bg-[var(--color-surface-2)]/50"><td className="p-3">Sport / gravel</td><td className="p-3">Trasee lungi, curse</td><td className="p-3 font-semibold">&gt; 5.000 lei</td></tr>
             </tbody>
           </table>
         </div>
 
         <Callout type="tip" title="Second hand">
-          Pe OLX și Velo Market (grupuri Facebook București) găsești biciclete second-hand la
-          60-70% din preț. Verifică lanțul, roțile, cadrul pentru fisuri.
+          Pe OLX și grupurile de Facebook dedicate bicicliștilor din zona ta găsești biciclete
+          second-hand la 60-70% din preț. Verifică lanțul, roțile, cadrul pentru fisuri.
         </Callout>
       </Chapter>
 
@@ -188,40 +188,42 @@ export default function GhidBiciclistPage() {
           <li>Circulație pe trotuar (fără motiv): 145-290 lei</li>
         </ul>
 
-        <Callout type="warning" title="Șinele de tramvai — pericol real în București">
-          Șinele sunt paralele cu direcția ta. <strong>Traversează-le întotdeauna la 90°</strong>.
-          Dacă le iei oblic, roata îți intră pe șină și cazi instant. În Bd. Unirii, Calea
-          Dorobanți, Șos. Giurgiului — atenție maximă.
+        <Callout type="warning" title="Șinele de tramvai — pericol real">
+          În orașele cu tramvaie, șinele sunt paralele cu direcția ta. <strong>Traversează-le
+          întotdeauna la 90°</strong>. Dacă le iei oblic, roata îți intră pe șină și cazi instant.
+          Fii atent pe bulevardele cu linii de tramvai.
         </Callout>
       </Chapter>
 
-      <Chapter id="piste" title="Cum mergi pe pistele din București" number={5}>
+      <Chapter id="piste" title="Cum mergi pe pistele din orașul tău" number={5}>
         <p>
-          În 2026 există aproximativ 38 km de piste amenajate și alte 20-30 km de trasee
-          recomandate pe zone mai calme.
+          Tot mai multe orașe din România investesc în infrastructură pentru bicicliști — piste
+          dedicate, trasee prin parcuri și zone cu trafic redus.
         </p>
 
-        <h3>Cele mai bune trasee</h3>
+        <h3>Cum găsești cele mai bune trasee</h3>
         <ul>
           <li>
-            <strong>Centru - Herăstrău:</strong> prin Calea Victoriei → Piața Victoriei → Șos.
-            Kiseleff. Una dintre cele mai sigure rute.
+            <strong>Google Maps (modul Bicicletă):</strong> arată pistele dedicate și rutele
+            recomandate din orașul tău.
           </li>
           <li>
-            <strong>Bd. Unirii - Piața Unirii:</strong> pistă dedicată largă, dar atenție la
-            mașinile care parchează pe ea.
+            <strong>Komoot / Bikemap:</strong> rute create de alți bicicliști, cu recenzii și
+            niveluri de dificultate.
           </li>
           <li>
-            <strong>Parcul IOR → Parcul Titan:</strong> trasee complet separate de trafic.
+            <strong>Parcurile locale:</strong> cele mai sigure trasee sunt de obicei prin parcuri,
+            complet separate de traficul auto.
           </li>
           <li>
-            <strong>Tur complet Parc Tineretului:</strong> 4 km, perfect pentru începători.
+            <strong>Grupuri locale de bicicliști:</strong> întreabă comunitatea din zona ta pentru
+            cele mai sigure rute zilnice.
           </li>
         </ul>
 
         <h3>Pericole de evitat</h3>
         <ul>
-          <li>Mașini parcate pe pistă (raportează la 021/9524 sau pe această platformă)</li>
+          <li>Mașini parcate pe pistă (raportează la poliția locală sau pe această platformă)</li>
           <li>Uși deschise brusc de pasageri — păstrează 1 metru distanță de mașinile parcate</li>
           <li>Pietoni care traversează fără să se uite — ai grijă și sună din sonerie</li>
           <li>Grătare metalice ude — sunt foarte alunecoase</li>
@@ -229,39 +231,38 @@ export default function GhidBiciclistPage() {
       </Chapter>
 
       <Chapter id="transport" title="Bicicleta în transport în comun" number={6}>
-        <h3>Metrou (Metrorex)</h3>
+        <h3>Metrou</h3>
         <p>
           Bicicletele <strong>pliabile</strong> sunt permise oricând. Bicicletele normale sunt
-          permise <strong>doar în afara orelor de vârf</strong> (înainte de 7:00, 9:30-15:30, după
-          20:00). Nu plătești suplimentar, dar te porți civilizat.
+          de regulă permise <strong>doar în afara orelor de vârf</strong>. Nu plătești suplimentar,
+          dar te porți civilizat. Verifică regulamentul operatorului local.
         </p>
 
-        <h3>STB (autobuze, tramvaie)</h3>
+        <h3>Autobuze și tramvaie</h3>
         <p>
-          În general <strong>nu este permis</strong> să urci cu bicicleta. Doar cele pliabile și
-          împachetate pot fi admise, la aprecierea vatmanului.
+          În general <strong>nu este permis</strong> să urci cu bicicleta normală. Doar cele pliabile și
+          împachetate pot fi admise, la aprecierea conducătorului.
         </p>
 
         <h3>Trenuri CFR</h3>
         <p>
-          CFR are vagoane speciale pentru biciclete pe multe rute din jurul Bucureștiului.
-          Biletul se ia separat (10-20 lei). Rute populare: București → Snagov, București →
-          Buftea, București → Giurgiu.
+          CFR are vagoane speciale pentru biciclete pe multe rute. Biletul pentru bicicletă
+          se ia separat (10-20 lei). Verifică disponibilitatea pe ruta dorită la ghișeu sau online.
         </p>
       </Chapter>
 
       <Chapter id="parcare" title="Unde parchezi bicicleta" number={7}>
         <p>
-          PMB și primăriile de sector au instalat rastele în ultimele ceva ani. Principalele zone
-          cu parcare sigură:
+          Majoritatea primăriilor au instalat rastele în zonele centrale și lângă instituții publice.
+          Caută rastele în aceste locuri:
         </p>
         <ul>
-          <li>Piața Universității — rastele multiple</li>
-          <li>Piața Romană — în fața ASE și la metrou</li>
-          <li>Unirea Shopping Center</li>
-          <li>AFI Cotroceni — rastele cu pază</li>
-          <li>Herăstrău — intrările principale</li>
-          <li>Cișmigiu — intrarea dinspre Gh. Magheru</li>
+          <li>Piețele centrale și zonele pietonale</li>
+          <li>Lângă stațiile de metrou și autogări</li>
+          <li>În fața centrelor comerciale</li>
+          <li>La intrările parcurilor mari</li>
+          <li>Lângă universități și instituții publice</li>
+          <li>La gări și stații de tren</li>
         </ul>
 
         <Callout type="tip" title="Reguli de parcare inteligentă">
@@ -308,7 +309,7 @@ export default function GhidBiciclistPage() {
             - Imediat dacă lanțul sare, frânele nu mai țin, cadrul are o crăpătură.
           </p>
           <p>
-            - Service-uri bune în București: Bike Center, Cyclops, ProBike.
+            - Caută un service de biciclete local cu recenzii bune pe Google Maps.
           </p>
         </Callout>
       </Chapter>
@@ -317,16 +318,16 @@ export default function GhidBiciclistPage() {
         <ul>
           <li><strong>Komoot</strong> — rute și planificare, cea mai bună pentru începători.</li>
           <li><strong>Strava</strong> — tracking performanțe, comunitate, segmente populare.</li>
-          <li><strong>Google Maps</strong> — activează modul Bicicletă. În București e util.</li>
+          <li><strong>Google Maps</strong> — activează modul Bicicletă. Funcționează în toate orașele din România.</li>
           <li><strong>Bikemap</strong> — rute construite de alți bicicliști.</li>
           <li><strong>OsmAnd</strong> — hărți offline, gratuite, cu straturi pentru piste.</li>
         </ul>
 
-        <h3>Comunități București</h3>
+        <h3>Comunități de bicicliști</h3>
         <ul>
-          <li>Grupul Facebook &quot;Bicicliști București&quot; — 50k+ membri activi.</li>
-          <li>Asociația &quot;Pe două roți&quot; — evenimente și ateliere.</li>
-          <li>&quot;Critical Mass&quot; — ieșiri în masă, ultima vineri din lună.</li>
+          <li>Grupuri locale de Facebook pentru bicicliștii din orașul tău — caută &quot;Bicicliști [orașul tău]&quot;.</li>
+          <li>Asociații locale pentru mobilitate urbană — există în majoritatea orașelor mari.</li>
+          <li>&quot;Critical Mass&quot; — ieșiri în masă organizate în mai multe orașe din România.</li>
         </ul>
       </Chapter>
 
