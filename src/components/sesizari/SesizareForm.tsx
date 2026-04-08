@@ -545,26 +545,84 @@ ${today}`;
           />
         </Field>
 
-        {/* Date/time */}
+        {/* Date/time — custom selects */}
         {mode === "complet" && (
           <>
             {!unknownDate && (
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Data constatării">
-                  <input
-                    type="date"
-                    value={dataConstatarii}
-                    onChange={(e) => setDataConstatarii(e.target.value)}
+              <div className="grid grid-cols-3 gap-2">
+                <Field label="Zi">
+                  <select
+                    value={dataConstatarii.split("-")[2] || ""}
+                    onChange={(e) => {
+                      const parts = dataConstatarii.split("-");
+                      setDataConstatarii(`${parts[0]}-${parts[1]}-${e.target.value.padStart(2, "0")}`);
+                    }}
                     className={inputClass}
-                  />
+                  >
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                      <option key={d} value={String(d).padStart(2, "0")}>{d}</option>
+                    ))}
+                  </select>
                 </Field>
-                <Field label="Ora constatării">
-                  <input
-                    type="time"
-                    value={oraConstatarii}
-                    onChange={(e) => setOraConstatarii(e.target.value)}
+                <Field label="Lună">
+                  <select
+                    value={dataConstatarii.split("-")[1] || ""}
+                    onChange={(e) => {
+                      const parts = dataConstatarii.split("-");
+                      setDataConstatarii(`${parts[0]}-${e.target.value}-${parts[2]}`);
+                    }}
                     className={inputClass}
-                  />
+                  >
+                    {["Ianuarie","Februarie","Martie","Aprilie","Mai","Iunie","Iulie","August","Septembrie","Octombrie","Noiembrie","Decembrie"].map((m, i) => (
+                      <option key={i} value={String(i + 1).padStart(2, "0")}>{m}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="An">
+                  <select
+                    value={dataConstatarii.split("-")[0] || ""}
+                    onChange={(e) => {
+                      const parts = dataConstatarii.split("-");
+                      setDataConstatarii(`${e.target.value}-${parts[1]}-${parts[2]}`);
+                    }}
+                    className={inputClass}
+                  >
+                    {[2026, 2025, 2024].map((y) => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
+                </Field>
+              </div>
+            )}
+            {!unknownDate && (
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Ora (0-23)">
+                  <select
+                    value={oraConstatarii.split(":")[0] || "12"}
+                    onChange={(e) => {
+                      const mins = oraConstatarii.split(":")[1] || "00";
+                      setOraConstatarii(`${e.target.value}:${mins}`);
+                    }}
+                    className={inputClass}
+                  >
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <option key={i} value={String(i).padStart(2, "0")}>{String(i).padStart(2, "0")}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Minut">
+                  <select
+                    value={oraConstatarii.split(":")[1] || "00"}
+                    onChange={(e) => {
+                      const hrs = oraConstatarii.split(":")[0] || "12";
+                      setOraConstatarii(`${hrs}:${e.target.value}`);
+                    }}
+                    className={inputClass}
+                  >
+                    {Array.from({ length: 12 }, (_, i) => i * 5).map((m) => (
+                      <option key={m} value={String(m).padStart(2, "0")}>{String(m).padStart(2, "0")}</option>
+                    ))}
+                  </select>
                 </Field>
               </div>
             )}
@@ -573,9 +631,9 @@ ${today}`;
                 type="checkbox"
                 checked={unknownDate}
                 onChange={(e) => setUnknownDate(e.target.checked)}
-                className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)]"
+                className="w-4 h-4 rounded border-[var(--color-border)] accent-[var(--color-primary)]"
               />
-              <span className="text-sm text-[var(--color-text-muted)]">Nu știu data/ora exactă a constatării</span>
+              <span className="text-sm text-[var(--color-text-muted)]">Nu știu data/ora exactă</span>
             </label>
           </>
         )}
