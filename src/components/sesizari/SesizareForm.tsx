@@ -367,7 +367,12 @@ export function SesizareForm() {
 
   const handleSubmit = async () => {
     if (!canSubmit) {
-      setError("Completează toate câmpurile obligatorii (marcate cu *)");
+      const missing: string[] = [];
+      if (data.nume.length < 2) missing.push("Numele tău");
+      if (!data.tip) missing.push("Tip problemă");
+      if (data.descriere.length < 10) missing.push("Descrierea problemei (min 10 caractere)");
+      if (data.locatie.length < 3) missing.push("Locația problemei");
+      setError(missing.length > 0 ? `Completează: ${missing.join(", ")}` : "Completează toate câmpurile obligatorii");
       return;
     }
     setSubmitting(true);
