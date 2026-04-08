@@ -14,7 +14,7 @@ export function Footer() {
           {/* Column 1 — Brand */}
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 flex items-center justify-center text-white">
+              <div className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 flex items-center justify-center text-white">
                 <MapPin size={18} strokeWidth={2.5} />
               </div>
               <span className="font-[family-name:var(--font-sora)] font-bold text-lg">

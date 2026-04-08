@@ -80,7 +80,7 @@ export default async function CountyHomePage({
   return (
     <>
       {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#1C4ED8] via-[#1e3a8a] to-[#0F172A] text-white min-h-[70vh] flex flex-col justify-center">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] text-white min-h-[70vh] flex flex-col justify-center">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.3),transparent)]" />
         <div className="absolute inset-0 bg-grid-pattern opacity-10" />
 
@@ -100,7 +100,7 @@ export default async function CountyHomePage({
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl text-blue-100/85 max-w-xl leading-relaxed mb-8">
+              <p className="text-lg md:text-xl text-emerald-100/85 max-w-xl leading-relaxed mb-8">
                 Hărți, sesizări, ghiduri, știri și statistici despre {isBucharest ? "orașul tău" : `județul ${county.name}`} — într-un singur loc.
               </p>
 
@@ -114,7 +114,7 @@ export default async function CountyHomePage({
                 </Link>
                 <Link
                   href={`/${judet}/sesizari`}
-                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white text-[#1C4ED8] font-semibold hover:bg-white/90 transition-colors shadow-lg"
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
                 >
                   <AlertCircle size={18} />
                   Fă o sesizare
@@ -126,23 +126,23 @@ export default async function CountyHomePage({
             <div className="hidden lg:flex flex-col gap-4 w-72">
               {/* AQI card */}
               <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-[12px] p-5">
-                <p className="text-blue-200/70 text-xs font-medium mb-1">Calitate aer</p>
+                <p className="text-emerald-200/70 text-xs font-medium mb-1">Calitate aer</p>
                 <p className="text-3xl font-bold tabular-nums" style={{ color: aqiColor(stats.aqiMediu) }}>
                   AQI: {stats.aqiMediu} — {aqiLabel(stats.aqiMediu)}
                 </p>
-                <p className="text-blue-200/60 text-xs mt-1">medie anuală ANPM</p>
+                <p className="text-emerald-200/60 text-xs mt-1">medie anuală ANPM</p>
               </div>
 
               {/* Population card */}
               <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-[12px] p-5">
-                <p className="text-blue-200/70 text-xs font-medium mb-1">Primar {county.name}</p>
+                <p className="text-emerald-200/70 text-xs font-medium mb-1">Primar {county.name}</p>
                 <p className="text-xl font-bold">{stats.primarName}</p>
-                <p className="text-blue-200/60 text-xs mt-1">{stats.primarPartid} · {stats.populatie.toLocaleString("ro-RO")} loc.</p>
+                <p className="text-emerald-200/60 text-xs mt-1">{stats.primarPartid} · {stats.populatie.toLocaleString("ro-RO")} loc.</p>
               </div>
 
               {/* Transport card */}
               <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-[12px] p-5">
-                <p className="text-blue-200/70 text-xs font-medium mb-1">Transport public</p>
+                <p className="text-emerald-200/70 text-xs font-medium mb-1">Transport public</p>
                 <p className="text-xl font-bold">{stats.transportPublicOperator}</p>
                 <p className="text-emerald-400 text-xs mt-1">
                   {stats.hasMetrou ? "Cu metrou · " : ""}
@@ -155,7 +155,7 @@ export default async function CountyHomePage({
 
         {/* Bottom ticker */}
         <div className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
-          <div className="flex animate-ticker whitespace-nowrap py-3 text-xs text-blue-200/80 gap-8">
+          <div className="flex animate-ticker whitespace-nowrap py-3 text-xs text-emerald-200/80 gap-8">
             {[
               `📊 AQI: ${stats.aqiMediu} — ${stats.aqiQuality}`,
               `🗳️ ${stats.sesizariTotal.toLocaleString("ro-RO")} sesizări estimate`,
@@ -250,19 +250,19 @@ export default async function CountyHomePage({
       {/* ─── CTA ─── */}
       <section className="pb-14">
         <div className="container-narrow">
-          <div className="relative overflow-hidden bg-gradient-to-br from-[#1C4ED8] via-[#1e3a8a] to-[#0F172A] rounded-[16px] p-8 md:p-12 text-white text-center">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] rounded-[16px] p-8 md:p-12 text-white text-center">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_110%,rgba(120,119,198,0.2),transparent)]" />
             <div className="relative z-10">
               <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-3">
                 Ai o problemă în {county.name}?
               </h2>
-              <p className="text-blue-100/80 mb-8 max-w-lg mx-auto leading-relaxed">
+              <p className="text-emerald-100/80 mb-8 max-w-lg mx-auto leading-relaxed">
                 Depune o sesizare formală — AI-ul generează textul cu temei legal,
                 detectăm autoritățile, tu doar apeși trimite.
               </p>
               <Link
                 href={`/${judet}/sesizari`}
-                className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[#1C4ED8] font-semibold hover:bg-white/90 transition-colors shadow-lg"
+                className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
               >
                 <AlertCircle size={18} />
                 Fă o sesizare <ArrowRight size={16} />

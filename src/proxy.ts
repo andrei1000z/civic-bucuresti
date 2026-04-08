@@ -12,10 +12,9 @@ const DEFAULT_COUNTY = "b";
 
 /**
  * Routes that redirect to county-prefixed versions.
- * Global pages (/stiri, /statistici, /harti, /aer) stay GLOBAL — no redirect.
+ * Global: /stiri, /statistici, /harti, /ghiduri stay GLOBAL.
  */
 const REDIRECT_EXACT = new Set([
-  "/ghiduri",
   "/autoritati",
   "/bilete",
   "/evenimente",
@@ -38,7 +37,7 @@ export default function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/ghiduri", "/autoritati", "/bilete",
+    "/autoritati", "/bilete",
     "/evenimente", "/istoric", "/cum-functioneaza", "/aer",
   ],
 };

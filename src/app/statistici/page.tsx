@@ -180,16 +180,16 @@ export default function StatisticiPage() {
       </div>
 
       {/* CTA */}
-      <div className="bg-gradient-to-br from-[#1C4ED8] via-[#1e3a8a] to-[#0F172A] rounded-[16px] p-8 md:p-12 text-white text-center">
+      <div className="bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] rounded-[16px] p-8 md:p-12 text-white text-center">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-3">
           Vezi statisticile pentru județul tău
         </h2>
-        <p className="text-blue-100/80 mb-6">
+        <p className="text-emerald-100/80 mb-6">
           Fiecare județ are pagină proprie cu date detaliate: accidente, AQI, sesizări, spații verzi.
         </p>
         <Link
           href="/#county-picker"
-          className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[#1C4ED8] font-semibold hover:bg-white/90 transition-colors shadow-lg"
+          className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
         >
           Alege județul <ArrowRight size={18} />
         </Link>

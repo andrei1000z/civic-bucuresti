@@ -3,42 +3,42 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --color-primary: #1C4ED8;
-  --color-primary-hover: #1e40af;
-  --color-primary-soft: #dbeafe;
-  --color-secondary: #059669;
-  --color-secondary-soft: #d1fae5;
+  --color-primary: #059669;
+  --color-primary-hover: #047857;
+  --color-primary-soft: #d1fae5;
+  --color-secondary: #0891b2;
+  --color-secondary-soft: #cffafe;
   --color-accent: #DC2626;
   --color-accent-soft: #fee2e2;
 
-  --color-bg: #F8FAFC;
+  --color-bg: #FAFAFA;
   --color-surface: #FFFFFF;
-  --color-surface-2: #F1F5F9;
-  --color-border: #E2E8F0;
-  --color-text: #0F172A;
-  --color-text-muted: #475569;
+  --color-surface-2: #F4F4F5;
+  --color-border: #E4E4E7;
+  --color-text: #18181B;
+  --color-text-muted: #71717A;
 
-  --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 4px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 4px 8px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
-  --shadow-xl: 0 24px 48px rgba(15, 23, 42, 0.12), 0 8px 16px rgba(15, 23, 42, 0.06);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.07), 0 4px 10px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.05);
 }
 
 .dark {
-  --color-primary: #3b82f6;
-  --color-primary-hover: #60a5fa;
-  --color-primary-soft: #1e3a8a;
-  --color-secondary: #10b981;
-  --color-secondary-soft: #064e3b;
+  --color-primary: #10b981;
+  --color-primary-hover: #34d399;
+  --color-primary-soft: #064e3b;
+  --color-secondary: #22d3ee;
+  --color-secondary-soft: #083344;
   --color-accent: #ef4444;
   --color-accent-soft: #7f1d1d;
 
-  --color-bg: #0F172A;
-  --color-surface: #1E293B;
-  --color-surface-2: #334155;
-  --color-border: #334155;
-  --color-text: #F1F5F9;
-  --color-text-muted: #cbd5e1;
+  --color-bg: #0a0a0a;
+  --color-surface: #171717;
+  --color-surface-2: #262626;
+  --color-border: #2e2e2e;
+  --color-text: #FAFAFA;
+  --color-text-muted: #a1a1aa;
 
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -205,7 +205,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dark .leaflet-tile-pane > .leaflet-layer:first-child .leaflet-tile {
-  filter: brightness(0.7) invert(1) contrast(1) hue-rotate(200deg) saturate(0.4) brightness(0.9);
+  filter: brightness(0.7) invert(1) contrast(1) hue-rotate(130deg) saturate(0.3) brightness(0.9);
 }
 /* Only the FIRST (base) tile layer gets dark filter. Overlay layers stay bright. */
 
