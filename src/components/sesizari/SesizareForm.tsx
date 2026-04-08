@@ -445,16 +445,16 @@ export function SesizareForm() {
 
   const previewText = data.formal_text || `Bună ziua,
 
-${subsemnatul} ${data.nume || "[NUMELE]"}, ${domiciliat} în ${data.adresa || "[ADRESA]"}, vă adresez prezenta sesizare în temeiul OG 27/2002 privind reglementarea activității de soluționare a petițiilor, cu modificările ulterioare.
+${subsemnatul} ${data.nume || "[NUMELE]"}, ${domiciliat} în ${data.adresa || "[ADRESA]"}, vă adresez prezenta sesizare în temeiul OG 27/2002.
 
 Vă sesizez cu privire la ${tipInfo?.label.toLowerCase() || "[tipul problemei]"}${constatareText}, în următoarea locație: ${data.locatie || "[LOCAȚIA]"}.
 
 ${data.descriere || "[DESCRIEREA DETALIATĂ A PROBLEMEI]"}
 ${evidenceText}
-Având în vedere cele expuse, vă solicit:
-1. Remedierea problemei semnalate în cel mai scurt timp posibil.
-2. Comunicarea unui răspuns în termenul legal de 30 de zile, conform art. 8 din OG 27/2002.
-3. Confirmarea înregistrării prezentei sesizări cu număr de înregistrare.
+Vă solicit:
+1. Remedierea problemei semnalate.
+2. Comunicarea unui răspuns în termenul legal de 30 de zile (art. 8, OG 27/2002).
+3. Confirmarea înregistrării sesizării cu număr de înregistrare.
 
 Cu respect,
 ${data.nume || "[NUMELE]"}
