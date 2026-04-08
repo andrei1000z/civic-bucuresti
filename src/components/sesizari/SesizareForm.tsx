@@ -545,98 +545,35 @@ ${today}`;
           />
         </Field>
 
-        {/* Date/time — custom selects */}
-        {mode === "complet" && (
-          <>
-            {!unknownDate && (
-              <div className="grid grid-cols-3 gap-2">
-                <Field label="Zi">
-                  <select
-                    value={dataConstatarii.split("-")[2] || ""}
-                    onChange={(e) => {
-                      const parts = dataConstatarii.split("-");
-                      setDataConstatarii(`${parts[0]}-${parts[1]}-${e.target.value.padStart(2, "0")}`);
-                    }}
-                    className={inputClass}
-                  >
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                      <option key={d} value={String(d).padStart(2, "0")}>{d}</option>
-                    ))}
-                  </select>
-                </Field>
-                <Field label="Lună">
-                  <select
-                    value={dataConstatarii.split("-")[1] || ""}
-                    onChange={(e) => {
-                      const parts = dataConstatarii.split("-");
-                      setDataConstatarii(`${parts[0]}-${e.target.value}-${parts[2]}`);
-                    }}
-                    className={inputClass}
-                  >
-                    {["Ianuarie","Februarie","Martie","Aprilie","Mai","Iunie","Iulie","August","Septembrie","Octombrie","Noiembrie","Decembrie"].map((m, i) => (
-                      <option key={i} value={String(i + 1).padStart(2, "0")}>{m}</option>
-                    ))}
-                  </select>
-                </Field>
-                <Field label="An">
-                  <select
-                    value={dataConstatarii.split("-")[0] || ""}
-                    onChange={(e) => {
-                      const parts = dataConstatarii.split("-");
-                      setDataConstatarii(`${e.target.value}-${parts[1]}-${parts[2]}`);
-                    }}
-                    className={inputClass}
-                  >
-                    {[2026, 2025, 2024].map((y) => (
-                      <option key={y} value={y}>{y}</option>
-                    ))}
-                  </select>
-                </Field>
-              </div>
-            )}
-            {!unknownDate && (
-              <div className="grid grid-cols-2 gap-2">
-                <Field label="Ora (0-23)">
-                  <select
-                    value={oraConstatarii.split(":")[0] || "12"}
-                    onChange={(e) => {
-                      const mins = oraConstatarii.split(":")[1] || "00";
-                      setOraConstatarii(`${e.target.value}:${mins}`);
-                    }}
-                    className={inputClass}
-                  >
-                    {Array.from({ length: 24 }, (_, i) => (
-                      <option key={i} value={String(i).padStart(2, "0")}>{String(i).padStart(2, "0")}</option>
-                    ))}
-                  </select>
-                </Field>
-                <Field label="Minut">
-                  <select
-                    value={oraConstatarii.split(":")[1] || "00"}
-                    onChange={(e) => {
-                      const hrs = oraConstatarii.split(":")[0] || "12";
-                      setOraConstatarii(`${hrs}:${e.target.value}`);
-                    }}
-                    className={inputClass}
-                  >
-                    {Array.from({ length: 12 }, (_, i) => i * 5).map((m) => (
-                      <option key={m} value={String(m).padStart(2, "0")}>{String(m).padStart(2, "0")}</option>
-                    ))}
-                  </select>
-                </Field>
-              </div>
-            )}
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={unknownDate}
-                onChange={(e) => setUnknownDate(e.target.checked)}
-                className="w-4 h-4 rounded border-[var(--color-border)] accent-[var(--color-primary)]"
-              />
-              <span className="text-sm text-[var(--color-text-muted)]">Nu știu data/ora exactă</span>
-            </label>
-          </>
-        )}
+        {/* Date/time */}
+        <div>
+          <p className="text-sm font-medium mb-2">Data și ora constatării</p>
+          <label className="flex items-center gap-2 cursor-pointer mb-3">
+            <input
+              type="checkbox"
+              checked={unknownDate}
+              onChange={(e) => setUnknownDate(e.target.checked)}
+              className="w-4 h-4 rounded border-[var(--color-border)] accent-[var(--color-primary)]"
+            />
+            <span className="text-xs text-[var(--color-text-muted)]">Nu știu data/ora exactă</span>
+          </label>
+          {!unknownDate && (
+            <div className="grid grid-cols-5 gap-1.5">
+              <select value={dataConstatarii.split("-")[2] || ""} onChange={(e) => { const p = dataConstatarii.split("-"); setDataConstatarii(`${p[0]}-${p[1]}-${e.target.value.padStart(2,"0")}`); }} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]">
+                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (<option key={d} value={String(d).padStart(2,"0")}>{d}</option>))}
+              </select>
+              <select value={dataConstatarii.split("-")[1] || ""} onChange={(e) => { const p = dataConstatarii.split("-"); setDataConstatarii(`${p[0]}-${e.target.value}-${p[2]}`); }} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)] col-span-2">
+                {["Ian","Feb","Mar","Apr","Mai","Iun","Iul","Aug","Sep","Oct","Nov","Dec"].map((m, i) => (<option key={i} value={String(i+1).padStart(2,"0")}>{m}</option>))}
+              </select>
+              <select value={oraConstatarii.split(":")[0] || "12"} onChange={(e) => setOraConstatarii(`${e.target.value}:${oraConstatarii.split(":")[1] || "00"}`)} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]">
+                {Array.from({ length: 24 }, (_, i) => (<option key={i} value={String(i).padStart(2,"0")}>{String(i).padStart(2,"0")}h</option>))}
+              </select>
+              <select value={oraConstatarii.split(":")[1] || "00"} onChange={(e) => setOraConstatarii(`${oraConstatarii.split(":")[0] || "12"}:${e.target.value}`)} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]">
+                {Array.from({ length: 12 }, (_, i) => i * 5).map((m) => (<option key={m} value={String(m).padStart(2,"0")}>{String(m).padStart(2,"0")}m</option>))}
+              </select>
+            </div>
+          )}
+        </div>
 
         <Field label="Descrierea problemei" required>
           <textarea
