@@ -72,7 +72,7 @@ function formatAddress(addr: string): string {
 export function SesizareForm() {
   const { user } = useAuth();
   const county = useCountyOptional();
-  const [mode, setMode] = useState<"choice" | "rapid" | "complet">("choice");
+  const mode = "complet"; // single mode, no choice screen
   const [data, setData] = useState<FormData>(INITIAL);
   const [imagini, setImagini] = useState<string[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
@@ -428,7 +428,9 @@ export function SesizareForm() {
     ? `\nAnexez ${imagini.length} ${imagini.length === 1 ? "fotografie" : "fotografii"} realizate la fața locului.\n`
     : "";
 
-  const previewText = data.formal_text || `${subsemnatul} ${data.nume || "[NUMELE]"}, ${domiciliat} în ${data.adresa || "[ADRESA]"}, vă adresez prezenta sesizare în temeiul OG 27/2002 privind reglementarea activității de soluționare a petițiilor.
+  const previewText = data.formal_text || `Bună ziua,
+
+${subsemnatul} ${data.nume || "[NUMELE]"}, ${domiciliat} în ${data.adresa || "[ADRESA]"}, vă adresez prezenta sesizare în temeiul OG 27/2002 privind reglementarea activității de soluționare a petițiilor, cu modificările ulterioare.
 
 Vă sesizez cu privire la ${tipInfo?.label.toLowerCase() || "[tipul problemei]"}, constatată în data de ${today}, în următoarea locație: ${data.locatie || "[LOCAȚIA]"}.
 
@@ -486,62 +488,8 @@ ${today}`;
     );
   }
 
-  // Mode choice screen
-  if (mode === "choice") {
-    return (
-      <div className="max-w-2xl mx-auto">
-        <div className="grid sm:grid-cols-2 gap-4 mb-6">
-          <button
-            onClick={() => setMode("rapid")}
-            className="text-left bg-[var(--color-surface)] border-2 border-[var(--color-border)] rounded-[12px] p-6 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-lg)] transition-all group"
-          >
-            <div className="w-12 h-12 rounded-[10px] bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-4">
-              <Sparkles size={22} className="text-white" />
-            </div>
-            <h3 className="font-[family-name:var(--font-sora)] text-lg font-bold mb-1 group-hover:text-[var(--color-primary)]">
-              Sesizare rapidă
-            </h3>
-            <p className="text-sm text-[var(--color-text-muted)]">
-              Doar datele esențiale: nume, descriere, locație. Ideal când vrei să trimiți repede.
-            </p>
-          </button>
-          <button
-            onClick={() => setMode("complet")}
-            className="text-left bg-[var(--color-surface)] border-2 border-[var(--color-border)] rounded-[12px] p-6 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-lg)] transition-all group"
-          >
-            <div className="w-12 h-12 rounded-[10px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-4">
-              <AlertCircle size={22} className="text-white" />
-            </div>
-            <h3 className="font-[family-name:var(--font-sora)] text-lg font-bold mb-1 group-hover:text-[var(--color-primary)]">
-              Sesizare completă
-            </h3>
-            <p className="text-sm text-[var(--color-text-muted)]">
-              Toate detaliile: telefon, data constatării, dimensiuni, poze multiple. Crește șansele de rezolvare.
-            </p>
-          </button>
-        </div>
-        <p className="text-xs text-[var(--color-text-muted)] text-center">
-          Sesizarea rapidă include doar informațiile minime obligatorii. Sesizarea completă adaugă detalii care ajută
-          autoritățile să înțeleagă mai bine problema și să intervină mai eficient.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="grid lg:grid-cols-[1fr_1.1fr] gap-8">
-      {/* Mode indicator + back */}
-      <div className="lg:col-span-2 flex items-center gap-3 mb-2">
-        <button
-          onClick={() => setMode("choice")}
-          className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
-        >
-          ← Schimbă tipul
-        </button>
-        <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] font-semibold">
-          {mode === "rapid" ? "⚡ Sesizare rapidă" : "📋 Sesizare completă"}
-        </span>
-      </div>
       {/* Form */}
       <div className="space-y-5">
         {/* Honeypot — hidden from humans, bots fill it.
@@ -582,19 +530,9 @@ ${today}`;
           />
         </Field>
 
-        {/* Phone + date/time — only in complet mode */}
+        {/* Date/time */}
         {mode === "complet" && (
           <>
-            <Field label="Telefon de contact">
-              <input
-                type="tel"
-                autoComplete="tel"
-                value={data.email} // reuse email field for phone in complet mode
-                onChange={(e) => update("email", e.target.value)}
-                placeholder="07xx xxx xxx"
-                className={inputClass}
-              />
-            </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Data constatării">
                 <input

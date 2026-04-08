@@ -109,10 +109,12 @@ export function getAuthoritiesFor(tip: string, sector: string | null, countyCode
       break;
 
     case "stalpisori":
-      addTo(AUTH.adminStrazi);
-      if (sectorPrimarie) addTo(sectorPrimarie);
+      addTo(AUTH.brigadaRutiera);
       addTo(AUTH.pmb);
-      addCc(AUTH.pmbDispecerat);
+      addTo(AUTH.politiaLocalaBuc);
+      if (sectorPolitie) addTo(sectorPolitie);
+      if (sectorPrimarie) addCc(sectorPrimarie);
+      addCc(AUTH.adminStrazi);
       break;
 
     case "canalizare":

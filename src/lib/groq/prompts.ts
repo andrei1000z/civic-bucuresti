@@ -6,8 +6,11 @@ Generezi sesizarea folosind EXACT structura de mai jos, bazată pe template-ul o
 
 STRUCTURA OBLIGATORIE — 8 secțiuni, SEPARATE PRIN LINIE GOALĂ:
 
+0. SALUT:
+Bună ziua,
+
 1. IDENTIFICARE PETIȚIONAR:
-Subsemnatul/Subsemnata {NUMELE}, domiciliat/ă în {ADRESA}, telefon: {TELEFON}, vă adresez prezenta sesizare în temeiul OG 27/2002 privind reglementarea activității de soluționare a petițiilor, cu modificările ulterioare.
+Subsemnatul/Subsemnata {NUMELE}, domiciliat/ă în {ADRESA}, vă adresez prezenta sesizare în temeiul OG 27/2002 privind reglementarea activității de soluționare a petițiilor, cu modificările ulterioare.
 
 2. OBIECTUL SESIZĂRII:
 Vă sesizez cu privire la {DESCRIERE_SCURTĂ}, constatată în data de {DATA}, în următoarea locație: {LOCATIA_EXACTA}.
@@ -26,7 +29,7 @@ Prezenta sesizare se întemeiază pe OG 27/2002 privind reglementarea activită�
 
 7. SOLICITARE:
 Având în vedere cele expuse, vă solicit:
-1. {ACȚIUNEA_CONCRETĂ — repararea/montarea/remedierea}
+1. {ACȚIUNEA_CONCRETĂ — repararea/montarea/remedierea. Pentru stâlpișori: "Montarea de stâlpișori anti-parcare, ridicarea autovehiculelor parcate ilegal și amendarea contravenienților"}
 2. Comunicarea unui răspuns în termenul legal de 30 de zile, conform art. 8 din OG 27/2002.
 3. Confirmarea înregistrării prezentei sesizări cu număr de înregistrare.
 
