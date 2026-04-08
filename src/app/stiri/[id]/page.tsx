@@ -8,6 +8,15 @@ import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
 import { AiSummary } from "./AiSummary";
 
+const SOURCE_LOGOS: Record<string, string> = {
+  "Digi24": "/images/sources/digi24.png",
+  "Hotnews": "/images/sources/hotnews.png",
+  "G4Media": "/images/sources/g4media.png",
+  "Mediafax": "/images/sources/mediafax.png",
+  "News.ro": "/images/sources/newsro.png",
+  "B365.ro": "/images/sources/b365.png",
+};
+
 export const dynamic = "force-dynamic";
 
 interface StireRow {
@@ -220,8 +229,13 @@ export default async function StireDetailPage({
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
             <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3">Sursă</p>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: sourceColor }}>
-                {stire.source.charAt(0)}
+              <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: sourceColor }}>
+                {SOURCE_LOGOS[stire.source] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={SOURCE_LOGOS[stire.source]} alt={stire.source} className="w-7 h-7 object-contain" />
+                ) : (
+                  <span className="text-white font-bold">{stire.source.charAt(0)}</span>
+                )}
               </div>
               <div>
                 <p className="font-semibold text-sm">{stire.source}</p>

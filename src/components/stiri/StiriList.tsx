@@ -9,6 +9,15 @@ import { timeAgo } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { useCountyOptional } from "@/lib/county-context";
 
+const SOURCE_LOGOS: Record<string, string> = {
+  "Digi24": "/images/sources/digi24.png",
+  "Hotnews": "/images/sources/hotnews.png",
+  "G4Media": "/images/sources/g4media.png",
+  "Mediafax": "/images/sources/mediafax.png",
+  "News.ro": "/images/sources/newsro.png",
+  "B365.ro": "/images/sources/b365.png",
+};
+
 interface StireRow {
   id: string;
   url: string;
@@ -167,7 +176,11 @@ export function StiriList() {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <div className="absolute top-4 left-4 flex gap-2">
-                    <Badge bgColor={SOURCE_COLORS[featured.source] ?? "#64748b"} color="white">
+                    <Badge bgColor={SOURCE_COLORS[featured.source] ?? "#64748b"} color="white" className="flex items-center gap-1.5">
+                      {SOURCE_LOGOS[featured.source] && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={SOURCE_LOGOS[featured.source]} alt="" className="w-4 h-4 rounded-sm object-contain" />
+                      )}
                       {featured.source}
                     </Badge>
                     <Badge className="bg-black/40 text-white border border-white/20">Featured</Badge>
@@ -221,7 +234,11 @@ export function StiriList() {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <div className="absolute top-3 left-3">
-                    <Badge bgColor={SOURCE_COLORS[stire.source] ?? "#64748b"} color="white">
+                    <Badge bgColor={SOURCE_COLORS[stire.source] ?? "#64748b"} color="white" className="flex items-center gap-1.5">
+                      {SOURCE_LOGOS[stire.source] && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={SOURCE_LOGOS[stire.source]} alt="" className="w-3.5 h-3.5 rounded-sm object-contain" />
+                      )}
                       {stire.source}
                     </Badge>
                   </div>
