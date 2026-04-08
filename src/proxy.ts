@@ -10,14 +10,9 @@ const COUNTY_SLUGS = new Set([
 const COOKIE_NAME = "county";
 const DEFAULT_COUNTY = "b";
 
-/**
- * Routes that redirect to county-prefixed versions.
- * Global: /stiri, /statistici, /harti, /ghiduri stay GLOBAL.
- */
 const REDIRECT_EXACT = new Set([
   "/autoritati",
   "/bilete",
-  "/evenimente",
   "/istoric",
   "/cum-functioneaza",
   "/aer",
@@ -38,6 +33,6 @@ export default function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/autoritati", "/bilete",
-    "/evenimente", "/istoric", "/cum-functioneaza", "/aer",
+    "/istoric", "/cum-functioneaza", "/aer",
   ],
 };
