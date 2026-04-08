@@ -32,12 +32,12 @@ const FEEDS: Feed[] = [
   { url: "https://www.news.ro/rss", source: "News.ro" },
   // Local / regional — more county coverage
   { url: "https://b365.ro/feed/", source: "B365.ro" },
-  { url: "https://www.monitorulcj.ro/feed", source: "Monitorul CJ" },
-  { url: "https://www.ziaruldeiasi.ro/rss/stiri-iasi.xml", source: "Ziarul de Iași" },
+  { url: "https://www.monitorulcj.ro/rss", source: "Monitorul CJ" },
+  { url: "https://www.ziaruldeiasi.ro/rss", source: "Ziarul de Iași" },
   { url: "https://www.opiniatimisoarei.ro/feed", source: "Opinia Timișoarei" },
-  { url: "https://www.stirisuceava.net/feed", source: "Știri Suceava" },
+  { url: "https://www.stiridecluj.ro/rss.xml", source: "Știri de Cluj" },
   { url: "https://www.editiadedimineata.ro/feed", source: "Ediția de Dimineață" },
-  { url: "https://www.gazeta-bt.ro/feed", source: "Gazeta BT" },
+  { url: "https://www.stiridinromania.ro/feed", source: "Știri din România" },
 ];
 
 // Simple category classifier from keywords in title + excerpt
