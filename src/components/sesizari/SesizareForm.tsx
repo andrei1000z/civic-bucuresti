@@ -902,48 +902,26 @@ function SuccessScreen({
   }, []);
 
   return (
-    <div className="max-w-2xl mx-auto py-4">
-      <div className="text-center mb-6">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-          <CheckCircle2 size={32} className="text-emerald-600 dark:text-emerald-400" />
-        </div>
-        <h3 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-2">
-          Sesizare înregistrată!
-        </h3>
-        <p className="text-[var(--color-text-muted)] mb-2">Cod unic:</p>
-        <p className="font-mono font-bold text-2xl text-[var(--color-primary)]">{code}</p>
+    <div className="max-w-md mx-auto py-8 text-center">
+      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+        <CheckCircle2 size={32} className="text-emerald-600 dark:text-emerald-400" />
       </div>
+      <h3 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-2">
+        Sesizare înregistrată!
+      </h3>
+      <p className="text-[var(--color-text-muted)] mb-1">Cod unic:</p>
+      <p className="font-mono font-bold text-3xl text-[var(--color-primary)] mb-6">{code}</p>
 
-      <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-[12px] p-5 mb-6">
-        <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-1 flex items-center gap-2">
-          <Mail size={16} />
-          {autoOpened ? "Ți-am deschis emailul" : "Trimite la autorități"}
-        </h4>
-        <p className="text-sm text-blue-800 dark:text-blue-400 mb-4">
-          {autoOpened
-            ? "Verifică tab-ul nou / clientul tău de email — textul e deja completat, doar apeși Send."
-            : popupBlocked
-              ? "Browser-ul a blocat popup-ul. Alege manual clientul de email:"
-              : "Alege serviciul tău de email:"}
-        </p>
-        {imaginiCount > 0 && (
-          <p className="text-xs text-blue-700 dark:text-blue-500 mb-3 italic">
-            ⚠️ Atașează fotografiile manual — link-urile lor sunt incluse în corpul emailului.
-          </p>
-        )}
-        <EmailChoicePanel input={emailInput} />
-      </div>
-
-      <div className="flex flex-wrap gap-3 justify-center">
+      <div className="flex flex-col gap-3">
         <button
           onClick={() => router.push(`/sesizari/${code}`)}
-          className="h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
+          className="h-12 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
         >
           Vezi sesizarea ta →
         </button>
         <button
           onClick={onAnother}
-          className="h-11 px-5 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)]"
+          className="h-12 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] font-medium hover:bg-[var(--color-surface-2)] transition-colors"
         >
           Altă sesizare
         </button>

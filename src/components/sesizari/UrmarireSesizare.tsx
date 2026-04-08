@@ -34,9 +34,14 @@ export function UrmarireSesizare() {
     setResult(null);
     try {
       const res = await fetch(`/api/sesizari/${encodeURIComponent(cod.trim())}`);
-      const json = await res.json();
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch {
+        throw new Error("Sesizarea nu a fost găsită. Verifică codul.");
+      }
       if (!res.ok) throw new Error(json.error || "Nu am găsit sesizarea");
-      setResult({ sesizare: json.data.sesizare, timeline: json.data.timeline });
+      if (!json.data?.sesizare) throw new Error("Sesizarea nu a fost găsită.");
+      setResult({ sesizare: json.data.sesizare, timeline: json.data.timeline ?? [] });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Eroare căutare");
     } finally {
@@ -56,7 +61,7 @@ export function UrmarireSesizare() {
             value={cod}
             onChange={(e) => setCod(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            placeholder="Cod sesizare (ex: SES-2026-0012)"
+            placeholder="Cod sesizare (ex: 00001)"
             className="flex-1 h-11 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
           />
           <button
