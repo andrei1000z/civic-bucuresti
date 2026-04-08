@@ -75,6 +75,9 @@ export function SesizareForm() {
   const mode = "complet"; // single mode, no choice screen
   const [data, setData] = useState<FormData>(INITIAL);
   const [imagini, setImagini] = useState<string[]>([]);
+  const [dataConstatarii, setDataConstatarii] = useState(new Date().toISOString().split("T")[0]);
+  const [oraConstatarii, setOraConstatarii] = useState(new Date().toTimeString().slice(0, 5));
+  const [unknownDate, setUnknownDate] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
   const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
@@ -424,6 +427,18 @@ export function SesizareForm() {
 
   const today = new Date().toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" });
 
+  // Format constatare date for email
+  const constatareText = unknownDate
+    ? ""
+    : (() => {
+        try {
+          const d = new Date(`${dataConstatarii}T${oraConstatarii}`);
+          return `, constatată în data de ${d.toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })} la ora ${oraConstatarii}`;
+        } catch {
+          return `, constatată în data de ${dataConstatarii} la ora ${oraConstatarii}`;
+        }
+      })();
+
   const evidenceText = imagini.length > 0
     ? `\nAnexez ${imagini.length} ${imagini.length === 1 ? "fotografie" : "fotografii"} realizate la fața locului.\n`
     : "";
@@ -432,7 +447,7 @@ export function SesizareForm() {
 
 ${subsemnatul} ${data.nume || "[NUMELE]"}, ${domiciliat} în ${data.adresa || "[ADRESA]"}, vă adresez prezenta sesizare în temeiul OG 27/2002 privind reglementarea activității de soluționare a petițiilor, cu modificările ulterioare.
 
-Vă sesizez cu privire la ${tipInfo?.label.toLowerCase() || "[tipul problemei]"}, constatată în data de ${today}, în următoarea locație: ${data.locatie || "[LOCAȚIA]"}.
+Vă sesizez cu privire la ${tipInfo?.label.toLowerCase() || "[tipul problemei]"}${constatareText}, în următoarea locație: ${data.locatie || "[LOCAȚIA]"}.
 
 ${data.descriere || "[DESCRIEREA DETALIATĂ A PROBLEMEI]"}
 ${evidenceText}
@@ -533,24 +548,35 @@ ${today}`;
         {/* Date/time */}
         {mode === "complet" && (
           <>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Data constatării">
-                <input
-                  type="date"
-                  value={new Date().toISOString().split("T")[0]}
-                  className={inputClass}
-                  readOnly
-                />
-              </Field>
-              <Field label="Ora constatării">
-                <input
-                  type="time"
-                  value={new Date().toTimeString().slice(0, 5)}
-                  className={inputClass}
-                  readOnly
-                />
-              </Field>
-            </div>
+            {!unknownDate && (
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Data constatării">
+                  <input
+                    type="date"
+                    value={dataConstatarii}
+                    onChange={(e) => setDataConstatarii(e.target.value)}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label="Ora constatării">
+                  <input
+                    type="time"
+                    value={oraConstatarii}
+                    onChange={(e) => setOraConstatarii(e.target.value)}
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+            )}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={unknownDate}
+                onChange={(e) => setUnknownDate(e.target.checked)}
+                className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)]"
+              />
+              <span className="text-sm text-[var(--color-text-muted)]">Nu știu data/ora exactă a constatării</span>
+            </label>
           </>
         )}
 
