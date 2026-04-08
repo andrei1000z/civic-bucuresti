@@ -108,6 +108,11 @@ export const SOURCE_COLORS: Record<string, string> = {
   "G4Media": "#1F2937",
   "Mediafax": "#0369A1",
   "News.ro": "#059669",
-  "Agerpres": "#7C3AED",
-  "B365.ro": "#059669",
+  "B365.ro": "#10B981",
+  "Monitorul CJ": "#7C3AED",
+  "Ziarul de Iași": "#6366F1",
+  "Opinia Timișoarei": "#EC4899",
+  "Știri Suceava": "#14B8A6",
+  "Ediția de Dimineață": "#F59E0B",
+  "Gazeta BT": "#8B5CF6",
 };

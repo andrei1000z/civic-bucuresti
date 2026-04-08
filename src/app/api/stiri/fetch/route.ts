@@ -51,8 +51,8 @@ export async function POST(req: Request) {
 
     const supabase = createSupabaseAdmin();
 
-    // Delete articles older than 48h to keep DB small
-    const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+    // Delete articles older than 24h to keep content fresh
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { count: deleted } = await supabase
       .from("stiri_cache")
       .delete({ count: "exact" })

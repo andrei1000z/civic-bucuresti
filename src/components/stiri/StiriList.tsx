@@ -40,7 +40,12 @@ const sourceGradients: Record<string, string> = {
   "G4Media": "from-slate-600 to-slate-900",
   Mediafax: "from-sky-600 to-sky-900",
   "News.ro": "from-green-600 to-green-900",
-  Agerpres: "from-violet-600 to-violet-900",
+  "Monitorul CJ": "from-violet-600 to-violet-900",
+  "Ziarul de Iași": "from-indigo-600 to-indigo-900",
+  "Opinia Timișoarei": "from-pink-600 to-pink-900",
+  "Știri Suceava": "from-teal-600 to-teal-900",
+  "Ediția de Dimineață": "from-amber-500 to-amber-800",
+  "Gazeta BT": "from-purple-600 to-purple-900",
 };
 
 export function StiriList() {

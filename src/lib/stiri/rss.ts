@@ -24,13 +24,20 @@ interface Feed {
  * County tagging happens via detectCounties() on the full text.
  */
 const FEEDS: Feed[] = [
+  // National
   { url: "https://www.digi24.ro/rss", source: "Digi24" },
   { url: "https://www.hotnews.ro/rss", source: "Hotnews" },
   { url: "https://www.g4media.ro/feed", source: "G4Media" },
   { url: "https://www.mediafax.ro/rss", source: "Mediafax" },
   { url: "https://www.news.ro/rss", source: "News.ro" },
-  { url: "https://www.agerpres.ro/flux-documentare/rss", source: "Agerpres" },
+  // Local / regional — more county coverage
   { url: "https://b365.ro/feed/", source: "B365.ro" },
+  { url: "https://www.monitorulcj.ro/feed", source: "Monitorul CJ" },
+  { url: "https://www.ziaruldeiasi.ro/rss/stiri-iasi.xml", source: "Ziarul de Iași" },
+  { url: "https://www.opiniatimisoarei.ro/feed", source: "Opinia Timișoarei" },
+  { url: "https://www.stirisuceava.net/feed", source: "Știri Suceava" },
+  { url: "https://www.editiadedimineata.ro/feed", source: "Ediția de Dimineață" },
+  { url: "https://www.gazeta-bt.ro/feed", source: "Gazeta BT" },
 ];
 
 // Simple category classifier from keywords in title + excerpt
@@ -131,7 +138,40 @@ export async function fetchFeed(feed: Feed): Promise<RssArticle[]> {
   }
 }
 
+/**
+ * Fetch og:image from an article URL. Fast timeout, best-effort.
+ */
+async function fetchOgImage(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Civia/1.0 (civia.ro)" },
+      redirect: "follow",
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    // Extract og:image
+    const match = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+    return match?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchAllFeeds(): Promise<RssArticle[]> {
   const results = await Promise.all(FEEDS.map((f) => fetchFeed(f)));
-  return results.flat();
+  const articles = results.flat();
+
+  // Scrape OG images for articles that don't have one (batch, max 20 at a time)
+  const noImage = articles.filter((a) => !a.image_url);
+  const batch = noImage.slice(0, 30); // limit to avoid timeout
+  if (batch.length > 0) {
+    const images = await Promise.all(batch.map((a) => fetchOgImage(a.url)));
+    batch.forEach((a, i) => {
+      if (images[i]) a.image_url = images[i];
+    });
+  }
+
+  return articles;
 }
