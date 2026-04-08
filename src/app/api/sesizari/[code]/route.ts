@@ -6,6 +6,39 @@ import { getSesizareByCode } from "@/lib/sesizari/repository";
 export const dynamic = "force-dynamic";
 
 /**
+ * GET /api/sesizari/[code] — fetch sesizare + timeline by code.
+ */
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ code: string }> }
+) {
+  const { code } = await params;
+  try {
+    const sesizare = await getSesizareByCode(code);
+    if (!sesizare) {
+      return NextResponse.json({ error: "Sesizarea nu a fost găsită" }, { status: 404 });
+    }
+
+    // Get timeline
+    const admin = createSupabaseAdmin();
+    const { data: timeline } = await admin
+      .from("sesizare_timeline")
+      .select("*")
+      .eq("sesizare_id", sesizare.id)
+      .order("created_at", { ascending: true });
+
+    return NextResponse.json({
+      data: { sesizare, timeline: timeline ?? [] },
+    });
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Eroare" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * DELETE /api/sesizari/[code] — only the author can delete their own sesizare.
  * CASCADE in DB handles votes/comments/timeline/verifications/follows.
  */
