@@ -4,9 +4,9 @@ export const ghiduri: Ghid[] = [
   {
     id: "gh-1",
     slug: "ghid-biciclist",
-    titlu: "Ghidul biciclistului din București",
+    titlu: "Ghid pentru bicicliști",
     descriere:
-      "Tot ce trebuie să știi ca să pedalezi în siguranță prin capitală: echipament, reguli, trasee, întreținere.",
+      "Tot ce trebuie să știi ca să pedalezi în siguranță: echipament, reguli de circulație, trasee, întreținere.",
     capitole: 10,
     dificultate: "mediu",
     timpCitire: 35,
@@ -19,7 +19,7 @@ export const ghiduri: Ghid[] = [
     slug: "ghid-vara",
     titlu: "Ghid de vară — cum supraviețuiești caniculei",
     descriere:
-      "Cod roșu, hidratare, surse de apă gratuită, parcuri umbroase și cum ajuți persoanele vulnerabile.",
+      "Cod roșu, hidratare, surse de apă, parcuri umbroase și cum ajuți persoanele vulnerabile.",
     capitole: 6,
     dificultate: "usor",
     timpCitire: 18,
@@ -32,7 +32,7 @@ export const ghiduri: Ghid[] = [
     slug: "ghid-cutremur",
     titlu: "Ghid cutremur — ce faci înainte, în timpul și după",
     descriere:
-      "Zona seismică Vrancea, pregătirea casei, rucsacul de urgență, clădirile cu bulină roșie.",
+      "Zona seismică Vrancea, pregătirea casei, rucsacul de urgență, clădiri cu risc seismic.",
     capitole: 6,
     dificultate: "mediu",
     timpCitire: 22,
@@ -43,9 +43,9 @@ export const ghiduri: Ghid[] = [
   {
     id: "gh-4",
     slug: "ghid-transport",
-    titlu: "Ghid transport public București",
+    titlu: "Ghid transport public",
     descriere:
-      "Metrou, STB, Ilfov, carduri, abonamente, aplicații, trucuri pentru călătorii eficiente.",
+      "Operatori, bilete, abonamente, aplicații și sfaturi pentru călătorii eficiente cu transportul public.",
     capitole: 7,
     dificultate: "usor",
     timpCitire: 20,
@@ -69,9 +69,9 @@ export const ghiduri: Ghid[] = [
   {
     id: "gh-6",
     slug: "ghid-cetatean",
-    titlu: "Ghid cetățean — drepturile tale în PMB",
+    titlu: "Drepturile cetățeanului — ghid complet",
     descriere:
-      "Petiții, informații publice, consultări, cum te înscrii la ședințe, drepturi de contestație.",
+      "Petiții, informații publice, consultări, cum participi la ședințe, drepturi de contestație.",
     capitole: 8,
     dificultate: "mediu",
     timpCitire: 28,
