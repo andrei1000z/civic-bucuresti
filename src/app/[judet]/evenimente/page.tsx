@@ -19,10 +19,10 @@ const categoryIcons: Record<EvenimentCategory, React.ElementType> = {
 const categoryLabels: Record<EvenimentCategory, string> = {
   accident: "Accident",
   incendiu: "Incendiu",
-  inundatie: "Inundatii",
+  inundatie: "Inundații",
   cutremur: "Cutremur",
   protest: "Protest",
-  infrastructura: "Infrastructura",
+  infrastructura: "Infrastructură",
 };
 
 const severityColors: Record<EvenimentSeverity, string> = {
