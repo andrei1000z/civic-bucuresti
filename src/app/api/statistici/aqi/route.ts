@@ -1,31 +1,35 @@
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
-export const runtime = "edge";
 
-// Attempt to fetch live AQI from OpenAQ API (public, no key required for basic data)
-// Fallback: return deterministic daily-varying mock that's at least plausible
-export async function GET() {
+/**
+ * GET /api/statistici/aqi?lat=44.43&lng=26.10
+ * Fetch live AQI from OpenAQ for the nearest city to given coordinates.
+ * Defaults to București if no coords provided.
+ */
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const lat = Number(searchParams.get("lat") || "44.43");
+  const lng = Number(searchParams.get("lng") || "26.10");
+
   try {
-    // OpenAQ v2 API — București monitoring stations
+    // OpenAQ v2 — search by coordinates with radius 50km
     const res = await fetch(
-      "https://api.openaq.org/v2/latest?city=Bucharest&limit=20",
-      { next: { revalidate: 3600 } }
+      `https://api.openaq.org/v2/latest?coordinates=${lat},${lng}&radius=50000&limit=30`,
+      { next: { revalidate: 1800 } }
     );
     if (res.ok) {
       const json = await res.json();
-      // Try to compute AQI from PM2.5 values if available
       interface Measurement { parameter: string; value: number; unit: string; }
       interface Result { measurements?: Measurement[]; }
       const results: Result[] = json?.results ?? [];
       const pm25Values = results
         .flatMap((r) => r.measurements ?? [])
-        .filter((m) => m.parameter === "pm25" && typeof m.value === "number")
+        .filter((m) => m.parameter === "pm25" && typeof m.value === "number" && m.value > 0 && m.value < 500)
         .map((m) => m.value);
 
       if (pm25Values.length > 0) {
         const avgPm25 = pm25Values.reduce((a, b) => a + b, 0) / pm25Values.length;
-        // Simple EPA AQI conversion for PM2.5
         const aqi = pm25ToAqi(avgPm25);
         return NextResponse.json({
           data: {
@@ -39,45 +43,34 @@ export async function GET() {
       }
     }
   } catch {
-    // fall through to mock
+    // fall through
   }
 
-  // No live data available — return explicit unavailable status
+  // No live data available
   return NextResponse.json({
     data: {
       aqi: null,
       pm25: null,
       source: "indisponibil",
-      quality: "Date temporar indisponibile",
+      quality: "Date indisponibile",
       stations: 0,
-      fallback: true,
     },
   });
 }
 
-function pm25ToAqi(pm: number): number {
-  // EPA breakpoints PM2.5 (µg/m³) → AQI
-  const table = [
-    { cLow: 0, cHigh: 12, iLow: 0, iHigh: 50 },
-    { cLow: 12.1, cHigh: 35.4, iLow: 51, iHigh: 100 },
-    { cLow: 35.5, cHigh: 55.4, iLow: 101, iHigh: 150 },
-    { cLow: 55.5, cHigh: 150.4, iLow: 151, iHigh: 200 },
-    { cLow: 150.5, cHigh: 250.4, iLow: 201, iHigh: 300 },
-    { cLow: 250.5, cHigh: 500.4, iLow: 301, iHigh: 500 },
-  ];
-  for (const bp of table) {
-    if (pm >= bp.cLow && pm <= bp.cHigh) {
-      return ((bp.iHigh - bp.iLow) / (bp.cHigh - bp.cLow)) * (pm - bp.cLow) + bp.iLow;
-    }
-  }
-  return 500;
+function pm25ToAqi(pm25: number): number {
+  if (pm25 <= 12) return ((50 / 12) * pm25);
+  if (pm25 <= 35.4) return 50 + ((50 / 23.4) * (pm25 - 12));
+  if (pm25 <= 55.4) return 100 + ((50 / 20) * (pm25 - 35.4));
+  if (pm25 <= 150.4) return 150 + ((50 / 95) * (pm25 - 55.4));
+  if (pm25 <= 250.4) return 200 + ((100 / 100) * (pm25 - 150.4));
+  return 300 + ((200 / 149.6) * (pm25 - 250.4));
 }
 
 function aqiLabel(aqi: number): string {
-  if (aqi < 50) return "Bun";
-  if (aqi < 100) return "Moderat";
-  if (aqi < 150) return "Nesănătos (grupe sensibile)";
-  if (aqi < 200) return "Nesănătos";
-  if (aqi < 300) return "Foarte nesănătos";
+  if (aqi <= 50) return "Bun";
+  if (aqi <= 100) return "Moderat";
+  if (aqi <= 150) return "Nesănătos (grupe sensibile)";
+  if (aqi <= 200) return "Nesănătos";
   return "Periculos";
 }

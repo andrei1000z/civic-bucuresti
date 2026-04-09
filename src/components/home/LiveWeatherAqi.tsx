@@ -49,7 +49,7 @@ export function LiveWeatherAqi() {
     const load = () => {
       Promise.all([
         fetch(`/api/weather${params}`).then((r) => r.json()).catch(() => null),
-        fetch("/api/statistici/aqi").then((r) => r.json()).catch(() => null),
+        fetch(`/api/statistici/aqi${params}`).then((r) => r.json()).catch(() => null),
       ]).then(([w, a]) => {
         if (w?.data) setWeather(w.data);
         if (a?.data && a.data.aqi != null) setAqi({ aqi: a.data.aqi, quality: a.data.quality ?? "Moderat" });
