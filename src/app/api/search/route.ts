@@ -41,19 +41,26 @@ function sanitizeForPostgrest(q: string): string {
   return q.replace(/[,()*.:\\]/g, "").slice(0, 64);
 }
 
+/** Split query into words; a haystack matches if EVERY word appears somewhere in it */
+function matchesAll(haystack: string, words: string[]): boolean {
+  return words.every((w) => haystack.includes(w));
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const qRaw = (searchParams.get("q") ?? "").trim().toLowerCase();
   if (!qRaw || qRaw.length < 2) return NextResponse.json({ data: [] });
   const q = qRaw;
+  const words = qRaw.split(/\s+/).filter((w) => w.length >= 2);
+  if (words.length === 0) return NextResponse.json({ data: [] });
   const qSafe = sanitizeForPostgrest(qRaw);
-  if (!qSafe || qSafe.length < 2) return NextResponse.json({ data: [] });
 
   const results: SearchResult[] = [];
 
   // Counties / Județe
   for (const c of ALL_COUNTIES) {
-    if (c.name.toLowerCase().includes(q) || c.id.toLowerCase() === q || c.slug === q) {
+    const hay = `${c.name} ${c.id} ${c.slug}`.toLowerCase();
+    if (matchesAll(hay, words)) {
       results.push({
         type: "judet",
         title: c.name,
@@ -66,14 +73,16 @@ export async function GET(req: Request) {
 
   // Static pages
   for (const p of STATIC_PAGES) {
-    if (p.title.toLowerCase().includes(q) || p.excerpt?.toLowerCase().includes(q)) {
+    const hay = `${p.title} ${p.excerpt ?? ""}`.toLowerCase();
+    if (matchesAll(hay, words)) {
       results.push(p);
     }
   }
 
   // Ghiduri
   for (const g of ghiduri) {
-    if (g.titlu.toLowerCase().includes(q) || g.descriere.toLowerCase().includes(q)) {
+    const hay = `${g.titlu} ${g.descriere}`.toLowerCase();
+    if (matchesAll(hay, words)) {
       results.push({
         type: "ghid",
         title: g.titlu,
@@ -85,7 +94,8 @@ export async function GET(req: Request) {
 
   // Evenimente
   for (const e of evenimente) {
-    if (e.titlu.toLowerCase().includes(q) || e.descriere.toLowerCase().includes(q)) {
+    const hay = `${e.titlu} ${e.descriere} ${e.county ?? ""}`.toLowerCase();
+    if (matchesAll(hay, words)) {
       results.push({
         type: "eveniment",
         title: e.titlu,
@@ -98,7 +108,8 @@ export async function GET(req: Request) {
 
   // Bilete transport
   for (const b of bilete) {
-    if (b.nume.toLowerCase().includes(q) || b.descriere.toLowerCase().includes(q) || b.operator.toLowerCase().includes(q)) {
+    const hay = `${b.nume} ${b.descriere} ${b.operator}`.toLowerCase();
+    if (matchesAll(hay, words)) {
       results.push({
         type: "bilet",
         title: `${b.nume} (${b.operator.toUpperCase()})`,
@@ -111,8 +122,8 @@ export async function GET(req: Request) {
 
   // Linii transport
   for (const l of linii) {
-    const traseStr = l.traseu.join(" ").toLowerCase();
-    if (l.numar.toLowerCase().includes(q) || l.tip.toLowerCase().includes(q) || traseStr.includes(q)) {
+    const hay = `${l.numar} ${l.tip} ${l.traseu.join(" ")}`.toLowerCase();
+    if (matchesAll(hay, words)) {
       results.push({
         type: "linie",
         title: `${l.tip.charAt(0).toUpperCase() + l.tip.slice(1)} ${l.numar}`,
@@ -125,8 +136,8 @@ export async function GET(req: Request) {
 
   // Primari
   for (const p of primari) {
-    const haystack = [p.nume, p.partid, ...p.realizari, ...p.controverse].join(" ").toLowerCase();
-    if (haystack.includes(q)) {
+    const hay = [p.nume, p.partid, ...p.realizari, ...p.controverse].join(" ").toLowerCase();
+    if (matchesAll(hay, words)) {
       results.push({
         type: "primar",
         title: `${p.nume} (${p.partid})`,
@@ -139,8 +150,8 @@ export async function GET(req: Request) {
 
   // Direcții PMB
   for (const d of DIRECTII) {
-    const haystack = [d.name, d.role, ...d.responsabilitati].join(" ").toLowerCase();
-    if (haystack.includes(q)) {
+    const hay = [d.name, d.role, ...d.responsabilitati].join(" ").toLowerCase();
+    if (matchesAll(hay, words)) {
       results.push({
         type: "directie",
         title: d.name,
@@ -153,8 +164,8 @@ export async function GET(req: Request) {
 
   // Companii municipale
   for (const c of COMPANII) {
-    const haystack = [c.name, c.rol].join(" ").toLowerCase();
-    if (haystack.includes(q)) {
+    const hay = `${c.name} ${c.rol}`.toLowerCase();
+    if (matchesAll(hay, words)) {
       results.push({
         type: "companie",
         title: c.name,
@@ -167,8 +178,8 @@ export async function GET(req: Request) {
 
   // Glosar termeni
   for (const g of GLOSAR) {
-    const haystack = [g.term, g.shortForm, g.definition].join(" ").toLowerCase();
-    if (haystack.includes(q)) {
+    const hay = `${g.term} ${g.shortForm} ${g.definition}`.toLowerCase();
+    if (matchesAll(hay, words)) {
       results.push({
         type: "glosar",
         title: `${g.shortForm} — ${g.term}`,
@@ -180,8 +191,8 @@ export async function GET(req: Request) {
 
   // Ghiduri sesizări (tipuri de sesizări)
   for (const sg of SESIZARI_GUIDES) {
-    const haystack = [sg.label, sg.urgenta, ...sg.tips, ...sg.destinatari].join(" ").toLowerCase();
-    if (haystack.includes(q)) {
+    const hay = [sg.label, sg.urgenta, ...sg.tips, ...sg.destinatari].join(" ").toLowerCase();
+    if (matchesAll(hay, words)) {
       results.push({
         type: "ghid-sesizare",
         title: `Sesizare: ${sg.label}`,
@@ -193,9 +204,9 @@ export async function GET(req: Request) {
   }
 
   // Operatori transport din țară
-  for (const [key, op] of Object.entries(OPERATORS)) {
-    const haystack = [op.name, op.coverage, ...op.types, op.app ?? ""].join(" ").toLowerCase();
-    if (haystack.includes(q)) {
+  for (const [, op] of Object.entries(OPERATORS)) {
+    const hay = `${op.name} ${op.coverage} ${op.types.join(" ")} ${op.app ?? ""}`.toLowerCase();
+    if (matchesAll(hay, words)) {
       results.push({
         type: "transport",
         title: op.name,
@@ -206,42 +217,58 @@ export async function GET(req: Request) {
     }
   }
 
-  // Sesizari (DB)
+  // Sesizari (DB) — search each word with OR across columns
   try {
     const supabase = await createSupabaseServer();
-    const { data } = await supabase
-      .from("sesizari_feed")
-      .select("code, titlu, locatie, sector, status, descriere")
-      .or(`titlu.ilike.%${qSafe}%,locatie.ilike.%${qSafe}%,descriere.ilike.%${qSafe}%`)
-      .limit(8);
-    for (const s of (data ?? []) as Array<{ code: string; titlu: string; locatie: string; sector: string; status: string; descriere: string }>) {
-      results.push({
-        type: "sesizare",
-        title: s.titlu,
-        url: `/sesizari/${s.code}`,
-        excerpt: `${s.locatie}`,
-        meta: s.status,
-      });
+    const safeWords = words.map((w) => sanitizeForPostgrest(w)).filter(Boolean);
+    // Build OR filter: each word must appear in at least one column
+    // Supabase doesn't support AND of ORs easily, so we search the first word and filter in JS
+    if (safeWords.length > 0) {
+      const first = safeWords[0];
+      const { data } = await supabase
+        .from("sesizari_feed")
+        .select("code, titlu, locatie, sector, status, descriere")
+        .or(`titlu.ilike.%${first}%,locatie.ilike.%${first}%,descriere.ilike.%${first}%`)
+        .limit(20);
+      for (const s of (data ?? []) as Array<{ code: string; titlu: string; locatie: string; sector: string; status: string; descriere: string }>) {
+        const hay = `${s.titlu} ${s.locatie} ${s.descriere}`.toLowerCase();
+        if (matchesAll(hay, safeWords)) {
+          results.push({
+            type: "sesizare",
+            title: s.titlu,
+            url: `/sesizari/${s.code}`,
+            excerpt: `${s.locatie}`,
+            meta: s.status,
+          });
+        }
+      }
     }
   } catch { /* ignore */ }
 
-  // Stiri (DB) — link to internal page, not external URL
+  // Stiri (DB) — same word-based approach
   try {
     const supabase = await createSupabaseServer();
-    const { data } = await supabase
-      .from("stiri_cache")
-      .select("id, title, excerpt, source")
-      .or(`title.ilike.%${qSafe}%,excerpt.ilike.%${qSafe}%`)
-      .order("published_at", { ascending: false })
-      .limit(5);
-    for (const s of (data ?? []) as Array<{ id: string; title: string; excerpt: string; source: string }>) {
-      results.push({
-        type: "stire",
-        title: s.title,
-        url: `/stiri/${s.id}`,
-        excerpt: s.excerpt?.slice(0, 120) ?? "",
-        meta: s.source,
-      });
+    const safeWords = words.map((w) => sanitizeForPostgrest(w)).filter(Boolean);
+    if (safeWords.length > 0) {
+      const first = safeWords[0];
+      const { data } = await supabase
+        .from("stiri_cache")
+        .select("id, title, excerpt, source")
+        .or(`title.ilike.%${first}%,excerpt.ilike.%${first}%`)
+        .order("published_at", { ascending: false })
+        .limit(10);
+      for (const s of (data ?? []) as Array<{ id: string; title: string; excerpt: string; source: string }>) {
+        const hay = `${s.title} ${s.excerpt ?? ""}`.toLowerCase();
+        if (matchesAll(hay, safeWords)) {
+          results.push({
+            type: "stire",
+            title: s.title,
+            url: `/stiri/${s.id}`,
+            excerpt: s.excerpt?.slice(0, 120) ?? "",
+            meta: s.source,
+          });
+        }
+      }
     }
   } catch { /* ignore */ }
 

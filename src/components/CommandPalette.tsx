@@ -107,11 +107,11 @@ export function CommandPalette() {
 
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 50);
-    else { setQuery(""); setResults([]); setActiveIdx(0); }
+    else { setQuery(""); setResults([]); setActiveIdx(0); setAiAnswer(null); setAiLoading(false); }
   }, [open]);
 
   useEffect(() => {
-    if (!query || query.length < 2) { setResults([]); return; }
+    if (!query || query.length < 2) { setResults([]); setAiAnswer(null); return; }
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -137,15 +137,48 @@ export function CommandPalette() {
   const askAI = useCallback(async () => {
     if (!query || query.length < 3 || aiLoading) return;
     setAiLoading(true);
-    setAiAnswer(null);
+    setAiAnswer("");
     try {
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [{ role: "user", content: query }] }),
       });
-      const text = await res.text();
-      setAiAnswer(text.slice(0, 500));
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Eroare server" }));
+        setAiAnswer(err.error ?? "Eroare server");
+        setAiLoading(false);
+        return;
+      }
+      const reader = res.body?.getReader();
+      if (!reader) { setAiAnswer("Nu am putut citi răspunsul."); setAiLoading(false); return; }
+      const decoder = new TextDecoder();
+      let buf = "";
+      let answer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split("\n");
+        buf = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const payload = line.slice(6).trim();
+          if (payload === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(payload);
+            if (parsed.delta) {
+              answer += parsed.delta;
+              setAiAnswer(answer);
+            }
+            if (parsed.error) {
+              answer += `\n${parsed.error}`;
+              setAiAnswer(answer);
+            }
+          } catch { /* skip malformed */ }
+        }
+      }
+      if (!answer) setAiAnswer("Nu am primit un răspuns. Încearcă din nou.");
     } catch {
       setAiAnswer("Nu am putut genera un răspuns. Încearcă din nou.");
     } finally {
@@ -160,7 +193,7 @@ export function CommandPalette() {
       else if (e.key === "ArrowUp" && results.length > 0) { e.preventDefault(); setActiveIdx((i) => (i - 1 + results.length) % results.length); }
       else if (e.key === "Enter") {
         e.preventDefault();
-        if (results.length > 0) handleSelect(results[activeIdx].url);
+        if (results.length > 0 && !e.shiftKey) handleSelect(results[activeIdx].url);
         else if (query.length >= 3) askAI();
       }
     };
@@ -217,65 +250,86 @@ export function CommandPalette() {
                 })}
               </div>
             </div>
-          ) : results.length === 0 && !loading ? (
-            <div className="p-6">
-              {aiAnswer ? (
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
-                      <Sparkles size={12} className="text-violet-500" />
-                    </div>
-                    <p className="text-xs font-semibold text-violet-600 dark:text-violet-400">Răspuns AI</p>
-                  </div>
-                  <p className="text-sm text-[var(--color-text)] leading-relaxed whitespace-pre-wrap">{aiAnswer}</p>
-                </div>
-              ) : aiLoading ? (
+          ) : (
+            <>
+              {/* Results list */}
+              {results.length > 0 && !loading && (
+                <ul className="py-1">
+                  {results.map((r, i) => {
+                    const Icon = TYPE_ICON[r.type];
+                    return (
+                      <li key={`${r.type}-${r.url}-${i}`}>
+                        <button
+                          onClick={() => handleSelect(r.url)}
+                          onMouseEnter={() => setActiveIdx(i)}
+                          className={cn(
+                            "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors",
+                            i === activeIdx ? "bg-[var(--color-primary-soft)]" : "hover:bg-[var(--color-surface-2)]"
+                          )}
+                        >
+                          <div className={cn("w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0", i === activeIdx ? "bg-[var(--color-primary)]/10" : "bg-[var(--color-surface-2)]")}>
+                            <Icon size={14} className={TYPE_COLOR[r.type]} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{r.title}</p>
+                            <p className="text-[10px] text-[var(--color-text-muted)] truncate">
+                              {TYPE_LABEL[r.type]}{r.meta ? ` · ${r.meta}` : ""}
+                            </p>
+                          </div>
+                          {i === activeIdx && <ArrowRight size={12} className="text-[var(--color-primary)] shrink-0" />}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              {/* No results message */}
+              {results.length === 0 && !loading && !aiAnswer && !aiLoading && (
                 <div className="text-center py-4">
-                  <Loader2 size={20} className="animate-spin mx-auto mb-2 text-violet-500" />
-                  <p className="text-xs text-[var(--color-text-muted)]">AI generează răspunsul...</p>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <p className="text-sm text-[var(--color-text-muted)] mb-3">Niciun rezultat pentru „{query}"</p>
-                  <button
-                    onClick={askAI}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-[8px] bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-medium hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors"
-                  >
-                    <Sparkles size={12} />
-                    Întreabă AI-ul (Enter)
-                  </button>
+                  <p className="text-sm text-[var(--color-text-muted)]">Niciun rezultat pentru &bdquo;{query}&rdquo;</p>
                 </div>
               )}
-            </div>
-          ) : (
-            <ul className="py-1">
-              {results.map((r, i) => {
-                const Icon = TYPE_ICON[r.type];
-                return (
-                  <li key={`${r.type}-${r.url}-${i}`}>
+
+              {/* AI section — always visible when query >= 3 chars */}
+              {query.length >= 3 && !loading && (
+                <div className="border-t border-[var(--color-border)]">
+                  {aiAnswer ? (
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+                          <Sparkles size={10} className="text-violet-500" />
+                        </div>
+                        <p className="text-[10px] font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wider">Răspuns AI</p>
+                        {aiLoading && <Loader2 size={10} className="animate-spin text-violet-500" />}
+                      </div>
+                      <p className="text-sm text-[var(--color-text)] leading-relaxed whitespace-pre-wrap">{aiAnswer}</p>
+                    </div>
+                  ) : aiLoading ? (
+                    <div className="flex items-center gap-2 p-4">
+                      <Loader2 size={14} className="animate-spin text-violet-500" />
+                      <p className="text-xs text-[var(--color-text-muted)]">AI generează răspunsul...</p>
+                    </div>
+                  ) : (
                     <button
-                      onClick={() => handleSelect(r.url)}
-                      onMouseEnter={() => setActiveIdx(i)}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors",
-                        i === activeIdx ? "bg-[var(--color-primary-soft)]" : "hover:bg-[var(--color-surface-2)]"
-                      )}
+                      onClick={askAI}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
                     >
-                      <div className={cn("w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0", i === activeIdx ? "bg-[var(--color-primary)]/10" : "bg-[var(--color-surface-2)]")}>
-                        <Icon size={14} className={TYPE_COLOR[r.type]} />
+                      <div className="w-8 h-8 rounded-[8px] bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
+                        <Sparkles size={14} className="text-violet-500" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{r.title}</p>
-                        <p className="text-[10px] text-[var(--color-text-muted)] truncate">
-                          {TYPE_LABEL[r.type]}{r.meta ? ` · ${r.meta}` : ""}
+                        <p className="text-sm font-medium text-violet-700 dark:text-violet-300">Întreabă AI-ul despre &bdquo;{query}&rdquo;</p>
+                        <p className="text-[10px] text-[var(--color-text-muted)]">
+                          {results.length > 0 ? "Shift+Enter" : "Enter"} pentru răspuns AI
                         </p>
                       </div>
-                      {i === activeIdx && <ArrowRight size={12} className="text-[var(--color-primary)] shrink-0" />}
+                      <Sparkles size={12} className="text-violet-400 shrink-0" />
                     </button>
-                  </li>
-                );
-              })}
-            </ul>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -287,6 +341,9 @@ export function CommandPalette() {
             </span>
             <span className="flex items-center gap-1">
               <kbd className="px-1 py-0.5 rounded bg-[var(--color-surface-2)] font-mono text-[9px]">↵</kbd> deschide
+            </span>
+            <span className="flex items-center gap-1">
+              <kbd className="px-1 py-0.5 rounded bg-[var(--color-surface-2)] font-mono text-[9px]">⇧↵</kbd> AI
             </span>
             <span className="flex items-center gap-1">
               <kbd className="px-1 py-0.5 rounded bg-[var(--color-surface-2)] font-mono text-[9px]">esc</kbd> închide
