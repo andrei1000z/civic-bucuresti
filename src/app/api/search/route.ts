@@ -41,9 +41,33 @@ function sanitizeForPostgrest(q: string): string {
   return q.replace(/[,()*.:\\]/g, "").slice(0, 64);
 }
 
-/** Split query into words; a haystack matches if EVERY word appears somewhere in it */
+/**
+ * Stem a Romanian word by trimming inflection suffixes.
+ * "explozie" → "explozi", "rahovei" → "rahov", "incendiul" → "incendi"
+ * Returns array of stems to try (original + trimmed variants).
+ */
+function roStems(word: string): string[] {
+  const stems = [word];
+  // Romanian suffixes sorted longest-first
+  const suffixes = ["ului", "elor", "iei", "rea", "lui", "lor", "iei", "ată", "ate", "ări", "ări", "ul", "ei", "ii", "ea", "le", "or", "al", "ia", "ie", "ă", "a", "e", "i", "u"];
+  for (const s of suffixes) {
+    if (word.length > s.length + 2 && word.endsWith(s)) {
+      stems.push(word.slice(0, -s.length));
+      break;
+    }
+  }
+  // Fallback: also try dropping last 1-2 chars for short words
+  if (word.length > 4) stems.push(word.slice(0, -1));
+  if (word.length > 5) stems.push(word.slice(0, -2));
+  return [...new Set(stems)];
+}
+
+/** A haystack matches if EVERY query word has at least one stem that appears in it */
 function matchesAll(haystack: string, words: string[]): boolean {
-  return words.every((w) => haystack.includes(w));
+  return words.every((w) => {
+    const stems = roStems(w);
+    return stems.some((s) => haystack.includes(s));
+  });
 }
 
 export async function GET(req: Request) {
