@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, FileText, Newspaper, BookOpen, Siren, MapPin, Hash, Loader2, Command } from "lucide-react";
+import { Search, FileText, Newspaper, BookOpen, Siren, Hash, Loader2, ArrowRight, X, MapPin, BarChart3, Map as MapIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SearchResult {
@@ -21,6 +21,14 @@ const TYPE_ICON = {
   page: Hash,
 };
 
+const TYPE_COLOR = {
+  sesizare: "text-red-500",
+  ghid: "text-amber-500",
+  eveniment: "text-purple-500",
+  stire: "text-blue-500",
+  page: "text-[var(--color-text-muted)]",
+};
+
 const TYPE_LABEL = {
   sesizare: "Sesizare",
   ghid: "Ghid",
@@ -28,6 +36,15 @@ const TYPE_LABEL = {
   stire: "Știre",
   page: "Pagină",
 };
+
+const QUICK_LINKS = [
+  { label: "Sesizări", url: "/sesizari", icon: FileText, color: "text-red-500" },
+  { label: "Hărți", url: "/harti", icon: MapIcon, color: "text-blue-500" },
+  { label: "Statistici", url: "/statistici", icon: BarChart3, color: "text-purple-500" },
+  { label: "Știri", url: "/stiri", icon: Newspaper, color: "text-emerald-500" },
+  { label: "Ghiduri", url: "/ghiduri", icon: BookOpen, color: "text-amber-500" },
+  { label: "Evenimente", url: "/evenimente", icon: Siren, color: "text-pink-500" },
+];
 
 export function CommandPalette() {
   const router = useRouter();
@@ -39,16 +56,13 @@ export function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // Cmd+K / Ctrl+K global shortcut + custom event from Navbar search button
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.key === "k" || e.key === "K") && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen((o) => !o);
       }
-      if (e.key === "Escape" && open) {
-        setOpen(false);
-      }
+      if (e.key === "Escape" && open) setOpen(false);
     };
     const customHandler = () => setOpen(true);
     document.addEventListener("keydown", handler);
@@ -59,23 +73,13 @@ export function CommandPalette() {
     };
   }, [open]);
 
-  // Focus input on open
   useEffect(() => {
-    if (open) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    } else {
-      setQuery("");
-      setResults([]);
-      setActiveIdx(0);
-    }
+    if (open) setTimeout(() => inputRef.current?.focus(), 50);
+    else { setQuery(""); setResults([]); setActiveIdx(0); }
   }, [open]);
 
-  // Debounced search
   useEffect(() => {
-    if (!query || query.length < 2) {
-      setResults([]);
-      return;
-    }
+    if (!query || query.length < 2) { setResults([]); return; }
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -86,42 +90,25 @@ export function CommandPalette() {
         const json = await res.json();
         setResults(json.data ?? []);
         setActiveIdx(0);
-      } catch {
-        // aborted or error
-      } finally {
-        setLoading(false);
-      }
+      } catch { /* aborted */ }
+      finally { setLoading(false); }
     }, 200);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
+    return () => { clearTimeout(timer); controller.abort(); };
   }, [query]);
 
-  const handleSelect = useCallback((r: SearchResult) => {
+  const handleSelect = useCallback((url: string) => {
     setOpen(false);
-    if (r.url.startsWith("http")) {
-      window.open(r.url, "_blank", "noopener,noreferrer");
-    } else {
-      router.push(r.url);
-    }
+    if (url.startsWith("http")) window.open(url, "_blank", "noopener,noreferrer");
+    else router.push(url);
   }, [router]);
 
-  // Keyboard navigation
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
       if (results.length === 0) return;
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setActiveIdx((i) => (i + 1) % results.length);
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setActiveIdx((i) => (i - 1 + results.length) % results.length);
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        handleSelect(results[activeIdx]);
-      }
+      if (e.key === "ArrowDown") { e.preventDefault(); setActiveIdx((i) => (i + 1) % results.length); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); setActiveIdx((i) => (i - 1 + results.length) % results.length); }
+      else if (e.key === "Enter") { e.preventDefault(); handleSelect(results[activeIdx].url); }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
@@ -131,74 +118,80 @@ export function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-[150] bg-black/50 backdrop-blur-sm flex items-start justify-center pt-[10vh] p-4"
+      className="fixed inset-0 z-[150] bg-black/60 backdrop-blur-md flex items-start justify-center pt-[12vh] p-4"
       onClick={() => setOpen(false)}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-2xl bg-[var(--color-surface)] rounded-[12px] shadow-[var(--shadow-xl)] overflow-hidden animate-fade-in-up"
+        className="w-full max-w-xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] shadow-2xl overflow-hidden"
       >
-        <div className="flex items-center gap-3 px-4 border-b border-[var(--color-border)]">
-          <Search size={20} className="text-[var(--color-text-muted)] shrink-0" />
+        {/* Search input */}
+        <div className="flex items-center gap-3 px-5 h-14 border-b border-[var(--color-border)]">
+          <Search size={18} className="text-[var(--color-primary)] shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Caută sesizări, ghiduri, evenimente, pagini..."
-            className="flex-1 h-14 bg-transparent text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:outline-none text-base"
+            placeholder="Caută pe Civia..."
+            className="flex-1 bg-transparent text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:outline-none text-sm"
           />
-          {loading && <Loader2 size={16} className="animate-spin text-[var(--color-text-muted)]" />}
-          <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded border border-[var(--color-border)] text-[10px] text-[var(--color-text-muted)] font-mono">
-            ESC
-          </kbd>
+          {loading && <Loader2 size={14} className="animate-spin text-[var(--color-primary)]" />}
+          <button onClick={() => setOpen(false)} className="w-7 h-7 rounded-[6px] bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)] transition-colors">
+            <X size={12} className="text-[var(--color-text-muted)]" />
+          </button>
         </div>
 
-        <div className="max-h-[60vh] overflow-y-auto">
+        {/* Content */}
+        <div className="max-h-[55vh] overflow-y-auto">
           {query.length < 2 ? (
-            <div className="p-8 text-center text-sm text-[var(--color-text-muted)]">
-              <Command size={28} className="mx-auto mb-3 opacity-50" />
-              <p>Scrie minim 2 caractere să cauți</p>
-              <div className="flex flex-wrap gap-2 justify-center mt-4 text-xs">
-                <button onClick={() => setQuery("sesizari")} className="px-2 py-1 rounded bg-[var(--color-surface-2)]">sesizari</button>
-                <button onClick={() => setQuery("groapa")} className="px-2 py-1 rounded bg-[var(--color-surface-2)]">groapa</button>
-                <button onClick={() => setQuery("bilete")} className="px-2 py-1 rounded bg-[var(--color-surface-2)]">bilete</button>
-                <button onClick={() => setQuery("cutremur")} className="px-2 py-1 rounded bg-[var(--color-surface-2)]">cutremur</button>
+            <div className="p-4">
+              <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3 px-1">Acces rapid</p>
+              <div className="grid grid-cols-3 gap-2">
+                {QUICK_LINKS.map((link) => {
+                  const Icon = link.icon;
+                  return (
+                    <button
+                      key={link.url}
+                      onClick={() => handleSelect(link.url)}
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-[10px] hover:bg-[var(--color-surface-2)] transition-colors"
+                    >
+                      <Icon size={18} className={link.color} />
+                      <span className="text-xs font-medium">{link.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ) : results.length === 0 && !loading ? (
-            <div className="p-8 text-center text-sm text-[var(--color-text-muted)]">
-              Niciun rezultat pentru &quot;{query}&quot;
+            <div className="p-8 text-center">
+              <Search size={24} className="mx-auto mb-2 text-[var(--color-text-muted)] opacity-30" />
+              <p className="text-sm text-[var(--color-text-muted)]">Niciun rezultat pentru „{query}"</p>
             </div>
           ) : (
-            <ul>
+            <ul className="py-1">
               {results.map((r, i) => {
                 const Icon = TYPE_ICON[r.type];
                 return (
                   <li key={`${r.type}-${r.url}-${i}`}>
                     <button
-                      onClick={() => handleSelect(r)}
+                      onClick={() => handleSelect(r.url)}
                       onMouseEnter={() => setActiveIdx(i)}
                       className={cn(
-                        "w-full flex items-start gap-3 px-4 py-3 text-left border-b border-[var(--color-border)] last:border-b-0 transition-colors",
-                        i === activeIdx && "bg-[var(--color-primary-soft)]"
+                        "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors",
+                        i === activeIdx ? "bg-[var(--color-primary-soft)]" : "hover:bg-[var(--color-surface-2)]"
                       )}
                     >
-                      <Icon size={16} className="text-[var(--color-text-muted)] mt-0.5 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                          <span className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
-                            {TYPE_LABEL[r.type]}
-                          </span>
-                          {r.meta && (
-                            <span className="text-[10px] text-[var(--color-text-muted)]">· {r.meta}</span>
-                          )}
-                        </div>
-                        <p className="font-medium text-sm truncate">{r.title}</p>
-                        {r.excerpt && (
-                          <p className="text-xs text-[var(--color-text-muted)] truncate mt-0.5">{r.excerpt}</p>
-                        )}
+                      <div className={cn("w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0", i === activeIdx ? "bg-[var(--color-primary)]/10" : "bg-[var(--color-surface-2)]")}>
+                        <Icon size={14} className={TYPE_COLOR[r.type]} />
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{r.title}</p>
+                        <p className="text-[10px] text-[var(--color-text-muted)] truncate">
+                          {TYPE_LABEL[r.type]}{r.meta ? ` · ${r.meta}` : ""}
+                        </p>
+                      </div>
+                      {i === activeIdx && <ArrowRight size={12} className="text-[var(--color-primary)] shrink-0" />}
                     </button>
                   </li>
                 );
@@ -207,17 +200,21 @@ export function CommandPalette() {
           )}
         </div>
 
-        <div className="px-4 py-2 border-t border-[var(--color-border)] flex items-center justify-between text-[10px] text-[var(--color-text-muted)]">
-          <div className="flex items-center gap-3">
+        {/* Footer */}
+        <div className="px-4 py-2 border-t border-[var(--color-border)] flex items-center justify-between">
+          <div className="flex items-center gap-3 text-[10px] text-[var(--color-text-muted)]">
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded border border-[var(--color-border)] font-mono">↑↓</kbd> navighezi
+              <kbd className="px-1 py-0.5 rounded bg-[var(--color-surface-2)] font-mono text-[9px]">↑↓</kbd> navighează
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded border border-[var(--color-border)] font-mono">Enter</kbd> deschide
+              <kbd className="px-1 py-0.5 rounded bg-[var(--color-surface-2)] font-mono text-[9px]">↵</kbd> deschide
+            </span>
+            <span className="flex items-center gap-1">
+              <kbd className="px-1 py-0.5 rounded bg-[var(--color-surface-2)] font-mono text-[9px]">esc</kbd> închide
             </span>
           </div>
-          <span className="flex items-center gap-1">
-            <MapPin size={10} /> civia.ro
+          <span className="flex items-center gap-1 text-[10px] text-[var(--color-text-muted)]">
+            <MapPin size={8} /> civia.ro
           </span>
         </div>
       </div>
