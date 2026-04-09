@@ -76,6 +76,7 @@ export async function generateMetadata(
       description: ev?.descriere.slice(0, 160),
       type: "article",
       publishedTime: ev?.data,
+      images: ev?.image ? [`/images/evenimente/${ev.image}.webp`] : undefined,
     },
   };
 }
@@ -279,10 +280,10 @@ export default async function EvenimentDetailPage({
                     </Badge>
                   </dd>
                 </div>
-                {eveniment.victime != null && (
+                {eveniment.victime != null && eveniment.victime > 0 && (
                   <div>
                     <dt className="text-xs text-[var(--color-text-muted)]">Victime</dt>
-                    <dd className="font-medium text-red-600">{eveniment.victime}</dd>
+                    <dd className="font-medium text-red-600">{eveniment.victime.toLocaleString("ro-RO")}</dd>
                   </div>
                 )}
               </dl>

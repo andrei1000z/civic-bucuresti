@@ -25,7 +25,7 @@ export default function EvenimentePage() {
             Evenimentele care au marcat România
           </h1>
           <p className="text-lg text-white/80 max-w-2xl">
-            {sorted.length} evenimente documentate din 1989 până azi — accidente, incendii, inundații, cutremure și proteste.
+            {sorted.length} evenimente documentate din {new Date(sorted[sorted.length - 1]?.data ?? "1940").getFullYear()} până azi — accidente, incendii, inundații, cutremure și proteste.
           </p>
         </div>
       </section>

@@ -49,7 +49,7 @@ export async function generateMetadata({
   if (!county) return {};
   return {
     title: `Evenimente — ${county.name}`,
-    description: `Cronologia evenimentelor semnificative din ${county.name} si din Romania.`,
+    description: `Cronologia evenimentelor semnificative din ${county.name} și din România.`,
     alternates: { canonical: `/${county.slug}/evenimente` },
   };
 }
@@ -106,7 +106,7 @@ function EventCard({ ev }: { ev: Eveniment }) {
               <span>{ev.victime} victime</span>
             )}
             {ev.evacuati !== undefined && ev.evacuati > 0 && (
-              <span>{ev.evacuati} evacuati</span>
+              <span>{ev.evacuati} evacuați</span>
             )}
             {ev.echipaje !== undefined && ev.echipaje > 0 && (
               <span>{ev.echipaje} echipaje</span>
@@ -145,14 +145,14 @@ export default async function CountyEvenimentePage({
         <div className="absolute inset-0 bg-grid-pattern opacity-10" />
         <div className="container-narrow relative z-10 py-16 md:py-20">
           <Badge className="mb-4 bg-white/10 text-white border border-white/20">
-            Arhiva cronologica
+            Arhivă cronologică
           </Badge>
           <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
             Evenimente — {county.name}
           </h1>
           <p className="text-lg text-white/80 max-w-2xl">
             Accidente, incendii, inundatii, cutremure si proteste — o arhiva documentata a
-            incidentelor importante din {county.name} si din Romania.
+            incidentelor importante din {county.name} și din România.
           </p>
         </div>
       </section>
@@ -162,7 +162,7 @@ export default async function CountyEvenimentePage({
         <section className="py-16">
           <div className="container-narrow">
             <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-6">
-              Evenimente in {county.name}
+              Evenimente în {county.name}
               <span className="ml-2 text-base font-normal text-[var(--color-text-muted)]">
                 ({localEvents.length})
               </span>
@@ -180,7 +180,7 @@ export default async function CountyEvenimentePage({
       <section className={localEvents.length > 0 ? "pb-16" : "py-16"}>
         <div className="container-narrow">
           <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-6">
-            {localEvents.length > 0 ? "Evenimente nationale" : `Evenimente din Romania`}
+            {localEvents.length > 0 ? "Evenimente naționale" : `Evenimente din România`}
             <span className="ml-2 text-base font-normal text-[var(--color-text-muted)]">
               ({nationalEvents.length})
             </span>

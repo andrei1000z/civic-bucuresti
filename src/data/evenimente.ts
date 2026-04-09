@@ -81,6 +81,21 @@ export const evenimente: Eveniment[] = [
     echipaje: 0,
   },
   {
+    id: "ev-048",
+    slug: "prabusire-acoperis-2024",
+    titlu: "Prăbușirea acoperișului Halei Traian",
+    data: "2024-11-15",
+    county: "B",
+    category: "infrastructura",
+    severity: "moderat",
+    descriere:
+      "Acoperișul Halei Traian din București s-a prăbușit din cauza acumulării de zăpadă. Structura avea peste 80 de ani. Fără victime.",
+    gradient: "from-stone-700 via-slate-800 to-gray-900",
+    victime: 0,
+    evacuati: 0,
+    echipaje: 4,
+  },
+  {
     id: "ev-012",
     slug: "inundatie-pasaj-basarab-2024",
     titlu: "Inundații în Pasajul Basarab",
@@ -148,7 +163,7 @@ export const evenimente: Eveniment[] = [
     titlu: "Tornado în Călărași",
     data: "2024-04-30",
     county: "CL",
-    category: "inundatie",
+    category: "infrastructura",
     severity: "major",
     descriere:
       "Fenomen meteo extrem de tip tornadă în sudul județului Călărași. Acoperișuri smulse, stâlpi de electricitate doborâți, culturi agricole distruse pe sute de hectare.",
@@ -164,7 +179,7 @@ export const evenimente: Eveniment[] = [
     titlu: "Alunecări de teren în Gorj",
     data: "2024-04-20",
     county: "GJ",
-    category: "inundatie",
+    category: "infrastructura",
     severity: "major",
     descriere:
       "Alunecări masive de teren în mai multe sate din județul Gorj, provocate de ploi abundente. Drumuri distruse, case fisurate, familii evacuate.",
@@ -201,6 +216,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Incendiu la un stand de mărfuri din Piața Obor. ISU a intervenit rapid, fără victime.",
     gradient: "from-orange-500 via-red-600 to-orange-800",
+    image: "incendiu-piatra-neamt-2020",
     victime: 0,
     evacuati: 15,
     echipaje: 3,
@@ -516,6 +532,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "A treia mineriadă: minerii din Valea Jiului au coborât din nou la București cerând demisia guvernului Petre Roman. Violențe de stradă, sediul guvernului atacat. Premierul Petre Roman a demisionat.",
     gradient: "from-gray-700 via-red-800 to-stone-900",
+    image: "mineriada-1990",
     victime: 3,
     evacuati: 0,
     echipaje: 0,
@@ -531,6 +548,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Cea mai violentă mineriadă: minerii chemați de Ion Iliescu au atacat brutal manifestanții pașnici din Piața Universității, sediile partidelor de opoziție și case particulare. Cel puțin 7 morți oficial, sute de răniți.",
     gradient: "from-red-800 via-stone-900 to-gray-950",
+    image: "mineriada-1991",
     victime: 7,
     evacuati: 0,
     echipaje: 0,
@@ -546,6 +564,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Revoluția a început la Timișoara pe 16 decembrie 1989 cu protestele de la casa parohului reformat László Tőkés. Armata a deschis focul asupra protestatarilor. Timișoara a fost primul oraș liber de comunism din România.",
     gradient: "from-red-900 via-yellow-700 to-blue-900",
+    image: "revolutia-1989-brasov",
     victime: 72,
     evacuati: 0,
     echipaje: 0,
@@ -561,6 +580,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Pe 21 decembrie, mitingul organizat de Ceaușescu în Piața Palatului s-a transformat în revoltă. Pe 22 decembrie, dictatorul a fugit cu elicopterul. Lupte de stradă violente au continuat până pe 25 decembrie. Peste 1.100 de morți la nivel național.",
     gradient: "from-red-900 via-amber-800 to-red-950",
+    image: "revolutia-1989-bucuresti",
     victime: 1104,
     evacuati: 0,
     echipaje: 0,
@@ -576,6 +596,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Studenții și muncitorii din Cluj-Napoca au ieșit în stradă pe 21 decembrie. Armata a deschis focul în Piața Libertății. 26 de morți și peste 60 de răniți în oraș.",
     gradient: "from-red-800 via-orange-800 to-slate-900",
+    image: "revolutia-1989-cluj",
     victime: 26,
     evacuati: 0,
     echipaje: 0,
@@ -591,6 +612,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Sibiu a fost al doilea cel mai afectat oraș în timpul Revoluției, după București. Lupte grele de stradă, 99 de morți și peste 100 de răniți. Nicu Ceaușescu, fiul dictatorului, era prim-secretar al județului.",
     gradient: "from-red-900 via-stone-800 to-red-950",
+    image: "revolutia-1989-sibiu",
     victime: 99,
     evacuati: 0,
     echipaje: 0,
@@ -606,6 +628,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Muncitorii de la Uzina Tractorul și cetățenii brașoveni au ieșit masiv în stradă. Brașov avea deja o tradiție de revoltă — protestul muncitorilor din noiembrie 1987 fusese prima contestare majoră a regimului.",
     gradient: "from-red-800 via-amber-700 to-stone-900",
+    image: "revolutia-1989-timisoara",
     victime: 18,
     evacuati: 0,
     echipaje: 0,
@@ -637,6 +660,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Protest civic de lungă durată în Piața Universității din București, cerând interzicerea foștilor comuniști din viața politică. Zona a fost declarată simbolic 'zonă liberă de neo-comunism'. Protestul a durat până pe 13 iunie.",
     gradient: "from-indigo-800 via-violet-700 to-purple-900",
+    image: "piata-universitatii-1990",
     victime: 0,
     evacuati: 0,
     echipaje: 0,
@@ -684,6 +708,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Incendiu la secția de nou-născuți a Maternității Giulești din București. 6 bebeluși au decedat. Tragedia a scos la iveală condițiile precare din spitalele românești.",
     gradient: "from-gray-900 via-red-800 to-black",
+    image: "incendiu-matei-bals-2021",
     victime: 6,
     evacuati: 20,
     echipaje: 10,
