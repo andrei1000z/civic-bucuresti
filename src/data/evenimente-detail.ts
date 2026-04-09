@@ -18,7 +18,7 @@ export const evenimenteDetails: Record<string, EvenimentDetail> = {
     slug: "rahova-2025",
     coords: [44.4125, 26.0734],
     fullDescription:
-      "În dimineața zilei de 15 aprilie 2025, o explozie puternică urmată de incendiu a avut loc într-un bloc de locuințe de pe Calea Rahovei. Evenimentul a fost cauzat de o scurgere de gaze naturale și a afectat apartamentele de la etajele 4-6. 52 de locatari au fost evacuați, 4 persoane au suferit răniri, iar 12 apartamente au devenit nelocuibile.",
+      "În dimineața zilei de 17 octombrie 2025, o explozie puternică urmată de incendiu a avut loc într-un bloc de locuințe de pe Calea Rahovei. Evenimentul a fost cauzat de o scurgere de gaze naturale și a afectat apartamentele de la etajele 4-6. 52 de locatari au fost evacuați, 4 persoane au suferit răniri, iar 12 apartamente au devenit nelocuibile.",
     timeline: [
       { time: "09:23", titlu: "Prima sesizare la 112", desc: "Locatarii semnalează explozie și fum intens la etajul 4." },
       { time: "09:28", titlu: "Dispecerat ISU alertat", desc: "3 autospeciale trimise de la Detașamentul Berceni." },
@@ -1475,7 +1475,7 @@ export const evenimenteDetails: Record<string, EvenimentDetail> = {
       { name: "CSAT — documente desecretizate", url: "https://www.presidency.ro" },
       { name: "G4Media — cronologie alegeri anulate", url: "https://www.g4media.ro" },
     ],
-    ongoingStatus: "Noi alegeri prezidențiale programate în 2025",
+    ongoingStatus: "Alegerile prezidențiale au avut loc pe 7 decembrie 2025. Ciprian Ciucu (PNL) a câștigat.",
   },
 
   "criza-energetica-2025": {

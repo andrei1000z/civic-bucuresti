@@ -5,7 +5,7 @@ export const evenimente: Eveniment[] = [
     id: "ev-001",
     slug: "rahova-2025",
     titlu: "Explozia de pe Calea Rahovei",
-    data: "2025-04-15",
+    data: "2025-10-17",
     county: "B",
     category: "incendiu",
     severity: "critic",
