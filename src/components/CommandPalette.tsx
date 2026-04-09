@@ -2,39 +2,69 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, FileText, Newspaper, BookOpen, Siren, Hash, Loader2, ArrowRight, X, MapPin, BarChart3, Map as MapIcon } from "lucide-react";
+import { Search, FileText, Newspaper, BookOpen, Siren, Hash, Loader2, ArrowRight, X, MapPin, BarChart3, Map as MapIcon, Sparkles, Ticket, Train, User, Building2, Factory, BookA, ShieldAlert, Bus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SearchResult {
-  type: "sesizare" | "ghid" | "eveniment" | "stire" | "page";
+  type: "sesizare" | "ghid" | "eveniment" | "stire" | "page" | "judet" | "bilet" | "linie" | "primar" | "directie" | "companie" | "glosar" | "ghid-sesizare" | "transport" | "ai";
   title: string;
   url: string;
   excerpt?: string;
   meta?: string;
 }
 
-const TYPE_ICON = {
+const TYPE_ICON: Record<string, React.ElementType> = {
   sesizare: FileText,
   ghid: BookOpen,
   eveniment: Siren,
   stire: Newspaper,
   page: Hash,
+  judet: MapPin,
+  bilet: Ticket,
+  linie: Train,
+  primar: User,
+  directie: Building2,
+  companie: Factory,
+  glosar: BookA,
+  "ghid-sesizare": ShieldAlert,
+  transport: Bus,
+  ai: Search,
 };
 
-const TYPE_COLOR = {
+const TYPE_COLOR: Record<string, string> = {
   sesizare: "text-red-500",
   ghid: "text-amber-500",
   eveniment: "text-purple-500",
   stire: "text-blue-500",
   page: "text-[var(--color-text-muted)]",
+  judet: "text-emerald-500",
+  bilet: "text-orange-500",
+  linie: "text-cyan-500",
+  primar: "text-indigo-500",
+  directie: "text-sky-500",
+  companie: "text-teal-500",
+  glosar: "text-lime-600",
+  "ghid-sesizare": "text-rose-500",
+  transport: "text-fuchsia-500",
+  ai: "text-violet-500",
 };
 
-const TYPE_LABEL = {
+const TYPE_LABEL: Record<string, string> = {
   sesizare: "Sesizare",
   ghid: "Ghid",
   eveniment: "Eveniment",
   stire: "Știre",
   page: "Pagină",
+  judet: "Județ",
+  bilet: "Bilet",
+  linie: "Linie",
+  primar: "Primar",
+  directie: "Direcție PMB",
+  companie: "Companie",
+  glosar: "Termen",
+  "ghid-sesizare": "Tip sesizare",
+  transport: "Transport",
+  ai: "AI",
 };
 
 const QUICK_LINKS = [
@@ -53,6 +83,8 @@ export function CommandPalette() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [aiAnswer, setAiAnswer] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -102,17 +134,39 @@ export function CommandPalette() {
     else router.push(url);
   }, [router]);
 
+  const askAI = useCallback(async () => {
+    if (!query || query.length < 3 || aiLoading) return;
+    setAiLoading(true);
+    setAiAnswer(null);
+    try {
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: [{ role: "user", content: query }] }),
+      });
+      const text = await res.text();
+      setAiAnswer(text.slice(0, 500));
+    } catch {
+      setAiAnswer("Nu am putut genera un răspuns. Încearcă din nou.");
+    } finally {
+      setAiLoading(false);
+    }
+  }, [query, aiLoading]);
+
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (results.length === 0) return;
-      if (e.key === "ArrowDown") { e.preventDefault(); setActiveIdx((i) => (i + 1) % results.length); }
-      else if (e.key === "ArrowUp") { e.preventDefault(); setActiveIdx((i) => (i - 1 + results.length) % results.length); }
-      else if (e.key === "Enter") { e.preventDefault(); handleSelect(results[activeIdx].url); }
+      if (e.key === "ArrowDown" && results.length > 0) { e.preventDefault(); setActiveIdx((i) => (i + 1) % results.length); }
+      else if (e.key === "ArrowUp" && results.length > 0) { e.preventDefault(); setActiveIdx((i) => (i - 1 + results.length) % results.length); }
+      else if (e.key === "Enter") {
+        e.preventDefault();
+        if (results.length > 0) handleSelect(results[activeIdx].url);
+        else if (query.length >= 3) askAI();
+      }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [open, results, activeIdx, handleSelect]);
+  }, [open, results, activeIdx, handleSelect, query, askAI]);
 
   if (!open) return null;
 
@@ -164,9 +218,34 @@ export function CommandPalette() {
               </div>
             </div>
           ) : results.length === 0 && !loading ? (
-            <div className="p-8 text-center">
-              <Search size={24} className="mx-auto mb-2 text-[var(--color-text-muted)] opacity-30" />
-              <p className="text-sm text-[var(--color-text-muted)]">Niciun rezultat pentru „{query}"</p>
+            <div className="p-6">
+              {aiAnswer ? (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+                      <Sparkles size={12} className="text-violet-500" />
+                    </div>
+                    <p className="text-xs font-semibold text-violet-600 dark:text-violet-400">Răspuns AI</p>
+                  </div>
+                  <p className="text-sm text-[var(--color-text)] leading-relaxed whitespace-pre-wrap">{aiAnswer}</p>
+                </div>
+              ) : aiLoading ? (
+                <div className="text-center py-4">
+                  <Loader2 size={20} className="animate-spin mx-auto mb-2 text-violet-500" />
+                  <p className="text-xs text-[var(--color-text-muted)]">AI generează răspunsul...</p>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <p className="text-sm text-[var(--color-text-muted)] mb-3">Niciun rezultat pentru „{query}"</p>
+                  <button
+                    onClick={askAI}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-[8px] bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-medium hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors"
+                  >
+                    <Sparkles size={12} />
+                    Întreabă AI-ul (Enter)
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <ul className="py-1">
