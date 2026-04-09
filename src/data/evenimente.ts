@@ -216,7 +216,6 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Incendiu la un stand de mărfuri din Piața Obor. ISU a intervenit rapid, fără victime.",
     gradient: "from-orange-500 via-red-600 to-orange-800",
-    image: "incendiu-piatra-neamt-2020",
     victime: 0,
     evacuati: 15,
     echipaje: 3,
@@ -532,7 +531,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "A treia mineriadă: minerii din Valea Jiului au coborât din nou la București cerând demisia guvernului Petre Roman. Violențe de stradă, sediul guvernului atacat. Premierul Petre Roman a demisionat.",
     gradient: "from-gray-700 via-red-800 to-stone-900",
-    image: "mineriada-1990",
+    image: "mineriada-1991",
     victime: 3,
     evacuati: 0,
     echipaje: 0,
@@ -628,7 +627,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Muncitorii de la Uzina Tractorul și cetățenii brașoveni au ieșit masiv în stradă. Brașov avea deja o tradiție de revoltă — protestul muncitorilor din noiembrie 1987 fusese prima contestare majoră a regimului.",
     gradient: "from-red-800 via-amber-700 to-stone-900",
-    image: "revolutia-1989-timisoara",
+    image: "revolutia-1989-brasov",
     victime: 18,
     evacuati: 0,
     echipaje: 0,
@@ -678,7 +677,7 @@ export const evenimente: Eveniment[] = [
     gradient: "from-stone-800 via-red-700 to-gray-900",
     image: "cutremur-vrancea-1990",
     victime: 0,
-    evacuati: 500,
+    evacuati: 0,
     echipaje: 40,
   },
   {
@@ -708,7 +707,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Incendiu la secția de nou-născuți a Maternității Giulești din București. 6 bebeluși au decedat. Tragedia a scos la iveală condițiile precare din spitalele românești.",
     gradient: "from-gray-900 via-red-800 to-black",
-    image: "incendiu-matei-bals-2021",
+    image: "incendiu-giulesti-2010",
     victime: 6,
     evacuati: 20,
     echipaje: 10,

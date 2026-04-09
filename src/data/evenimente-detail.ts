@@ -156,7 +156,7 @@ export const evenimenteDetails: Record<string, EvenimentDetail> = {
       "Densitate mare de construcții vechi în centrul Bucureștiului",
     ],
     impact:
-      "1.578 morți în București (1.391 conform unor surse), 11.321 răniți, 33 blocuri prăbușite, 35.000 apartamente avariate. Pagube materiale: 2 miliarde USD (valoare 1977).",
+      "1.578 morți la nivel național (din care circa 1.391 în București), 11.321 răniți, 33 blocuri prăbușite, 35.000 apartamente avariate. Pagube materiale: 2 miliarde USD (valoare 1977).",
     response:
       "Statul a inițiat programul de consolidare masivă. Normele antiseismice P100 au fost revizuite. A urmat demolarea masivă din anii '80 pentru Casa Poporului.",
     quotes: [
