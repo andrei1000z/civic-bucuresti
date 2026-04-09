@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Wind, Droplets, Thermometer, Wind as WindIcon } from "lucide-react";
-import { useCountyOptional } from "@/lib/county-context";
+import { usePathname } from "next/navigation";
+import { ALL_COUNTIES } from "@/data/counties";
 
 interface Weather {
   temp: number;
@@ -38,7 +39,11 @@ function aqiColor(aqi: number): string {
 }
 
 export function LiveWeatherAqi() {
-  const county = useCountyOptional();
+  const pathname = usePathname();
+  // Detect county from URL path (e.g. /cj/sesizari → "cj")
+  const pathSlug = pathname.match(/^\/([a-z]{1,2})(?:\/|$)/)?.[1] ?? null;
+  const county = pathSlug ? ALL_COUNTIES.find((c) => c.slug === pathSlug) : null;
+
   const [weather, setWeather] = useState<Weather | null>(null);
   const [aqi, setAqi] = useState<Aqi | null>(null);
 
