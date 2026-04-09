@@ -43,6 +43,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Curtea Constituțională a anulat alegerile prezidențiale din 2024, invocând ingerințe externe în campania electorală. Decizie fără precedent în istoria post-comunistă a României, urmată de proteste masive.",
     gradient: "from-purple-800 via-red-800 to-slate-900",
+    image: "alegeri-anulate-2024",
     victime: 0,
     evacuati: 0,
     echipaje: 0,
@@ -74,6 +75,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Brașovul se confruntă cu o criză cronică a urșilor în zone urbane. În 2024, atacurile s-au înmulțit: un turist ucis pe traseul Jepii Mici din Munții Bucegi, iar urșii intră regulat în cartiere și containere de gunoi.",
     gradient: "from-green-800 via-stone-800 to-emerald-950",
+    image: "ursi-brasov-2024",
     victime: 1,
     evacuati: 0,
     echipaje: 0,
@@ -119,6 +121,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Ploi record au provocat inundații grave în județele Bacău și Neamț. Râul Bistrița a depășit cotele de pericol, localități izolate, drumuri naționale blocate.",
     gradient: "from-blue-800 via-slate-800 to-indigo-950",
+    image: "inundatii-moldova-2024",
     victime: 0,
     evacuati: 400,
     echipaje: 60,
@@ -134,6 +137,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Ploi torențiale au provocat inundații în mai multe localități din județul Hunedoara. Comunități izolate, poduri distruse, intervenții cu bărci pneumatice.",
     gradient: "from-blue-700 via-indigo-800 to-slate-900",
+    image: "inundatii-hunedoara-2024",
     victime: 0,
     evacuati: 200,
     echipaje: 35,
@@ -149,6 +153,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Fenomen meteo extrem de tip tornadă în sudul județului Călărași. Acoperișuri smulse, stâlpi de electricitate doborâți, culturi agricole distruse pe sute de hectare.",
     gradient: "from-slate-700 via-cyan-800 to-gray-900",
+    image: "tornado-calarasi-2024",
     victime: 0,
     evacuati: 80,
     echipaje: 20,
@@ -164,6 +169,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Alunecări masive de teren în mai multe sate din județul Gorj, provocate de ploi abundente. Drumuri distruse, case fisurate, familii evacuate.",
     gradient: "from-amber-800 via-stone-700 to-yellow-950",
+    image: "alunecari-teren-gorj-2024",
     victime: 0,
     evacuati: 120,
     echipaje: 25,
@@ -179,6 +185,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Tren de călători deraiat în zona Fetești, pe ruta București–Constanța. Vagoane răsturnate, răniți transportați la spital.",
     gradient: "from-red-700 via-amber-800 to-stone-900",
+    image: "accident-tren-fetesti-2024",
     victime: 15,
     evacuati: 200,
     echipaje: 25,
@@ -209,6 +216,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Explozie la o stație de transfer GPL din Crevedia, Dâmbovița. 6 morți (3 inițial, alți 3 au decedat ulterior din cauza arsurilor), peste 50 de răniți, sute de persoane evacuate din localitățile limitrofe.",
     gradient: "from-red-700 via-orange-800 to-red-950",
+    image: "explozia-crevedia-2023",
     victime: 6,
     evacuati: 500,
     echipaje: 80,
@@ -240,6 +248,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Ploi torențiale au afectat mai multe localități din Timiș și Caraș-Severin. Drumuri blocate și gospodării inundate.",
     gradient: "from-blue-700 via-slate-800 to-indigo-900",
+    image: "inundatii-banat-2023",
     victime: 0,
     evacuati: 350,
     echipaje: 30,
@@ -301,6 +310,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "România a intrat în stare de urgență pe 16 martie 2020 din cauza pandemiei COVID-19. Carantină generală, școli închise, restricții de circulație. Peste 67.000 de decese confirmate la nivel național până în 2023.",
     gradient: "from-red-900 via-slate-800 to-gray-950",
+    image: "pandemia-covid-19-2020",
     victime: 67000,
     evacuati: 0,
     echipaje: 0,
@@ -411,6 +421,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Cel mai mare protest de mediu din istoria României. Zeci de mii de oameni au ieșit în stradă în București, Cluj, Timișoara și alte orașe împotriva proiectului minier cu cianuri de la Roșia Montană.",
     gradient: "from-emerald-700 via-yellow-800 to-green-900",
+    image: "protest-rosia-montana-2013",
     victime: 0,
     evacuati: 0,
     echipaje: 0,
@@ -441,6 +452,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Cele mai grave inundații din ultimele decenii au afectat toată România în primăvara și vara anului 2006. Dunărea a depășit cotele istorice. Zeci de morți, mii de case distruse, pagube de peste 1 miliard de euro.",
     gradient: "from-blue-900 via-cyan-800 to-slate-950",
+    image: "inundatii-2006-romania",
     victime: 23,
     evacuati: 15000,
     echipaje: 200,
@@ -456,6 +468,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Ploi torențiale prelungite au provocat inundații devastatoare în județele Galați, Buzău, Vrancea și Bacău. Râurile Siret și Prut au depășit cotele de pericol, localități întregi evacuate.",
     gradient: "from-blue-800 via-indigo-800 to-cyan-950",
+    image: "inundatii-2005-moldova",
     victime: 13,
     evacuati: 8000,
     echipaje: 150,
@@ -471,6 +484,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Cutremur de 5.8 grade pe scara Richter cu epicentrul în zona Vrancea. Pagube la clădiri în mai multe județe, panică generală. A reactivat discuția despre riscul seismic în România.",
     gradient: "from-stone-700 via-red-800 to-slate-900",
+    image: "cutremur-vrancea-2004",
     victime: 0,
     evacuati: 0,
     echipaje: 50,
@@ -486,6 +500,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Ultima mineriadă: minerul Miron Cozma a condus o coloană de circa 10.000 de mineri din Valea Jiului spre București. Armata a blocat coloana la Stoenești, iar Cozma a fost arestat. Guvernul a negociat cu minerii.",
     gradient: "from-stone-700 via-amber-800 to-gray-900",
+    image: "mineriada-1999",
     victime: 0,
     evacuati: 0,
     echipaje: 0,
@@ -606,6 +621,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Incendiu la secția ATI a Spitalului de Boli Infecțioase din Constanța. 9 pacienți COVID-19 au decedat. Al patrulea incendiu mortal într-un spital românesc în mai puțin de un an.",
     gradient: "from-gray-800 via-red-700 to-slate-950",
+    image: "incendiu-spital-constanta-2021",
     victime: 9,
     evacuati: 100,
     echipaje: 15,
@@ -636,6 +652,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Cutremur de 6.9 grade pe scara Richter cu epicentrul în zona Vrancea. Pagube în mai multe județe, panică în București. A reamintit de pericolul seismic la doar câțiva ani după 1977.",
     gradient: "from-stone-800 via-red-700 to-gray-900",
+    image: "cutremur-vrancea-1990",
     victime: 0,
     evacuati: 500,
     echipaje: 40,
@@ -651,6 +668,7 @@ export const evenimente: Eveniment[] = [
     descriere:
       "Ploi torențiale au provocat inundații grave în județele Dolj, Olt și Gorj. Sute de case inundate, drumuri distruse și culturi agricole compromise.",
     gradient: "from-blue-700 via-cyan-800 to-indigo-900",
+    image: "inundatii-oltenia-2014",
     victime: 2,
     evacuati: 600,
     echipaje: 45,
