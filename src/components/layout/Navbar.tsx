@@ -7,6 +7,7 @@ import { Menu, X, ChevronDown, AlertCircle, MapPin, Search } from "lucide-react"
 import { NAV_LINKS, NAV_MORE, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { NotificationBell } from "@/components/NotificationBell";
 import { useCountyOptional } from "@/lib/county-context";
 import { cn } from "@/lib/utils";
 import { LiveWeatherAqi } from "@/components/home/LiveWeatherAqi";
@@ -139,7 +140,7 @@ export function Navbar() {
             })}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {countySlug && (
               <div className="hidden xl:block">
                 <LiveWeatherAqi />
@@ -149,13 +150,14 @@ export function Navbar() {
               onClick={() => {
                 document.dispatchEvent(new CustomEvent("open-command-palette"));
               }}
-              className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+              className="hidden sm:flex w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
               aria-label="Caută (Ctrl+K)"
               title="Caută (Ctrl+K)"
             >
               <Search size={16} />
             </button>
             <ThemeToggle />
+            <NotificationBell />
             <UserMenu />
             <Link
               href={countySlug ? `/${countySlug}/sesizari` : "/b/sesizari"}

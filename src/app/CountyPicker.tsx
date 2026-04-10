@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, Navigation, Loader2 } from "lucide-react";
 import { ALL_COUNTIES, getCountyById } from "@/data/counties";
@@ -43,6 +44,23 @@ export function CountyPicker() {
     localStorage.setItem("civia_county", slug);
     document.cookie = `county=${slug}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
     router.push(`/${slug}`);
+  };
+
+  // Persist the selection when the user clicks a real <Link>. The Link handles
+  // navigation + prefetch; we just capture the side-effect of setting the county
+  // before the navigation commits.
+  const persist = (slug: string) => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("civia_county", slug);
+    // eslint-disable-next-line react-hooks/immutability -- cookie assignment is a side-effect on document, not a React value
+    document.cookie = `county=${slug}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+  };
+
+  // Prefetch the county route when the user hovers — gives instant navigation
+  // on click even for counties outside the initial viewport (Next already
+  // prefetches visible Links, this covers the rest).
+  const prefetchOnHover = (slug: string) => {
+    router.prefetch(`/${slug}`);
   };
 
   const handleGPS = () => {
@@ -124,9 +142,13 @@ export function CountyPicker() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
           {filtered.map((county) => (
-            <button
+            <Link
               key={county.id}
-              onClick={() => handleSelect(county.slug)}
+              href={`/${county.slug}`}
+              prefetch
+              onClick={() => persist(county.slug)}
+              onMouseEnter={() => prefetchOnHover(county.slug)}
+              onTouchStart={() => prefetchOnHover(county.slug)}
               className="group flex items-center gap-2 p-3 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all text-left"
             >
               <span className="text-[10px] font-bold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-1.5 py-0.5 rounded shrink-0">
@@ -135,7 +157,7 @@ export function CountyPicker() {
               <span className="text-sm font-medium truncate group-hover:text-[var(--color-primary)] transition-colors">
                 {county.name}
               </span>
-            </button>
+            </Link>
           ))}
         </div>
 

@@ -14,8 +14,8 @@ export async function GET(req: Request) {
   const lat = Number(searchParams.get("lat"));
   const lng = Number(searchParams.get("lng"));
 
-  if (isNaN(lat) || isNaN(lng) || lat < 43 || lat > 49 || lng < 20 || lng > 30) {
-    return NextResponse.json({ error: "Coordonate invalide (România: 43-49°N, 20-30°E)" }, { status: 400 });
+  if (isNaN(lat) || isNaN(lng) || lat < 43.5 || lat > 48.3 || lng < 20.2 || lng > 29.7) {
+    return NextResponse.json({ error: "Coordonate invalide (România: 43.5-48.3°N, 20.2-29.7°E)" }, { status: 400 });
   }
 
   // Rate limit: 2 req/sec per IP (Nominatim allows 1/sec, we buffer)

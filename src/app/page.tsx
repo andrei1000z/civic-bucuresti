@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, TrendingUp, Wind, Newspaper } from "lucide-react";
 import { SITE_NAME } from "@/lib/constants";
 import { CountyPicker } from "./CountyPicker";
+import { LiveStatsBar } from "@/components/home/LiveStatsBar";
+import { TopVotedWidget } from "@/components/home/TopVotedWidget";
+import { LiveWeatherAqi } from "@/components/home/LiveWeatherAqi";
 
 export const revalidate = 300;
 
@@ -61,6 +64,13 @@ export default function HomePage() {
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[var(--color-bg)] to-transparent" />
       </section>
 
+      {/* LIVE STATS BAR */}
+      <section className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div className="container-narrow py-6">
+          <LiveStatsBar />
+        </div>
+      </section>
+
       {/* COUNTY PICKER */}
       <section id="county-picker" className="py-12 md:py-16 bg-[var(--color-surface)]">
         <div className="container-narrow">
@@ -68,9 +78,48 @@ export default function HomePage() {
             <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold">
               Alege județul tău
             </h2>
+            <p className="text-[var(--color-text-muted)] mt-2">
+              Vezi sesizări, hărți, statistici și știri locale.
+            </p>
           </div>
         </div>
         <CountyPicker />
+      </section>
+
+      {/* TOP VOTED + AER LIVE */}
+      <section className="py-12 md:py-16">
+        <div className="container-narrow">
+          <div className="grid gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold flex items-center gap-2">
+                  <TrendingUp size={22} className="text-[var(--color-primary)]" />
+                  Se întâmplă acum
+                </h2>
+                <Link
+                  href="/sesizari-publice"
+                  className="text-sm text-[var(--color-primary)] hover:underline inline-flex items-center gap-1"
+                >
+                  Toate sesizările <ArrowRight size={14} />
+                </Link>
+              </div>
+              <TopVotedWidget />
+            </div>
+            <div>
+              <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold flex items-center gap-2 mb-5">
+                <Wind size={22} className="text-[var(--color-primary)]" />
+                Aerul acum
+              </h2>
+              <LiveWeatherAqi />
+              <Link
+                href="/aer"
+                className="mt-3 text-sm text-[var(--color-primary)] hover:underline inline-flex items-center gap-1"
+              >
+                Vezi harta completă <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* HOW IT WORKS */}

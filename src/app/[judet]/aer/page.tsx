@@ -3,7 +3,7 @@ import { getCountyBySlug } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
 import { AerMapWrapper } from "@/app/aer/AerMapWrapper";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export async function generateMetadata({
   params,

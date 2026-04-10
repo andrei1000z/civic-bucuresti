@@ -42,6 +42,11 @@ export const NAV_MORE = [
 export const GHID_DROPDOWN = [
   { href: "/ghiduri/ghid-cetatean", label: "Drepturile cetățeanului", icon: "⚖️" },
   { href: "/ghiduri/ghid-sesizari", label: "Ghid sesizări", icon: "📮" },
+  { href: "/ghiduri/ghid-legea-544", label: "Legea 544/2001", icon: "🔓" },
+  { href: "/ghiduri/ghid-contestatie-amenda", label: "Contestare amendă", icon: "⚖️" },
+  { href: "/ghiduri/ghid-ong", label: "Cum înființezi ONG", icon: "🤝" },
+  { href: "/ghiduri/ghid-ajutor-social", label: "Ajutoare sociale", icon: "💰" },
+  { href: "/ghiduri/ghid-dezbatere-publica", label: "Dezbatere publică", icon: "💬" },
   { href: "/ghiduri/ghid-biciclist", label: "Ghidul biciclistului", icon: "🚲" },
   { href: "/ghiduri/ghid-vara", label: "Ghid de vară", icon: "☀️" },
   { href: "/ghiduri/ghid-cutremur", label: "Ghid cutremur", icon: "🌍" },

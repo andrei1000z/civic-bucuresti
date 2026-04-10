@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { SITE_NAME } from "@/lib/constants";
+import { CookiePreferencesButton } from "./FooterClientLinks";
 
 const linkCls =
   "text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors";
@@ -37,6 +38,16 @@ export function Footer() {
               <li><Link href="/statistici" className={linkCls}>Statistici</Link></li>
               <li><Link href="/stiri" className={linkCls}>Știri</Link></li>
               <li><Link href="/evenimente" className={linkCls}>Evenimente</Link></li>
+              <li><Link href="/calendar-civic" className={linkCls}>Calendar civic</Link></li>
+            </ul>
+            <h4 className="font-semibold mt-5 mb-3 text-[var(--color-text)] text-sm">
+              Date publice
+            </h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/buget" className={linkCls}>Buget național</Link></li>
+              <li><Link href="/siguranta" className={linkCls}>Siguranță</Link></li>
+              <li><Link href="/educatie" className={linkCls}>Educație</Link></li>
+              <li><Link href="/sanatate" className={linkCls}>Sănătate</Link></li>
             </ul>
           </div>
 
@@ -48,6 +59,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link href="/ghiduri/ghid-cetatean" className={linkCls}>Drepturile cetățeanului</Link></li>
               <li><Link href="/ghiduri/ghid-sesizari" className={linkCls}>Ghid sesizări</Link></li>
+              <li><Link href="/ghiduri/ghid-legea-544" className={linkCls}>Legea 544/2001</Link></li>
               <li><Link href="/ghiduri/ghid-biciclist" className={linkCls}>Ghidul biciclistului</Link></li>
               <li><Link href="/ghiduri/ghid-vara" className={linkCls}>Ghid de vară</Link></li>
               <li><Link href="/ghiduri/ghid-cutremur" className={linkCls}>Ghid cutremur</Link></li>
@@ -63,6 +75,10 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link href="/legal/confidentialitate" className={linkCls}>Confidențialitate</Link></li>
               <li><Link href="/legal/termeni" className={linkCls}>Termeni</Link></li>
+              <li><Link href="/accesibilitate" className={linkCls}>Accesibilitate</Link></li>
+              <li><Link href="/dezvoltatori" className={linkCls}>API dezvoltatori</Link></li>
+              <li><Link href="/impact" className={linkCls}>Dashboard impact</Link></li>
+              <li><CookiePreferencesButton /></li>
             </ul>
             <h4 className="font-semibold mt-5 mb-3 text-[var(--color-text)] text-sm">
               Resurse oficiale

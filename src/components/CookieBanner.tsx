@@ -5,6 +5,17 @@ import Link from "next/link";
 import { Cookie, X } from "lucide-react";
 
 const STORAGE_KEY = "civic_cookie_consent";
+const CHANGE_EVENT = "civic:cookie-consent:reopen";
+
+/**
+ * Open the cookie banner programmatically — used by footer "Preferințe cookie" link
+ * for GDPR consent retraction compliance.
+ */
+export function openCookiePreferences() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(STORAGE_KEY);
+  window.dispatchEvent(new Event(CHANGE_EVENT));
+}
 
 export function CookieBanner() {
   const [visible, setVisible] = useState(false);
@@ -13,6 +24,10 @@ export function CookieBanner() {
     if (typeof window === "undefined") return;
     const consent = localStorage.getItem(STORAGE_KEY);
     if (!consent) setVisible(true);
+
+    const reopen = () => setVisible(true);
+    window.addEventListener(CHANGE_EVENT, reopen);
+    return () => window.removeEventListener(CHANGE_EVENT, reopen);
   }, []);
 
   const accept = () => {

@@ -15,6 +15,27 @@ const schema = z.object({
   ).min(1).max(20),
 });
 
+// Coarse prompt-injection filter. We look for the most common jailbreak shapes
+// in both English and Romanian, plus tokens that try to fake chat-template boundaries.
+const INJECTION_PATTERNS = [
+  /ignor(e|ă|a)\s+(previous|prior|above|instructions|toate|instruc)/i,
+  /disregard\s+(previous|prior|above|the)/i,
+  /forget\s+(everything|all|previous)/i,
+  /you\s+are\s+now\s+(a|an|dan|developer)/i,
+  /reveal\s+(your|the)\s+(system|prompt|instructions)/i,
+  /show\s+(me\s+)?(your|the)\s+(system|prompt)/i,
+  /sistem\s*prompt/i,
+  /prompt\s*de\s*sistem/i,
+  /arat(a|ă)\s+(prompt|instruc)/i,
+  /<\|(im_start|im_end|system|user|assistant)\|>/i,
+  /\[\[system\]\]/i,
+  /###\s*(system|instruction)/i,
+];
+
+function looksLikeInjection(text: string): boolean {
+  return INJECTION_PATTERNS.some((re) => re.test(text));
+}
+
 export async function POST(req: Request) {
   const ip = getClientIp(req);
   const rl = await rateLimitAsync(`ai-chat:${ip}`, { limit: 20, windowMs: 60_000 });
@@ -25,6 +46,15 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { messages } = schema.parse(body);
+
+    // Reject if the most recent user message is an obvious prompt-injection attempt.
+    const lastUser = [...messages].reverse().find((m) => m.role === "user");
+    if (lastUser && looksLikeInjection(lastUser.content)) {
+      return Response.json(
+        { error: "Îmi pare rău, nu pot răspunde la această cerere. Încearcă o întrebare despre sesizări, transport, ghiduri sau știri civice." },
+        { status: 400 }
+      );
+    }
 
     const groq = getGroqClient();
     const stream = await groq.chat.completions.create({

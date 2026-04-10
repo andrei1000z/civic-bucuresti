@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 import { ghiduri } from "@/data/ghiduri";
 import { evenimente } from "@/data/evenimente";
 import { ALL_COUNTIES } from "@/data/counties";
@@ -71,13 +72,17 @@ function matchesAll(haystack: string, words: string[]): boolean {
 }
 
 export async function GET(req: Request) {
+  const ip = getClientIp(req);
+  const rl = await rateLimitAsync(`search:${ip}`, { limit: 60, windowMs: 60_000 });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Prea multe căutări. Așteaptă 1 minut." }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const qRaw = (searchParams.get("q") ?? "").trim().toLowerCase();
   if (!qRaw || qRaw.length < 2) return NextResponse.json({ data: [] });
-  const q = qRaw;
   const words = qRaw.split(/\s+/).filter((w) => w.length >= 2);
   if (words.length === 0) return NextResponse.json({ data: [] });
-  const qSafe = sanitizeForPostgrest(qRaw);
 
   const results: SearchResult[] = [];
 

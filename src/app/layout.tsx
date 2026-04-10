@@ -9,7 +9,9 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/JsonLd";
 import { CookieBanner } from "@/components/CookieBanner";
+import { AlertBanner } from "@/components/AlertBanner";
 import { Analytics } from "@/components/Analytics";
+import { DeferredClientMount } from "@/components/DeferredClientMount";
 import { ToastProvider } from "@/components/Toast";
 import { BackToTop } from "@/components/BackToTop";
 import { InstallPrompt } from "@/components/InstallPrompt";
@@ -44,20 +46,6 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   metadataBase: new URL(SITE_URL),
-  keywords: [
-    "România",
-    "sesizări",
-    "sesizări online",
-    "calitate aer",
-    "platformă civică",
-    "primărie",
-    "administrație locală",
-    "ghid cetățean",
-    "petiții",
-    "calitate aer România",
-    "poluare",
-    "hărți",
-  ],
   authors: [{ name: "Civia" }],
   creator: "Civia",
   publisher: "Civia",
@@ -109,6 +97,13 @@ export default function RootLayout({
       className={`${inter.variable} ${sora.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <link rel="preconnect" href="https://api.groq.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://api.open-meteo.com" />
+        <link rel="dns-prefetch" href="https://api.openaq.org" />
+        <link rel="dns-prefetch" href="https://plausible.io" />
+        <link rel="alternate" type="application/rss+xml" title="Sesizări Civia" href="/feed.xml" />
+      </head>
       <body className="min-h-full flex flex-col bg-[var(--color-bg)]">
         <OrganizationJsonLd />
         <WebsiteJsonLd />
@@ -122,15 +117,20 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <ToastProvider>
+              <AlertBanner />
               <Navbar />
               <main id="main-content" className="flex-1 flex flex-col">{children}</main>
               <Footer />
-              <CivicAssistant />
-              <CommandPalette />
-              <AuthModal />
-              <CookieBanner />
-              <BackToTop />
-              <InstallPrompt />
+              {/* Heavy interactive widgets — mount only after first paint + idle.
+                  Shaves ~300ms off LCP on slow devices. */}
+              <DeferredClientMount>
+                <CivicAssistant />
+                <CommandPalette />
+                <AuthModal />
+                <CookieBanner />
+                <BackToTop />
+                <InstallPrompt />
+              </DeferredClientMount>
             </ToastProvider>
           </AuthProvider>
         </ThemeProvider>

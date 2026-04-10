@@ -37,7 +37,7 @@ const nextConfig: NextConfig = {
       "default-src 'self'",
       `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""} https://plausible.io`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https: http:",
+      "img-src 'self' data: blob: https:",
       "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.groq.com https://api.open-meteo.com https://overpass-api.de https://plausible.io https://api.openaq.org",
       "frame-ancestors 'self'",
@@ -48,7 +48,7 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: [
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          // frame-ancestors in CSP already covers this; X-Frame-Options kept off intentionally.
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-DNS-Prefetch-Control", value: "on" },
@@ -60,10 +60,19 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Long-lived cache for GeoJSON (they rarely change + committed to repo)
+        // Long-lived cache for GeoJSON (they rarely change + committed to repo).
+        // 7 days in browser, 30 days on CDN, serve stale for 7 days while revalidating.
         source: "/geojson/:path*",
         headers: [
-          { key: "Cache-Control", value: "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400" },
+          { key: "Cache-Control", value: "public, max-age=604800, s-maxage=2592000, stale-while-revalidate=604800" },
+        ],
+      },
+      {
+        // Static images (events, primari portraits) — hash-immutable via Next Image optimizer,
+        // but for direct /images/ access we want long cache too.
+        source: "/images/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=2592000, s-maxage=31536000, stale-while-revalidate=2592000" },
         ],
       },
     ];

@@ -1,0 +1,265 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { Bell, MessageCircle, CheckCircle2, X } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+
+interface Notification {
+  id: string;
+  type: "comment" | "status" | "verify";
+  sesizareCode: string;
+  sesizareTitle: string;
+  message: string;
+  createdAt: string;
+  read: boolean;
+}
+
+const STORAGE_KEY = "civia:notifications";
+const LAST_SEEN_KEY = "civia:notifications:lastSeen";
+const MAX_STORED = 30;
+
+function loadStored(): Notification[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as Notification[];
+  } catch {
+    return [];
+  }
+}
+
+function saveStored(notifs: Notification[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(notifs.slice(0, MAX_STORED)));
+  } catch {
+    /* quota ignored */
+  }
+}
+
+export function NotificationBell() {
+  const { user } = useAuth();
+  const [notifs, setNotifs] = useState<Notification[]>([]);
+  const [open, setOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const addNotification = useCallback((n: Notification) => {
+    setNotifs((prev) => {
+      const next = [n, ...prev].slice(0, MAX_STORED);
+      saveStored(next);
+      return next;
+    });
+    setUnread((u) => u + 1);
+  }, []);
+
+  // Hydrate from localStorage on mount
+  useEffect(() => {
+    const stored = loadStored();
+    setNotifs(stored);
+    const lastSeen = Number(localStorage.getItem(LAST_SEEN_KEY) ?? "0");
+    setUnread(stored.filter((n) => new Date(n.createdAt).getTime() > lastSeen).length);
+  }, []);
+
+  // Subscribe to realtime events once user is loaded and has followed sesizari
+  useEffect(() => {
+    if (!user) return;
+    const supabase = createSupabaseBrowser();
+
+    async function init() {
+      const { data: follows } = await supabase
+        .from("sesizare_follows")
+        .select("sesizare_id")
+        .eq("user_id", user!.id);
+      const sesizareIds = (follows ?? []).map((f: { sesizare_id: string }) => f.sesizare_id);
+      if (sesizareIds.length === 0) return () => {};
+
+      const channel = supabase
+        .channel("notifications")
+        .on(
+          "postgres_changes" as never,
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "sesizare_comments",
+            filter: `sesizare_id=in.(${sesizareIds.join(",")})`,
+          },
+          async (payload: { new: { sesizare_id: string; body: string; author_name: string } }) => {
+            const { data: sez } = await supabase
+              .from("sesizari")
+              .select("code, titlu")
+              .eq("id", payload.new.sesizare_id)
+              .maybeSingle();
+            if (!sez) return;
+            addNotification({
+              id: `c-${Date.now()}-${Math.random()}`,
+              type: "comment",
+              sesizareCode: sez.code,
+              sesizareTitle: sez.titlu,
+              message: `${payload.new.author_name}: ${payload.new.body.slice(0, 60)}`,
+              createdAt: new Date().toISOString(),
+              read: false,
+            });
+          }
+        )
+        .on(
+          "postgres_changes" as never,
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "sesizare_timeline",
+            filter: `sesizare_id=in.(${sesizareIds.join(",")})`,
+          },
+          async (payload: { new: { sesizare_id: string; event_type: string; description: string } }) => {
+            const { data: sez } = await supabase
+              .from("sesizari")
+              .select("code, titlu")
+              .eq("id", payload.new.sesizare_id)
+              .maybeSingle();
+            if (!sez) return;
+            addNotification({
+              id: `t-${Date.now()}-${Math.random()}`,
+              type: "status",
+              sesizareCode: sez.code,
+              sesizareTitle: sez.titlu,
+              message: payload.new.description,
+              createdAt: new Date().toISOString(),
+              read: false,
+            });
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+
+    const cleanup = init();
+    return () => {
+      cleanup.then((fn) => fn?.());
+    };
+  }, [user, addNotification]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  function handleOpen() {
+    setOpen((v) => !v);
+    if (!open) {
+      // Mark all as seen when opening
+      localStorage.setItem(LAST_SEEN_KEY, String(Date.now()));
+      setUnread(0);
+    }
+  }
+
+  function clearAll() {
+    setNotifs([]);
+    saveStored([]);
+    setUnread(0);
+    setOpen(false);
+  }
+
+  if (!user) return null;
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={handleOpen}
+        className="relative w-9 h-9 inline-flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors"
+        aria-label="Notificări"
+      >
+        <Bell size={18} />
+        {unread > 0 && (
+          <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+            {unread > 9 ? "9+" : unread}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div
+          className="fixed sm:absolute top-16 sm:top-auto left-2 right-2 sm:left-auto sm:right-0 sm:mt-2 sm:w-80 max-h-[calc(100dvh-5rem)] sm:max-h-[480px] overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-xl z-50 flex flex-col"
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
+            <div className="text-sm font-semibold">Notificări</div>
+            {notifs.length > 0 && (
+              <button
+                onClick={clearAll}
+                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+              >
+                Șterge tot
+              </button>
+            )}
+          </div>
+
+          {notifs.length === 0 ? (
+            <div className="px-4 py-10 text-center text-sm text-[var(--color-text-muted)]">
+              <Bell size={28} className="mx-auto mb-2 opacity-40" />
+              Fără notificări noi.
+              <div className="text-xs mt-1">
+                Urmărește sesizări ca să primești update-uri aici.
+              </div>
+            </div>
+          ) : (
+            <div className="overflow-y-auto">
+              {notifs.map((n) => (
+                <Link
+                  key={n.id}
+                  href={`/sesizari/${n.sesizareCode}`}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "flex gap-3 px-4 py-3 hover:bg-[var(--color-surface-2)] border-b border-[var(--color-border)] last:border-b-0 transition-colors",
+                    !n.read && "bg-[var(--color-primary-soft)]/30"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "w-8 h-8 shrink-0 rounded-full flex items-center justify-center",
+                      n.type === "comment" && "bg-blue-100 text-blue-700",
+                      n.type === "status" && "bg-emerald-100 text-emerald-700",
+                      n.type === "verify" && "bg-amber-100 text-amber-700"
+                    )}
+                  >
+                    {n.type === "comment" ? <MessageCircle size={16} /> : <CheckCircle2 size={16} />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold line-clamp-1">{n.sesizareTitle}</div>
+                    <div className="text-xs text-[var(--color-text-muted)] line-clamp-2 mt-0.5">
+                      {n.message}
+                    </div>
+                    <div className="text-[10px] text-[var(--color-text-muted)] mt-1">
+                      {relativeTime(n.createdAt)}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.round(diff / 60000);
+  if (mins < 1) return "chiar acum";
+  if (mins < 60) return `acum ${mins} min`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `acum ${hrs} h`;
+  const days = Math.round(hrs / 24);
+  return `acum ${days} z`;
+}

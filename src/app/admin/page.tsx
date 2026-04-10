@@ -52,6 +52,7 @@ export default async function AdminDashboard() {
               <p className="text-xs text-[var(--color-text-muted)]">{pending.count ?? 0} în așteptare</p>
             </div>
           </Link>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a
             href="/api/stiri/fetch"
             className="flex items-center gap-3 p-4 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors"

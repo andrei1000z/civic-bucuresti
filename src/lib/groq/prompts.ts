@@ -75,7 +75,7 @@ RĂSPUNDE DOAR CU JSON VALID în formatul EXACT:
 {"tip": "..."}
 
 Unde "..." e UNUL dintre cele 16 tipuri de mai sus (lowercase, fără diacritice).
-NU adăuga text înainte/după. NU folosi markdown. NU include "sector" sau alte câmpuri.`;
+NU adăuga text înainte/după. NU folosi markdown. NU include alte câmpuri în obiectul JSON.`;
 
 export const SYSTEM_PROMPT_CIVIC_ASSISTANT = `Ești "Asistent Civia" — un chatbot direct și util de pe civia.ro, platforma civică a României.
 

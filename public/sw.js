@@ -1,7 +1,7 @@
 // Civia — Minimal Service Worker
 // Strategy: network-first for HTML/API, cache-first for static assets.
 
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 const STATIC_CACHE = `civia-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `civia-runtime-${CACHE_VERSION}`;
 
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
   "/manifest.webmanifest",
   "/icon-192.png",
   "/icon-512.png",
-  // Ghiduri — precached for offline reading
+  // Ghiduri — precached for offline reading (critical content for emergencies)
   "/ghiduri",
   "/ghiduri/ghid-biciclist",
   "/ghiduri/ghid-cutremur",
@@ -19,10 +19,23 @@ const STATIC_ASSETS = [
   "/ghiduri/ghid-transport",
   "/ghiduri/ghid-cetatean",
   "/ghiduri/ghid-sesizari",
-  // Key pages
+  "/ghiduri/ghid-legea-544",
+  "/ghiduri/ghid-contestatie-amenda",
+  "/ghiduri/ghid-ong",
+  "/ghiduri/ghid-ajutor-social",
+  "/ghiduri/ghid-dezbatere-publica",
+  // Key public pages — accessible offline
   "/sesizari",
   "/harti",
   "/bilete",
+  "/accesibilitate",
+  "/calendar-civic",
+  "/buget",
+  "/siguranta",
+  "/educatie",
+  "/sanatate",
+  "/impact",
+  "/dezvoltatori",
 ];
 
 self.addEventListener("install", (event) => {

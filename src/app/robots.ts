@@ -16,10 +16,12 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: [
           "/api/",        // all API routes
-          "/auth/",       // auth callback/error
-          "/cont/",       // personal account (private)
-          "/admin/",      // admin panel
-          "/embed/",      // iframe embeds
+          "/auth",        // auth callback/error (both with & without slash)
+          "/auth/",
+          "/cont",        // personal account (private)
+          "/cont/",
+          "/admin",       // admin panel
+          "/admin/",
         ],
       },
     ],

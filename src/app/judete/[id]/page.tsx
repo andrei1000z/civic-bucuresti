@@ -5,7 +5,8 @@ import { ChevronLeft, Building2, Mail, Phone, Globe, MapPin, FileText, ArrowRigh
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { Badge } from "@/components/ui/Badge";
 
-export const dynamic = "force-dynamic";
+// ISR: county authorities rarely change; sesizari list is small. 5 min refresh.
+export const revalidate = 300;
 
 interface County { id: string; name: string; center_lat: number | null; center_lng: number | null; }
 interface Authority { id: string; name: string; type: string; email: string | null; phone: string | null; website: string | null; verified: boolean; }

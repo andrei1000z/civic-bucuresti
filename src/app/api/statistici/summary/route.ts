@@ -1,49 +1,18 @@
 import { NextResponse } from "next/server";
-import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { getSesizariStatsCached } from "@/lib/cached-queries";
 
-export const revalidate = 300; // 5 minutes (ISR caching)
+export const revalidate = 300;
 
 /**
  * Lightweight count-based summary for homepage widgets.
- * Returns totals WITHOUT fetching row data.
+ * Shares an in-memory cache with /impact and other callers — a single
+ * stats pull serves all of them within the TTL window.
  */
 export async function GET() {
   try {
-    const admin = createSupabaseAdmin();
-
-    const todayIso = new Date(Date.now() - 24 * 60 * 60_000).toISOString();
-
-    const [total, today, inLucru, rezolvate] = await Promise.all([
-      admin
-        .from("sesizari")
-        .select("*", { count: "exact", head: true })
-        .eq("moderation_status", "approved"),
-      admin
-        .from("sesizari")
-        .select("*", { count: "exact", head: true })
-        .eq("moderation_status", "approved")
-        .gte("created_at", todayIso),
-      admin
-        .from("sesizari")
-        .select("*", { count: "exact", head: true })
-        .eq("moderation_status", "approved")
-        .eq("status", "in-lucru"),
-      admin
-        .from("sesizari")
-        .select("*", { count: "exact", head: true })
-        .eq("moderation_status", "approved")
-        .eq("status", "rezolvat"),
-    ]);
-
+    const data = await getSesizariStatsCached();
     return NextResponse.json(
-      {
-        data: {
-          total: total.count ?? 0,
-          today: today.count ?? 0,
-          inLucru: inLucru.count ?? 0,
-          rezolvate: rezolvate.count ?? 0,
-        },
-      },
+      { data },
       {
         headers: {
           "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",

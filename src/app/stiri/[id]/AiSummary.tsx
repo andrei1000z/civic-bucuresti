@@ -13,11 +13,14 @@ export function AiSummary({
   fallbackText: string;
 }) {
   const [summary, setSummary] = useState<string | null>(initialSummary);
+  // If the server already produced a summary (common case) skip the client fetch entirely.
   const [loading, setLoading] = useState(!initialSummary);
 
   useEffect(() => {
-    if (initialSummary) return; // Already have cached summary
+    if (initialSummary) return; // Server already generated — nothing to do
 
+    // Fallback path only: server failed to generate (timeout / cold start).
+    // Hit the API route which has its own cache + rate limit.
     let cancelled = false;
     fetch(`/api/stiri/${stireId}/synthesize`)
       .then((r) => r.json())

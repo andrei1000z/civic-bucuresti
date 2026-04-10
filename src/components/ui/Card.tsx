@@ -11,7 +11,7 @@ export function Card({ children, hover, accentColor, className, ...props }: Card
   return (
     <div
       className={cn(
-        "relative bg-[var(--color-surface)] rounded-[var(--radius-card)] p-5",
+        "relative bg-[var(--color-surface)] rounded-[var(--radius-card)] p-4 sm:p-5",
         "border border-[var(--color-border)] shadow-[var(--shadow-soft)]",
         "transition-all duration-200",
         hover && "hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] hover:border-[var(--color-primary)]/30",

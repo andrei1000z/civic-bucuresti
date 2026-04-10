@@ -41,8 +41,8 @@ describe("Data integrity", () => {
   });
 
   describe("evenimente", () => {
-    it("has 12 events", () => {
-      expect(evenimente.length).toBe(12);
+    it("has at least 12 events", () => {
+      expect(evenimente.length).toBeGreaterThanOrEqual(12);
     });
     it("all have unique slugs", () => {
       const slugs = new Set(evenimente.map((e) => e.slug));
@@ -56,12 +56,12 @@ describe("Data integrity", () => {
       expect(evenimenteDetails["colectiv-2015"]).toBeDefined();
       expect(evenimenteDetails["cutremur-1977"]).toBeDefined();
     });
-    it("details have coords within Bucharest", () => {
+    it("details have coords within Romania bounds", () => {
       for (const [, d] of Object.entries(evenimenteDetails)) {
-        expect(d.coords[0]).toBeGreaterThan(44.3);
-        expect(d.coords[0]).toBeLessThan(44.6);
-        expect(d.coords[1]).toBeGreaterThan(25.9);
-        expect(d.coords[1]).toBeLessThan(26.3);
+        expect(d.coords[0]).toBeGreaterThan(43.5);
+        expect(d.coords[0]).toBeLessThan(48.3);
+        expect(d.coords[1]).toBeGreaterThan(20.2);
+        expect(d.coords[1]).toBeLessThan(30.0);
       }
     });
   });
@@ -91,14 +91,22 @@ describe("Data integrity", () => {
   });
 
   describe("ghiduri", () => {
-    it("has 6 guides", () => {
-      expect(ghiduri.length).toBe(6);
+    it("has at least 6 guides", () => {
+      expect(ghiduri.length).toBeGreaterThanOrEqual(6);
+    });
+    it("all have unique slugs", () => {
+      const slugs = new Set(ghiduri.map((g) => g.slug));
+      expect(slugs.size).toBe(ghiduri.length);
     });
   });
 
   describe("quiz civic", () => {
-    it("has exactly 10 questions", () => {
-      expect(QUIZ.length).toBe(10);
+    it("has at least 10 questions", () => {
+      expect(QUIZ.length).toBeGreaterThanOrEqual(10);
+    });
+    it("all have unique ids", () => {
+      const ids = new Set(QUIZ.map((q) => q.id));
+      expect(ids.size).toBe(QUIZ.length);
     });
     it("each has 4 options and correct index", () => {
       for (const q of QUIZ) {

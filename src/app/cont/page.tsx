@@ -354,6 +354,7 @@ export default function ContPage() {
           ștergi contul. Sesizările tale publice rămân (anonimizate) pentru interesul public.
         </p>
         <div className="flex flex-wrap gap-2">
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a
             href="/api/profile/export"
             className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)]"

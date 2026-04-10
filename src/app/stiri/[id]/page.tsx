@@ -6,6 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/Badge";
 import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
+import { getOrGenerateAiSummary } from "@/lib/stiri/ai-summary";
 import { AiSummary } from "./AiSummary";
 
 const SOURCE_LOGOS: Record<string, string> = {
@@ -104,6 +105,12 @@ export default async function StireDetailPage({
   const stire = await getStire(id);
   if (!stire) notFound();
 
+  // Generate (or read cached) AI summary on the server so the first user
+  // to open the article pays the Groq cost and every subsequent visitor
+  // gets the summary pre-rendered in the initial HTML — no client fetch,
+  // no flicker, no duplicate API calls.
+  const aiSummary = await getOrGenerateAiSummary(stire);
+
   const related = await getRelatedArticles(stire);
   const sourceColor = SOURCE_COLORS[stire.source] ?? "#64748b";
 
@@ -198,7 +205,7 @@ export default async function StireDetailPage({
             </div>
             <AiSummary
               stireId={stire.id}
-              initialSummary={stire.ai_summary}
+              initialSummary={aiSummary}
               fallbackText={stire.excerpt || stire.content || ""}
             />
           </div>

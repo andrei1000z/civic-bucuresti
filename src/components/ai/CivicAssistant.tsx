@@ -16,6 +16,49 @@ const SUGGESTED_QUESTIONS = [
   "Cine e primarul Bucureștiului?",
 ];
 
+/**
+ * Quick actions — pre-filled expert prompts for the most common civic tasks.
+ * Each sends a structured multi-turn request that produces a usable document.
+ */
+const QUICK_ACTIONS: { emoji: string; label: string; prompt: string }[] = [
+  {
+    emoji: "📮",
+    label: "Scrie o cerere L544",
+    prompt:
+      "Scrie-mi o cerere formală în baza Legii 544/2001 privind accesul la informații de interes public. Vreau să aflu câte contracte de publicitate a semnat PMB în 2025 și cu ce firme. Cererea să fie gata de copiat, cu formulări legale corecte.",
+  },
+  {
+    emoji: "📝",
+    label: "Petiție OG 27/2002",
+    prompt:
+      "Ajută-mă să redactez o petiție formală în baza OG 27/2002. Problema: groapă periculoasă pe strada mea care nu e reparată de 3 luni. Structurează corect cu temei legal, solicitare clară și termenul de 30 zile.",
+  },
+  {
+    emoji: "⚖️",
+    label: "Contestă o amendă",
+    prompt:
+      "Vreau să contest o amendă contravențională de la Poliția Rutieră. Explică-mi pașii exacți și redactează un model de plângere. Menționează termenul de 15 zile, taxa judiciară, și motive de nulitate frecvente.",
+  },
+  {
+    emoji: "🏛️",
+    label: "Cum particip la dezbatere publică",
+    prompt:
+      "Cum particip efectiv la o dezbatere publică pentru un proiect de hotărâre a Consiliului Local? Pașii de urmat, termenul legal, cum îmi depun observațiile scrise ca să fie luate în considerare.",
+  },
+  {
+    emoji: "🤝",
+    label: "Înființez un ONG",
+    prompt:
+      "Explică-mi pașii pentru a înființa un ONG (asociație) în România. Acte necesare, costuri reale, unde depun dosarul, cât durează. Vreau o listă numerotată și costuri totale estimate.",
+  },
+  {
+    emoji: "💰",
+    label: "Ajutoare sociale disponibile",
+    prompt:
+      "Ce ajutoare sociale există în România pentru o familie cu doi copii și venit redus? Enumeră-le pe toate cu condiții de eligibilitate, cuantum și unde se depune cererea.",
+  },
+];
+
 const INITIAL_MESSAGE: Message = {
   role: "assistant",
   content: "Salut! Sunt Asistentul Civia. Te pot ajuta cu informații despre transport, sesizări, primărie, ghiduri sau orice altceva despre oraș. Ce vrei să știi?",
@@ -171,7 +214,7 @@ export function CivicAssistant() {
 
       {/* Chat window */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-40 w-[calc(100vw-3rem)] sm:w-[400px] max-h-[calc(100vh-8rem)] h-[600px] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-xl)] flex flex-col overflow-hidden animate-fade-in-up">
+        <div className="fixed inset-x-3 bottom-24 sm:inset-x-auto sm:right-6 z-40 sm:w-[400px] h-[calc(100dvh-7rem)] sm:h-[600px] max-h-[calc(100dvh-7rem)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] shadow-[var(--shadow-xl)] flex flex-col overflow-hidden animate-fade-in-up">
           {/* Header */}
           <header className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)] to-indigo-700 text-white">
             <div className="flex items-center gap-2">
@@ -237,19 +280,42 @@ export function CivicAssistant() {
               </div>
             ))}
 
-            {/* Suggested questions on empty state */}
+            {/* Suggested questions + quick actions on empty state */}
             {messages.length === 1 && !streaming && (
-              <div className="pt-2 space-y-2">
-                <p className="text-xs text-[var(--color-text-muted)] px-1">Încearcă:</p>
-                {SUGGESTED_QUESTIONS.map((q) => (
-                  <button
-                    key={q}
-                    onClick={() => sendMessage(q)}
-                    className="w-full text-left text-xs px-3 py-2 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] border border-[var(--color-border)] transition-colors"
-                  >
-                    {q}
-                  </button>
-                ))}
+              <div className="pt-2 space-y-3">
+                <div className="space-y-1.5">
+                  <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-1">
+                    Acțiuni utile
+                  </p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {QUICK_ACTIONS.map((a) => (
+                      <button
+                        key={a.label}
+                        onClick={() => sendMessage(a.prompt)}
+                        className="text-left text-xs px-2.5 py-2 rounded-[8px] bg-gradient-to-br from-[var(--color-primary-soft)] to-transparent hover:from-[var(--color-primary-soft)] hover:to-[var(--color-primary-soft)]/50 border border-[var(--color-primary)]/20 transition-all"
+                        title={a.prompt.slice(0, 100) + "…"}
+                      >
+                        <div className="text-base mb-0.5">{a.emoji}</div>
+                        <div className="font-medium leading-tight">{a.label}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-1">
+                    Sau întreabă
+                  </p>
+                  {SUGGESTED_QUESTIONS.map((q) => (
+                    <button
+                      key={q}
+                      onClick={() => sendMessage(q)}
+                      className="w-full text-left text-xs px-3 py-2 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] border border-[var(--color-border)] transition-colors"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>

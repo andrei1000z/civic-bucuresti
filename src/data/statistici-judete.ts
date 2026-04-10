@@ -80,7 +80,7 @@ const MONTHLY_WEIGHTS = [0.078, 0.062, 0.080, 0.083, 0.088, 0.096, 0.102, 0.097,
 const MONTHS = ["Ian", "Feb", "Mar", "Apr", "Mai", "Iun", "Iul", "Aug", "Sep", "Oct", "Noi", "Dec"];
 
 function buildMonthly(total: number): MonthlyValue[] {
-  let distributed = MONTHLY_WEIGHTS.map((w) => Math.round(total * w));
+  const distributed = MONTHLY_WEIGHTS.map((w) => Math.round(total * w));
   // Adjust last month so sum equals total exactly
   const diff = total - distributed.reduce((a, b) => a + b, 0);
   distributed[11] += diff;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Mail, CheckCircle2, Loader2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { useAuth } from "./AuthProvider";
@@ -177,7 +178,7 @@ export function AuthModal() {
           </form>
 
           <p className="text-xs text-[var(--color-text-muted)] mt-4 text-center">
-            Prin autentificare ești de acord cu <a href="/legal/termeni" className="text-[var(--color-primary)] hover:underline">termenii</a> platformei.
+            Prin autentificare ești de acord cu <Link href="/legal/termeni" className="text-[var(--color-primary)] hover:underline">termenii</Link> platformei.
           </p>
         </div>
       )}

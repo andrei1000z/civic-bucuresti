@@ -297,6 +297,69 @@ h1, h2, h3, h4, h5, h6 {
   text-underline-offset: 2px;
 }
 
+/* Tables inside guides: clean styling + horizontal scroll on narrow viewports
+   so long rows never break the page layout. */
+.prose-civic table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+}
+.prose-civic thead {
+  background: var(--color-surface-2);
+}
+.prose-civic th,
+.prose-civic td {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+.prose-civic th {
+  font-weight: 600;
+  color: var(--color-text);
+}
+.prose-civic td strong {
+  color: var(--color-text);
+}
+
+/* Inline code blocks inside prose */
+.prose-civic code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875em;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  background: var(--color-surface-2);
+  color: var(--color-primary);
+}
+
+/* Prevent any rogue element from causing horizontal scroll */
+.prose-civic img,
+.prose-civic video,
+.prose-civic iframe {
+  max-width: 100%;
+  height: auto;
+}
+.prose-civic pre {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: pre;
+}
+
+/* Break long URLs / unbreakable strings inside paragraphs so they wrap
+   instead of forcing a horizontal scroll. */
+.prose-civic p,
+.prose-civic li {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
 /* Focus ring */
 :focus-visible {
   outline: 2px solid var(--color-primary);

@@ -22,6 +22,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/judete`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/legal/confidentialitate`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/legal/termeni`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${base}/dezvoltatori`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/accesibilitate`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/calendar-civic`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${base}/buget`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/siguranta`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/educatie`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/sanatate`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
   ];
 
   // Per-county pages: 42 counties × 8 pages = 336 URLs
@@ -43,7 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/ghiduri`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/statistici`, lastModified: now, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/bilete`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/impact`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${base}/impact`, lastModified: now, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/cum-functioneaza`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/evenimente`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/istoric`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
@@ -65,19 +72,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  // Dynamic sesizari
+  // Dynamic sesizari + stiri (both pulled in parallel)
   let sesizariRoutes: MetadataRoute.Sitemap = [];
+  let stiriRoutes: MetadataRoute.Sitemap = [];
   try {
     const admin = createSupabaseAdmin();
-    const { data } = await admin
-      .from("sesizari")
-      .select("code, updated_at")
-      .eq("publica", true)
-      .eq("moderation_status", "approved")
-      .order("created_at", { ascending: false })
-      .limit(500);
-    if (data) {
-      sesizariRoutes = (data as { code: string; updated_at: string }[])
+    const [sesResp, stiriResp] = await Promise.all([
+      admin
+        .from("sesizari")
+        .select("code, updated_at")
+        .eq("publica", true)
+        .eq("moderation_status", "approved")
+        .order("created_at", { ascending: false })
+        .limit(500),
+      admin
+        .from("stiri_cache")
+        .select("id, published_at, fetched_at")
+        .order("published_at", { ascending: false })
+        .limit(200),
+    ]);
+    if (sesResp.data) {
+      sesizariRoutes = (sesResp.data as { code: string; updated_at: string }[])
         .filter((s) => s.updated_at && !isNaN(new Date(s.updated_at).getTime()))
         .map((s) => ({
           url: `${base}/sesizari/${s.code}`,
@@ -85,6 +100,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           changeFrequency: "weekly" as const,
           priority: 0.5,
         }));
+    }
+    if (stiriResp.data) {
+      stiriRoutes = (stiriResp.data as { id: string; published_at: string; fetched_at: string }[])
+        .map((s) => {
+          const dt = s.published_at ?? s.fetched_at;
+          const parsed = dt ? new Date(dt) : now;
+          return {
+            url: `${base}/stiri/${s.id}`,
+            lastModified: isNaN(parsed.getTime()) ? now : parsed,
+            changeFrequency: "monthly" as const,
+            priority: 0.4,
+          };
+        });
     }
   } catch {}
 
@@ -95,5 +123,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...ghiduriRoutes,
     ...evenimenteRoutes,
     ...sesizariRoutes,
+    ...stiriRoutes,
   ];
 }

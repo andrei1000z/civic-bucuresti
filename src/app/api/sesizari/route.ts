@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 import { listSesizari, createSesizare } from "@/lib/sesizari/repository";
 import { generateUniqueCode } from "@/lib/sesizari/codes";
 import { createSupabaseServer } from "@/lib/supabase/server";
@@ -27,8 +28,8 @@ const createSchema = z.object({
   sector: z.enum(["S1", "S2", "S3", "S4", "S5", "S6"]).optional().nullable().default(null),
   county: z.string().max(3).optional().nullable(),       // "CJ", "B", etc.
   locality: z.string().max(100).optional().nullable(),    // "Cluj-Napoca", etc.
-  lat: z.number().min(43).max(49),  // Romania lat range
-  lng: z.number().min(20).max(30),  // Romania lng range
+  lat: z.number().min(43.5).max(48.3),  // Romania lat range (actual)
+  lng: z.number().min(20.2).max(29.7),  // Romania lng range (actual)
   descriere: z.string().min(10, "Descrierea trebuie să aibă minim 10 caractere").max(2000),
   formal_text: z.string().max(5000).optional().nullable(),
   imagini: z.array(z.string().url()).max(5).default([]),
@@ -74,10 +75,10 @@ export async function POST(req: Request) {
     const body = await req.json();
     const parsed = createSchema.parse(body);
 
-    // Honeypot check: if filled, silently reject (bot detected).
-    // Don't show the field name to the user — just generic error.
+    // Honeypot: if filled, silent drop with fake success — the bot thinks it worked,
+    // we don't pollute the DB, and real users who hit this via mobile autofill also get a 200.
     if (parsed._honey && parsed._honey.length > 0) {
-      return NextResponse.json({ error: "Sesizare invalidă" }, { status: 400 });
+      return NextResponse.json({ data: { code: "XXXXXX", titlu: parsed.titlu } });
     }
 
     const supabase = await createSupabaseServer();
@@ -118,7 +119,10 @@ export async function POST(req: Request) {
             ctaText: "Vezi sesizarea ta",
             ctaUrl: `${siteUrl}/sesizari/${code}`,
           }),
-        }).catch(() => {}); // fire-and-forget
+        }).catch((err) => {
+          // fire-and-forget, but report to Sentry so we know if Resend breaks
+          Sentry.captureException(err, { tags: { kind: "sesizare_email" }, extra: { code } });
+        });
       }
 
       return NextResponse.json({ data: row });
