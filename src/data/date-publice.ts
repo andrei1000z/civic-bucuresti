@@ -20,6 +20,7 @@ export interface BugetYearly {
   cheltuieli: number;
   deficitProcPib: number; // % din PIB
   pib: number; // mld lei
+  isProjected?: boolean;
 }
 
 export const BUGET_NATIONAL: BugetYearly[] = [
@@ -28,7 +29,8 @@ export const BUGET_NATIONAL: BugetYearly[] = [
   { year: 2022, venituri: 451.7, cheltuieli: 552.3, deficitProcPib: 6.3, pib: 1414.9 },
   { year: 2023, venituri: 492.1, cheltuieli: 614.6, deficitProcPib: 6.6, pib: 1604.1 },
   { year: 2024, venituri: 538.5, cheltuieli: 689.2, deficitProcPib: 8.6, pib: 1700.0 },
-  { year: 2025, venituri: 582.1, cheltuieli: 720.0, deficitProcPib: 7.9, pib: 1820.0 }, // proiecție
+  { year: 2025, venituri: 592.4, cheltuieli: 727.8, deficitProcPib: 7.4, pib: 1830.0 },
+  { year: 2026, venituri: 634.0, cheltuieli: 760.0, deficitProcPib: 6.8, pib: 1920.0, isProjected: true },
 ];
 
 export interface BugetCheltuiala {
@@ -39,14 +41,14 @@ export interface BugetCheltuiala {
 }
 
 export const BUGET_CHELTUIELI_2025: BugetCheltuiala[] = [
-  { categorie: "Asigurări sociale (pensii, șomaj)", procent: 32.5, mldLei: 234.0, color: "#3B82F6" },
-  { categorie: "Sănătate", procent: 14.2, mldLei: 102.2, color: "#EF4444" },
-  { categorie: "Educație", procent: 10.8, mldLei: 77.8, color: "#F59E0B" },
-  { categorie: "Ordine publică & apărare", procent: 11.3, mldLei: 81.4, color: "#8B5CF6" },
-  { categorie: "Transport & infrastructură", procent: 9.7, mldLei: 69.8, color: "#10B981" },
-  { categorie: "Dobânzi datorie publică", procent: 8.4, mldLei: 60.5, color: "#DC2626" },
-  { categorie: "Administrație publică", procent: 6.2, mldLei: 44.6, color: "#64748B" },
-  { categorie: "Altele", procent: 6.9, mldLei: 49.7, color: "#94A3B8" },
+  { categorie: "Asigurări sociale (pensii, șomaj)", procent: 33.1, mldLei: 240.9, color: "#3B82F6" },
+  { categorie: "Sănătate", procent: 14.0, mldLei: 101.9, color: "#EF4444" },
+  { categorie: "Educație", procent: 10.6, mldLei: 77.1, color: "#F59E0B" },
+  { categorie: "Ordine publică & apărare", procent: 11.5, mldLei: 83.7, color: "#8B5CF6" },
+  { categorie: "Transport & infrastructură", procent: 9.9, mldLei: 72.1, color: "#10B981" },
+  { categorie: "Dobânzi datorie publică", procent: 8.9, mldLei: 64.8, color: "#DC2626" },
+  { categorie: "Administrație publică", procent: 6.1, mldLei: 44.4, color: "#64748B" },
+  { categorie: "Altele", procent: 5.9, mldLei: 42.9, color: "#94A3B8" },
 ];
 
 // ═══════════════════════════════════════════════════════════════════
@@ -70,6 +72,7 @@ export const CRIMINALITATE: CriminalitateStats[] = [
   { year: 2022, totalInfractiuni: 263500, violente: 55100, patrimoniu: 168200, rutiere: 26800, evazFiscala: 9300, droguri: 4100 },
   { year: 2023, totalInfractiuni: 272900, violente: 57800, patrimoniu: 172500, rutiere: 27500, evazFiscala: 10800, droguri: 4300 },
   { year: 2024, totalInfractiuni: 278100, violente: 59300, patrimoniu: 174900, rutiere: 28100, evazFiscala: 10500, droguri: 5300 },
+  { year: 2025, totalInfractiuni: 284500, violente: 61200, patrimoniu: 176800, rutiere: 28900, evazFiscala: 10900, droguri: 6700 },
 ];
 
 export const TOP_SIGURANTA_JUDETE: { county: string; rata: number; trend: "up" | "down" | "stable" }[] = [
@@ -93,6 +96,7 @@ export interface BacStats {
   prezenti: number;
   note10: number; // nr elevi cu nota 10
   note6plus: number;
+  isProjected?: boolean;
 }
 
 export const BAC_STATS: BacStats[] = [
@@ -137,6 +141,7 @@ export interface SanatateStats {
   mortInfantilaLa1000: number;
   mediciLa1000Loc: number;
   cheltuialaPibProc: number;
+  isProjected?: boolean;
 }
 
 export const SANATATE_NATIONALA: SanatateStats[] = [
@@ -146,6 +151,7 @@ export const SANATATE_NATIONALA: SanatateStats[] = [
   { year: 2022, sperantaViataAni: 74.5, mortInfantilaLa1000: 5.1, mediciLa1000Loc: 3.24, cheltuialaPibProc: 6.2 },
   { year: 2023, sperantaViataAni: 75.3, mortInfantilaLa1000: 4.9, mediciLa1000Loc: 3.31, cheltuialaPibProc: 6.1 },
   { year: 2024, sperantaViataAni: 75.9, mortInfantilaLa1000: 4.7, mediciLa1000Loc: 3.38, cheltuialaPibProc: 6.2 },
+  { year: 2025, sperantaViataAni: 76.3, mortInfantilaLa1000: 4.5, mediciLa1000Loc: 3.44, cheltuialaPibProc: 6.3 },
 ];
 
 export const TOP_SPITALE_PUBLICE: { rang: number; nume: string; oras: string; paturi: number; specializare: string }[] = [

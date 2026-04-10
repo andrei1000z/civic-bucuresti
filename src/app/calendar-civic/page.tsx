@@ -9,6 +9,7 @@ import {
 } from "@/data/calendar-civic";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { EventListJsonLd } from "@/components/FaqJsonLd";
 
 export const metadata: Metadata = {
   title: "Calendar civic — date importante pentru cetățeni",
@@ -94,6 +95,16 @@ export default function CalendarCivicPage() {
 
   return (
     <div className="container-narrow py-12 md:py-16">
+      <EventListJsonLd
+        events={upcoming.slice(0, 15).map((e) => ({
+          name: e.title,
+          description: e.description,
+          startDate: e.date,
+          endDate: e.endDate,
+          url: `https://civia.ro/calendar-civic#${e.id}`,
+          location: e.location,
+        }))}
+      />
       <Badge className="mb-4">Calendar civic</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
         <CalendarDays size={40} className="text-[var(--color-primary)]" />

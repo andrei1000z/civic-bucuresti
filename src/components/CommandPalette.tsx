@@ -134,6 +134,24 @@ export function CommandPalette() {
     else router.push(url);
   }, [router]);
 
+  // Prefetch an internal route on hover / arrow-focus so the next navigation
+  // feels instant. Safe to call multiple times — Next.js dedupes.
+  const prefetchResult = useCallback((url: string) => {
+    if (!url || url.startsWith("http")) return;
+    try {
+      router.prefetch(url);
+    } catch {
+      // best-effort
+    }
+  }, [router]);
+
+  // Prefetch the currently-highlighted result so Enter feels instant.
+  useEffect(() => {
+    const active = results[activeIdx];
+    if (!active) return;
+    prefetchResult(active.url);
+  }, [activeIdx, results, prefetchResult]);
+
   const askAI = useCallback(async () => {
     if (!query || query.length < 3 || aiLoading) return;
     setAiLoading(true);
@@ -261,7 +279,8 @@ export function CommandPalette() {
                       <li key={`${r.type}-${r.url}-${i}`}>
                         <button
                           onClick={() => handleSelect(r.url)}
-                          onMouseEnter={() => setActiveIdx(i)}
+                          onMouseEnter={() => { setActiveIdx(i); prefetchResult(r.url); }}
+                          onFocus={() => prefetchResult(r.url)}
                           className={cn(
                             "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors",
                             i === activeIdx ? "bg-[var(--color-primary-soft)]" : "hover:bg-[var(--color-surface-2)]"

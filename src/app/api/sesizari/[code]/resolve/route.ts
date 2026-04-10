@@ -4,6 +4,7 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
 import { humanizeSupabaseError } from "@/lib/supabase/errors";
+import { invalidateSesizariCache } from "@/lib/cached-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +60,7 @@ export async function POST(
       description: "Marcată ca rezolvată de autor",
     });
 
+    invalidateSesizariCache();
     return NextResponse.json({ ok: true });
   } catch (e) {
     if (e instanceof z.ZodError) {

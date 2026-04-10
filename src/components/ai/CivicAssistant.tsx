@@ -10,10 +10,12 @@ interface Message {
 }
 
 const SUGGESTED_QUESTIONS = [
-  "Cât costă abonamentul STB lunar?",
-  "Cum fac o sesizare la PMB?",
+  "Câte sesizări s-au rezolvat luna asta?",
+  "Când expiră impozitul pe clădire?",
+  "Câți bani merg la educație din bugetul de stat?",
+  "Cum fac o sesizare pentru groapă?",
   "Ce fac la cutremur?",
-  "Cine e primarul Bucureștiului?",
+  "Care sunt top licee din România?",
 ];
 
 /**
@@ -56,6 +58,18 @@ const QUICK_ACTIONS: { emoji: string; label: string; prompt: string }[] = [
     label: "Ajutoare sociale disponibile",
     prompt:
       "Ce ajutoare sociale există în România pentru o familie cu doi copii și venit redus? Enumeră-le pe toate cu condiții de eligibilitate, cuantum și unde se depune cererea.",
+  },
+  {
+    emoji: "📊",
+    label: "Cerere buget L544",
+    prompt:
+      "Scrie o cerere L544/2001 către primăria orașului meu pentru execuția bugetară 2025: venituri, cheltuieli pe capitole (sănătate, educație, infrastructură), lista contractelor mai mari de 100.000 lei și procentul de realizare. Gata de trimis pe email.",
+  },
+  {
+    emoji: "🏫",
+    label: "Compară liceele din oraș",
+    prompt:
+      "Spune-mi care sunt top 5 licee din orașul meu după promovabilitatea BAC 2025, cu medii de admitere și recomandări concrete pentru părinți. Dacă nu ai date specifice, trimite-mă la /educatie pe civia.ro.",
   },
 ];
 

@@ -21,6 +21,7 @@ interface SearchResult {
 }
 
 const STATIC_PAGES: SearchResult[] = [
+  // Core platform
   { type: "page", title: "Sesizări", url: "/sesizari", excerpt: "Depune sesizări către autorități" },
   { type: "page", title: "Hărți", url: "/harti", excerpt: "Piste bicicletă, drumuri, transport, calitate aer" },
   { type: "page", title: "Statistici", url: "/statistici", excerpt: "Date naționale: accidente, AQI, populație" },
@@ -35,7 +36,20 @@ const STATIC_PAGES: SearchResult[] = [
   { type: "page", title: "Cum funcționează", url: "/cum-functioneaza", excerpt: "Ghid despre administrația publică, CGMB, sesizări" },
   { type: "page", title: "Primari București", url: "/cum-functioneaza#primari", excerpt: "Toți primarii Capitalei din 1990 până azi" },
   { type: "page", title: "Structura PMB", url: "/cum-functioneaza#structura", excerpt: "Direcții, companii municipale, organigrama PMB" },
-  { type: "page", title: "Quiz civic", url: "/quiz", excerpt: "Testează-ți cunoștințele despre administrația Bucureștiului" },
+  { type: "page", title: "Istoric evenimente", url: "/istoric", excerpt: "Timeline interactiv al evenimentelor majore din România" },
+
+  // Dashboards de date publice (noi în P2/P3)
+  { type: "page", title: "Impact Civia", url: "/impact", excerpt: "Dashboard public: sesizări rezolvate, primării notificate, cetățeni activi" },
+  { type: "page", title: "Buget național", url: "/buget", excerpt: "Execuție bugetară România: venituri, cheltuieli, deficit" },
+  { type: "page", title: "Siguranță & criminalitate", url: "/siguranta", excerpt: "Statistici oficiale Poliția Română pe tipuri și județe" },
+  { type: "page", title: "Educație", url: "/educatie", excerpt: "Promovabilitate BAC, top licee, statistici învățământ" },
+  { type: "page", title: "Sănătate", url: "/sanatate", excerpt: "Speranță viață, medici per capita, top spitale publice" },
+  { type: "page", title: "Calendar civic", url: "/calendar-civic", excerpt: "Alegeri, taxe, ședințe CGMB, consultări publice" },
+  { type: "page", title: "Compară județele", url: "/compara", excerpt: "Vezi două județe side-by-side: sesizări, populație, stats" },
+
+  // Info / dev
+  { type: "page", title: "Accesibilitate", url: "/accesibilitate", excerpt: "Drepturi L448/2006, facilități, declarație WCAG 2.1 AA" },
+  { type: "page", title: "API public pentru dezvoltatori", url: "/dezvoltatori", excerpt: "API v1 deschis cu CORS, licență CC BY 4.0" },
 ];
 
 function sanitizeForPostgrest(q: string): string {

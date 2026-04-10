@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { upsertVote, removeVote, getSesizareByCode } from "@/lib/sesizari/repository";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { invalidateSesizariCache } from "@/lib/cached-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,7 @@ export async function POST(
     } else {
       await upsertVote({ sesizareId: sesizare.id, userId: user.id, value });
     }
+    invalidateSesizariCache();
     return NextResponse.json({ ok: true });
   } catch (e) {
     if (e instanceof z.ZodError) {

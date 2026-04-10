@@ -10,6 +10,7 @@ export const revalidate = 3600; // hourly
 const COUNTY_PAGES = [
   "", "/sesizari", "/aer", "/harti", "/statistici", "/stiri", "/ghiduri",
   "/autoritati", "/bilete", "/evenimente", "/istoric", "/cum-functioneaza",
+  "/impact",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -24,11 +25,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/legal/termeni`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/dezvoltatori`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/accesibilitate`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${base}/calendar-civic`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
-    { url: `${base}/buget`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/siguranta`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/educatie`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/sanatate`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/calendar-civic`, lastModified: now, changeFrequency: "daily", priority: 0.7 },
+    { url: `${base}/buget`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/siguranta`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/educatie`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/sanatate`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/compara`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
   ];
 
   // Per-county pages: 42 counties × 8 pages = 336 URLs
@@ -50,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/ghiduri`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/statistici`, lastModified: now, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/bilete`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/impact`, lastModified: now, changeFrequency: "daily", priority: 0.7 },
+    { url: `${base}/impact`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/cum-functioneaza`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/evenimente`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/istoric`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },

@@ -11,7 +11,9 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
+// ISR — sensor data lives behind /api/aer which has its own 5-min cache.
+// The page itself is a thin shell around AerMapWrapper (client-only).
+export const revalidate = 3600;
 
 // Wrapper that imports the client map lazily to avoid SSR window issues
 import { AerMapWrapper } from "./AerMapWrapper";

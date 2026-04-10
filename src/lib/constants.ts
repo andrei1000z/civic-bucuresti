@@ -19,7 +19,7 @@ export const BUCHAREST_BOUNDS: [[number, number], [number, number]] = [
 ];
 
 // ============================================================
-// NAVIGATION — 6 main links + "Mai mult" dropdown
+// NAVIGATION — main links + "Mai mult" dropdown + date publice submenu
 // ============================================================
 export const NAV_LINKS = [
   { href: "/sesizari", label: "Sesizări" },
@@ -30,13 +30,23 @@ export const NAV_LINKS = [
   { href: "/evenimente", label: "Evenimente" },
 ] as const;
 
-// Extra items — shown only when inside a county context (no dropdown, just more nav items)
+// "Mai mult" dropdown — secondary routes including new P2/P3 highlights
 export const NAV_MORE = [
+  { href: "/impact", label: "Impact Civia", icon: "📊" },
+  { href: "/calendar-civic", label: "Calendar civic", icon: "📅" },
   { href: "/aer", label: "Calitate aer", icon: "🌬️" },
   { href: "/bilete", label: "Bilete & Abonamente", icon: "🎫" },
   { href: "/istoric", label: "Istoric", icon: "📜" },
   { href: "/cum-functioneaza", label: "Administrația", icon: "🏛️" },
-  { href: "/autoritati", label: "Autorități", icon: "🏢" },
+  { href: "/compara", label: "Compară județe", icon: "⚖️" },
+] as const;
+
+// Date publice — separate submenu for transparency dashboards
+export const NAV_DATE_PUBLICE = [
+  { href: "/buget", label: "Buget național", icon: "💰" },
+  { href: "/siguranta", label: "Siguranță", icon: "🛡️" },
+  { href: "/educatie", label: "Educație", icon: "🎓" },
+  { href: "/sanatate", label: "Sănătate", icon: "❤️" },
 ] as const;
 
 export const GHID_DROPDOWN = [

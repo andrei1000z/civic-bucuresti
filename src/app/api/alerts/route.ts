@@ -4,7 +4,7 @@ export const revalidate = 300; // 5 minutes
 
 interface AlertPayload {
   id: string;
-  type: "aqi" | "meteo" | "ro-alert" | "info";
+  type: "aqi" | "meteo" | "ro-alert" | "quake" | "info";
   severity: "info" | "warning" | "critical";
   title: string;
   message: string;
@@ -13,21 +13,74 @@ interface AlertPayload {
   validUntil?: string;
 }
 
+// Romania bounding box (approximate) used to filter global feeds
+const RO_BOUNDS = { latMin: 43.5, latMax: 48.3, lonMin: 20.2, lonMax: 29.7 };
+
+function inRomania(lat: number, lon: number): boolean {
+  return lat >= RO_BOUNDS.latMin && lat <= RO_BOUNDS.latMax && lon >= RO_BOUNDS.lonMin && lon <= RO_BOUNDS.lonMax;
+}
+
+/**
+ * EMSC recent earthquake feed — public JSON, no API key.
+ * Returns quakes M >= 3.0 within Romania bounds in the last 24h.
+ */
+async function fetchRecentQuake(): Promise<AlertPayload | null> {
+  try {
+    const since = new Date(Date.now() - 24 * 60 * 60_000).toISOString().slice(0, 19);
+    const url = `https://www.seismicportal.eu/fdsnws/event/1/query?format=json&minmagnitude=3.0&limit=20&orderby=time&start=${since}`;
+    const res = await fetch(url, { next: { revalidate: 300 } });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      features?: Array<{
+        id: string;
+        properties: { mag: number; lat: number; lon: number; time: string; flynn_region: string };
+      }>;
+    };
+    const features = json.features ?? [];
+    // Keep only events within RO bbox, newest first
+    const roEvents = features
+      .filter((f) => inRomania(f.properties.lat, f.properties.lon))
+      .sort((a, b) => new Date(b.properties.time).getTime() - new Date(a.properties.time).getTime());
+    const latest = roEvents[0];
+    if (!latest) return null;
+    const mag = latest.properties.mag;
+    // Only surface events M >= 4.0 to the banner — smaller ones are noise
+    if (mag < 4.0) return null;
+    const ageMin = Math.round((Date.now() - new Date(latest.properties.time).getTime()) / 60_000);
+    return {
+      id: `quake-${latest.id}`,
+      type: "quake",
+      severity: mag >= 5.0 ? "critical" : "warning",
+      title: `Cutremur ${mag.toFixed(1)} în România`,
+      message: `Magnitudine ${mag.toFixed(1)} în ${latest.properties.flynn_region}, acum ${ageMin} min. Verifică clădirile pentru avarii.`,
+      link: "/ghiduri/ghid-cutremur",
+      source: "EMSC seismicportal.eu",
+      validUntil: new Date(Date.now() + 6 * 60 * 60_000).toISOString(),
+    };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Aggregates active public alerts into a single response consumed by
  * the sticky <AlertBanner /> in the root layout.
  *
- * Sources currently checked:
- *   1. AQI — if the highest sensor reading in București exceeds AQI 150, emit a critical alert
- *   2. Editorial — announcements set via env var CIVIA_ANNOUNCEMENT
+ * Sources currently checked (in priority order, highest severity wins):
+ *   1. EMSC earthquake feed — M ≥ 4.0 in Romania bbox, last 24h
+ *   2. AQI — if the highest sensor reading in București exceeds AQI 150
+ *   3. Editorial — announcements set via env var CIVIA_ANNOUNCEMENT
  *
- * Strategy: the first alert that fires (in priority order) is returned.
  * All sources fail-open — a 5xx from any external API results in null.
  */
 export async function GET() {
   const alerts: AlertPayload[] = [];
 
-  // 1. AQI — query our own aggregator
+  // 1. Earthquake feed (EMSC)
+  const quake = await fetchRecentQuake();
+  if (quake) alerts.push(quake);
+
+  // 2. AQI — query our own aggregator
   try {
     const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
     const res = await fetch(`${base}/api/aer?county=B`, {

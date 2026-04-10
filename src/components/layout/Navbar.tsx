@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { Menu, X, ChevronDown, AlertCircle, MapPin, Search } from "lucide-react";
-import { NAV_LINKS, NAV_MORE, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
+import { NAV_LINKS, NAV_MORE, NAV_DATE_PUBLICE, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -34,6 +34,7 @@ export function Navbar() {
   }));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [ghidDropdown, setGhidDropdown] = useState(false);
+  const [moreDropdown, setMoreDropdown] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -138,6 +139,58 @@ export function Navbar() {
                 </Link>
               );
             })}
+
+            {/* "Mai mult" dropdown — secondary links + date publice */}
+            <div
+              className="relative"
+              onMouseEnter={() => setMoreDropdown(true)}
+              onMouseLeave={() => setMoreDropdown(false)}
+            >
+              <button
+                type="button"
+                className={cn(
+                  "flex items-center gap-1 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all",
+                  "text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
+                )}
+                aria-expanded={moreDropdown}
+              >
+                Mai mult
+                <ChevronDown size={14} className={cn("transition-transform", moreDropdown && "rotate-180")} />
+              </button>
+              <div
+                className={cn(
+                  "absolute top-full right-0 w-72 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-lg)] overflow-hidden py-2 origin-top transition-all duration-150",
+                  moreDropdown
+                    ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+                    : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
+                )}
+              >
+                {NAV_MORE.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={countySlug ? `/${countySlug}${link.href}` : link.href}
+                    className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
+                  >
+                    <span className="text-lg">{link.icon}</span>
+                    <span className="text-[var(--color-text)]">{link.label}</span>
+                  </Link>
+                ))}
+                <div className="my-2 border-t border-[var(--color-border)]" />
+                <div className="px-4 py-1 text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
+                  Date publice
+                </div>
+                {NAV_DATE_PUBLICE.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
+                  >
+                    <span className="text-lg">{link.icon}</span>
+                    <span className="text-[var(--color-text)]">{link.label}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </nav>
 
           <div className="flex items-center gap-1 sm:gap-2">
@@ -220,16 +273,37 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-          {/* More links */}
-          {countySlug && NAV_MORE.map((link, i) => (
-            <Link
-              key={link.href}
-              href={`/${countySlug}${link.href}`}
-              className="block px-4 py-2 rounded-[var(--radius-button)] text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
-            >
-              {link.icon} {link.label}
-            </Link>
-          ))}
+          {/* Mai mult — secondary links */}
+          <div className="pt-3 mt-3 border-t border-[var(--color-border)]">
+            <div className="px-4 py-1 text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
+              Mai mult
+            </div>
+            {NAV_MORE.map((link) => (
+              <Link
+                key={link.href}
+                href={countySlug ? `/${countySlug}${link.href}` : link.href}
+                className="block px-4 py-2 rounded-[var(--radius-button)] text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
+              >
+                {link.icon} {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Date publice */}
+          <div className="pt-3 mt-3 border-t border-[var(--color-border)]">
+            <div className="px-4 py-1 text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
+              Date publice
+            </div>
+            {NAV_DATE_PUBLICE.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="block px-4 py-2 rounded-[var(--radius-button)] text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
+              >
+                {link.icon} {link.label}
+              </Link>
+            ))}
+          </div>
           <div className="pt-4 mt-4 border-t border-[var(--color-border)] space-y-2">
             <Link
               href={countySlug ? `/${countySlug}/sesizari` : "/b/sesizari"}

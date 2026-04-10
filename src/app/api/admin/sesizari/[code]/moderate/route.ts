@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
+import { invalidateSesizariCache } from "@/lib/cached-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -47,5 +48,6 @@ export async function POST(
     .eq("id", sesizare.id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  invalidateSesizariCache();
   return NextResponse.json({ ok: true });
 }

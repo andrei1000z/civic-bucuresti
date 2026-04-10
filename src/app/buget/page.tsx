@@ -5,6 +5,7 @@ import { BUGET_NATIONAL, BUGET_CHELTUIELI_2025 } from "@/data/date-publice";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
+import { DatasetJsonLd } from "@/components/FaqJsonLd";
 
 export const metadata: Metadata = {
   title: "Buget național România — execuție bugetară",
@@ -22,6 +23,12 @@ export default function BugetPage() {
 
   return (
     <div className="container-narrow py-12 md:py-16">
+      <DatasetJsonLd
+        name="Buget național România"
+        description="Execuție bugetară România: venituri, cheltuieli, deficit % PIB, evoluție 2020-2025. Surse: Ministerul Finanțelor, INS."
+        url="https://civia.ro/buget"
+        keywords={["buget", "romania", "fisc", "deficit", "pib", "transparenta"]}
+      />
       <Badge className="mb-4">Transparență fiscală</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
         <Wallet size={40} className="text-[var(--color-primary)]" />

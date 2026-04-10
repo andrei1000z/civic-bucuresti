@@ -7,6 +7,7 @@ import { ALL_COUNTIES } from "@/data/counties";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { CountUp } from "@/components/home/CountUp";
+import { DatasetJsonLd } from "@/components/FaqJsonLd";
 
 export const revalidate = 600; // 10 minutes
 
@@ -155,6 +156,12 @@ export default async function ImpactPage() {
 
   return (
     <div className="container-narrow py-12 md:py-16">
+      <DatasetJsonLd
+        name="Civia — Sesizări civice România"
+        description="Dataset cu sesizări civice depuse prin platforma Civia: total, rezolvate, în lucru, pe tipuri, pe județe. Actualizat live."
+        url="https://civia.ro/impact"
+        keywords={["sesizari", "romania", "date publice", "transparenta", "administratie"]}
+      />
       {/* HERO */}
       <div className="mb-10 md:mb-14">
         <Badge className="mb-4">Dashboard public</Badge>

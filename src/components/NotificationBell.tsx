@@ -63,35 +63,52 @@ export function NotificationBell() {
     setUnread(stored.filter((n) => new Date(n.createdAt).getTime() > lastSeen).length);
   }, []);
 
-  // Subscribe to realtime events once user is loaded and has followed sesizari
+  // Subscribe to realtime events once user is loaded.
+  //
+  // Two groups of watched IDs:
+  //  1. "followed"  — sesizari the user clicked Follow on → comments + timeline changes
+  //  2. "owned"     — sesizari the user authored → votes, verifications, moderation status
+  //
+  // Both groups merge into a single realtime channel with distinct filters.
   useEffect(() => {
     if (!user) return;
     const supabase = createSupabaseBrowser();
 
     async function init() {
-      const { data: follows } = await supabase
-        .from("sesizare_follows")
-        .select("sesizare_id")
-        .eq("user_id", user!.id);
-      const sesizareIds = (follows ?? []).map((f: { sesizare_id: string }) => f.sesizare_id);
-      if (sesizareIds.length === 0) return () => {};
+      const [followsRes, ownedRes] = await Promise.all([
+        supabase.from("sesizare_follows").select("sesizare_id").eq("user_id", user!.id),
+        supabase.from("sesizari").select("id").eq("user_id", user!.id).limit(200),
+      ]);
+      const followedIds = (followsRes.data ?? []).map((f: { sesizare_id: string }) => f.sesizare_id);
+      const ownedIds = (ownedRes.data ?? []).map((s: { id: string }) => s.id);
 
-      const channel = supabase
-        .channel("notifications")
-        .on(
+      // Union for timeline (both owners and followers want status updates)
+      const timelineIds = Array.from(new Set([...followedIds, ...ownedIds]));
+      if (timelineIds.length === 0 && ownedIds.length === 0) return () => {};
+
+      async function lookupSesizare(id: string) {
+        const { data } = await supabase
+          .from("sesizari")
+          .select("code, titlu")
+          .eq("id", id)
+          .maybeSingle();
+        return data as { code: string; titlu: string } | null;
+      }
+
+      const channel = supabase.channel("notifications");
+
+      // Comments — on followed sesizari
+      if (followedIds.length > 0) {
+        channel.on(
           "postgres_changes" as never,
           {
             event: "INSERT",
             schema: "public",
             table: "sesizare_comments",
-            filter: `sesizare_id=in.(${sesizareIds.join(",")})`,
+            filter: `sesizare_id=in.(${followedIds.join(",")})`,
           },
           async (payload: { new: { sesizare_id: string; body: string; author_name: string } }) => {
-            const { data: sez } = await supabase
-              .from("sesizari")
-              .select("code, titlu")
-              .eq("id", payload.new.sesizare_id)
-              .maybeSingle();
+            const sez = await lookupSesizare(payload.new.sesizare_id);
             if (!sez) return;
             addNotification({
               id: `c-${Date.now()}-${Math.random()}`,
@@ -103,21 +120,21 @@ export function NotificationBell() {
               read: false,
             });
           }
-        )
-        .on(
+        );
+      }
+
+      // Timeline (status change) — on any followed OR owned sesizare
+      if (timelineIds.length > 0) {
+        channel.on(
           "postgres_changes" as never,
           {
             event: "INSERT",
             schema: "public",
             table: "sesizare_timeline",
-            filter: `sesizare_id=in.(${sesizareIds.join(",")})`,
+            filter: `sesizare_id=in.(${timelineIds.join(",")})`,
           },
           async (payload: { new: { sesizare_id: string; event_type: string; description: string } }) => {
-            const { data: sez } = await supabase
-              .from("sesizari")
-              .select("code, titlu")
-              .eq("id", payload.new.sesizare_id)
-              .maybeSingle();
+            const sez = await lookupSesizare(payload.new.sesizare_id);
             if (!sez) return;
             addNotification({
               id: `t-${Date.now()}-${Math.random()}`,
@@ -129,8 +146,90 @@ export function NotificationBell() {
               read: false,
             });
           }
-        )
-        .subscribe();
+        );
+      }
+
+      // Votes — on sesizari owned by the user (someone voted on my sesizare)
+      if (ownedIds.length > 0) {
+        channel.on(
+          "postgres_changes" as never,
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "sesizare_votes",
+            filter: `sesizare_id=in.(${ownedIds.join(",")})`,
+          },
+          async (payload: { new: { sesizare_id: string; value: number } }) => {
+            const sez = await lookupSesizare(payload.new.sesizare_id);
+            if (!sez) return;
+            const isUp = payload.new.value > 0;
+            addNotification({
+              id: `v-${Date.now()}-${Math.random()}`,
+              type: "comment", // reuse icon category
+              sesizareCode: sez.code,
+              sesizareTitle: sez.titlu,
+              message: isUp ? "Cineva a votat ▲ sesizarea ta" : "Cineva a votat ▼ sesizarea ta",
+              createdAt: new Date().toISOString(),
+              read: false,
+            });
+          }
+        );
+
+        // Verifications — on owned sesizari
+        channel.on(
+          "postgres_changes" as never,
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "sesizare_verifications",
+            filter: `sesizare_id=in.(${ownedIds.join(",")})`,
+          },
+          async (payload: { new: { sesizare_id: string; agrees: boolean } }) => {
+            const sez = await lookupSesizare(payload.new.sesizare_id);
+            if (!sez) return;
+            addNotification({
+              id: `vf-${Date.now()}-${Math.random()}`,
+              type: "verify",
+              sesizareCode: sez.code,
+              sesizareTitle: sez.titlu,
+              message: payload.new.agrees
+                ? "Un cetățean a confirmat rezolvarea sesizării tale"
+                : "Un cetățean a contestat rezolvarea sesizării tale",
+              createdAt: new Date().toISOString(),
+              read: false,
+            });
+          }
+        );
+
+        // Moderation status change — on owned sesizari
+        channel.on(
+          "postgres_changes" as never,
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "sesizari",
+            filter: `id=in.(${ownedIds.join(",")})`,
+          },
+          async (payload: { new: { id: string; code: string; titlu: string; moderation_status: string; status: string } }) => {
+            const newMod = payload.new.moderation_status;
+            if (newMod !== "approved" && newMod !== "rejected") return;
+            addNotification({
+              id: `m-${Date.now()}-${Math.random()}`,
+              type: "status",
+              sesizareCode: payload.new.code,
+              sesizareTitle: payload.new.titlu,
+              message:
+                newMod === "approved"
+                  ? "Sesizarea ta a fost aprobată și e acum publică"
+                  : "Sesizarea ta a fost respinsă la moderare",
+              createdAt: new Date().toISOString(),
+              read: false,
+            });
+          }
+        );
+      }
+
+      channel.subscribe();
 
       return () => {
         supabase.removeChannel(channel);

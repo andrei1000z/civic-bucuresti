@@ -6,6 +6,7 @@ import { ALL_COUNTIES } from "@/data/counties";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
+import { DatasetJsonLd } from "@/components/FaqJsonLd";
 
 export const metadata: Metadata = {
   title: "Educație — statistici BAC, licee și învățământ",
@@ -25,6 +26,12 @@ export default function EducatiePage() {
 
   return (
     <div className="container-narrow py-12 md:py-16">
+      <DatasetJsonLd
+        name="Educație România — BAC + top licee"
+        description="Promovabilitate Bacalaureat pe ani, top 10 licee, abandon școlar, context comparativ UE."
+        url="https://civia.ro/educatie"
+        keywords={["educatie", "bac", "licee", "romania", "invatamant"]}
+      />
       <Badge className="mb-4">Educație</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
         <GraduationCap size={40} className="text-[var(--color-primary)]" />

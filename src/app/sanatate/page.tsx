@@ -5,6 +5,7 @@ import { SANATATE_NATIONALA, TOP_SPITALE_PUBLICE } from "@/data/date-publice";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
+import { DatasetJsonLd } from "@/components/FaqJsonLd";
 
 export const metadata: Metadata = {
   title: "Sănătate — sistem medical România",
@@ -20,6 +21,12 @@ export default function SanatatePage() {
 
   return (
     <div className="container-narrow py-12 md:py-16">
+      <DatasetJsonLd
+        name="Sănătate România — statistici sistem medical"
+        description="Speranță viață, mortalitate infantilă, medici per capita, top spitale publice, context UE."
+        url="https://civia.ro/sanatate"
+        keywords={["sanatate", "medicina", "spitale", "romania", "statistici"]}
+      />
       <Badge className="mb-4">Sănătate publică</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
         <Heart size={40} className="text-[var(--color-primary)]" />

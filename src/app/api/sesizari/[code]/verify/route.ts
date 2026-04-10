@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { getSesizareByCode, upsertVerification } from "@/lib/sesizari/repository";
 import { humanizeSupabaseError } from "@/lib/supabase/errors";
+import { invalidateSesizariCache } from "@/lib/cached-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,7 @@ export async function POST(
       agrees: parsed.agrees,
     });
 
+    invalidateSesizariCache();
     return NextResponse.json({ ok: true });
   } catch (e) {
     if (e instanceof z.ZodError) {

@@ -118,9 +118,29 @@ CUNOAȘTERI DOMENIU:
    - Sorin Oprescu (2008-2015, Independent)
    - Istoric complet: /cum-functioneaza#primari
 
-6. **Ghiduri:** cutremur, vară/caniculă, biciclist, transport, sesizări, drepturi cetățean → /ghiduri
+6. **Ghiduri (11 total):**
+   - Cutremur, vară/caniculă, biciclist, transport, sesizări, drepturi cetățean
+   - **Legea 544/2001** — acces informații publice → /ghiduri/ghid-legea-544
+   - **Contestare amendă** — plângere contravențională → /ghiduri/ghid-contestatie-amenda
+   - **Cum înființezi ONG** (asociație) → /ghiduri/ghid-ong
+   - **Ajutoare sociale** — VMI, alocații, indemnizații → /ghiduri/ghid-ajutor-social
+   - **Dezbatere publică L52/2003** → /ghiduri/ghid-dezbatere-publica
+   - Toate la /ghiduri
 
-7. **Alte pagini:** /harti (piste, drumuri, aer), /statistici (accidente, AQI, populație), /stiri (știri locale), /aer (calitate aer live)
+7. **Dashboards de date publice (noi):**
+   - **/impact** — dashboard live: totale sesizări, rezolvate, top votate, top județe active
+   - **/buget** — buget național România: venituri, cheltuieli pe categorii (sănătate 14%, educație 11%), deficit % PIB
+   - **/siguranta** — criminalitate: tipuri de infracțiuni, rata pe județe, trend 2019-2024
+   - **/educatie** — promovabilitate BAC pe ani, top 10 licee naționale, context abandon școlar
+   - **/sanatate** — speranță viață, mortalitate infantilă, top 7 spitale publice
+   - **/calendar-civic** — alegeri viitoare, deadline taxe (31 martie impozit clădire, 25 mai declarație unică), ședințe CGMB, consultări publice
+   - **/compara/[jud1]/[jud2]** — compară două județe side-by-side
+
+8. **Alte pagini:**
+   - /harti (piste, drumuri, aer), /statistici (accidente, AQI, populație), /stiri (știri locale), /aer (calitate aer live)
+   - /accesibilitate — drepturi L448/2006, WCAG 2.1 AA
+   - /dezvoltatori — API public CORS-enabled, licență CC BY 4.0, documentație completă
+   - /api/v1/sesizari + /api/v1/stats — endpoint-uri publice pentru jurnaliști/cercetători
 
 REGULI:
 - Răspunde cu FAPTE, nu cu empatie goală

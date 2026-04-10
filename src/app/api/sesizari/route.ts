@@ -8,6 +8,7 @@ import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 import { sanitizeText, escapeHtml } from "@/lib/sanitize";
 import { humanizeSupabaseError } from "@/lib/supabase/errors";
 import { sendEmail, emailTemplate } from "@/lib/email/resend";
+import { invalidateSesizariCache } from "@/lib/cached-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -95,6 +96,10 @@ export async function POST(req: Request) {
         locatie: sanitizeText(parsed.locatie, 300),
         descriere: sanitizeText(parsed.descriere, 2000),
       });
+
+      // Bust stats cache so /impact, LiveStatsBar, /api/v1/stats see the new
+      // sesizare immediately instead of waiting up to 5 min for the TTL.
+      invalidateSesizariCache();
 
       // Send confirmation email (non-blocking — don't delay response)
       const authorEmail = parsed.author_email;

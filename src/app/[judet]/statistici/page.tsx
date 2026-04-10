@@ -179,10 +179,19 @@ export default async function StatisticiPage({
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-4">
           Date din surse oficiale: INS, DRPCIV, ANPM. Actualizate cu cele mai recente cifre disponibile.
         </p>
-        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[8px] p-3 text-xs text-amber-800 dark:text-amber-300">
-          <strong>Notă:</strong> Datele despre accidente și sesizări per județ sunt estimări proporționale cu populația,
-          bazate pe totaluri naționale DRPCIV 2023. Cifrele exacte pe județ se actualizează când DRPCIV publică detaliile.
-          Populația și suprafețele sunt din Recensământul INS 2021.
+        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[8px] p-4 text-xs text-amber-800 dark:text-amber-300 flex gap-3 items-start">
+          <span className="text-base leading-none">⚠️</span>
+          <div>
+            <strong>Estimări proporționale, nu date reale pe județ.</strong>{" "}
+            Pentru accidente și unele agregate, cifrele sunt calculate proporțional cu populația pornind de la totalurile naționale DRPCIV/INS, pentru că datele detaliate per județ nu sunt publicate în mod deschis.
+            {" "}Datele reale pot diferi. Pentru cifrele oficiale, vezi{" "}
+            <a href="https://www.politiaromana.ro" target="_blank" rel="noopener noreferrer" className="underline font-semibold">politiaromana.ro</a>
+            {", "}
+            <a href="https://insse.ro" target="_blank" rel="noopener noreferrer" className="underline font-semibold">insse.ro</a>
+            {" și "}
+            <a href="https://data.gov.ro" target="_blank" rel="noopener noreferrer" className="underline font-semibold">data.gov.ro</a>.
+            Populația e din Recensământul INS 2021.
+          </div>
         </div>
       </div>
 
