@@ -116,7 +116,7 @@ CUNOAȘTERI DOMENIU:
    - Nicușor Dan (2020-2025, Independent/USR)
    - Gabriela Firea (2016-2020, PSD)
    - Sorin Oprescu (2008-2015, Independent)
-   - Istoric complet: /cum-functioneaza#primari
+   - Istoric complet: /istoric
 
 6. **Ghiduri (11 total):**
    - Cutremur, vară/caniculă, biciclist, transport, sesizări, drepturi cetățean

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 
 export const metadata: Metadata = {
   title: "Ghiduri pentru cetățeni",
-  description: "Ghiduri complete pentru cetățeni: bicicletă, caniculă, cutremur, transport, sesizări.",
+  description: "11 ghiduri practice: Legea 544, contestare amendă, ajutoare sociale, ONG, dezbatere publică, drepturi cetățean, sesizări, bicicletă, cutremur, caniculă, transport.",
   alternates: { canonical: "/ghiduri" },
 };
 

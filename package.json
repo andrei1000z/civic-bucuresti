@@ -9,7 +9,6 @@
     "lint": "eslint",
     "fetch-osm": "tsx scripts/fetch-osm-bucharest.ts",
     "fetch-stiri": "tsx scripts/fetch-stiri.ts",
-    "clean-mock": "tsx scripts/clean-mock-sesizari.ts",
     "migrate": "tsx scripts/migrate.ts",
     "test": "vitest run",
     "test:watch": "vitest",

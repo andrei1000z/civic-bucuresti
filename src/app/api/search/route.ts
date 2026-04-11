@@ -34,8 +34,8 @@ const STATIC_PAGES: SearchResult[] = [
   { type: "page", title: "Urmărește sesizarea", url: "/urmareste", excerpt: "Verifică statusul sesizării tale" },
   { type: "page", title: "Contul tău", url: "/cont", excerpt: "Profil + sesizările tale" },
   { type: "page", title: "Cum funcționează", url: "/cum-functioneaza", excerpt: "Ghid despre administrația publică, CGMB, sesizări" },
-  { type: "page", title: "Primari București", url: "/cum-functioneaza#primari", excerpt: "Toți primarii Capitalei din 1990 până azi" },
-  { type: "page", title: "Structura PMB", url: "/cum-functioneaza#structura", excerpt: "Direcții, companii municipale, organigrama PMB" },
+  { type: "page", title: "Primari București", url: "/istoric", excerpt: "Toți primarii Capitalei din 1990 până azi" },
+  { type: "page", title: "Structura PMB", url: "/cum-functioneaza", excerpt: "Direcții, companii municipale, organigrama PMB" },
   { type: "page", title: "Istoric evenimente", url: "/istoric", excerpt: "Timeline interactiv al evenimentelor majore din România" },
 
   // Dashboards de date publice (noi în P2/P3)

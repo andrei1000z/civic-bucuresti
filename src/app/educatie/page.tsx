@@ -103,7 +103,7 @@ export default function EducatiePage() {
         </h2>
         <div className="space-y-2">
           {TOP_LICEE_2025.map((l) => (
-            <Link key={l.rang} href={`/${countySlug(l.county)}`} className="block">
+            <Link key={l.rang} href={`/${countySlug(l.county)}`} className="block group">
               <Card hover className="flex items-center gap-3 sm:gap-4 py-3">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white font-bold flex items-center justify-center text-sm sm:text-base">
                   {l.rang}
@@ -142,7 +142,7 @@ export default function EducatiePage() {
             </p>
           </Card>
           <Card accentColor="#F59E0B">
-            <h3 className="font-bold mb-2">3% din PIB pentru educație — nerespectat</h3>
+            <h3 className="font-bold mb-2">6% din PIB pentru educație — nerespectat</h3>
             <p className="text-sm text-[var(--color-text-muted)]">
               Legea educației prevede alocarea a minim 6% din PIB pentru educație, dar bugetul
               real e constant sub 3.5%. Cel mai mic procent din UE după Irlanda.

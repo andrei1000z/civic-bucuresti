@@ -10,7 +10,7 @@ const CompozitieCGChart = dynamic(() => import("@/components/charts/IstoricChart
 
 export const metadata: Metadata = {
   title: "Istoric administrație București",
-  description: "Toți primarii Bucureștiului din 1989 până azi: realizări, controverse, proiecte. Interactiv.",
+  description: "Toți primarii Bucureștiului din 1990 până azi: realizări, controverse, proiecte. Interactiv.",
   alternates: { canonical: "/istoric" },
 };
 

@@ -20,7 +20,7 @@ export async function OPTIONS() {
  */
 export async function GET(req: Request) {
   const ip = getClientIp(req);
-  const rl = await rateLimitAsync(`api-v1-stats:${ip}`, { limit: 60, windowMs: 60_000 });
+  const rl = await rateLimitAsync(`api-v1-stats:${ip}`, { limit: 120, windowMs: 60_000 });
   if (!rl.success) {
     return NextResponse.json(
       { error: "rate_limited" },

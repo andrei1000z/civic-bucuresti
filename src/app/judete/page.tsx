@@ -5,7 +5,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
 export const metadata: Metadata = {
   title: "Județele României — Civia",
-  description: "Alege județul tău pentru a depune sesizări, vedea autorități locale și statistici civice. Toate cele 41 de județe + București.",
+  description: "Alege județul tău pentru a depune sesizări, vedea autorități locale și statistici civice. Toate cele 42 de entități administrative ale României.",
   alternates: { canonical: "/judete" },
 };
 

@@ -282,19 +282,18 @@ export default async function ImpactPage() {
               const pct = Math.round((c.count / maxCountyCount) * 100);
               const resolvedPct = c.count > 0 ? Math.round((c.resolved / c.count) * 100) : 0;
               return (
-                <Link key={c.county} href={`/${countySlug(c.county)}/impact`}>
+                <Link key={c.county} href={`/${countySlug(c.county)}/impact`} className="group">
                   <Card hover className="h-full">
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div>
-                        <div className="font-semibold">{countyName(c.county)}</div>
+                        <div className="font-semibold group-hover:text-[var(--color-primary)] transition-colors">
+                          {countyName(c.county)}
+                        </div>
                         <div className="text-xs text-[var(--color-text-muted)]">
                           {c.count} sesizări · {c.resolved} rezolvate ({resolvedPct}%)
                         </div>
-                        <div className="text-[10px] text-[var(--color-primary)] mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          Vezi dashboard →
-                        </div>
                       </div>
-                      <ArrowRight size={18} className="text-[var(--color-text-muted)] mt-1" />
+                      <ArrowRight size={18} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] group-hover:translate-x-0.5 transition-all mt-1" />
                     </div>
                     <div className="h-1.5 bg-[var(--color-bg)] rounded-full overflow-hidden">
                       <div

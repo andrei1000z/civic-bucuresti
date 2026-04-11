@@ -34,7 +34,7 @@ const tabs = [
   { id: "pejos" as const, label: "Pe jos", icon: Footprints, href: "/harti/pejos" },
   { id: "auto" as const, label: "Cu mașina", icon: Car, href: "/harti/cumasina" },
   { id: "transport" as const, label: "Transport", icon: Bus, href: "/harti/transport" },
-  { id: "statistici" as const, label: "Aer", icon: BarChart3, href: "/harti/aer" },
+  { id: "statistici" as const, label: "Aer", icon: BarChart3, href: "/aer" },
 ];
 
 export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}) {
