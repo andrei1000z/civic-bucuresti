@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink, Calendar, User, Tag, Sparkles } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
@@ -18,7 +19,13 @@ const SOURCE_LOGOS: Record<string, string> = {
   "B365.ro": "/images/sources/b365.png",
 };
 
-export const dynamic = "force-dynamic";
+// Stire content is immutable once published, AI summary cached in DB.
+// ISR 10 min is plenty for the rare case a summary gets regenerated.
+export const revalidate = 600;
+export const dynamicParams = true;
+export async function generateStaticParams() {
+  return [];
+}
 
 interface StireRow {
   id: string;
@@ -85,13 +92,29 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { id } = await params;
   const stire = await getStire(id);
+  if (!stire) {
+    return { title: "Știre inexistentă", robots: { index: false, follow: false } };
+  }
+  const title = stire.title;
+  const description = stire.excerpt?.slice(0, 160) ?? `Știre din ${stire.source}`;
   return {
-    title: stire?.title ?? "Știre",
-    description: stire?.excerpt?.slice(0, 160) ?? "",
+    title,
+    description,
+    alternates: { canonical: `${SITE_URL}/stiri/${id}` },
+    authors: stire.author ? [{ name: stire.author }] : undefined,
     openGraph: {
-      title: stire?.title,
-      description: stire?.excerpt?.slice(0, 160),
-      images: stire?.image_url ? [stire.image_url] : undefined,
+      title,
+      description,
+      type: "article",
+      publishedTime: stire.published_at,
+      url: `${SITE_URL}/stiri/${id}`,
+      images: stire.image_url ? [stire.image_url] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: stire.image_url ? [stire.image_url] : undefined,
     },
   };
 }
@@ -127,11 +150,14 @@ export default async function StireDetailPage({
       <div className="mb-8">
         {stire.image_url && (
           <div className="relative h-64 md:h-[420px] rounded-[16px] overflow-hidden mb-6 bg-[var(--color-surface-2)]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={stire.image_url}
               alt={stire.title}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 896px"
+              className="object-cover"
+              priority
+              unoptimized
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             <div className="absolute bottom-6 left-6 right-6">
@@ -238,8 +264,13 @@ export default async function StireDetailPage({
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: sourceColor }}>
                 {SOURCE_LOGOS[stire.source] ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={SOURCE_LOGOS[stire.source]} alt={stire.source} className="w-7 h-7 object-contain" />
+                  <Image
+                    src={SOURCE_LOGOS[stire.source]}
+                    alt={stire.source}
+                    width={28}
+                    height={28}
+                    className="w-7 h-7 object-contain"
+                  />
                 ) : (
                   <span className="text-white font-bold">{stire.source.charAt(0)}</span>
                 )}
@@ -286,8 +317,15 @@ export default async function StireDetailPage({
               >
                 <div className="relative h-32 bg-gradient-to-br from-slate-600 to-slate-800">
                   {r.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={r.image_url} alt="" className="w-full h-full object-cover" />
+                    <Image
+                      src={r.image_url}
+                      alt={r.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover"
+                      unoptimized
+                      loading="lazy"
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <span className="text-4xl font-bold text-white/20">{r.source.charAt(0)}</span>

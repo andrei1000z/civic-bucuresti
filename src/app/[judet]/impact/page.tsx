@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, CheckCircle2, Clock, TrendingUp, MapPin } from "lucide-react";
-import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getCountyBySlug } from "@/data/counties";
 import { SESIZARE_TIPURI, STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { CountUp } from "@/components/home/CountUp";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
+import { getImpactDataCached } from "@/lib/cached-queries";
 
 // On-demand ISR: render when first visitor hits a county, cache 10 min.
 // Avoids 42-county sequential Supabase round-trip at build time.
@@ -34,97 +34,22 @@ export async function generateMetadata({
   };
 }
 
-interface CountyImpactData {
-  total: number;
-  rezolvate: number;
-  inLucru: number;
-  today: number;
-  byType: { tip: string; count: number }[];
-  topVoted: Array<{ code: string; titlu: string; locatie: string; voturi_net: number; status: string }>;
-  latestResolved: Array<{ code: string; titlu: string; locatie: string; resolved_at: string }>;
-  avgResolutionDays: number | null;
-}
+const EMPTY_COUNTY_IMPACT = {
+  total: 0,
+  rezolvate: 0,
+  inLucru: 0,
+  today: 0,
+  byType: [] as Array<{ tip: string; count: number }>,
+  topVoted: [] as Array<{ code: string; titlu: string; locatie: string; voturi_net: number; status: string }>,
+  latestResolved: [] as Array<{ code: string; titlu: string; locatie: string; resolved_at: string }>,
+  avgResolutionDays: null as number | null,
+};
 
-async function getCountyImpact(countyId: string): Promise<CountyImpactData> {
+async function getCountyImpact(countyId: string) {
   try {
-    const admin = createSupabaseAdmin();
-    const todayIso = new Date(Date.now() - 24 * 60 * 60_000).toISOString();
-    const id = countyId.toUpperCase();
-
-    const [total, rezolvate, inLucru, today, byTypeRes, topVotedRes, latestRes, resolvedDates] = await Promise.all([
-      admin.from("sesizari").select("*", { count: "exact", head: true }).eq("moderation_status", "approved").eq("county", id),
-      admin.from("sesizari").select("*", { count: "exact", head: true }).eq("moderation_status", "approved").eq("county", id).eq("status", "rezolvat"),
-      admin.from("sesizari").select("*", { count: "exact", head: true }).eq("moderation_status", "approved").eq("county", id).eq("status", "in-lucru"),
-      admin.from("sesizari").select("*", { count: "exact", head: true }).eq("moderation_status", "approved").eq("county", id).gte("created_at", todayIso),
-      admin.from("sesizari").select("tip").eq("moderation_status", "approved").eq("county", id).limit(5000),
-      admin
-        .from("sesizari_feed")
-        .select("code, titlu, locatie, voturi_net, status")
-        .eq("publica", true)
-        .eq("county", id)
-        .order("voturi_net", { ascending: false })
-        .limit(6),
-      admin
-        .from("sesizari")
-        .select("code, titlu, locatie, resolved_at")
-        .eq("moderation_status", "approved")
-        .eq("county", id)
-        .eq("status", "rezolvat")
-        .not("resolved_at", "is", null)
-        .order("resolved_at", { ascending: false })
-        .limit(6),
-      admin
-        .from("sesizari")
-        .select("created_at, resolved_at")
-        .eq("moderation_status", "approved")
-        .eq("county", id)
-        .eq("status", "rezolvat")
-        .not("resolved_at", "is", null)
-        .limit(200),
-    ]);
-
-    const byTypeMap = new Map<string, number>();
-    for (const r of (byTypeRes.data ?? []) as { tip: string }[]) {
-      byTypeMap.set(r.tip, (byTypeMap.get(r.tip) ?? 0) + 1);
-    }
-    const byType = [...byTypeMap.entries()]
-      .map(([tip, count]) => ({ tip, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 6);
-
-    let avgResolutionDays: number | null = null;
-    const resolved = (resolvedDates.data ?? []) as { created_at: string; resolved_at: string }[];
-    if (resolved.length > 0) {
-      const totalMs = resolved.reduce((acc, r) => {
-        const c = new Date(r.created_at).getTime();
-        const s = new Date(r.resolved_at).getTime();
-        if (isNaN(c) || isNaN(s) || s <= c) return acc;
-        return acc + (s - c);
-      }, 0);
-      avgResolutionDays = Math.round((totalMs / resolved.length) / (1000 * 60 * 60 * 24));
-    }
-
-    return {
-      total: total.count ?? 0,
-      rezolvate: rezolvate.count ?? 0,
-      inLucru: inLucru.count ?? 0,
-      today: today.count ?? 0,
-      byType,
-      topVoted: (topVotedRes.data ?? []) as CountyImpactData["topVoted"],
-      latestResolved: (latestRes.data ?? []) as CountyImpactData["latestResolved"],
-      avgResolutionDays,
-    };
+    return await getImpactDataCached(countyId);
   } catch {
-    return {
-      total: 0,
-      rezolvate: 0,
-      inLucru: 0,
-      today: 0,
-      byType: [],
-      topVoted: [],
-      latestResolved: [],
-      avgResolutionDays: null,
-    };
+    return EMPTY_COUNTY_IMPACT;
   }
 }
 

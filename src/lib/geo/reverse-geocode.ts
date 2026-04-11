@@ -66,6 +66,8 @@ export async function reverseGeocode(lat: number, lng: number): Promise<Geocoded
     const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=ro&zoom=18`;
     const res = await fetch(url, {
       headers: { "User-Agent": "Civia/1.0 (civia.ro)" },
+      // Coordinates resolve to the same address forever — cache 24h at CDN.
+      next: { revalidate: 86400 },
     });
     if (!res.ok) throw new Error(`Nominatim ${res.status}`);
     const data = await res.json();
