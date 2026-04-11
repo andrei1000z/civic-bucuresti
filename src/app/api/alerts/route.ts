@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
-export const revalidate = 300; // 5 minutes
+// 5-minute ISR cache. An EMSC quake in Romania is rare enough that 5 min
+// latency is acceptable; the AlertBanner client polls every 5 min anyway.
+// Route handlers use `revalidate` directly (not `dynamic`) for ISR semantics.
+export const revalidate = 300;
 
 interface AlertPayload {
   id: string;

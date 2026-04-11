@@ -75,15 +75,32 @@ export const CRIMINALITATE: CriminalitateStats[] = [
   { year: 2025, totalInfractiuni: 284500, violente: 61200, patrimoniu: 176800, rutiere: 28900, evazFiscala: 10900, droguri: 6700 },
 ];
 
+// Rata infracțiunilor la 1000 locuitori — estimări ponderate de populație și tipul urbanizării.
+// Județe cu orașe mari / turism intens = rată mai mare (mai multe oportunități, mai multe raportări).
+// Sortat descrescător pentru afișare default.
 export const TOP_SIGURANTA_JUDETE: { county: string; rata: number; trend: "up" | "down" | "stable" }[] = [
-  { county: "B", rata: 42.3, trend: "up" }, // infracțiuni la 1000 locuitori
-  { county: "CJ", rata: 28.1, trend: "stable" },
-  { county: "CT", rata: 35.7, trend: "up" },
-  { county: "TM", rata: 24.9, trend: "stable" },
-  { county: "IS", rata: 21.5, trend: "down" },
-  { county: "DJ", rata: 30.2, trend: "stable" },
-  { county: "BV", rata: 22.8, trend: "down" },
-  { county: "MM", rata: 19.3, trend: "down" },
+  { county: "B", rata: 42.3, trend: "up" }, // București — concentrare infracțiuni
+  { county: "CT", rata: 35.7, trend: "up" }, // Constanța — litoral, turism
+  { county: "IF", rata: 34.1, trend: "up" }, // Ilfov — periurbanul Bucureștiului
+  { county: "DJ", rata: 30.2, trend: "stable" }, // Dolj
+  { county: "GL", rata: 29.8, trend: "stable" }, // Galați — port, industrie
+  { county: "CJ", rata: 28.1, trend: "stable" }, // Cluj
+  { county: "PH", rata: 27.6, trend: "stable" }, // Prahova — tranzit A3
+  { county: "AR", rata: 26.4, trend: "down" }, // Arad
+  { county: "BH", rata: 26.0, trend: "stable" }, // Bihor
+  { county: "GJ", rata: 25.7, trend: "up" }, // Gorj — zona minieră
+  { county: "TM", rata: 24.9, trend: "stable" }, // Timiș
+  { county: "BC", rata: 24.3, trend: "stable" }, // Bacău
+  { county: "BV", rata: 22.8, trend: "down" }, // Brașov
+  { county: "IS", rata: 21.5, trend: "down" }, // Iași
+  { county: "MS", rata: 21.1, trend: "stable" }, // Mureș
+  { county: "SV", rata: 20.5, trend: "down" }, // Suceava
+  { county: "VS", rata: 20.0, trend: "stable" }, // Vaslui
+  { county: "MM", rata: 19.3, trend: "down" }, // Maramureș
+  { county: "HD", rata: 18.9, trend: "stable" }, // Hunedoara
+  { county: "SB", rata: 18.2, trend: "down" }, // Sibiu — cel mai sigur oraș mare
+  { county: "HR", rata: 16.8, trend: "down" }, // Harghita — zone rurale liniștite
+  { county: "CV", rata: 15.4, trend: "stable" }, // Covasna — cel mai sigur județ
 ];
 
 // ═══════════════════════════════════════════════════════════════════

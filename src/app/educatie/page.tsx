@@ -21,6 +21,10 @@ function countyName(id: string): string {
   return ALL_COUNTIES.find((c) => c.id === id)?.name ?? id;
 }
 
+function countySlug(id: string): string {
+  return ALL_COUNTIES.find((c) => c.id === id)?.slug ?? id.toLowerCase();
+}
+
 export default function EducatiePage() {
   const latest = BAC_STATS[BAC_STATS.length - 1];
 
@@ -99,27 +103,29 @@ export default function EducatiePage() {
         </h2>
         <div className="space-y-2">
           {TOP_LICEE_2025.map((l) => (
-            <Card key={l.rang} className="flex items-center gap-3 sm:gap-4 py-3">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white font-bold flex items-center justify-center text-sm sm:text-base">
-                {l.rang}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm sm:text-base leading-tight line-clamp-2 sm:line-clamp-1 sm:truncate">
-                  {l.nume}
+            <Link key={l.rang} href={`/${countySlug(l.county)}`} className="block">
+              <Card hover className="flex items-center gap-3 sm:gap-4 py-3">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white font-bold flex items-center justify-center text-sm sm:text-base">
+                  {l.rang}
                 </div>
-                <div className="text-[11px] sm:text-xs text-[var(--color-text-muted)] mt-0.5 truncate">
-                  {l.oras} · {countyName(l.county)}
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-sm sm:text-base leading-tight line-clamp-2 sm:line-clamp-1 sm:truncate">
+                    {l.nume}
+                  </div>
+                  <div className="text-[11px] sm:text-xs text-[var(--color-text-muted)] mt-0.5 truncate">
+                    {l.oras} · {countyName(l.county)} →
+                  </div>
                 </div>
-              </div>
-              <div className="text-right shrink-0">
-                <div className="font-bold text-emerald-600 text-sm sm:text-base tabular-nums">
-                  {l.promovabilitate.toFixed(1)}%
+                <div className="text-right shrink-0">
+                  <div className="font-bold text-emerald-600 text-sm sm:text-base tabular-nums">
+                    {l.promovabilitate.toFixed(1)}%
+                  </div>
+                  <div className="text-[10px] text-[var(--color-text-muted)] tabular-nums">
+                    {l.mediaAdmitere.toFixed(2)}
+                  </div>
                 </div>
-                <div className="text-[10px] text-[var(--color-text-muted)] tabular-nums">
-                  {l.mediaAdmitere.toFixed(2)}
-                </div>
-              </div>
-            </Card>
+              </Card>
+            </Link>
           ))}
         </div>
       </section>

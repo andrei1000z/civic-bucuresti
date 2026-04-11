@@ -168,13 +168,38 @@ export default async function CountyImpactPage({
       </Link>
 
       <Badge className="mb-4">Dashboard local</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 leading-tight">
         Impact în <span className="text-[var(--color-primary)]">{county.name}</span>
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
         Sesizările depuse de cetățenii din {county.name} prin platforma Civia. Actualizat live.
       </p>
 
+      {/* Empty state — shown when no data at all, skips empty grids below */}
+      {data.total === 0 ? (
+        <Card className="text-center py-16">
+          <div className="text-6xl mb-4 opacity-40">📮</div>
+          <h3 className="text-xl font-bold mb-2">Încă nu sunt sesizări publice în {county.name}</h3>
+          <p className="text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">
+            Fii primul cetățean care semnalează o problemă. Platforma generează automat textul formal și îl trimite la autoritatea competentă.
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link
+              href={`/${county.slug}/sesizari`}
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-[var(--radius-button)] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)]"
+            >
+              Fă o sesizare <ArrowRight size={16} />
+            </Link>
+            <Link
+              href="/impact"
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:bg-[var(--color-surface)] font-medium"
+            >
+              Vezi dashboard-ul național
+            </Link>
+          </div>
+        </Card>
+      ) : (
+      <>
       {/* Big numbers */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
         <Card className="text-center">
@@ -324,25 +349,13 @@ export default async function CountyImpactPage({
         )}
       </div>
 
-      {data.total === 0 && (
-        <Card className="text-center py-12">
-          <div className="text-6xl mb-4 opacity-40">📮</div>
-          <h3 className="text-xl font-bold mb-2">Încă nu sunt sesizări publice în {county.name}</h3>
-          <p className="text-[var(--color-text-muted)] mb-6">Fii primul care semnalează o problemă.</p>
-          <Link
-            href={`/${county.slug}/sesizari`}
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-[var(--radius-button)] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)]"
-          >
-            Fă o sesizare <ArrowRight size={16} />
-          </Link>
-        </Card>
-      )}
-
       <div className="mt-10 text-center">
         <Link href="/impact" className="inline-flex items-center gap-1 text-sm text-[var(--color-primary)] hover:underline font-medium">
           Vezi dashboard-ul național <ArrowRight size={14} />
         </Link>
       </div>
+      </>
+      )}
     </div>
   );
 }

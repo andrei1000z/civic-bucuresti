@@ -123,6 +123,18 @@ export default function BugetPage() {
             max={35}
           />
         </Card>
+        <div className="mt-4 flex flex-wrap gap-2 text-xs">
+          <span className="text-[var(--color-text-muted)] self-center">Vezi detaliat:</span>
+          <Link href="/sanatate" className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors">
+            ❤️ Sănătate
+          </Link>
+          <Link href="/educatie" className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-950/40 transition-colors">
+            🎓 Educație
+          </Link>
+          <Link href="/siguranta" className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-violet-50 dark:bg-violet-950/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-950/40 transition-colors">
+            🛡️ Ordine publică
+          </Link>
+        </div>
       </section>
 
       {/* CONTEXT */}

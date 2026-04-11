@@ -102,7 +102,19 @@ export default async function EvenimentDetailPage({
       ]} />
       {/* Hero */}
       <section className={`relative bg-gradient-to-br ${eveniment.gradient} text-white overflow-hidden`}>
-        <div className="absolute inset-0 bg-grid-pattern opacity-10" />
+        {eveniment.image && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/images/evenimente/${eveniment.image}.webp`}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover opacity-40"
+              loading="eager"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+          </>
+        )}
+        {!eveniment.image && <div className="absolute inset-0 bg-grid-pattern opacity-10" />}
         <div className="container-narrow relative z-10 py-12 md:py-16">
           <Link
             href="/evenimente"

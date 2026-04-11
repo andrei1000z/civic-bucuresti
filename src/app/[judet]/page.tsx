@@ -53,6 +53,7 @@ function aqiLabel(aqi: number): string {
 
 const sections = [
   { path: "/sesizari", icon: AlertCircle, label: "Sesizări", color: "#DC2626" },
+  { path: "/impact", icon: BarChart3, label: "Impact local", color: "#1C4ED8" },
   { path: "/aer", icon: Wind, label: "Calitate aer", color: "#059669" },
   { path: "/harti", icon: MapIcon, label: "Hărți", color: "#2563EB" },
   { path: "/statistici", icon: BarChart3, label: "Statistici", color: "#8B5CF6" },
@@ -260,13 +261,21 @@ export default async function CountyHomePage({
                 Depune o sesizare formală — AI-ul generează textul cu temei legal,
                 detectăm autoritățile, tu doar apeși trimite.
               </p>
-              <Link
-                href={`/${judet}/sesizari`}
-                className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
-              >
-                <AlertCircle size={18} />
-                Fă o sesizare <ArrowRight size={16} />
-              </Link>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <Link
+                  href={`/${judet}/sesizari`}
+                  className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
+                >
+                  <AlertCircle size={18} />
+                  Fă o sesizare <ArrowRight size={16} />
+                </Link>
+                <Link
+                  href={`/compara/${judet}/b`}
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 transition-colors backdrop-blur-sm"
+                >
+                  ⚖️ Compară cu alt județ
+                </Link>
+              </div>
             </div>
           </div>
         </div>

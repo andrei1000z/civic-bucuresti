@@ -165,13 +165,18 @@ export default async function ImpactPage() {
       {/* HERO */}
       <div className="mb-10 md:mb-14">
         <Badge className="mb-4">Dashboard public</Badge>
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 leading-tight">
           Impactul platformei{" "}
           <span className="text-[var(--color-primary)]">Civia</span>
         </h1>
         <p className="text-lg md:text-xl text-[var(--color-text-muted)] max-w-3xl leading-relaxed">
           Fiecare sesizare e un pas către un oraș mai bun. Iată ce s-a schimbat
           datorită cetățenilor care au ales să acționeze.
+        </p>
+        <p className="mt-4 text-xs text-[var(--color-text-muted)] max-w-3xl">
+          Sursa datelor: sesizări trimise direct prin platforma Civia de către cetățeni, agregate automat.
+          Datele sunt publice, anonimizate unde e cazul (conform GDPR) și disponibile și prin API la{" "}
+          <Link href="/dezvoltatori" className="text-[var(--color-primary)] hover:underline">/dezvoltatori</Link>.
         </p>
       </div>
 
@@ -277,13 +282,16 @@ export default async function ImpactPage() {
               const pct = Math.round((c.count / maxCountyCount) * 100);
               const resolvedPct = c.count > 0 ? Math.round((c.resolved / c.count) * 100) : 0;
               return (
-                <Link key={c.county} href={`/${countySlug(c.county)}/sesizari`}>
+                <Link key={c.county} href={`/${countySlug(c.county)}/impact`}>
                   <Card hover className="h-full">
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div>
                         <div className="font-semibold">{countyName(c.county)}</div>
                         <div className="text-xs text-[var(--color-text-muted)]">
                           {c.count} sesizări · {c.resolved} rezolvate ({resolvedPct}%)
+                        </div>
+                        <div className="text-[10px] text-[var(--color-primary)] mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          Vezi dashboard →
                         </div>
                       </div>
                       <ArrowRight size={18} className="text-[var(--color-text-muted)] mt-1" />
@@ -377,12 +385,20 @@ export default async function ImpactPage() {
           Adaugă vocea ta celor {data.total.toLocaleString("ro-RO")} sesizări depuse deja.
           Cu cât mai mulți cetățeni, cu atât mai mare presiunea pentru schimbare.
         </p>
-        <Link
-          href="/#county-picker"
-          className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
-        >
-          Fă o sesizare <ArrowRight size={18} />
-        </Link>
+        <div className="flex flex-wrap gap-3 justify-center">
+          <Link
+            href="/#county-picker"
+            className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
+          >
+            Fă o sesizare <ArrowRight size={18} />
+          </Link>
+          <Link
+            href="/compara"
+            className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 transition-colors backdrop-blur-sm"
+          >
+            ⚖️ Compară județele
+          </Link>
+        </div>
       </section>
     </div>
   );

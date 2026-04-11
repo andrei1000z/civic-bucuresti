@@ -130,5 +130,16 @@ export const getCountyOverviewCached = unstable_cache(
 export function invalidateSesizariCache() {
   // `profile: "max"` enables stale-while-revalidate semantics — visitors keep
   // seeing the previous (fast) value while the next pageview refreshes it.
-  revalidateTag("sesizari-stats", "max");
+  // Wrapped in try-catch because revalidateTag can throw at build time or
+  // in unusual runtime contexts; a cache miss is acceptable, a crashing
+  // mutation route is not.
+  try {
+    revalidateTag("sesizari-stats", "max");
+  } catch (err) {
+    // Intentionally swallowed. Worst case: stats are stale for up to the
+    // TTL window (5 min). The mutation itself already succeeded.
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[cache] invalidateSesizariCache failed:", err);
+    }
+  }
 }
