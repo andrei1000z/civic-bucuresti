@@ -14,7 +14,6 @@ const REDIRECT_EXACT = new Set([
   "/autoritati",
   "/bilete",
   "/istoric",
-  "/cum-functioneaza",
   "/aer",
 ]);
 
@@ -33,6 +32,6 @@ export default function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/autoritati", "/bilete",
-    "/istoric", "/cum-functioneaza", "/aer",
+    "/istoric", "/aer",
   ],
 };

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
   Building2,
@@ -67,10 +66,6 @@ export default async function CountyCumFunctioneazaPage({
   const { judet } = await params;
   const county = getCountyBySlug(judet);
   if (!county) return null;
-
-  if (county.id === "B") {
-    redirect("/cum-functioneaza");
-  }
 
   const stats = getCountyStats(county.id);
 
