@@ -165,7 +165,7 @@ export function Navbar() {
                     : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
                 )}
               >
-                {NAV_MORE.map((link) => (
+                {NAV_MORE.filter((l) => !("countyOnly" in l && l.countyOnly) || countySlug).map((link) => (
                   <Link
                     key={link.href}
                     href={countySlug ? `/${countySlug}${link.href}` : link.href}
@@ -278,7 +278,7 @@ export function Navbar() {
             <div className="px-4 py-1 text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
               Mai mult
             </div>
-            {NAV_MORE.map((link) => (
+            {NAV_MORE.filter((l) => !("countyOnly" in l && l.countyOnly) || countySlug).map((link) => (
               <Link
                 key={link.href}
                 href={countySlug ? `/${countySlug}${link.href}` : link.href}

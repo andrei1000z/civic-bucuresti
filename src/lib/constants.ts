@@ -30,14 +30,19 @@ export const NAV_LINKS = [
   { href: "/evenimente", label: "Evenimente" },
 ] as const;
 
-// "Mai mult" dropdown — secondary routes including new P2/P3 highlights
+// "Mai mult" dropdown — secondary routes.
+// `countyOnly: true` = hidden on the national/homepage dropdown; only appears
+// when the user is inside a county context (prefixed with /{slug}).
+// Bilete, Istoric, Administrația are county-specific (local transport, local
+// mayoral history, local administration) — they make no sense without a
+// county to scope them to.
 export const NAV_MORE = [
   { href: "/impact", label: "Impact Civia", icon: "📊" },
   { href: "/calendar-civic", label: "Calendar civic", icon: "📅" },
   { href: "/aer", label: "Calitate aer", icon: "🌬️" },
-  { href: "/bilete", label: "Bilete & Abonamente", icon: "🎫" },
-  { href: "/istoric", label: "Istoric", icon: "📜" },
-  { href: "/cum-functioneaza", label: "Administrația", icon: "🏛️" },
+  { href: "/bilete", label: "Bilete & Abonamente", icon: "🎫", countyOnly: true },
+  { href: "/istoric", label: "Istoric", icon: "📜", countyOnly: true },
+  { href: "/cum-functioneaza", label: "Administrația", icon: "🏛️", countyOnly: true },
   { href: "/compara", label: "Compară județe", icon: "⚖️" },
 ] as const;
 
