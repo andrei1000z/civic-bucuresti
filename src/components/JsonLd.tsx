@@ -61,3 +61,48 @@ export function WebsiteJsonLd() {
     />
   );
 }
+
+export function NewsArticleJsonLd({
+  headline,
+  description,
+  url,
+  datePublished,
+  author,
+  publisher,
+  image,
+}: {
+  headline: string;
+  description?: string;
+  url: string;
+  datePublished: string;
+  author?: string;
+  publisher?: string;
+  image?: string;
+}) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: headline.slice(0, 110),
+    description: description?.slice(0, 300),
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    url,
+    datePublished,
+    dateModified: datePublished,
+    author: author
+      ? { "@type": "Person", name: author }
+      : { "@type": "Organization", name: publisher || SITE_NAME },
+    publisher: {
+      "@type": "Organization",
+      name: publisher || SITE_NAME,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/apple-icon` },
+    },
+    ...(image ? { image: [image] } : {}),
+    inLanguage: "ro-RO",
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
+    />
+  );
+}

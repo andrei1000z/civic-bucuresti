@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronLeft, CheckCircle2, MapPin, Calendar } from "lucide-react";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { SESIZARE_TIPURI } from "@/lib/constants";
@@ -95,13 +96,23 @@ export default async function SesizariResolvatePage() {
                     >
                       <div className="grid grid-cols-2">
                         <div className="relative h-48">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={s.imagini[0]} alt="Înainte" className="w-full h-full object-cover" />
+                          <Image
+                            src={s.imagini[0]}
+                            alt="Înainte"
+                            fill
+                            sizes="(max-width: 768px) 50vw, 25vw"
+                            className="object-cover"
+                          />
                           <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-red-500 text-white">ÎNAINTE</span>
                         </div>
                         <div className="relative h-48">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={s.resolved_photo_url!} alt="După" className="w-full h-full object-cover" />
+                          <Image
+                            src={s.resolved_photo_url!}
+                            alt="După"
+                            fill
+                            sizes="(max-width: 768px) 50vw, 25vw"
+                            className="object-cover"
+                          />
                           <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500 text-white">DUPĂ</span>
                         </div>
                       </div>

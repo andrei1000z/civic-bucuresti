@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ThumbsUp, MessageSquare, MapPin, Filter, Image as ImgIcon, Loader2, Map as MapIconLucide, List } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ShareButton } from "./ShareButton";
@@ -250,8 +251,7 @@ export function SesizariPublice() {
                     {s.imagini.slice(0, s.resolved_photo_url ? 2 : 3).map((url, i) => (
                       <div key={i} className="relative w-14 h-14 rounded-[8px] bg-[var(--color-surface-2)] overflow-hidden flex items-center justify-center">
                         {url.startsWith("http") ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={url} alt="" className="w-full h-full object-cover" />
+                          <Image src={url} alt="" fill sizes="56px" className="object-cover" />
                         ) : (
                           <ImgIcon size={16} className="text-[var(--color-text-muted)]" />
                         )}
@@ -264,8 +264,7 @@ export function SesizariPublice() {
                     ))}
                     {s.resolved_photo_url && (
                       <div className="relative w-14 h-14 rounded-[8px] overflow-hidden ring-2 ring-emerald-500">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={s.resolved_photo_url} alt="După" className="w-full h-full object-cover" />
+                        <Image src={s.resolved_photo_url} alt="După" fill sizes="56px" className="object-cover" />
                         <span className="absolute bottom-0 inset-x-0 bg-emerald-500/90 text-white text-[8px] font-bold text-center leading-tight py-0.5">
                           AFTER
                         </span>

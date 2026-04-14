@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldAlert, TrendingDown, TrendingUp, Minus, ExternalLink } from "lucide-react";
-import { CRIMINALITATE, TOP_SIGURANTA_JUDETE } from "@/data/date-publice";
+import { CRIMINALITATE, TOP_SIGURANTA_JUDETE, DATE_PUBLICE_SNAPSHOT } from "@/data/date-publice";
 import { ALL_COUNTIES } from "@/data/counties";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
+import { LastUpdated } from "@/components/data/LastUpdated";
 
 export const metadata: Metadata = {
   title: "Siguranță publică & criminalitate — statistici România",
@@ -203,6 +204,11 @@ export default function SigurantaPage() {
           </li>
         </ul>
       </section>
+
+      <LastUpdated
+        date={DATE_PUBLICE_SNAPSHOT.lastUpdated}
+        sources={["Poliția Română", "Ministerul de Interne", "INS"]}
+      />
     </div>
   );
 }

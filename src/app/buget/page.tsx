@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Wallet, TrendingUp, AlertTriangle, ExternalLink, ArrowRight } from "lucide-react";
-import { BUGET_NATIONAL, BUGET_CHELTUIELI_2025 } from "@/data/date-publice";
+import { BUGET_NATIONAL, BUGET_CHELTUIELI_2025, DATE_PUBLICE_SNAPSHOT } from "@/data/date-publice";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
+import { LastUpdated } from "@/components/data/LastUpdated";
 
 export const metadata: Metadata = {
   title: "Buget național România — execuție bugetară",
@@ -233,6 +234,12 @@ export default function BugetPage() {
           Cum obții execuția bugetară detaliată a primăriei tale <ArrowRight size={16} />
         </Link>
       </div>
+
+      <LastUpdated
+        date={DATE_PUBLICE_SNAPSHOT.lastUpdated}
+        sources={["Ministerul Finanțelor", "INS", "BNR"]}
+        note="Cifrele 2026 sunt proiecții din bugetul aprobat decembrie 2025."
+      />
     </div>
   );
 }

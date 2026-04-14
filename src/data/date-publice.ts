@@ -10,6 +10,13 @@
  *   - BOR (Banca Natională) — bnr.ro
  */
 
+// Public snapshot metadata — rendered in page footers via <LastUpdated />.
+// Keep this in sync with the `last updated` line above.
+export const DATE_PUBLICE_SNAPSHOT = {
+  lastUpdated: "2026-04-10",
+  sources: ["INS", "Ministerul Finanțelor", "MEN", "Poliția Română", "BNR"],
+} as const;
+
 // ═══════════════════════════════════════════════════════════════════
 // BUGET NAȚIONAL — execuție bugetară (miliarde lei)
 // ═══════════════════════════════════════════════════════════════════

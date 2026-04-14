@@ -9,6 +9,7 @@ import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
 import { getOrGenerateAiSummary } from "@/lib/stiri/ai-summary";
 import { AiSummary } from "./AiSummary";
+import { NewsArticleJsonLd } from "@/components/JsonLd";
 
 const SOURCE_LOGOS: Record<string, string> = {
   "Digi24": "/images/sources/digi24.png",
@@ -139,6 +140,15 @@ export default async function StireDetailPage({
 
   return (
     <div className="container-narrow py-8 md:py-12 max-w-4xl">
+      <NewsArticleJsonLd
+        headline={stire.title}
+        description={stire.excerpt ?? undefined}
+        url={`${SITE_URL}/stiri/${stire.id}`}
+        datePublished={stire.published_at}
+        author={stire.author ?? undefined}
+        publisher={stire.source}
+        image={stire.image_url ?? undefined}
+      />
       <Link
         href="/stiri"
         className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"

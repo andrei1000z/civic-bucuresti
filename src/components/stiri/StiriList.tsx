@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Search, ArrowRight, ExternalLink, Loader2 } from "lucide-react";
 import { SOURCE_COLORS } from "@/lib/constants";
 import { Badge } from "@/components/ui/Badge";
@@ -178,8 +179,14 @@ export function StiriList() {
                   <div className="absolute top-4 left-4 flex gap-2">
                     <Badge bgColor={SOURCE_COLORS[featured.source] ?? "#64748b"} color="white" className="flex items-center gap-1.5">
                       {SOURCE_LOGOS[featured.source] && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={SOURCE_LOGOS[featured.source]} alt="" className="w-4 h-4 rounded-sm object-contain" />
+                        <Image
+                          src={SOURCE_LOGOS[featured.source]}
+                          alt=""
+                          width={16}
+                          height={16}
+                          className="w-4 h-4 rounded-sm object-contain"
+                          unoptimized
+                        />
                       )}
                       {featured.source}
                     </Badge>
@@ -236,8 +243,14 @@ export function StiriList() {
                   <div className="absolute top-3 left-3">
                     <Badge bgColor={SOURCE_COLORS[stire.source] ?? "#64748b"} color="white" className="flex items-center gap-1.5">
                       {SOURCE_LOGOS[stire.source] && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={SOURCE_LOGOS[stire.source]} alt="" className="w-3.5 h-3.5 rounded-sm object-contain" />
+                        <Image
+                          src={SOURCE_LOGOS[stire.source]}
+                          alt=""
+                          width={14}
+                          height={14}
+                          className="w-3.5 h-3.5 rounded-sm object-contain"
+                          unoptimized
+                        />
                       )}
                       {stire.source}
                     </Badge>

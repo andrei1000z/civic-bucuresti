@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Heart, ExternalLink, ArrowRight, TrendingDown } from "lucide-react";
-import { SANATATE_NATIONALA, TOP_SPITALE_PUBLICE } from "@/data/date-publice";
+import { SANATATE_NATIONALA, TOP_SPITALE_PUBLICE, DATE_PUBLICE_SNAPSHOT } from "@/data/date-publice";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
+import { LastUpdated } from "@/components/data/LastUpdated";
 
 export const metadata: Metadata = {
   title: "Sănătate — sistem medical România",
@@ -193,6 +194,11 @@ export default function SanatatePage() {
           Vezi și statistici despre educație <ArrowRight size={16} />
         </Link>
       </div>
+
+      <LastUpdated
+        date={DATE_PUBLICE_SNAPSHOT.lastUpdated}
+        sources={["INS", "OMS", "Ministerul Sănătății"]}
+      />
     </div>
   );
 }

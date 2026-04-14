@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { GraduationCap, ArrowRight, ExternalLink, TrendingUp } from "lucide-react";
-import { BAC_STATS, TOP_LICEE_2025 } from "@/data/date-publice";
+import { BAC_STATS, TOP_LICEE_2025, DATE_PUBLICE_SNAPSHOT } from "@/data/date-publice";
 import { ALL_COUNTIES } from "@/data/counties";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
+import { LastUpdated } from "@/components/data/LastUpdated";
 
 export const metadata: Metadata = {
   title: "Educație — statistici BAC, licee și învățământ",
@@ -195,6 +196,11 @@ export default function EducatiePage() {
           Vezi și statistici despre sănătate <ArrowRight size={16} />
         </Link>
       </div>
+
+      <LastUpdated
+        date={DATE_PUBLICE_SNAPSHOT.lastUpdated}
+        sources={["Ministerul Educației", "INS", "edu.ro"]}
+      />
     </div>
   );
 }
