@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, Users, Newspaper, Shield } from "lucide-react";
+import { FileText, Users, Newspaper, Shield, BarChart3 } from "lucide-react";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -50,6 +50,16 @@ export default async function AdminDashboard() {
             <div>
               <p className="font-medium text-sm">Moderare sesizări</p>
               <p className="text-xs text-[var(--color-text-muted)]">{pending.count ?? 0} în așteptare</p>
+            </div>
+          </Link>
+          <Link
+            href="/admin/analytics"
+            className="flex items-center gap-3 p-4 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors"
+          >
+            <BarChart3 size={20} className="text-blue-500" />
+            <div>
+              <p className="font-medium text-sm">Analytics live</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Trafic, device, țări, erori</p>
             </div>
           </Link>
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}

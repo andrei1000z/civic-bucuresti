@@ -1,0 +1,453 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import {
+  Activity, Users, Eye, Gauge, Globe2, MapPin, Smartphone, Monitor,
+  Link2, TrendingUp, Clock, AlertTriangle, RefreshCw,
+} from "lucide-react";
+
+interface Summary {
+  ok: boolean;
+  total: Record<string, string | number>;
+  routes: Record<string, string | number>;
+  referrers: Record<string, string | number>;
+  countries: Record<string, string | number>;
+  cities: Record<string, string | number>;
+  languages: Record<string, string | number>;
+  hourly: Record<string, string | number>;
+  errors: Record<string, string | number>;
+  eventsTotal: Record<string, string | number>;
+  scrollDepth: Record<string, string | number>;
+  utmSource: Record<string, string | number>;
+  utmMedium: Record<string, string | number>;
+  utmCampaign: Record<string, string | number>;
+  landingPages: Record<string, string | number>;
+  today: { dau: number };
+  yesterday: { dau: number };
+  wau: number;
+  mau: number;
+  stickiness: number;
+  topUsers: { id: string; views: number }[];
+  eventsStream: { t: number; type: string; pathname?: string; country?: string; city?: string; device?: string; referrer?: string; userId?: string | null }[];
+  perf: { avgLoadTime: number; avgTimeOnPage: number };
+  serverTime: number;
+}
+
+const COUNTRY_FLAGS: Record<string, string> = {
+  RO: "🇷🇴", MD: "🇲🇩", US: "🇺🇸", GB: "🇬🇧", DE: "🇩🇪", FR: "🇫🇷",
+  IT: "🇮🇹", ES: "🇪🇸", NL: "🇳🇱", AT: "🇦🇹", CH: "🇨🇭", BE: "🇧🇪",
+  IE: "🇮🇪", PT: "🇵🇹", SE: "🇸🇪", NO: "🇳🇴", DK: "🇩🇰", FI: "🇫🇮",
+  PL: "🇵🇱", CZ: "🇨🇿", HU: "🇭🇺", BG: "🇧🇬", GR: "🇬🇷", TR: "🇹🇷",
+};
+
+function toNum(v: string | number | undefined): number {
+  if (typeof v === "number") return v;
+  if (typeof v === "string") return parseInt(v) || 0;
+  return 0;
+}
+
+function sum(rec: Record<string, string | number>): number {
+  return Object.values(rec).reduce<number>((s, v) => s + toNum(v), 0);
+}
+
+function fmt(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}
+
+function timeAgo(ts: number): string {
+  const s = Math.round((Date.now() - ts) / 1000);
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${Math.round(s / 60)}m`;
+  if (s < 86400) return `${Math.round(s / 3600)}h`;
+  return `${Math.round(s / 86400)}d`;
+}
+
+function StatCard({
+  icon: Icon, label, value, sub, accent = "#2563EB",
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string | number;
+  sub?: string;
+  accent?: string;
+}) {
+  return (
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+      <Icon size={18} style={{ color: accent }} className="mb-2" />
+      <p className="text-3xl font-bold" style={{ color: accent }}>{value}</p>
+      <p className="text-xs text-[var(--color-text-muted)] mt-1">{label}</p>
+      {sub && <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5">{sub}</p>}
+    </div>
+  );
+}
+
+function BreakdownList({
+  title, icon: Icon, data, max = 12, labelFn,
+}: {
+  title: string;
+  icon: React.ElementType;
+  data: Record<string, string | number>;
+  max?: number;
+  labelFn?: (k: string) => string;
+}) {
+  const entries = Object.entries(data || {})
+    .map(([k, v]) => [k, toNum(v)] as [string, number])
+    .filter(([, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, max);
+  const total = entries.reduce((s, [, v]) => s + v, 0) || 1;
+  return (
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Icon size={16} className="text-[var(--color-text-muted)]" />
+        <h3 className="font-semibold text-sm">{title}</h3>
+      </div>
+      {entries.length === 0 ? (
+        <p className="text-xs text-[var(--color-text-muted)]">Fără date</p>
+      ) : (
+        <div className="space-y-2">
+          {entries.map(([k, v]) => {
+            const pct = Math.round((v / total) * 100);
+            return (
+              <div key={k}>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="truncate pr-2">{labelFn ? labelFn(k) : k}</span>
+                  <span className="text-[var(--color-text-muted)] tabular-nums">
+                    {fmt(v)} · {pct}%
+                  </span>
+                </div>
+                <div className="h-1.5 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
+                  <div className="h-full bg-[var(--color-primary)]" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HourlyChart({ data }: { data: Record<string, string | number> }) {
+  // Build last 24 hourly buckets
+  const now = new Date();
+  const buckets: { label: string; value: number }[] = [];
+  for (let i = 23; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 3600_000);
+    const key = `${d.toISOString().slice(0, 13).replace("T", " ")}`;
+    buckets.push({ label: `${d.getUTCHours().toString().padStart(2, "0")}`, value: toNum(data[key]) });
+  }
+  const max = Math.max(1, ...buckets.map((b) => b.value));
+  return (
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Clock size={16} className="text-[var(--color-text-muted)]" />
+        <h3 className="font-semibold text-sm">Vizualizări · ultimele 24h (UTC)</h3>
+      </div>
+      <div className="flex items-end gap-1 h-32">
+        {buckets.map((b, i) => (
+          <div key={i} className="flex-1 flex flex-col items-center justify-end" title={`${b.label}:00 — ${b.value}`}>
+            <div
+              className="w-full bg-[var(--color-primary)] rounded-t-sm transition-all"
+              style={{ height: `${Math.max(2, (b.value / max) * 100)}%`, opacity: b.value > 0 ? 1 : 0.2 }}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-between text-[10px] text-[var(--color-text-muted)] mt-1 tabular-nums">
+        <span>{buckets[0]?.label}</span>
+        <span>{buckets[12]?.label}</span>
+        <span>{buckets[23]?.label}</span>
+      </div>
+    </div>
+  );
+}
+
+function DeviceBreakdown({ total }: { total: Record<string, string | number> }) {
+  const device = {
+    mobile: toNum(total.device_mobile),
+    desktop: toNum(total.device_desktop),
+    tablet: toNum(total.device_tablet),
+  };
+  const browser: Record<string, number> = {};
+  const os: Record<string, number> = {};
+  for (const [k, v] of Object.entries(total)) {
+    if (k.startsWith("browser_")) browser[k.slice(8)] = toNum(v);
+    if (k.startsWith("os_")) os[k.slice(3)] = toNum(v);
+  }
+  const sumDev = device.mobile + device.desktop + device.tablet || 1;
+  return (
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Smartphone size={16} className="text-[var(--color-text-muted)]" />
+        <h3 className="font-semibold text-sm">Device · Browser · OS</h3>
+      </div>
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        {(["mobile", "desktop", "tablet"] as const).map((k) => (
+          <div key={k} className="text-center p-2 bg-[var(--color-surface-2)] rounded-[8px]">
+            <p className="text-xl font-bold">{Math.round((device[k] / sumDev) * 100)}%</p>
+            <p className="text-[10px] text-[var(--color-text-muted)] capitalize">{k}</p>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-3 text-xs">
+        <div>
+          <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] mb-1">Browsere</p>
+          {Object.entries(browser).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, v]) => (
+            <div key={k} className="flex justify-between">
+              <span className="capitalize">{k}</span>
+              <span className="text-[var(--color-text-muted)] tabular-nums">{fmt(v)}</span>
+            </div>
+          ))}
+        </div>
+        <div>
+          <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] mb-1">Sisteme</p>
+          {Object.entries(os).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, v]) => (
+            <div key={k} className="flex justify-between">
+              <span className="capitalize">{k}</span>
+              <span className="text-[var(--color-text-muted)] tabular-nums">{fmt(v)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AnalyticsDashboard() {
+  const [data, setData] = useState<Summary | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [lastFetch, setLastFetch] = useState<number>(0);
+
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch("/api/analytics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "summary" }),
+      });
+      if (!res.ok) {
+        setError(`HTTP ${res.status}`);
+        setLoading(false);
+        return;
+      }
+      const json = (await res.json()) as Summary;
+      setData(json);
+      setError(null);
+      setLastFetch(Date.now());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "unknown");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+    const i = setInterval(load, 5000);
+    return () => clearInterval(i);
+  }, [load]);
+
+  if (loading && !data) {
+    return (
+      <div className="py-12 text-center text-[var(--color-text-muted)]">
+        <RefreshCw size={20} className="animate-spin mx-auto mb-2" />
+        Se încarcă analytics...
+      </div>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <div className="py-12 text-center">
+        <AlertTriangle size={24} className="mx-auto mb-2 text-red-500" />
+        <p className="text-sm text-[var(--color-text-muted)]">{error}</p>
+        <button
+          onClick={load}
+          className="mt-4 px-4 py-2 rounded-[8px] bg-[var(--color-primary)] text-white text-sm"
+        >
+          Reîncearcă
+        </button>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  const views = toNum(data.total.views);
+  const dauDelta = data.today.dau - data.yesterday.dau;
+  const errorCount = sum(data.errors);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold">📊 Analytics</h2>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+            Actualizare la 5 sec · ultima: {lastFetch ? new Date(lastFetch).toLocaleTimeString() : "-"}
+          </p>
+        </div>
+        <button
+          onClick={load}
+          className="flex items-center gap-2 px-3 py-2 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] text-xs"
+        >
+          <RefreshCw size={14} />
+          Refresh
+        </button>
+      </div>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard
+          icon={Users}
+          label="DAU (azi)"
+          value={fmt(data.today.dau)}
+          sub={`ieri: ${data.yesterday.dau} (${dauDelta >= 0 ? "+" : ""}${dauDelta})`}
+          accent="#2563EB"
+        />
+        <StatCard icon={Activity} label="WAU" value={fmt(data.wau)} accent="#8B5CF6" />
+        <StatCard
+          icon={TrendingUp}
+          label="MAU"
+          value={fmt(data.mau)}
+          sub={`stickiness: ${data.stickiness}%`}
+          accent="#059669"
+        />
+        <StatCard icon={Eye} label="Vizualizări totale" value={fmt(views)} accent="#F59E0B" />
+        <StatCard
+          icon={Gauge}
+          label="Load time mediu"
+          value={`${data.perf.avgLoadTime}ms`}
+          accent="#0891B2"
+        />
+        <StatCard
+          icon={Clock}
+          label="Timp pe pagină"
+          value={`${Math.round(data.perf.avgTimeOnPage / 1000)}s`}
+          accent="#DB2777"
+        />
+        <StatCard
+          icon={AlertTriangle}
+          label="Erori JS"
+          value={fmt(errorCount)}
+          accent={errorCount > 0 ? "#DC2626" : "#6B7280"}
+        />
+        <StatCard
+          icon={Link2}
+          label="Custom events"
+          value={fmt(sum(data.eventsTotal))}
+          accent="#7C3AED"
+        />
+      </div>
+
+      {/* Hourly chart */}
+      <HourlyChart data={data.hourly} />
+
+      {/* Breakdown grids */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <BreakdownList
+          title="Țări"
+          icon={Globe2}
+          data={data.countries}
+          labelFn={(k) => `${COUNTRY_FLAGS[k] || "🌐"} ${k}`}
+        />
+        <BreakdownList title="Orașe" icon={MapPin} data={data.cities} />
+        <BreakdownList title="Top pagini" icon={Eye} data={data.routes} max={15} />
+        <BreakdownList title="Surse trafic" icon={Link2} data={data.referrers} max={15} />
+        <BreakdownList title="Landing pages" icon={TrendingUp} data={data.landingPages} max={10} />
+        <BreakdownList title="Limbi browser" icon={Globe2} data={data.languages} />
+        <DeviceBreakdown total={data.total} />
+        <BreakdownList title="Scroll depth %" icon={Monitor} data={data.scrollDepth} />
+      </div>
+
+      {/* UTM */}
+      {(sum(data.utmSource) > 0 || sum(data.utmCampaign) > 0) && (
+        <div className="grid md:grid-cols-3 gap-4">
+          <BreakdownList title="UTM source" icon={Link2} data={data.utmSource} />
+          <BreakdownList title="UTM medium" icon={Link2} data={data.utmMedium} />
+          <BreakdownList title="UTM campaign" icon={Link2} data={data.utmCampaign} />
+        </div>
+      )}
+
+      {/* Errors */}
+      {errorCount > 0 && (
+        <div className="bg-[var(--color-surface)] border border-red-500/30 rounded-[12px] p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <AlertTriangle size={16} className="text-red-500" />
+            <h3 className="font-semibold text-sm">Erori JavaScript</h3>
+          </div>
+          <div className="space-y-1 text-xs font-mono">
+            {Object.entries(data.errors)
+              .sort((a, b) => toNum(b[1]) - toNum(a[1]))
+              .slice(0, 10)
+              .map(([err, n]) => (
+                <div key={err} className="flex justify-between gap-4 py-1 border-b border-[var(--color-border)] last:border-0">
+                  <span className="truncate text-red-500">{err}</span>
+                  <span className="text-[var(--color-text-muted)] shrink-0 tabular-nums">{toNum(n)}×</span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Custom events */}
+      {sum(data.eventsTotal) > 0 && (
+        <BreakdownList title="Custom events" icon={Activity} data={data.eventsTotal} max={20} />
+      )}
+
+      {/* Real-time feed */}
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <Activity size={16} className="text-[var(--color-text-muted)]" />
+          <h3 className="font-semibold text-sm">Live feed · ultimele 50 evenimente</h3>
+          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-1" />
+        </div>
+        <div className="space-y-1 text-xs font-mono max-h-96 overflow-y-auto">
+          {data.eventsStream.length === 0 && (
+            <p className="text-[var(--color-text-muted)]">Fără evenimente recente</p>
+          )}
+          {data.eventsStream.map((e, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-2 py-1 border-b border-[var(--color-border)] last:border-0"
+            >
+              <span className="text-[var(--color-text-muted)] w-10 shrink-0 tabular-nums">{timeAgo(e.t)}</span>
+              <span className="shrink-0">{COUNTRY_FLAGS[e.country || ""] || "🌐"}</span>
+              <span className="shrink-0 text-[10px] uppercase tracking-wider px-1.5 py-0.5 bg-[var(--color-surface-2)] rounded">
+                {e.type}
+              </span>
+              <span className="truncate text-[var(--color-text)]">{e.pathname || e.type}</span>
+              {e.referrer && e.referrer !== "direct" && (
+                <span className="text-[var(--color-text-muted)] truncate shrink-0">← {e.referrer}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Top users */}
+      {data.topUsers.length > 0 && (
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Users size={16} className="text-[var(--color-text-muted)]" />
+            <h3 className="font-semibold text-sm">Top utilizatori (după vizualizări)</h3>
+          </div>
+          <div className="space-y-1 text-xs">
+            {data.topUsers.map((u, i) => (
+              <div key={u.id} className="flex justify-between py-1 border-b border-[var(--color-border)] last:border-0">
+                <span className="font-mono truncate">
+                  {i + 1}. {u.id.slice(0, 8)}...
+                </span>
+                <span className="text-[var(--color-text-muted)] tabular-nums">{fmt(u.views)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
