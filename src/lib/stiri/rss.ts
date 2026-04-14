@@ -82,11 +82,11 @@ function extractImage(item: { content?: string; enclosure?: { url?: string }; [k
   // Try to extract from content HTML
   const content = (item.content || "") as string;
   const match = content.match(/<img[^>]+src=["']([^"']+)["']/);
-  if (match) return match[1];
+  if (match && match[1]) return match[1];
   // Try og:image from description HTML
   const desc = (item["content:encoded"] || item.content || "") as string;
   const ogMatch = desc.match(/og:image[^>]+content=["']([^"']+)["']/);
-  if (ogMatch) return ogMatch[1];
+  if (ogMatch && ogMatch[1]) return ogMatch[1];
   return null;
 }
 

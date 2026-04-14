@@ -55,7 +55,7 @@ export function stripForPreview(formalText: string): string {
 
   // Fallback: skip first 2 paragraphs, show the rest
   const paragraphs = formalText.split(/\n\n+/);
-  if (paragraphs.length > 2) {
+  if (paragraphs.length > 2 && paragraphs[2]) {
     return paragraphs[2].replace(/\n+/g, " ").trim();
   }
 

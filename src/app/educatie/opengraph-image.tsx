@@ -8,7 +8,7 @@ export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 
 export default function EducatieOG() {
-  const latest = BAC_STATS[BAC_STATS.length - 1];
+  const latest = BAC_STATS[BAC_STATS.length - 1]!;
   return new ImageResponse(
     buildOgCard({
       badge: "Învățământ",

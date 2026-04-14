@@ -83,8 +83,8 @@ function buildMonthly(total: number): MonthlyValue[] {
   const distributed = MONTHLY_WEIGHTS.map((w) => Math.round(total * w));
   // Adjust last month so sum equals total exactly
   const diff = total - distributed.reduce((a, b) => a + b, 0);
-  distributed[11] += diff;
-  return MONTHS.map((month, i) => ({ month, value: distributed[i] }));
+  distributed[11] = (distributed[11] ?? 0) + diff;
+  return MONTHS.map((month, i) => ({ month: month ?? "", value: distributed[i] ?? 0 }));
 }
 
 // AQI quality label
@@ -115,7 +115,7 @@ function buildSesizariTipuri(total: number): SesizareTip[] {
   }));
   // Fix rounding
   const diff = total - items.reduce((a, b) => a + b.value, 0);
-  items[5].value += diff;
+  if (items[5]) items[5].value += diff;
   return items;
 }
 
@@ -1168,7 +1168,8 @@ export function getCountyStats(countyId: string): CountyStats {
   if (!COUNTY_DATA[key]) {
     console.warn(`[getCountyStats] Unknown county ID "${countyId}", falling back to București`);
   }
-  return COUNTY_DATA[key] ?? COUNTY_DATA["B"];
+  // "B" is always present in COUNTY_DATA — safe fallback.
+  return COUNTY_DATA[key] ?? COUNTY_DATA["B"]!;
 }
 
 /**

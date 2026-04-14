@@ -151,7 +151,7 @@ export default async function StatisticiPage({
     { grade: "A", color: "#059669", label: "Foarte bun" },
     { grade: "A+", color: "#059669", label: "Excelent" },
   ];
-  const gradeInfo = grades[Math.min(gradeScore, grades.length - 1)];
+  const gradeInfo = grades[Math.min(gradeScore, grades.length - 1)]!;
 
   // Neighbors data
   const neighbors = stats.judeteVecine ?? [];

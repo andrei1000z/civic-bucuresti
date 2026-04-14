@@ -211,7 +211,7 @@ export function CommandPalette() {
       else if (e.key === "ArrowUp" && results.length > 0) { e.preventDefault(); setActiveIdx((i) => (i - 1 + results.length) % results.length); }
       else if (e.key === "Enter") {
         e.preventDefault();
-        if (results.length > 0 && !e.shiftKey) handleSelect(results[activeIdx].url);
+        if (results.length > 0 && !e.shiftKey && results[activeIdx]) handleSelect(results[activeIdx]!.url);
         else if (query.length >= 3) askAI();
       }
     };
@@ -274,7 +274,7 @@ export function CommandPalette() {
               {results.length > 0 && !loading && (
                 <ul className="py-1">
                   {results.map((r, i) => {
-                    const Icon = TYPE_ICON[r.type];
+                    const Icon: React.ElementType = TYPE_ICON[r.type] ?? Hash;
                     return (
                       <li key={`${r.type}-${r.url}-${i}`}>
                         <button

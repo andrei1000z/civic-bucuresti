@@ -8,7 +8,7 @@ export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 
 export default function BugetOG() {
-  const latest = BUGET_NATIONAL[BUGET_NATIONAL.length - 1];
+  const latest = BUGET_NATIONAL[BUGET_NATIONAL.length - 1]!;
   return new ImageResponse(
     buildOgCard({
       badge: "Transparență fiscală",

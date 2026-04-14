@@ -82,10 +82,10 @@ export function rateLimit(
 export function getClientIp(req: Request): string {
   // Prefer Vercel-injected header (not spoofable from client).
   const vercelFwd = req.headers.get("x-vercel-forwarded-for");
-  if (vercelFwd) return vercelFwd.split(",")[0].trim();
+  if (vercelFwd) return vercelFwd.split(",")[0]?.trim() || "unknown";
   const real = req.headers.get("x-real-ip");
   if (real) return real;
   const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim() || "unknown";
+  if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
   return "unknown";
 }

@@ -45,8 +45,31 @@ async function compressImage(file: File): Promise<File> {
   });
 }
 
+// XHR upload that reports real transfer progress.
+function uploadWithProgress(
+  fd: FormData,
+  onProgress: (pct: number) => void,
+): Promise<{ ok: boolean; status: number; body: unknown }> {
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/upload");
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      let body: unknown;
+      try { body = JSON.parse(xhr.responseText); } catch { body = { error: `HTTP ${xhr.status}` }; }
+      resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, body });
+    };
+    xhr.onerror = () => resolve({ ok: false, status: 0, body: { error: "Eroare rețea" } });
+    xhr.send(fd);
+  });
+}
+
 export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -57,25 +80,27 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
     if (toUpload.length === 0) return;
     setUploading(true);
     setError(null);
+    setProgress(0);
+    setProcessing(true);
     try {
       const compressed = await Promise.all(toUpload.map(compressImage));
       for (const f of compressed) {
         if (f.size > MAX_BYTES) throw new Error(`"${f.name}" e prea mare (max 5MB).`);
       }
+      setProcessing(false);
       const fd = new FormData();
       compressed.forEach((f) => fd.append("files", f));
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const text = await res.text();
-      let json;
-      try { json = JSON.parse(text); } catch {
-        throw new Error(`Eroare server (${res.status}).`);
-      }
-      if (!res.ok) throw new Error(json.error || "Upload failed");
-      onChange([...urls, ...(json.data.urls as string[])]);
+      const res = await uploadWithProgress(fd, setProgress);
+      const json = res.body as { error?: string; data?: { urls?: string[] } };
+      if (!res.ok) throw new Error(json?.error || `Eroare server (${res.status}).`);
+      const uploaded = json?.data?.urls ?? [];
+      onChange([...urls, ...uploaded]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Eroare la upload");
     } finally {
       setUploading(false);
+      setProgress(0);
+      setProcessing(false);
     }
   }, [urls, max, onChange]);
 
@@ -135,10 +160,22 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
           } text-sm text-[var(--color-text-muted)]`}
         >
           {uploading ? (
-            <>
-              <Loader2 size={18} className="animate-spin" />
-              <span>Se încarcă...</span>
-            </>
+            <div className="flex flex-col items-center gap-2 w-full px-6">
+              <div className="flex items-center gap-2">
+                <Loader2 size={16} className="animate-spin" />
+                <span className="text-xs tabular-nums">
+                  {processing ? "Se procesează imaginea..." : `Se încarcă... ${progress}%`}
+                </span>
+              </div>
+              {!processing && (
+                <div className="w-full h-1.5 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[var(--color-primary)] transition-all"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <Upload size={18} />

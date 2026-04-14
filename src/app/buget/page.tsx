@@ -18,8 +18,10 @@ export const metadata: Metadata = {
 export const revalidate = 604800; // 1 week — static dataset
 
 export default function BugetPage() {
-  const latest = BUGET_NATIONAL[BUGET_NATIONAL.length - 1];
-  const prev = BUGET_NATIONAL[BUGET_NATIONAL.length - 2];
+  // BUGET_NATIONAL is a hardcoded, non-empty dataset — assertions are safe
+  // and document the invariant under noUncheckedIndexedAccess.
+  const latest = BUGET_NATIONAL[BUGET_NATIONAL.length - 1]!;
+  const prev = BUGET_NATIONAL[BUGET_NATIONAL.length - 2]!;
   const deficitTrend = latest.deficitProcPib - prev.deficitProcPib;
 
   return (

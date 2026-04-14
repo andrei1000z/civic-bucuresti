@@ -97,7 +97,7 @@ export default async function SesizariResolvatePage() {
                       <div className="grid grid-cols-2">
                         <div className="relative h-48">
                           <Image
-                            src={s.imagini[0]}
+                            src={s.imagini[0] ?? ""}
                             alt="Înainte"
                             fill
                             sizes="(max-width: 768px) 50vw, 25vw"

@@ -27,7 +27,7 @@ function countySlug(id: string): string {
 }
 
 export default function EducatiePage() {
-  const latest = BAC_STATS[BAC_STATS.length - 1];
+  const latest = BAC_STATS[BAC_STATS.length - 1]!;
 
   return (
     <div className="container-narrow py-12 md:py-16">

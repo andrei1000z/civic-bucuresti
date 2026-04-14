@@ -26,8 +26,11 @@ interface Props { sensors: UnifiedSensor[]; }
 function pointInRing(lat: number, lng: number, ring: number[][]): boolean {
   let inside = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const [xi, yi] = ring[i];
-    const [xj, yj] = ring[j];
+    const pi = ring[i];
+    const pj = ring[j];
+    if (!pi || !pj) continue;
+    const [xi, yi] = pi as [number, number];
+    const [xj, yj] = pj as [number, number];
     if (yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi)
       inside = !inside;
   }
@@ -140,10 +143,10 @@ export function AirHeatGrid({ sensors }: Props) {
         const bd = bCtx.getImageData(0, 0, GRID, GRID).data;
         const clean = bCtx.createImageData(GRID, GRID);
         for (let i = 0; i < GRID * GRID; i++) {
-          clean.data[i * 4] = bd[i * 4];
-          clean.data[i * 4 + 1] = bd[i * 4 + 1];
-          clean.data[i * 4 + 2] = bd[i * 4 + 2];
-          clean.data[i * 4 + 3] = mask[i] ? bd[i * 4 + 3] : 0;
+          clean.data[i * 4] = bd[i * 4] ?? 0;
+          clean.data[i * 4 + 1] = bd[i * 4 + 1] ?? 0;
+          clean.data[i * 4 + 2] = bd[i * 4 + 2] ?? 0;
+          clean.data[i * 4 + 3] = mask[i] ? (bd[i * 4 + 3] ?? 0) : 0;
         }
         bCtx.putImageData(clean, 0, 0);
         setImageUrl(blurred.toDataURL());

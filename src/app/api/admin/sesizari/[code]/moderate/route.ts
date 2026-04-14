@@ -4,8 +4,11 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
 import { invalidateSesizariCache } from "@/lib/cached-queries";
+import { sendEmail, emailTemplate } from "@/lib/email/resend";
 
 export const dynamic = "force-dynamic";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://civia.ro";
 
 const schema = z.object({
   action: z.enum(["approve", "reject"]),
@@ -49,5 +52,37 @@ export async function POST(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   invalidateSesizariCache();
+
+  // Best-effort: email the author with the moderation outcome. Silent if
+  // Resend isn't configured or the sesizare has no contact email.
+  const recipient = sesizare.author_email;
+  if (recipient) {
+    const approved = parsed.data.action === "approve";
+    const sesizareUrl = `${SITE_URL}/sesizari/${sesizare.code}`;
+    const trackUrl = `${SITE_URL}/urmareste?code=${sesizare.code}`;
+    const body = approved
+      ? `<p>Bună,</p>
+         <p>Sesizarea ta <strong>${sesizare.code}</strong> a fost aprobată și este acum vizibilă public pe Civia.</p>
+         <p><strong>${sesizare.titlu}</strong></p>
+         <p>Poți urmări statusul, votul comunității și comentariile oricând.</p>`
+      : `<p>Bună,</p>
+         <p>Sesizarea ta <strong>${sesizare.code}</strong> a fost respinsă de moderare.</p>
+         <p><strong>${sesizare.titlu}</strong></p>
+         <p>Motive frecvente: limbaj inadecvat, conținut duplicat, date personale sensibile sau informații insuficiente. Poți trimite o sesizare nouă cu detalii clare.</p>`;
+    await sendEmail({
+      to: recipient,
+      subject: approved
+        ? `Sesizarea ${sesizare.code} a fost aprobată · Civia`
+        : `Sesizarea ${sesizare.code} a fost respinsă · Civia`,
+      html: emailTemplate({
+        title: approved ? "Sesizare aprobată" : "Sesizare respinsă",
+        preheader: sesizare.titlu,
+        body,
+        ctaText: approved ? "Vezi sesizarea" : "Urmărește codul",
+        ctaUrl: approved ? sesizareUrl : trackUrl,
+      }),
+    });
+  }
+
   return NextResponse.json({ ok: true });
 }

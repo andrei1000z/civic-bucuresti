@@ -62,8 +62,11 @@ function aqiColor(aqi: number): string {
 function pointInRing(lat: number, lng: number, ring: number[][]): boolean {
   let inside = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const [xi, yi] = ring[i]; // [lng, lat]
-    const [xj, yj] = ring[j];
+    const pi = ring[i];
+    const pj = ring[j];
+    if (!pi || !pj) continue;
+    const [xi, yi] = pi as [number, number]; // [lng, lat]
+    const [xj, yj] = pj as [number, number];
     const intersect =
       yi > lat !== yj > lat &&
       lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
@@ -75,11 +78,13 @@ function pointInRing(lat: number, lng: number, ring: number[][]): boolean {
 function pointInBorder(lat: number, lng: number, border: BorderFeature | null): boolean {
   if (!border) return true; // if no border loaded, show all (fallback)
   if (border.geometry.type === "Polygon") {
-    return pointInRing(lat, lng, border.geometry.coordinates[0]);
+    const ring = border.geometry.coordinates[0];
+    return ring ? pointInRing(lat, lng, ring) : false;
   }
   // MultiPolygon
   for (const poly of border.geometry.coordinates) {
-    if (pointInRing(lat, lng, poly[0])) return true;
+    const ring = poly[0];
+    if (ring && pointInRing(lat, lng, ring)) return true;
   }
   return false;
 }

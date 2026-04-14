@@ -11,7 +11,7 @@ import { ALL_COUNTIES, getCountyById } from "@/data/counties";
  * This is a LOCAL fallback — no API call needed.
  */
 function findClosestCounty(lat: number, lng: number) {
-  let closest = ALL_COUNTIES[0];
+  let closest = ALL_COUNTIES[0]!;
   let minDist = Infinity;
   for (const c of ALL_COUNTIES) {
     const dLat = c.center[0] - lat;

@@ -12,7 +12,9 @@ export function CivicQuiz() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [done, setDone] = useState(false);
 
-  const question = QUIZ[current];
+  // QUIZ is a hardcoded non-empty array; guarded with `!` so the rest of
+  // the component can treat `question` as definitely present.
+  const question = QUIZ[current]!;
 
   const handleSelect = (idx: number) => {
     if (selectedAnswer !== null) return;
@@ -39,7 +41,7 @@ export function CivicQuiz() {
     setDone(false);
   };
 
-  const correctCount = answers.filter((a, i) => a === QUIZ[i].correct).length;
+  const correctCount = answers.filter((a, i) => a === QUIZ[i]?.correct).length;
   const percentage = Math.round((correctCount / QUIZ.length) * 100);
 
   if (!started) {

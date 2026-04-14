@@ -182,7 +182,7 @@ export function Navbar() {
                 {NAV_DATE_PUBLICE.map((link) => (
                   <Link
                     key={link.href}
-                    href={link.href}
+                    href={countySlug ? `/${countySlug}${link.href}` : link.href}
                     className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
                   >
                     <span className="text-lg">{link.icon}</span>
@@ -297,7 +297,7 @@ export function Navbar() {
             {NAV_DATE_PUBLICE.map((link) => (
               <Link
                 key={link.href}
-                href={link.href}
+                href={countySlug ? `/${countySlug}${link.href}` : link.href}
                 className="block px-4 py-2 rounded-[var(--radius-button)] text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
               >
                 {link.icon} {link.label}

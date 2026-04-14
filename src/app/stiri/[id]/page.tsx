@@ -275,7 +275,7 @@ export default async function StireDetailPage({
               <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: sourceColor }}>
                 {SOURCE_LOGOS[stire.source] ? (
                   <Image
-                    src={SOURCE_LOGOS[stire.source]}
+                    src={SOURCE_LOGOS[stire.source] ?? ""}
                     alt={stire.source}
                     width={28}
                     height={28}

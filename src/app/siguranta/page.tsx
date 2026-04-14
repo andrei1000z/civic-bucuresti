@@ -23,7 +23,7 @@ function countyName(id: string): string {
 }
 
 export default function SigurantaPage() {
-  const latest = CRIMINALITATE[CRIMINALITATE.length - 1];
+  const latest = CRIMINALITATE[CRIMINALITATE.length - 1]!;
 
   return (
     <div className="container-narrow py-12 md:py-16">

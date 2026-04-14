@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export const revalidate = 604800;
 
 export default function SanatatePage() {
-  const latest = SANATATE_NATIONALA[SANATATE_NATIONALA.length - 1];
+  const latest = SANATATE_NATIONALA[SANATATE_NATIONALA.length - 1]!;
 
   return (
     <div className="container-narrow py-12 md:py-16">

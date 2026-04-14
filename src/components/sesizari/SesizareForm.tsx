@@ -75,7 +75,7 @@ export function SesizareForm() {
   const mode = "complet"; // single mode, no choice screen
   const [data, setData] = useState<FormData>(INITIAL);
   const [imagini, setImagini] = useState<string[]>([]);
-  const [dataConstatarii, setDataConstatarii] = useState(new Date().toISOString().split("T")[0]);
+  const [dataConstatarii, setDataConstatarii] = useState<string>(new Date().toISOString().split("T")[0] ?? "2026-04-14");
   const [oraConstatarii, setOraConstatarii] = useState(new Date().toTimeString().slice(0, 5));
   const [unknownDate, setUnknownDate] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -244,7 +244,7 @@ export function SesizareForm() {
       // Extract title: take the "Vă sesizez cu privire la..." part, or first sentence
       let aiTitle = "";
       const sesizezMatch = formalText.match(/Vă sesizez cu privire la ([^,.]+)/i);
-      if (sesizezMatch) {
+      if (sesizezMatch && sesizezMatch[1]) {
         aiTitle = sesizezMatch[1].trim();
         // Capitalize first letter
         aiTitle = aiTitle.charAt(0).toUpperCase() + aiTitle.slice(1);
@@ -580,17 +580,20 @@ ${today}`;
             <span className="text-xs text-[var(--color-text-muted)]">Nu știu data/ora exactă</span>
           </label>
           {!unknownDate && (() => {
-            const [yr, mo, dy] = dataConstatarii.split("-").map(Number);
+            const parts = dataConstatarii.split("-").map(Number);
+            const yr = parts[0] ?? 2026;
+            const mo = parts[1] ?? 1;
+            const dy = parts[2] ?? 1;
             const isLeap = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
-            const daysInMonth = [0,31, isLeap(yr) ? 29 : 28, 31,30,31,30,31,31,30,31,30,31][mo] || 31;
+            const daysInMonth = [0,31, isLeap(yr) ? 29 : 28, 31,30,31,30,31,31,30,31,30,31][mo] ?? 31;
             // Auto-clamp day if month changed
             if (dy > daysInMonth) setDataConstatarii(`${yr}-${String(mo).padStart(2,"0")}-${String(daysInMonth).padStart(2,"0")}`);
             return (
             <div className="grid grid-cols-5 gap-1.5">
-              <select value={dataConstatarii.split("-")[2] || ""} onChange={(e) => { const p = dataConstatarii.split("-"); setDataConstatarii(`${p[0]}-${p[1]}-${e.target.value.padStart(2,"0")}`); }} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]">
+              <select value={dataConstatarii.split("-")[2] || ""} onChange={(e) => { const p = dataConstatarii.split("-"); setDataConstatarii(`${p[0] ?? ""}-${p[1] ?? ""}-${e.target.value.padStart(2,"0")}`); }} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]">
                 {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => (<option key={d} value={String(d).padStart(2,"0")}>{d}</option>))}
               </select>
-              <select value={dataConstatarii.split("-")[1] || ""} onChange={(e) => { const p = dataConstatarii.split("-"); setDataConstatarii(`${p[0]}-${e.target.value}-${p[2]}`); }} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)] col-span-2">
+              <select value={dataConstatarii.split("-")[1] || ""} onChange={(e) => { const p = dataConstatarii.split("-"); setDataConstatarii(`${p[0] ?? ""}-${e.target.value}-${p[2] ?? ""}`); }} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)] col-span-2">
                 {["Ian","Feb","Mar","Apr","Mai","Iun","Iul","Aug","Sep","Oct","Nov","Dec"].map((m, i) => (<option key={i} value={String(i+1).padStart(2,"0")}>{m}</option>))}
               </select>
               <select value={oraConstatarii.split(":")[0] || "12"} onChange={(e) => setOraConstatarii(`${e.target.value}:${oraConstatarii.split(":")[1] || "00"}`)} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]">

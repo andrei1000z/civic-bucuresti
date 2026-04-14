@@ -86,8 +86,12 @@ export function TariffCalculator() {
     }));
   }, [calatoriLucru, calatoriWeekend, zileLucru, zileWeekend, elev]);
 
-  const cheapest = results.reduce((min, p) => (p.cost < min.cost ? p : min), results[0]);
+  const cheapest = results.reduce<(typeof results)[number] | undefined>(
+    (min, p) => (!min || p.cost < min.cost ? p : min),
+    undefined,
+  );
   const maxCost = Math.max(...results.map((r) => r.cost));
+  if (!cheapest) return null;
 
   const totalCalatorii = calatoriLucru * zileLucru + calatoriWeekend * zileWeekend;
 

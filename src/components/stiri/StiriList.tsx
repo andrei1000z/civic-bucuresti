@@ -180,7 +180,7 @@ export function StiriList() {
                     <Badge bgColor={SOURCE_COLORS[featured.source] ?? "#64748b"} color="white" className="flex items-center gap-1.5">
                       {SOURCE_LOGOS[featured.source] && (
                         <Image
-                          src={SOURCE_LOGOS[featured.source]}
+                          src={SOURCE_LOGOS[featured.source] ?? ""}
                           alt=""
                           width={16}
                           height={16}
@@ -244,7 +244,7 @@ export function StiriList() {
                     <Badge bgColor={SOURCE_COLORS[stire.source] ?? "#64748b"} color="white" className="flex items-center gap-1.5">
                       {SOURCE_LOGOS[stire.source] && (
                         <Image
-                          src={SOURCE_LOGOS[stire.source]}
+                          src={SOURCE_LOGOS[stire.source] ?? ""}
                           alt=""
                           width={14}
                           height={14}

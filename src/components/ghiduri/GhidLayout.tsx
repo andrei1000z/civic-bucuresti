@@ -38,9 +38,11 @@ export function GhidLayout({
     const handleScroll = () => {
       const scrollY = window.scrollY + 200;
       for (let i = chapters.length - 1; i >= 0; i--) {
-        const el = document.getElementById(chapters[i].id);
+        const ch = chapters[i];
+        if (!ch) continue;
+        const el = document.getElementById(ch.id);
         if (el && el.offsetTop <= scrollY) {
-          setActiveChapter(chapters[i].id);
+          setActiveChapter(ch.id);
           break;
         }
       }

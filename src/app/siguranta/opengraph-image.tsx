@@ -8,7 +8,7 @@ export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 
 export default function SigurantaOG() {
-  const latest = CRIMINALITATE[CRIMINALITATE.length - 1];
+  const latest = CRIMINALITATE[CRIMINALITATE.length - 1]!;
   return new ImageResponse(
     buildOgCard({
       badge: "Siguranță publică",

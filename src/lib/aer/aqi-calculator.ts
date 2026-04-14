@@ -25,9 +25,12 @@ const PM10_BREAKPOINTS: AqiBreakpoint[] = [
 ];
 
 function interpolateAqi(concentration: number, breakpoints: AqiBreakpoint[]): number {
+  const first = breakpoints[0];
+  const last = breakpoints[breakpoints.length - 1];
+  if (!first || !last) return 0;
   // Clamp to min/max
-  if (concentration <= breakpoints[0].cLow) return 0;
-  if (concentration >= breakpoints[breakpoints.length - 1].cHigh) return 500;
+  if (concentration <= first.cLow) return 0;
+  if (concentration >= last.cHigh) return 500;
 
   for (const bp of breakpoints) {
     if (concentration >= bp.cLow && concentration <= bp.cHigh) {

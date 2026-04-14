@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { analyticsRedis, KEY, TTL } from "@/lib/analytics/redis";
+import { sanitizeStr, sanitizeKey, sanitizeId } from "@/lib/analytics/sanitize";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
@@ -13,24 +14,6 @@ const ALLOWED_ORIGINS = new Set([
   "http://localhost:3000",
   "http://localhost:3001",
 ]);
-
-function sanitizeStr(val: unknown, maxLen = 100): string {
-  if (typeof val !== "string") return "";
-  return val
-    .slice(0, maxLen)
-    .replace(/[\n\r\t\0]/g, "")
-    .trim();
-}
-
-function sanitizeKey(val: unknown, maxLen = 100): string {
-  // Redis hash field — forbid chars that could collide with our key format.
-  return sanitizeStr(val, maxLen).replace(/[:*?[\]{}]/g, "");
-}
-
-function sanitizeId(val: unknown): string {
-  if (typeof val !== "string") return "";
-  return val.slice(0, 64).replace(/[^a-zA-Z0-9\-_]/g, "");
-}
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);

@@ -8,7 +8,7 @@ export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 
 export default function SanatateOG() {
-  const latest = SANATATE_NATIONALA[SANATATE_NATIONALA.length - 1];
+  const latest = SANATATE_NATIONALA[SANATATE_NATIONALA.length - 1]!;
   return new ImageResponse(
     buildOgCard({
       badge: "Sănătate publică",

@@ -84,7 +84,7 @@ export function AlertBanner() {
 
   if (!alert || dismissed.has(alert.id)) return null;
 
-  const style = SEVERITY_STYLES[alert.severity] ?? SEVERITY_STYLES.info;
+  const style = SEVERITY_STYLES[alert.severity] ?? SEVERITY_STYLES.info!;
   const Icon = style.icon;
 
   const dismiss = () => {

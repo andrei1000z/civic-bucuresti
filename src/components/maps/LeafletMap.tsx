@@ -99,7 +99,7 @@ export default function LeafletMap({
   flyToTarget = null,
   tileStyle = "standard",
 }: LeafletMapProps & { tileStyle?: string }) {
-  const tile = TILE_URLS[tileStyle] ?? TILE_URLS.standard;
+  const tile = TILE_URLS[tileStyle] ?? TILE_URLS.standard!;
   return (
     <MapContainer
       center={center}

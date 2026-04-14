@@ -53,7 +53,8 @@ function normalizeFormatting(text: string): string {
 
   // Signature: "Cu respect," \n {Name} — no blank line between them
   for (let i = out.length - 2; i > 0; i--) {
-    if (/^Cu (respect|stimă),?$/i.test(out[i]) && out[i + 1] === "" && out[i + 2]) {
+    const cur = out[i];
+    if (cur && /^Cu (respect|stimă),?$/i.test(cur) && out[i + 1] === "" && out[i + 2]) {
       out.splice(i + 1, 1);
       break;
     }

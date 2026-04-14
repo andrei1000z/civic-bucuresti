@@ -81,5 +81,5 @@ export const TEMPLATES: Record<string, TipTemplate> = {
 };
 
 export function getTemplate(tip: string): TipTemplate {
-  return TEMPLATES[tip] ?? TEMPLATES["altele"];
+  return TEMPLATES[tip] ?? TEMPLATES["altele"]!;
 }

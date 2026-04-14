@@ -39,11 +39,14 @@ function dedup(sensors: UnifiedSensor[]): UnifiedSensor[] {
 
   for (let i = 0; i < sorted.length; i++) {
     if (used.has(i)) continue;
-    kept.push(sorted[i]);
-    // Mark nearby sensors as duplicates
+    const a = sorted[i];
+    if (!a) continue;
+    kept.push(a);
     for (let j = i + 1; j < sorted.length; j++) {
       if (used.has(j)) continue;
-      if (distanceM(sorted[i].lat, sorted[i].lng, sorted[j].lat, sorted[j].lng) < DEDUP_RADIUS_M) {
+      const b = sorted[j];
+      if (!b) continue;
+      if (distanceM(a.lat, a.lng, b.lat, b.lng) < DEDUP_RADIUS_M) {
         used.add(j);
       }
     }
@@ -67,16 +70,18 @@ export async function GET() {
   const bySource: Record<string, number> = {};
   const errors: string[] = [];
 
-  const sourceNames = ["sensor-community", "sensor-community-v2", "openaq", "waqi"];
+  const sourceNames = ["sensor-community", "sensor-community-v2", "openaq", "waqi"] as const;
   for (let i = 0; i < results.length; i++) {
     const result = results[i];
     const name = sourceNames[i];
+    if (!result || !name) continue;
     if (result.status === "fulfilled") {
       allSensors.push(...result.value);
       bySource[name] = result.value.length;
     } else {
       bySource[name] = 0;
-      errors.push(`${name}: ${result.reason?.message ?? "unknown error"}`);
+      const reason = result.reason as { message?: string } | undefined;
+      errors.push(`${name}: ${reason?.message ?? "unknown error"}`);
     }
   }
 

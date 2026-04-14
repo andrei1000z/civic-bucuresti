@@ -62,7 +62,7 @@ export function IstoricInteractive({ primari }: Props) {
   const toggleCompare = (id: string) => {
     setCompareIds((prev) => {
       if (prev.includes(id)) return prev.filter((x) => x !== id);
-      if (prev.length >= 2) return [prev[1], id];
+      if (prev.length >= 2 && prev[1]) return [prev[1], id];
       return [...prev, id];
     });
   };

@@ -28,7 +28,7 @@ export function CountUp({
     if (!el) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !started.current) {
+        if (entries[0]?.isIntersecting && !started.current) {
           started.current = true;
           const start = performance.now();
           const tick = (now: number) => {

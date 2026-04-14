@@ -17,11 +17,11 @@ export const AQI_LEVELS: AqiLevel[] = [
 ];
 
 export function getAqiLevel(aqi: number | null): AqiLevel {
-  if (aqi == null || aqi < 0) return AQI_LEVELS[0];
+  if (aqi == null || aqi < 0) return AQI_LEVELS[0]!;
   for (const level of AQI_LEVELS) {
     if (aqi <= level.max) return level;
   }
-  return AQI_LEVELS[AQI_LEVELS.length - 1];
+  return AQI_LEVELS[AQI_LEVELS.length - 1]!;
 }
 
 export function getAqiColor(aqi: number | null): string {
