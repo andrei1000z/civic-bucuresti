@@ -39,6 +39,8 @@ export function Footer() {
               <li><Link href="/stiri" className={linkCls}>Știri</Link></li>
               <li><Link href="/evenimente" className={linkCls}>Evenimente</Link></li>
               <li><Link href="/calendar-civic" className={linkCls}>Calendar civic</Link></li>
+              <li><Link href="/judete" className={linkCls}>Toate județele</Link></li>
+              <li><Link href="/compara" className={linkCls}>Compară județe</Link></li>
             </ul>
             <h4 className="font-semibold mt-5 mb-3 text-[var(--color-text)] text-sm">
               Date publice

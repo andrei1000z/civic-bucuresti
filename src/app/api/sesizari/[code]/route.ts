@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,11 @@ export async function DELETE(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Trebuie să fii conectat" }, { status: 401 });
+    }
+
+    const rl = await rateLimitAsync(`sesizare-delete:${user.id}`, { limit: 10, windowMs: 60_000 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Prea rapid" }, { status: 429 });
     }
 
     const sesizare = await getSesizareByCode(code);

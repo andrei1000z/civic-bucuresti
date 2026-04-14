@@ -40,10 +40,11 @@ export const NAV_MORE = [
   { href: "/impact", label: "Impact Civia", icon: "📊" },
   { href: "/calendar-civic", label: "Calendar civic", icon: "📅" },
   { href: "/aer", label: "Calitate aer", icon: "🌬️" },
+  { href: "/judete", label: "Toate județele", icon: "🗺️" },
+  { href: "/compara", label: "Compară județe", icon: "⚖️" },
   { href: "/bilete", label: "Bilete & Abonamente", icon: "🎫", countyOnly: true },
   { href: "/istoric", label: "Istoric", icon: "📜", countyOnly: true },
   { href: "/cum-functioneaza", label: "Administrația", icon: "🏛️", countyOnly: true },
-  { href: "/compara", label: "Compară județe", icon: "⚖️" },
 ] as const;
 
 // Date publice — separate submenu for transparency dashboards

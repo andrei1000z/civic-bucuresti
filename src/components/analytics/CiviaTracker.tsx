@@ -141,7 +141,7 @@ export function trackCustomEvent(eventType: string, extra: Record<string, string
 
 export function CiviaTracker(): null {
   const pathname = usePathname();
-  const pageEnterRef = useRef<number>(Date.now());
+  const pageEnterRef = useRef<number>(0);
   const lastPathRef = useRef<string | null>(null);
 
   // Pageview

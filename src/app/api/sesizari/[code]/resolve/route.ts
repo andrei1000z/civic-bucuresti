@@ -5,6 +5,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
 import { humanizeSupabaseError } from "@/lib/supabase/errors";
 import { invalidateSesizariCache } from "@/lib/cached-queries";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,11 @@ export async function POST(
     const supabase = await createSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
+
+    const rl = await rateLimitAsync(`resolve:${user.id}`, { limit: 5, windowMs: 60_000 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Prea multe încercări" }, { status: 429 });
+    }
 
     const sesizare = await getSesizareByCode(code);
     if (!sesizare) return NextResponse.json({ error: "Not found" }, { status: 404 });

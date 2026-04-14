@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
+  const rl = await rateLimitAsync(`top-voted:${getClientIp(req)}`, { limit: 60, windowMs: 60_000 });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Prea rapid" }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const limit = Math.min(Number(searchParams.get("limit") ?? 10), 50);
   try {

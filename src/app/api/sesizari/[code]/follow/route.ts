@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,11 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Trebuie să fii conectat" }, { status: 401 });
+  }
+
+  const rl = await rateLimitAsync(`follow:${user.id}`, { limit: 20, windowMs: 60_000 });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Prea rapid — așteaptă un minut" }, { status: 429 });
   }
 
   const sesizare = await getSesizareByCode(code);
@@ -38,6 +44,11 @@ export async function DELETE(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Trebuie să fii conectat" }, { status: 401 });
+  }
+
+  const rl = await rateLimitAsync(`follow:${user.id}`, { limit: 20, windowMs: 60_000 });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Prea rapid — așteaptă un minut" }, { status: 429 });
   }
 
   const sesizare = await getSesizareByCode(code);

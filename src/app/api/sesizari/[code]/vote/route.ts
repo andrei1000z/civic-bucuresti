@@ -3,6 +3,7 @@ import { z } from "zod";
 import { upsertVote, removeVote, getSesizareByCode } from "@/lib/sesizari/repository";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { invalidateSesizariCache } from "@/lib/cached-queries";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,14 @@ export async function POST(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Auth required" }, { status: 401 });
+    }
+
+    const rl = await rateLimitAsync(`vote:${user.id}`, { limit: 20, windowMs: 60_000 });
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Prea multe voturi. Încearcă peste un minut." },
+        { status: 429 }
+      );
     }
 
     const sesizare = await getSesizareByCode(code);

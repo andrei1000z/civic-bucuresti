@@ -4,6 +4,7 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { getSesizareByCode, upsertVerification } from "@/lib/sesizari/repository";
 import { humanizeSupabaseError } from "@/lib/supabase/errors";
 import { invalidateSesizariCache } from "@/lib/cached-queries";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,11 @@ export async function POST(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Trebuie să fii conectat" }, { status: 401 });
+    }
+
+    const rl = await rateLimitAsync(`verify:${user.id}`, { limit: 10, windowMs: 60_000 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Prea multe verificări" }, { status: 429 });
     }
 
     const sesizare = await getSesizareByCode(code);

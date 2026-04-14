@@ -431,8 +431,7 @@ export async function POST(req: NextRequest) {
     if (action === "user") return await handleUser(body);
     if (action === "exclude") return await handleExclude(body);
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
-  } catch (err) {
-    console.error("[analytics] error", err);
+  } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

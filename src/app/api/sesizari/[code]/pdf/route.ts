@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -9,9 +10,14 @@ export const dynamic = "force-dynamic";
  * No heavy PDF lib needed — the browser handles rendering.
  */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ code: string }> }
 ) {
+  const rl = await rateLimitAsync(`pdf:${getClientIp(req)}`, { limit: 5, windowMs: 60_000 });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Prea multe cereri PDF" }, { status: 429 });
+  }
+
   const { code } = await params;
   const sesizare = await getSesizareByCode(code);
   if (!sesizare) {
