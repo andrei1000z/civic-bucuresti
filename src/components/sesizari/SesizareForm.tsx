@@ -462,7 +462,7 @@ export function SesizareForm() {
       })();
 
   const evidenceText = imagini.length > 0
-    ? `\nAnexez ${imagini.length} ${imagini.length === 1 ? "fotografie" : "fotografii"} realizate la fața locului.\n`
+    ? `\nAnexez ${imagini.length} ${imagini.length === 1 ? "fotografie" : "fotografii"}.\n`
     : "";
 
   // Route through buildFormalText so the AI-generated text gets the same

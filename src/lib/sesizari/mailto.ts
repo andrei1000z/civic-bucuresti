@@ -96,7 +96,7 @@ export function buildFormalText(input: MailtoInput): string {
   const numarFoto = input.imagini?.length ?? 0;
   const evidence =
     numarFoto > 0
-      ? `\n\nAnexez ${numarFoto} ${numarFoto === 1 ? "fotografie realizată" : "fotografii realizate"} la fața locului, disponibile la codul sesizării ${input.code ?? ""}.\n`
+      ? `\n\nAnexez ${numarFoto} ${numarFoto === 1 ? "fotografie" : "fotografii"}.\n`
       : "";
 
   if (input.formal_text) {
