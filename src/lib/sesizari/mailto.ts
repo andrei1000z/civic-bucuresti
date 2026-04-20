@@ -127,7 +127,7 @@ ${today}`;
 }
 
 export function buildEmailPayload(input: MailtoInput): EmailPayload {
-  const recipients = getAuthoritiesFor(input.tip, input.sector ?? null);
+  const recipients = getAuthoritiesFor(input.tip, input.sector ?? null, null, input.locatie);
   const tipLabel = SESIZARE_TIPURI.find((t) => t.value === input.tip)?.label ?? "";
   const subject = `Sesizare ${tipLabel} — ${input.locatie}`;
   const body = buildFormalText(input);
@@ -182,6 +182,6 @@ export function buildYahooLink(input: MailtoInput): string {
   return `https://compose.mail.yahoo.com/?${params.toString()}`;
 }
 
-export function getRecipientsLabel(tip: string, sector?: string | null): string {
-  return getAuthoritiesFor(tip, sector ?? null).label;
+export function getRecipientsLabel(tip: string, sector?: string | null, locationText?: string | null): string {
+  return getAuthoritiesFor(tip, sector ?? null, null, locationText ?? null).label;
 }

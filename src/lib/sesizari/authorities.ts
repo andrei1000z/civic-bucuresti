@@ -1,5 +1,7 @@
 // Real emails of Bucharest authorities — verified public contacts
 
+import { detectSectorFromText } from "./sector-detect";
+
 export interface Authority {
   id: string;
   name: string;
@@ -54,7 +56,12 @@ export interface ResolvedRecipients {
  * For București: uses sector-specific authorities.
  * For other counties: uses county contacts from autoritati-contact.ts.
  */
-export function getAuthoritiesFor(tip: string, sector: string | null, countyCode?: string | null): ResolvedRecipients {
+export function getAuthoritiesFor(
+  tip: string,
+  sector: string | null,
+  countyCode?: string | null,
+  locationText?: string | null,
+): ResolvedRecipients {
   // If not București, route to county authorities
   if (countyCode && countyCode !== "B") {
     return getCountyAuthorities(tip, countyCode);
@@ -70,8 +77,15 @@ export function getAuthoritiesFor(tip: string, sector: string | null, countyCode
     if (!primary.find((x) => x.email === a.email) && !cc.find((x) => x.email === a.email)) cc.push(a);
   };
 
-  const sectorPrimarie = sector ? PRIMARII_SECTOR[sector] : null;
-  const sectorPolitie = sector ? POLITIA_LOCALA_SECTOR[sector] : null;
+  // If form didn't set a sector, try to recover it from the location text
+  // (e.g., "Str. Matei Voievod 12, Sector 3, București"). Without this the
+  // sector-specific primării + poliții get silently skipped.
+  const resolvedSector =
+    (sector && sector.trim()) ||
+    (locationText ? detectSectorFromText(locationText) : null) ||
+    null;
+  const sectorPrimarie = resolvedSector ? PRIMARII_SECTOR[resolvedSector] : null;
+  const sectorPolitie = resolvedSector ? POLITIA_LOCALA_SECTOR[resolvedSector] : null;
 
   switch (tip) {
     case "groapa":

@@ -439,7 +439,7 @@ export function SesizareForm() {
   };
 
   const tipInfo = SESIZARE_TIPURI.find((t) => t.value === data.tip);
-  const recipients = data.tip ? getAuthoritiesFor(data.tip, data.sector, detectedCounty) : null;
+  const recipients = data.tip ? getAuthoritiesFor(data.tip, data.sector, detectedCounty, data.locatie) : null;
 
   const gen = data.nume ? detectGen(data.nume) : null;
   const subsemnatul = gen ? subsemnatulForm(gen) : "Subsemnatul(a)";
