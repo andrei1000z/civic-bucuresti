@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { PhotoUploader } from "./PhotoUploader";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { EmailChoicePanel } from "./EmailChoicePanel";
-import { buildGmailLink, buildMailtoLink, type MailtoInput } from "@/lib/sesizari/mailto";
+import { buildFormalText, buildGmailLink, buildMailtoLink, type MailtoInput } from "@/lib/sesizari/mailto";
 import { useCountyOptional } from "@/lib/county-context";
 
 interface FormData {
@@ -465,9 +465,25 @@ export function SesizareForm() {
     ? `\nAnexez ${imagini.length} ${imagini.length === 1 ? "fotografie" : "fotografii"} realizate la fața locului.\n`
     : "";
 
-  const previewText = data.formal_text || `Bună ziua,
+  // Route through buildFormalText so the AI-generated text gets the same
+  // identity/date/photo-URL rewriter as the final Gmail body. Otherwise
+  // preview shows something different than what actually gets sent.
+  const previewText = data.formal_text
+    ? buildFormalText({
+        tip: data.tip,
+        titlu: effectiveTitlu,
+        locatie: data.locatie,
+        sector: data.sector,
+        descriere: data.descriere,
+        formal_text: data.formal_text,
+        author_name: data.nume,
+        author_email: data.email || null,
+        author_address: data.adresa || null,
+        imagini,
+      })
+    : `Bună ziua,
 
-${subsemnatul} ${data.nume || "[NUMELE]"}, ${domiciliat} în ${data.adresa || "[ADRESA]"}, vă adresez prezenta sesizare în temeiul OG 27/2002.
+${subsemnatul} ${data.nume || "[NUMELE]"}, ${domiciliat} în ${data.adresa || "[ADRESA]"}, vă adresez prezenta sesizare în temeiul OG 27/2002, semnalată astăzi, ${today}.
 
 Vă sesizez cu privire la ${tipInfo?.label.toLowerCase() || "[tipul problemei]"}${constatareText}, în următoarea locație: ${data.locatie || "[LOCAȚIA]"}.
 

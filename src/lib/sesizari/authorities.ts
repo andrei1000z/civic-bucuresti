@@ -109,12 +109,14 @@ export function getAuthoritiesFor(tip: string, sector: string | null, countyCode
       break;
 
     case "stalpisori":
+      // User pref: all 6 destinatari în TO (nu în CC) — sesizarea
+      // stâlpișori cere acțiune coordonată, nu informare pasivă.
       addTo(AUTH.brigadaRutiera);
-      addTo(AUTH.pmb);
-      addTo(AUTH.politiaLocalaBuc);
+      addTo(AUTH.pmb);               // relatiipublice@pmb.ro
+      addTo(AUTH.politiaLocalaBuc);  // office@plmb.ro
+      addTo(AUTH.adminStrazi);       // office@aspmb.ro
       if (sectorPolitie) addTo(sectorPolitie);
-      if (sectorPrimarie) addCc(sectorPrimarie);
-      addCc(AUTH.adminStrazi);
+      if (sectorPrimarie) addTo(sectorPrimarie);
       break;
 
     case "canalizare":

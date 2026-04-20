@@ -188,18 +188,6 @@ export function SignSesizareButton({
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-1.5">Email (pentru răspuns)</label>
-                  <input
-                    type="email"
-                    autoComplete="email"
-                    value={data.email}
-                    onChange={(e) => setData({ ...data, email: e.target.value })}
-                    placeholder="nume@exemplu.ro (opțional)"
-                    className="w-full h-11 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  />
-                </div>
-
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="checkbox"
