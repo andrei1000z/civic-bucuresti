@@ -14,3 +14,7 @@ export function getGroqClient(): Groq {
 
 export const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 export const GROQ_MODEL_FAST = process.env.GROQ_MODEL_FAST || "llama-3.1-8b-instant";
+// Vision-capable model for photo analysis in sesizări. Llama 4 Scout is
+// Groq's flagship vision model as of 2025-2026.
+export const GROQ_MODEL_VISION =
+  process.env.GROQ_MODEL_VISION || "meta-llama/llama-4-scout-17b-16e-instruct";

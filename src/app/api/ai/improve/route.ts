@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getGroqClient, GROQ_MODEL } from "@/lib/groq/client";
+import { getGroqClient, GROQ_MODEL, GROQ_MODEL_VISION } from "@/lib/groq/client";
 import { SYSTEM_PROMPT_FORMAL } from "@/lib/groq/prompts";
 import { getTemplate } from "@/lib/groq/templates";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+export const maxDuration = 45;
 
 const schema = z.object({
   descriere: z.string().min(5).max(2000),
@@ -14,11 +14,21 @@ const schema = z.object({
   locatie: z.string().optional(),
   nume: z.string().optional(),
   adresa: z.string().optional(),
+  // Photo URLs from Supabase storage. When present, we route to the vision
+  // model so the AI can refine the description based on what's actually in
+  // the frame (e.g., "sidewalk is wide, pedestrians have room" — not
+  // hallucinated "forced onto the road").
+  imagini: z.array(z.string().url()).max(5).optional(),
 });
 
 interface AIResponse {
   formal_text: string;
+  descriere_rafinata?: string;
 }
+
+// Max 5 photos to keep payload + latency sane. Groq vision accepts up to
+// ~20MB of image data per request.
+const MAX_PHOTOS = 5;
 
 // Keywords that mark paragraph starts in our formal template
 const PARAGRAPH_STARTS = [
@@ -75,11 +85,13 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { descriere, tip, locatie, nume, adresa } = schema.parse(body);
+    const { descriere, tip, locatie, nume, adresa, imagini } = schema.parse(body);
     const template = getTemplate(tip ?? "altele");
+    const photos = (imagini ?? []).slice(0, MAX_PHOTOS);
+    const hasPhotos = photos.length > 0;
 
-    const userContext = [
-      `Descrierea brută: ${descriere}`,
+    const textContext = [
+      `Descrierea brută a cetățeanului: ${descriere}`,
       locatie ? `Locație: ${locatie}` : "",
       nume ? `Nume cetățean: ${nume}` : "Nume: [NUMELE]",
       adresa ? `Adresa cetățean: ${adresa}` : "Adresa: [ADRESA]",
@@ -88,15 +100,30 @@ export async function POST(req: Request) {
       `Ghid pentru {PROPUNEREA_CONCRETA}: ${template.propunere}`,
     ].filter(Boolean).join("\n");
 
+    const visionInstruction = hasPhotos
+      ? `\n\nFOTOGRAFII ATAȘATE (${photos.length}):\nAnalizează imaginile de mai jos. Bazează descrierea problemei pe ce VEZI EFECTIV, nu pe clișee.\n- Dacă trotuarul e lat și pietonii au loc, NU scrie "forțați pe carosabil".\n- Dacă nu sunt mașini pe trotuar, NU inventa blocaje.\n- Menționează doar fapte concrete observabile: lățime trotuar, număr mașini parcate, tip degradare, pericol real.\nDacă descrierea cetățeanului contrazice ce vezi în poze, prioritizează fotografia și corectează.\n\nReturnează în JSON:\n{ "formal_text": "...", "descriere_rafinata": "o propoziție-două care descriu cu acuratețe ce se vede în poze" }`
+      : "";
+
     const groq = getGroqClient();
+    const userContent = hasPhotos
+      ? [
+          { type: "text" as const, text: textContext + visionInstruction },
+          ...photos.map((url) => ({
+            type: "image_url" as const,
+            image_url: { url },
+          })),
+        ]
+      : textContext;
+
     const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL,
+      model: hasPhotos ? GROQ_MODEL_VISION : GROQ_MODEL,
       messages: [
         { role: "system", content: SYSTEM_PROMPT_FORMAL },
-        { role: "user", content: userContext },
+        // Groq SDK accepts string or array content depending on model.
+        { role: "user", content: userContent as unknown as string },
       ],
       temperature: 0.3,
-      max_tokens: 900,
+      max_tokens: 1100,
       response_format: { type: "json_object" },
     });
 

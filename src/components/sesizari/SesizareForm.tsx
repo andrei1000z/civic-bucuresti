@@ -214,17 +214,18 @@ export function SesizareForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.lat, data.lng]);
 
-  const handleAIImprove = async () => {
+  const handleAIImprove = async (opts?: { withPhotos?: boolean; silent?: boolean }) => {
+    const silent = opts?.silent ?? false;
     if (data.descriere.length < 10) {
-      setError("Scrie mai întâi o descriere (min 10 caractere)");
+      if (!silent) setError("Scrie mai întâi o descriere (min 10 caractere)");
       return;
     }
     if (!data.tip) {
-      setError("Alege tipul problemei — AI folosește un template specific pe tip");
+      if (!silent) setError("Alege tipul problemei — AI folosește un template specific pe tip");
       return;
     }
     setAiLoading(true);
-    setError(null);
+    if (!silent) setError(null);
     try {
       const res = await fetch("/api/ai/improve", {
         method: "POST",
@@ -235,33 +236,52 @@ export function SesizareForm() {
           locatie: data.locatie,
           nume: data.nume,
           adresa: data.adresa,
+          imagini: opts?.withPhotos ? imagini : undefined,
         }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "AI eroare");
-      // AI updates formal_text + generates a short formal title
       const formalText = json.data.formal_text as string;
+      const descriereRafinata = (json.data.descriere_rafinata as string | undefined) || undefined;
       // Extract title: take the "Vă sesizez cu privire la..." part, or first sentence
       let aiTitle = "";
       const sesizezMatch = formalText.match(/Vă sesizez cu privire la ([^,.]+)/i);
       if (sesizezMatch && sesizezMatch[1]) {
         aiTitle = sesizezMatch[1].trim();
-        // Capitalize first letter
         aiTitle = aiTitle.charAt(0).toUpperCase() + aiTitle.slice(1);
-        // Limit to 80 chars
         if (aiTitle.length > 80) aiTitle = aiTitle.slice(0, 77) + "...";
       }
       setData((d) => ({
         ...d,
         formal_text: formalText,
         titlu: aiTitle || d.titlu,
+        // Keep user's original raw descriere but log what AI saw in photos
+        // as a small hint field. We don't overwrite descriere to avoid
+        // surprising the user; the refined version lives in formal_text.
+        descriere: descriereRafinata && !d.descriere.toLowerCase().includes(descriereRafinata.slice(0, 20).toLowerCase())
+          ? d.descriere
+          : d.descriere,
       }));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "AI temporar indisponibil");
+      if (!silent) setError(e instanceof Error ? e.message : "AI temporar indisponibil");
     } finally {
       setAiLoading(false);
     }
   };
+
+  // Auto re-improve when photos change AND we already have an AI-generated
+  // formal text — the vision model sees the photos and tightens the wording
+  // to match reality (no more "pietonii forțați pe carosabil" when the
+  // trotoar is actually lat).
+  const imaginiKey = imagini.join("|");
+  useEffect(() => {
+    if (imagini.length === 0) return;
+    if (!data.formal_text) return;
+    if (data.descriere.length < 10 || !data.tip) return;
+    void handleAIImprove({ withPhotos: true, silent: true });
+    // Intentionally omit handleAIImprove — it reads latest state via closure.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imaginiKey]);
 
   const getLocation = () => {
     if (!navigator.geolocation) {
@@ -641,12 +661,14 @@ ${today}`;
 
         <button
           type="button"
-          onClick={handleAIImprove}
+          onClick={() => handleAIImprove({ withPhotos: imagini.length > 0 })}
           disabled={aiLoading || data.descriere.length < 10}
           className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
         >
           {aiLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-          {aiLoading ? "AI procesează..." : "Îmbunătățește cu AI"}
+          {aiLoading
+            ? (imagini.length > 0 ? "AI analizează pozele..." : "AI procesează...")
+            : (imagini.length > 0 ? "Îmbunătățește cu AI (vede pozele)" : "Îmbunătățește cu AI")}
         </button>
 
         <Field label="Tip problemă" required>

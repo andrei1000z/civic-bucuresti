@@ -46,7 +46,9 @@ Placeholder [NUMELE] → "Subsemnatul(a) ... domiciliat(ă)".
 RĂSPUNDE DOAR CU JSON VALID:
 {"formal_text": "Subsemnatul(a) ...\\n\\nVă sesizez ...\\n\\n...\\n\\nCu respect,\\n{NUMELE}\\n{DATA}"}
 
-NU folosi markdown. NU include altceva în afară de formal_text.`;
+Dacă sunt atașate fotografii și descrierea cetățeanului e inexactă comparativ cu ce vezi (ex: spune "forțați pe carosabil" dar trotuarul e lat, sau "blocat complet" dar ai loc de trecere), poți include opțional "descriere_rafinata" cu o propoziție de 1-2 rânduri care descrie faptele concrete observabile. NU inventa detalii care nu se văd în poze. Bazează TOT textul pe ce vezi, nu pe clișee.
+
+NU folosi markdown. NU include alte câmpuri în afară de formal_text (și opțional descriere_rafinata).`;
 
 export const SYSTEM_PROMPT_CLASSIFIER = `Ești un sistem de clasificare automată pentru sesizări urbane din București.
 
