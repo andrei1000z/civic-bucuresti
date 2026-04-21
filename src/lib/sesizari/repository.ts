@@ -1,6 +1,7 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getHiddenUserIds } from "@/lib/privacy/hidden-users";
+import { scrubFormalTextForPublic } from "./scrub-public";
 import type {
   SesizareFeedRow,
   SesizareRow,
@@ -11,47 +12,78 @@ import type {
 
 const ANONYMOUS_LABEL = "Cetățean anonim";
 
-// Check whether the current request is authenticated as an admin. Admins
-// always see real author_names (moderation, identification). Anyone else —
-// public readers, authenticated non-admin users, the user themselves —
-// gets the anonymized view for rows whose owner opted into hide_name.
-async function callerIsAdmin(): Promise<boolean> {
+// One pass on the session: returns the viewer's user id (if any) and whether
+// they have the admin role. Used by both the name anonymizer and the
+// formal_text scrubber so we fetch the auth+profile row once per request.
+async function getViewerContext(): Promise<{ viewerId: string | null; isAdmin: boolean }> {
   try {
     const supabase = await createSupabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) return false;
+    if (!user) return { viewerId: null, isAdmin: false };
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .maybeSingle();
-    return (profile as { role?: string } | null)?.role === "admin";
+    return {
+      viewerId: user.id,
+      isAdmin: (profile as { role?: string } | null)?.role === "admin",
+    };
   } catch {
-    return false;
+    return { viewerId: null, isAdmin: false };
   }
 }
 
-// Replaces author_name with a generic label for any row whose user_id
-// appears in the Redis privacy set. One batched SMISMEMBER per call so
-// lists stay cheap. Storage is Redis-only → zero DB migration required
-// and the toggle takes effect immediately. No-op for admins.
-async function anonymizeHiddenAuthors<T extends { user_id: string | null; author_name: string }>(
-  rows: T[],
-): Promise<T[]> {
+type Anonymizable = {
+  user_id: string | null;
+  author_name: string;
+  formal_text?: string | null;
+};
+
+/**
+ * Applies public-viewer privacy to a list of sesizări:
+ *   - always scrubs the home address out of formal_text (promised on the
+ *     public page: "adresa de domiciliu a fost ascunsă automat")
+ *   - additionally scrubs the author name (in author_name AND in
+ *     formal_text) when the owner toggled hide_name in /cont
+ *   - admins and the row's owner bypass both scrubs (they're either
+ *     moderating or reading their own sesizare)
+ *
+ * Runs one Redis SMISMEMBER batched over all user_ids in the list plus
+ * one Supabase profile lookup for the viewer's role. Zero per-row
+ * queries.
+ */
+async function anonymizeHiddenAuthors<T extends Anonymizable>(rows: T[]): Promise<T[]> {
   if (rows.length === 0) return rows;
-  if (await callerIsAdmin()) return rows;
+
+  const { viewerId, isAdmin } = await getViewerContext();
+  if (isAdmin) return rows;
 
   const userIds = Array.from(new Set(rows.map((r) => r.user_id).filter((v): v is string => !!v)));
-  if (userIds.length === 0) return rows;
+  const hidden = userIds.length > 0 ? await getHiddenUserIds(userIds) : new Set<string>();
 
-  const hidden = await getHiddenUserIds(userIds);
-  if (hidden.size === 0) return rows;
+  return rows.map((r) => {
+    const isOwner = !!r.user_id && r.user_id === viewerId;
+    if (isOwner) return r; // owner sees their own name + address
 
-  return rows.map((r) =>
-    r.user_id && hidden.has(r.user_id) ? { ...r, author_name: ANONYMOUS_LABEL } : r,
-  );
+    const hideName = !!r.user_id && hidden.has(r.user_id);
+
+    let scrubbedFormalText = r.formal_text ?? null;
+    if (scrubbedFormalText) {
+      scrubbedFormalText = scrubFormalTextForPublic(scrubbedFormalText, {
+        authorName: r.author_name,
+        hideName, // scrub name only when user opted in
+      });
+    }
+
+    return {
+      ...r,
+      author_name: hideName ? ANONYMOUS_LABEL : r.author_name,
+      formal_text: scrubbedFormalText,
+    };
+  });
 }
 
 export interface ListFilters {
