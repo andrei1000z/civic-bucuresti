@@ -1,5 +1,6 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { getHiddenUserIds } from "@/lib/privacy/hidden-users";
 import type {
   SesizareFeedRow,
   SesizareRow,
@@ -32,9 +33,10 @@ async function callerIsAdmin(): Promise<boolean> {
   }
 }
 
-// Replaces author_name with a generic label for any row whose user_id opted
-// into the privacy flag (profiles.hide_name = true). Runs one batched
-// profile query per call so lists stay cheap. No-op for admins.
+// Replaces author_name with a generic label for any row whose user_id
+// appears in the Redis privacy set. One batched SMISMEMBER per call so
+// lists stay cheap. Storage is Redis-only → zero DB migration required
+// and the toggle takes effect immediately. No-op for admins.
 async function anonymizeHiddenAuthors<T extends { user_id: string | null; author_name: string }>(
   rows: T[],
 ): Promise<T[]> {
@@ -44,17 +46,7 @@ async function anonymizeHiddenAuthors<T extends { user_id: string | null; author
   const userIds = Array.from(new Set(rows.map((r) => r.user_id).filter((v): v is string => !!v)));
   if (userIds.length === 0) return rows;
 
-  const admin = createSupabaseAdmin();
-  const { data } = await admin
-    .from("profiles")
-    .select("id, hide_name")
-    .in("id", userIds);
-
-  const hidden = new Set(
-    (data ?? [])
-      .filter((p) => (p as { hide_name?: boolean }).hide_name === true)
-      .map((p) => (p as { id: string }).id),
-  );
+  const hidden = await getHiddenUserIds(userIds);
   if (hidden.size === 0) return rows;
 
   return rows.map((r) =>
