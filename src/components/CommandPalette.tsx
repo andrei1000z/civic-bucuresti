@@ -120,8 +120,15 @@ export function CommandPalette() {
       try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal: controller.signal });
         const json = await res.json();
-        setResults(json.data ?? []);
+        const hits = (json.data ?? []) as SearchResult[];
+        setResults(hits);
         setActiveIdx(0);
+        // Record the query so the dashboard knows what users look for.
+        // Zero-result queries are extra-valuable — they surface content
+        // gaps we should fill.
+        import("@/components/analytics/CiviaTracker").then(({ trackSearchQuery }) => {
+          trackSearchQuery(query, hits.length, "command-palette");
+        }).catch(() => { /* silent */ });
       } catch { /* aborted */ }
       finally { setLoading(false); }
     }, 200);

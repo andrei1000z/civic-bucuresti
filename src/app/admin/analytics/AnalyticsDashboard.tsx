@@ -3,8 +3,17 @@
 import { useEffect, useState, useCallback } from "react";
 import {
   Activity, Users, Eye, Gauge, Globe2, MapPin, Smartphone, Monitor,
-  Link2, TrendingUp, Clock, AlertTriangle, RefreshCw,
+  Link2, TrendingUp, Clock, AlertTriangle, RefreshCw, Zap, MousePointerClick,
+  Frown, Search, Bot, LogIn, Copy, Download, ExternalLink,
 } from "lucide-react";
+
+interface Vitals {
+  p50: number;
+  p75: number;
+  p95: number;
+  rating: Record<string, number>;
+  samples: number;
+}
 
 interface Summary {
   ok: boolean;
@@ -16,6 +25,7 @@ interface Summary {
   languages: Record<string, string | number>;
   hourly: Record<string, string | number>;
   errors: Record<string, string | number>;
+  errorPaths: Record<string, string | number>;
   eventsTotal: Record<string, string | number>;
   scrollDepth: Record<string, string | number>;
   utmSource: Record<string, string | number>;
@@ -30,7 +40,43 @@ interface Summary {
   topUsers: { id: string; views: number }[];
   eventsStream: { t: number; type: string; pathname?: string; country?: string; city?: string; device?: string; referrer?: string; userId?: string | null }[];
   perf: { avgLoadTime: number; avgTimeOnPage: number };
+  vitals: Record<string, Vitals>;
+  clicks: Record<string, string | number>;
+  outbound: Record<string, string | number>;
+  rageClicks: Record<string, string | number>;
+  searchTerms: Record<string, string | number>;
+  searchZero: Record<string, string | number>;
+  aiUsage: Record<string, string | number>;
+  authEvents: Record<string, string | number>;
+  formAbandon: Record<string, string | number>;
+  copyEvents: Record<string, string | number>;
+  pwaEvents: Record<string, string | number>;
+  funnels: Record<string, Record<string, string | number>>;
   serverTime: number;
+}
+
+const VITAL_UNIT: Record<string, string> = {
+  LCP: "ms", INP: "ms", FCP: "ms", TTFB: "ms", CLS: "",
+};
+
+function formatVital(name: string, v: number): string {
+  if (name === "CLS") return v.toFixed(3);
+  return `${Math.round(v)}${VITAL_UNIT[name] ?? "ms"}`;
+}
+
+function vitalColor(name: string, p75: number): string {
+  // web.dev thresholds
+  const t: Record<string, [number, number]> = {
+    LCP: [2500, 4000],
+    INP: [200, 500],
+    CLS: [0.1, 0.25],
+    FCP: [1800, 3000],
+    TTFB: [800, 1800],
+  };
+  const [good, poor] = t[name] ?? [Infinity, Infinity];
+  if (p75 <= good) return "#059669";
+  if (p75 <= poor) return "#F59E0B";
+  return "#DC2626";
 }
 
 const COUNTRY_FLAGS: Record<string, string> = {
@@ -397,6 +443,146 @@ export function AnalyticsDashboard() {
       {/* Custom events */}
       {sum(data.eventsTotal) > 0 && (
         <BreakdownList title="Custom events" icon={Activity} data={data.eventsTotal} max={20} />
+      )}
+
+      {/* Web Vitals */}
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <Zap size={16} className="text-[var(--color-text-muted)]" />
+          <h3 className="font-semibold text-sm">Web Vitals · performanță percepută</h3>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {(["LCP", "INP", "CLS", "FCP", "TTFB"] as const).map((v) => {
+            const d = data.vitals?.[v];
+            if (!d) return null;
+            const color = vitalColor(v, d.p75);
+            return (
+              <div key={v} className="p-3 bg-[var(--color-surface-2)] rounded-[8px]">
+                <div className="flex justify-between items-baseline mb-1">
+                  <span className="text-xs font-semibold tracking-wider">{v}</span>
+                  <span className="text-[10px] text-[var(--color-text-muted)] tabular-nums">n={d.samples}</span>
+                </div>
+                <div className="text-2xl font-bold tabular-nums" style={{ color }}>
+                  {d.samples === 0 ? "—" : formatVital(v, d.p75)}
+                </div>
+                <div className="text-[10px] text-[var(--color-text-muted)] tabular-nums">
+                  p50: {formatVital(v, d.p50)} · p95: {formatVital(v, d.p95)}
+                </div>
+                <div className="flex gap-1 mt-2 text-[10px]">
+                  <span className="text-emerald-600">✓ {d.rating.good ?? 0}</span>
+                  <span className="text-amber-500">! {d.rating["needs-improvement"] ?? 0}</span>
+                  <span className="text-red-600">✗ {d.rating.poor ?? 0}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Sesizare funnel */}
+      {data.funnels && Object.keys(data.funnels).length > 0 && (
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp size={16} className="text-[var(--color-text-muted)]" />
+            <h3 className="font-semibold text-sm">Funnel creare sesizare</h3>
+          </div>
+          {Object.entries(data.funnels).map(([funnel, steps]) => {
+            const STEPS = ["start", "tip-selected", "ai-improve", "ai-improve-vision", "submitted"];
+            const startCount = toNum(steps.start);
+            return (
+              <div key={funnel} className="space-y-2">
+                {STEPS.filter((s) => steps[s] !== undefined).map((s) => {
+                  const count = toNum(steps[s]);
+                  const pct = startCount > 0 ? Math.round((count / startCount) * 100) : 0;
+                  return (
+                    <div key={s}>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="font-medium">{s}</span>
+                        <span className="text-[var(--color-text-muted)] tabular-nums">
+                          {count} · {pct}%
+                        </span>
+                      </div>
+                      <div className="h-2 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[var(--color-primary)] transition-all"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+                {toNum(steps.error) > 0 && (
+                  <p className="text-xs text-red-500 mt-2">
+                    ⚠ {toNum(steps.error)} erori la submit
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Click + outbound + rage */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <BreakdownList title="Top click-uri (butoane + CTA)" icon={MousePointerClick} data={data.clicks} max={15} />
+        <BreakdownList title="Link-uri externe" icon={ExternalLink} data={data.outbound} max={15} />
+      </div>
+
+      {/* Rage clicks — frustration */}
+      {sum(data.rageClicks) > 0 && (
+        <div className="bg-[var(--color-surface)] border border-amber-500/30 rounded-[12px] p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Frown size={16} className="text-amber-500" />
+            <h3 className="font-semibold text-sm">Rage clicks · semnale de frustrare</h3>
+          </div>
+          <p className="text-xs text-[var(--color-text-muted)] mb-3">
+            3+ click-uri în aceeași zonă în &lt;1s → butonul pare nefuncțional sau reacția e lentă.
+          </p>
+          <BreakdownList title="" icon={Frown} data={data.rageClicks} max={10} />
+        </div>
+      )}
+
+      {/* Search */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <BreakdownList title="Căutări populare" icon={Search} data={data.searchTerms} max={15} />
+        {sum(data.searchZero) > 0 && (
+          <div className="bg-[var(--color-surface)] border border-red-500/30 rounded-[12px] p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Search size={16} className="text-red-500" />
+              <h3 className="font-semibold text-sm">Căutări fără rezultate</h3>
+            </div>
+            <p className="text-xs text-[var(--color-text-muted)] mb-3">
+              Conținut lipsă — user-ii caută dar nu găsesc. Adaugă pagini pt. aceste queries.
+            </p>
+            <BreakdownList title="" icon={Search} data={data.searchZero} max={10} />
+          </div>
+        )}
+      </div>
+
+      {/* AI + Auth + PWA + Copy */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {sum(data.aiUsage) > 0 && (
+          <BreakdownList title="Folosire AI" icon={Bot} data={data.aiUsage} max={10} />
+        )}
+        {sum(data.authEvents) > 0 && (
+          <BreakdownList title="Auth events" icon={LogIn} data={data.authEvents} max={10} />
+        )}
+        {sum(data.pwaEvents) > 0 && (
+          <BreakdownList title="PWA install" icon={Download} data={data.pwaEvents} max={5} />
+        )}
+        {sum(data.copyEvents) > 0 && (
+          <BreakdownList title="Copy events" icon={Copy} data={data.copyEvents} max={5} />
+        )}
+      </div>
+
+      {/* Form abandon */}
+      {sum(data.formAbandon) > 0 && (
+        <BreakdownList title="Form abandon · unde pleacă user-ii" icon={AlertTriangle} data={data.formAbandon} max={15} />
+      )}
+
+      {/* Error paths — where crashes happen */}
+      {sum(data.errorPaths) > 0 && (
+        <BreakdownList title="Erori per pagină" icon={AlertTriangle} data={data.errorPaths} max={15} />
       )}
 
       {/* Real-time feed */}

@@ -22,6 +22,7 @@ import { PhotoUploader } from "./PhotoUploader";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { EmailChoicePanel } from "./EmailChoicePanel";
 import { buildFormalText, buildGmailLink, buildMailtoLink, type MailtoInput } from "@/lib/sesizari/mailto";
+import { trackFunnelStep, trackAiUsage, trackFormAbandon } from "@/components/analytics/CiviaTracker";
 import { useCountyOptional } from "@/lib/county-context";
 
 interface FormData {
@@ -99,6 +100,30 @@ export function SesizareForm() {
     setData((d) => ({ ...d, [key]: value }));
     setError(null);
   };
+
+  // Funnel entry — user landed on the form
+  useEffect(() => {
+    trackFunnelStep("sesizare-create", "start");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Abandon signal — if the user leaves without hitting submit, fire a
+  // form-abandon event marking the furthest step reached. Lets the
+  // dashboard compute "where do people drop off".
+  useEffect(() => {
+    const onUnload = () => {
+      if (submitted) return;
+      const step =
+        data.tip && data.descriere.length > 10 && data.locatie ? "before-submit"
+        : data.tip && data.descriere.length > 10 ? "before-locatie"
+        : data.tip ? "before-descriere"
+        : "before-tip";
+      trackFormAbandon("sesizare", step);
+    };
+    window.addEventListener("pagehide", onUnload);
+    return () => window.removeEventListener("pagehide", onUnload);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.tip, data.descriere, data.locatie, submitted]);
 
   // Auto-fill from profile (auth) or localStorage (anonymous)
   useEffect(() => {
@@ -225,6 +250,8 @@ export function SesizareForm() {
       if (!silent) setError("Alege tipul problemei — AI folosește un template specific pe tip");
       return;
     }
+    trackAiUsage(opts?.withPhotos ? "improve-vision" : "improve-text", { tip: data.tip });
+    trackFunnelStep("sesizare-create", opts?.withPhotos ? "ai-improve-vision" : "ai-improve");
     setAiLoading(true);
     if (!silent) setError(null);
     try {
@@ -444,6 +471,7 @@ export function SesizareForm() {
       });
       const json = await res.json();
       if (!res.ok) {
+        trackFunnelStep("sesizare-create", "error");
         throw new Error(json.error || "Eroare trimitere");
       }
       // Save user data for anonymous users (so next submission auto-fills)
@@ -454,6 +482,7 @@ export function SesizareForm() {
         );
       }
       setSubmitted({ code: json.data.code });
+      trackFunnelStep("sesizare-create", "submitted", { hasPhotos: imagini.length > 0 ? 1 : 0 });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Eroare trimitere");
     } finally {
@@ -680,6 +709,9 @@ ${today}`;
               onChange={(e) => {
                 update("tip", e.target.value);
                 setTipDetectedByAI(false);
+                if (e.target.value) {
+                  trackFunnelStep("sesizare-create", "tip-selected", { tip: e.target.value });
+                }
               }}
               className={cn(inputClass, "flex-1")}
             >

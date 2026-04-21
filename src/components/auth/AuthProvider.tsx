@@ -32,8 +32,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
       setUser(session?.user ?? null);
+      // Mirror Supabase auth events into analytics so the admin dashboard
+      // can track signup / signin / signout counts. Fire-and-forget;
+      // dynamic import avoids pulling the tracker onto the server bundle.
+      if (typeof window !== "undefined") {
+        import("@/components/analytics/CiviaTracker").then(({ trackAuthEvent }) => {
+          if (event === "SIGNED_IN") trackAuthEvent("signin");
+          else if (event === "SIGNED_OUT") trackAuthEvent("signout");
+          else if (event === "PASSWORD_RECOVERY") trackAuthEvent("password-reset");
+        }).catch(() => { /* silent */ });
+      }
     });
 
     return () => listener.subscription.unsubscribe();
