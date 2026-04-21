@@ -17,6 +17,7 @@ interface Profile {
   address: string | null;
   phone: string | null;
   email: string;
+  hide_name?: boolean;
 }
 
 interface SesizareRow {
@@ -44,7 +45,7 @@ export default function ContPage() {
   const [deleting, setDeleting] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [form, setForm] = useState({ display_name: "", full_name: "", address: "", phone: "" });
+  const [form, setForm] = useState({ display_name: "", full_name: "", address: "", phone: "", hide_name: false });
 
   useEffect(() => {
     if (authLoading) return;
@@ -86,6 +87,7 @@ export default function ContPage() {
           full_name: p.data.full_name ?? "",
           address: p.data.address ?? "",
           phone: p.data.phone ?? "",
+          hide_name: p.data.hide_name ?? false,
         });
       }
       if (s.data) setSesizari(s.data);
@@ -232,6 +234,29 @@ export default function ContPage() {
                   className={inputClass}
                 />
               </Field>
+            </div>
+
+            {/* Confidențialitate */}
+            <div className="mt-5 pt-5 border-t border-[var(--color-border)]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+                Confidențialitate
+              </p>
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={form.hide_name}
+                  onChange={(e) => setForm({ ...form, hide_name: e.target.checked })}
+                  className="mt-0.5 w-4 h-4 accent-[var(--color-primary)] cursor-pointer"
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">Ascunde numele meu pe site</p>
+                  <p className="text-xs text-[var(--color-text-muted)] mt-0.5 leading-relaxed">
+                    Când e bifat, sesizările tale publice apar cu „Cetățean anonim" în loc de numele real.
+                    Numele tău rămâne în email-ul trimis la autorități și în panoul de moderare (e nevoie
+                    pentru identificare legală).
+                  </p>
+                </div>
+              </label>
             </div>
 
             {saveError && (

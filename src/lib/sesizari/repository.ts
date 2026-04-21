@@ -8,6 +8,60 @@ import type {
   SesizareVerificationRow,
 } from "@/lib/supabase/types";
 
+const ANONYMOUS_LABEL = "Cetățean anonim";
+
+// Check whether the current request is authenticated as an admin. Admins
+// always see real author_names (moderation, identification). Anyone else —
+// public readers, authenticated non-admin users, the user themselves —
+// gets the anonymized view for rows whose owner opted into hide_name.
+async function callerIsAdmin(): Promise<boolean> {
+  try {
+    const supabase = await createSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return false;
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    return (profile as { role?: string } | null)?.role === "admin";
+  } catch {
+    return false;
+  }
+}
+
+// Replaces author_name with a generic label for any row whose user_id opted
+// into the privacy flag (profiles.hide_name = true). Runs one batched
+// profile query per call so lists stay cheap. No-op for admins.
+async function anonymizeHiddenAuthors<T extends { user_id: string | null; author_name: string }>(
+  rows: T[],
+): Promise<T[]> {
+  if (rows.length === 0) return rows;
+  if (await callerIsAdmin()) return rows;
+
+  const userIds = Array.from(new Set(rows.map((r) => r.user_id).filter((v): v is string => !!v)));
+  if (userIds.length === 0) return rows;
+
+  const admin = createSupabaseAdmin();
+  const { data } = await admin
+    .from("profiles")
+    .select("id, hide_name")
+    .in("id", userIds);
+
+  const hidden = new Set(
+    (data ?? [])
+      .filter((p) => (p as { hide_name?: boolean }).hide_name === true)
+      .map((p) => (p as { id: string }).id),
+  );
+  if (hidden.size === 0) return rows;
+
+  return rows.map((r) =>
+    r.user_id && hidden.has(r.user_id) ? { ...r, author_name: ANONYMOUS_LABEL } : r,
+  );
+}
+
 export interface ListFilters {
   tip?: string;
   status?: string;
@@ -39,7 +93,7 @@ export async function listSesizari(filters: ListFilters = {}): Promise<SesizareF
 
   const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []) as SesizareFeedRow[];
+  return await anonymizeHiddenAuthors((data ?? []) as SesizareFeedRow[]);
 }
 
 export async function getSesizareByCode(code: string): Promise<SesizareFeedRow | null> {
@@ -50,7 +104,10 @@ export async function getSesizareByCode(code: string): Promise<SesizareFeedRow |
     .eq("code", code)
     .maybeSingle();
   if (error) throw error;
-  return (data as SesizareFeedRow | null) ?? null;
+  const row = (data as SesizareFeedRow | null) ?? null;
+  if (!row) return null;
+  const [anonymized] = await anonymizeHiddenAuthors([row]);
+  return anonymized ?? row;
 }
 
 export async function getSesizareById(id: string): Promise<SesizareFeedRow | null> {
@@ -61,7 +118,10 @@ export async function getSesizareById(id: string): Promise<SesizareFeedRow | nul
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
-  return (data as SesizareFeedRow | null) ?? null;
+  const row = (data as SesizareFeedRow | null) ?? null;
+  if (!row) return null;
+  const [anonymized] = await anonymizeHiddenAuthors([row]);
+  return anonymized ?? row;
 }
 
 export async function getTimeline(sesizareId: string): Promise<SesizareTimelineRow[]> {

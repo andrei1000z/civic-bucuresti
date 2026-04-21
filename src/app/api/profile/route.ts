@@ -13,6 +13,7 @@ const updateSchema = z.object({
   full_name: z.preprocess(emptyToNull, z.string().min(2).max(120).nullable().optional()),
   address: z.preprocess(emptyToNull, z.string().min(3).max(300).nullable().optional()),
   phone: z.preprocess(emptyToNull, z.string().max(30).nullable().optional()),
+  hide_name: z.boolean().optional(),
 });
 
 export async function GET() {
@@ -39,7 +40,7 @@ export async function PUT(req: Request) {
     const parsed = updateSchema.parse(body);
 
     // Build update object — null means "clear field", undefined means "don't change"
-    const updates: Record<string, string | null> = {};
+    const updates: Record<string, string | null | boolean> = {};
     if (parsed.display_name !== undefined) {
       updates.display_name = parsed.display_name ? sanitizeText(parsed.display_name, 80) : null;
     }
@@ -52,12 +53,19 @@ export async function PUT(req: Request) {
     if (parsed.phone !== undefined) {
       updates.phone = parsed.phone ? sanitizeText(parsed.phone, 30) : null;
     }
+    if (parsed.hide_name !== undefined) {
+      updates.hide_name = parsed.hide_name;
+    }
 
     // Ensure profile row exists (might not if trigger didn't fire)
+    const displayNameForUpsert =
+      typeof updates.display_name === "string" && updates.display_name
+        ? updates.display_name
+        : user.email?.split("@")[0] || "Cetățean";
     await supabase
       .from("profiles")
       .upsert(
-        { id: user.id, display_name: updates.display_name || user.email?.split("@")[0] || "Cetățean" },
+        { id: user.id, display_name: displayNameForUpsert },
         { onConflict: "id" }
       );
 
