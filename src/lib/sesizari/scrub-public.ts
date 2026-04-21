@@ -11,13 +11,29 @@ export interface ScrubOptions {
 const ADDRESS_REDACTED = "[adresă ascunsă]";
 const NAME_REDACTED = "Cetățean anonim";
 
+// End-of-address markers: the address starts after "locuiesc în/pe" or
+// "domiciliat în" and continues until one of these shows up. Includes:
+//   • " și {verb}"    — "și doresc / și vă aduc / și solicit..."
+//   • ", {verb}"      — "locuiesc în X, Sector 5, vă aduc..." (verb starts
+//                       after the last address comma)
+//   • ". "            — next sentence, but NOT abbreviations like "Str."/"bl."
+//   • double newline  — paragraph break
+//   • end of string
+// We write the address with a lookahead so the marker stays in the output.
+const ADDRESS_END = String.raw`(?=\s*(?:\s+(?:și|si|şi)\s+\w+|\s+(?:vă|va|mă|ma|îmi|imi|doresc|solicit|adresez|semnal(?:ez|au)|aduc)\b|[?!]\s|\n\s*\n|$))`;
+
 /**
  * Strips the home address (and optionally the author's name) from an
  * AI-generated or templated formal letter. Matches both openers we've
  * used:
- *   1. "Mă numesc {NAME}, locuiesc în {ADDRESS} și doresc..."  (new)
- *   2. "Subsemnatul(a) {NAME}, domiciliat(ă) în {ADDRESS}, ..."  (legacy)
- * Also redacts the signature line when hiding the name.
+ *   1. "Mă numesc {NAME}, locuiesc pe/în {ADDRESS} și doresc..."  (new)
+ *   2. "Subsemnatul(a) {NAME}, domiciliat(ă) pe/în {ADDRESS}, ..."  (legacy)
+ * Also redacts the signature line when hiding the name, and any
+ * standalone occurrence of the name mid-text.
+ *
+ * The ADDRESS_END sentinel is crafted so it doesn't stop at commas inside
+ * the address itself (Strada X nr 12, Sector 5, București) nor at periods
+ * inside Romanian abbreviations (Str., nr., bl., ap., et., sc.).
  */
 export function scrubFormalTextForPublic(text: string, opts: ScrubOptions): string {
   if (!text) return text;
@@ -25,30 +41,38 @@ export function scrubFormalTextForPublic(text: string, opts: ScrubOptions): stri
 
   const nameRedacted = opts.hideName ? NAME_REDACTED : (opts.authorName?.trim() || "Cetățean");
 
-  // 1. New opener: "Mă numesc X, locuiesc pe/în {ADDRESS} {tail}"
-  // Match greedily up to the next separator that starts the next clause
-  // ("și doresc", ".", "\n"). We replace the whole identity line to keep
-  // the grammar clean.
+  // 1. New opener: "Mă numesc X, locuiesc pe/în {ADDRESS}"
+  const newOpener = new RegExp(
+    String.raw`M[ăa]\s+numesc\s+([^,\n]+),\s*locuiesc\s+(?:pe|în|in)\s+[^\n]+?${ADDRESS_END}`,
+    "gim",
+  );
+  out = out.replace(newOpener, () => `Mă numesc ${nameRedacted}, locuiesc în ${ADDRESS_REDACTED}`);
+
+  // 2. Legacy opener: "Subsemnatul/Subsemnata X, domiciliat(ă) pe/în Y"
+  const legacyOpener = new RegExp(
+    String.raw`Subsemnat(?:ul|a|ul\(a\)|a\/Subsemnatul)?\s+([^,\n]+),\s*domiciliat(?:\(?ă\)?|ă|a)?\s+(?:pe|în|in)\s+[^\n]+?${ADDRESS_END}`,
+    "gim",
+  );
   out = out.replace(
-    /M[ăa]\s+numesc\s+([^,\n]+),\s*locuiesc\s+(?:pe|în)\s+([^\n]*?)(\s+(?:și|si)\s+doresc[^\n]*|\.$|(?=\n))/gim,
-    (_m, _name: string, _addr: string, tail: string) => {
-      const cleanTail = tail.trim();
-      const suffix = cleanTail && cleanTail !== "."
-        ? ` ${cleanTail}`
-        : ` și doresc să vă aduc la cunoștință o problemă care necesită intervenția dumneavoastră.`;
-      return `Mă numesc ${nameRedacted}, locuiesc în ${ADDRESS_REDACTED}${suffix}`;
-    },
+    legacyOpener,
+    () => `Subsemnat(ul/a) ${nameRedacted}, domiciliat(ă) în ${ADDRESS_REDACTED}`,
   );
 
-  // 2. Legacy opener: "Subsemnatul X, domiciliat în Y, ..."
-  out = out.replace(
-    /Subsemnat(?:ul|a|ul\(a\)|a\/Subsemnatul)?\s+([^,\n]+),\s*domiciliat(?:\(?ă\)?|ă)?\s+(?:pe|în)\s+([^,\n]+)(,\s*[^\n]*)?/gim,
-    (_m, _name: string, _addr: string, tail: string | undefined) => {
-      return `Subsemnat(ul/a) ${nameRedacted}, domiciliat(ă) în ${ADDRESS_REDACTED}${tail ?? ""}`;
-    },
+  // 3. Fallback: any remaining "locuiesc pe/în X" or "domiciliat în X"
+  // clause the openers above didn't catch (user typed a weird variant).
+  const bareLocuiesc = new RegExp(
+    String.raw`\blocuiesc\s+(?:pe|în|in)\s+[^\n]+?${ADDRESS_END}`,
+    "gim",
   );
+  out = out.replace(bareLocuiesc, `locuiesc în ${ADDRESS_REDACTED}`);
 
-  // 3. Signature block (always uses the name). If hiding, redact it.
+  const bareDomiciliat = new RegExp(
+    String.raw`\bdomiciliat(?:\(?ă\)?|ă|a)?\s+(?:pe|în|in)\s+[^\n]+?${ADDRESS_END}`,
+    "gim",
+  );
+  out = out.replace(bareDomiciliat, `domiciliat(ă) în ${ADDRESS_REDACTED}`);
+
+  // 4. Signature block (always uses the name). If hiding, redact it.
   if (opts.hideName) {
     out = out.replace(
       /(Cu\s+(?:respect|stim[ăa]),?\s*\n)[^\n]+/i,
@@ -56,7 +80,7 @@ export function scrubFormalTextForPublic(text: string, opts: ScrubOptions): stri
     );
   }
 
-  // 4. Any leftover literal occurrences of the real name mid-text —
+  // 5. Any leftover literal occurrences of the real name mid-text —
   // e.g., the AI sometimes drops the name in a "Eu, {Name}," aside.
   // Only redact when hiding, and only when the name is ≥ 3 chars to
   // avoid false positives on common words.

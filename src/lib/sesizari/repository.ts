@@ -357,5 +357,8 @@ export async function getSimilarSesizari(
     // RPC might not exist yet (migration not applied) — fail gracefully
     return [];
   }
-  return (data ?? []) as SesizareFeedRow[];
+  // Apply the same anonymization + address scrub as every other read path.
+  // Without this, the "Alții au sesizat aceeași problemă" widget leaked
+  // the real author_name even when hide_name was enabled.
+  return await anonymizeHiddenAuthors((data ?? []) as SesizareFeedRow[]);
 }

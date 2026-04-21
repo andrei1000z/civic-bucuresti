@@ -100,4 +100,54 @@ describe("scrubFormalTextForPublic", () => {
     expect(out).not.toContain("Eduard Andrei Mușat");
     expect((out.match(/Cetățean anonim/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
+
+  it("captures full multi-comma address with Sector marker", () => {
+    const text = `Mă numesc Ion Popescu, locuiesc în Strada Novaci 12, Sector 5, București și doresc să vă aduc la cunoștință.`;
+    const out = scrubFormalTextForPublic(text, {
+      authorName: "Ion Popescu",
+      hideName: false,
+    });
+    expect(out).not.toContain("Strada Novaci");
+    expect(out).not.toContain("Sector 5");
+    expect(out).not.toContain("București și");
+    expect(out).toContain("[adresă ascunsă]");
+  });
+
+  it("handles address with Romanian abbreviations (Str., nr., bl., ap.)", () => {
+    const text = `Mă numesc Maria Ionescu, locuiesc pe Str. Novaci nr. 12, bl. A3, sc. 1, ap. 15, Sector 5 și doresc să semnalez.`;
+    const out = scrubFormalTextForPublic(text, {
+      authorName: "Maria Ionescu",
+      hideName: false,
+    });
+    expect(out).not.toContain("Novaci");
+    expect(out).not.toContain("bl. A3");
+    expect(out).not.toContain("ap. 15");
+    expect(out).toContain("[adresă ascunsă]");
+    expect(out).toContain("doresc să semnalez");
+  });
+
+  it("scrubs address even when opener uses 'vă aduc' instead of 'și doresc'", () => {
+    const text = `Mă numesc Dan Radu, locuiesc în Bulevardul Dinicu Golescu 30, Sector 1, București, vă aduc la cunoștință problema.`;
+    const out = scrubFormalTextForPublic(text, {
+      authorName: "Dan Radu",
+      hideName: false,
+    });
+    expect(out).not.toContain("Dinicu Golescu 30");
+    expect(out).not.toContain("Sector 1, București,");
+    expect(out).toContain("[adresă ascunsă]");
+  });
+
+  it("scrubs address when the clause ends at paragraph break (no 'și doresc')", () => {
+    const text = `Mă numesc Ana Dobre, locuiesc în Aleea Teilor 5, Sector 3, București.
+
+În ultima perioadă am observat...`;
+    const out = scrubFormalTextForPublic(text, {
+      authorName: "Ana Dobre",
+      hideName: false,
+    });
+    expect(out).not.toContain("Aleea Teilor 5");
+    expect(out).not.toContain("Sector 3, București");
+    expect(out).toContain("[adresă ascunsă]");
+    expect(out).toContain("În ultima perioadă am observat");
+  });
 });
