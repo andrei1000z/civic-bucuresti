@@ -26,6 +26,18 @@ export function CountUp({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    // Respect prefers-reduced-motion — skip the count-up animation and
+    // just jump to the final value. Matches the global CSS guard.
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      setValue(to);
+      started.current = true;
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting && !started.current) {

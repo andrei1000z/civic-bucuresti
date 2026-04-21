@@ -15,6 +15,8 @@ import { DeferredClientMount } from "@/components/DeferredClientMount";
 import { ToastProvider } from "@/components/Toast";
 import { BackToTop } from "@/components/BackToTop";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { MobileFab } from "@/components/layout/MobileFab";
+import { KeyboardShortcuts } from "@/components/KeyboardShortcuts";
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/constants";
 
 // CivicAssistant is heavy (AI chat UI) and not needed on first paint — lazy-load it.
@@ -130,6 +132,8 @@ export default function RootLayout({
                 <CookieBanner />
                 <BackToTop />
                 <InstallPrompt />
+                <MobileFab />
+                <KeyboardShortcuts />
               </DeferredClientMount>
             </ToastProvider>
           </AuthProvider>

@@ -193,6 +193,48 @@ export default function ContPage() {
               </div>
             </div>
 
+            {/* Profile completeness nudge — sesizările se trimit mai ușor
+                când avem full_name + adresă salvate. */}
+            {(() => {
+              const checks: Array<{ ok: boolean; label: string }> = [
+                { ok: !!form.full_name, label: "Nume complet" },
+                { ok: !!form.address, label: "Adresă" },
+                { ok: !!form.phone, label: "Telefon (opțional)" },
+              ];
+              const done = checks.filter((c) => c.ok).length;
+              const pct = Math.round((done / checks.length) * 100);
+              if (pct === 100) return null;
+              return (
+                <div className="mb-5 p-3 rounded-[8px] bg-amber-500/5 border border-amber-500/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                      Profil {pct}% complet
+                    </span>
+                    <span className="text-xs text-[var(--color-text-muted)]">{done}/{checks.length}</span>
+                  </div>
+                  <div className="h-1.5 bg-[var(--color-surface-2)] rounded-full overflow-hidden mb-2">
+                    <div
+                      className="h-full bg-amber-500 transition-all"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <ul className="space-y-1 text-xs">
+                    {checks
+                      .filter((c) => !c.ok)
+                      .map((c) => (
+                        <li key={c.label} className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                          Lipsește: {c.label}
+                        </li>
+                      ))}
+                  </ul>
+                  <p className="text-[11px] text-[var(--color-text-muted)] mt-2">
+                    Completează pentru sesizări mai rapide — datele se auto-completează la fiecare trimitere.
+                  </p>
+                </div>
+              );
+            })()}
+
             <div className="space-y-4">
               <Field label="Nume afișat">
                 <input

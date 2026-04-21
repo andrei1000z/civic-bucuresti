@@ -9,22 +9,41 @@ export default function robots(): MetadataRoute.Robots {
     };
   }
 
+  // Private-by-default paths — blocked for EVERY crawler, including AI.
+  const PRIVATE = [
+    "/api/",
+    "/auth",
+    "/auth/",
+    "/cont",
+    "/cont/",
+    "/admin",
+    "/admin/",
+  ];
+
   return {
     rules: [
-      {
-        userAgent: "*",
-        allow: "/",
-        disallow: [
-          "/api/",        // all API routes
-          "/auth",        // auth callback/error (both with & without slash)
-          "/auth/",
-          "/cont",        // personal account (private)
-          "/cont/",
-          "/admin",       // admin panel
-          "/admin/",
-        ],
-      },
+      // Default policy — search engines + everything else can read the
+      // public site, but nothing under /api/, /auth, /cont, /admin.
+      { userAgent: "*", allow: "/", disallow: PRIVATE },
+
+      // Explicitly allow major search crawlers (redundant but reassures
+      // Googlebot / Bingbot when some hosting provider wildcards block).
+      { userAgent: "Googlebot", allow: "/", disallow: PRIVATE },
+      { userAgent: "Bingbot", allow: "/", disallow: PRIVATE },
+      { userAgent: "DuckDuckBot", allow: "/", disallow: PRIVATE },
+
+      // AI crawlers — allow them to index public civic content so the
+      // site shows up in answers about Romanian transparency / local
+      // government. Block the same private paths. If you later want to
+      // opt out of AI training, flip these to `disallow: "/"`.
+      { userAgent: "GPTBot", allow: "/", disallow: PRIVATE },
+      { userAgent: "ClaudeBot", allow: "/", disallow: PRIVATE },
+      { userAgent: "anthropic-ai", allow: "/", disallow: PRIVATE },
+      { userAgent: "PerplexityBot", allow: "/", disallow: PRIVATE },
+      { userAgent: "Google-Extended", allow: "/", disallow: PRIVATE },
+      { userAgent: "CCBot", allow: "/", disallow: PRIVATE },
     ],
     sitemap: [`${SITE_URL}/sitemap.xml`],
+    host: SITE_URL,
   };
 }

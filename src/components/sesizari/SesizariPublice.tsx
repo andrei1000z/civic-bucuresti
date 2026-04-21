@@ -189,22 +189,46 @@ export function SesizariPublice() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="py-20 text-center">
-          <p className="text-[var(--color-text-muted)] mb-4">
-            Nicio sesizare găsită cu aceste filtre.
-          </p>
-          <button
-            onClick={() => {
-              setFilterTip("toate");
-              setFilterStatus("toate");
-              setFilterSector("toate");
-              setSort("recent");
-            }}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
-          >
-            🔄 Resetează filtrele
-          </button>
-        </div>
+        (() => {
+          const hasActiveFilter =
+            filterTip !== "toate" || filterStatus !== "toate" || filterSector !== "toate";
+          return (
+            <div className="py-20 text-center">
+              <div className="text-6xl mb-4 opacity-40">📮</div>
+              <p className="text-lg font-semibold mb-2">
+                {hasActiveFilter
+                  ? "Nicio sesizare cu aceste filtre"
+                  : "Încă nu sunt sesizări publice"}
+              </p>
+              <p className="text-sm text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">
+                {hasActiveFilter
+                  ? "Încearcă alte combinații de filtre sau resetează-le."
+                  : "Fii primul cetățean care semnalează o problemă. Platforma generează automat textul formal și îl trimite la autoritatea competentă."}
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                {hasActiveFilter && (
+                  <button
+                    onClick={() => {
+                      setFilterTip("toate");
+                      setFilterStatus("toate");
+                      setFilterSector("toate");
+                      setSort("recent");
+                    }}
+                    className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
+                  >
+                    🔄 Resetează filtrele
+                  </button>
+                )}
+                <Link
+                  href={county ? `/${county.slug}/sesizari` : "/b/sesizari"}
+                  className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+                >
+                  Fă o sesizare acum →
+                </Link>
+              </div>
+            </div>
+          );
+        })()
       ) : (
         <>
         <div className="grid md:grid-cols-2 gap-4">

@@ -1,0 +1,152 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { X, Keyboard } from "lucide-react";
+
+const SHORTCUTS: Array<{ keys: string[]; label: string }> = [
+  { keys: ["Ctrl", "K"], label: "Deschide căutarea globală" },
+  { keys: ["/"], label: "Caută (alternativă)" },
+  { keys: ["?"], label: "Arată acest panou" },
+  { keys: ["g", "h"], label: "Mergi la pagina principală" },
+  { keys: ["g", "s"], label: "Mergi la sesizări" },
+  { keys: ["g", "m"], label: "Mergi la hărți" },
+  { keys: ["g", "i"], label: "Mergi la știri" },
+  { keys: ["Esc"], label: "Închide modal / panou" },
+];
+
+/**
+ * Global keyboard shortcut overlay. Opens when user presses "?" (unless
+ * focus is inside a form field). Also implements a small "g X" chord
+ * router — g then h goes home, g then s goes to sesizări, etc.
+ */
+export function KeyboardShortcuts() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let chord: string | null = null;
+    let chordTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const isEditableTarget = (t: EventTarget | null): boolean => {
+      const el = t as HTMLElement | null;
+      if (!el) return false;
+      const tag = el.tagName;
+      return (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        el.isContentEditable
+      );
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      // ? → open help (ignore while typing)
+      if (e.key === "?" && !isEditableTarget(e.target)) {
+        e.preventDefault();
+        setOpen((v) => !v);
+        return;
+      }
+
+      // Esc → close
+      if (e.key === "Escape" && open) {
+        setOpen(false);
+        return;
+      }
+
+      // `/` → focus search (dispatches the existing palette event)
+      if (e.key === "/" && !isEditableTarget(e.target)) {
+        e.preventDefault();
+        document.dispatchEvent(new CustomEvent("open-command-palette"));
+        return;
+      }
+
+      // "g X" chord navigation
+      if (isEditableTarget(e.target)) return;
+      if (chord === "g") {
+        const dest: Record<string, string> = {
+          h: "/",
+          s: "/sesizari",
+          m: "/harti",
+          i: "/stiri",
+          g: "/ghiduri",
+          c: "/calendar-civic",
+          a: "/admin",
+        };
+        const url = dest[e.key];
+        if (url) {
+          e.preventDefault();
+          window.location.href = url;
+        }
+        chord = null;
+        if (chordTimer) clearTimeout(chordTimer);
+        return;
+      }
+      if (e.key === "g" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        chord = "g";
+        chordTimer = setTimeout(() => {
+          chord = null;
+        }, 1500);
+      }
+    };
+
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      if (chordTimer) clearTimeout(chordTimer);
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={() => setOpen(false)}
+    >
+      <div
+        role="dialog"
+        aria-label="Scurtături tastatură"
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] shadow-[var(--shadow-xl)] overflow-hidden"
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
+          <div className="flex items-center gap-2">
+            <Keyboard size={18} className="text-[var(--color-primary)]" />
+            <h3 className="font-semibold">Scurtături tastatură</h3>
+          </div>
+          <button
+            onClick={() => setOpen(false)}
+            className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)]"
+            aria-label="Închide"
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <ul className="py-2">
+          {SHORTCUTS.map((s, i) => (
+            <li
+              key={i}
+              className="flex items-center justify-between px-5 py-2.5 text-sm hover:bg-[var(--color-surface-2)]"
+            >
+              <span>{s.label}</span>
+              <span className="flex items-center gap-1">
+                {s.keys.map((k, j) => (
+                  <kbd
+                    key={j}
+                    className="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-mono"
+                  >
+                    {k}
+                  </kbd>
+                ))}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="px-5 py-3 text-xs text-[var(--color-text-muted)] border-t border-[var(--color-border)]">
+          Apasă <kbd className="px-1.5 py-0.5 bg-[var(--color-surface-2)] rounded font-mono text-[10px]">?</kbd> oricând pt. a deschide acest panou.
+        </p>
+      </div>
+    </div>
+  );
+}

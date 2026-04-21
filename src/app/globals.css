@@ -417,3 +417,25 @@ h1, h2, h3, h4, h5, h6 {
   h1, h2, h3 { page-break-after: avoid; }
   p, li { page-break-inside: avoid; }
 }
+
+/* ───────────────────────────────────────────────────────────────
+   Accessibility: focus ring visibility
+   Shows an obvious 2px outline around keyboard-focused interactive
+   elements. Suppressed for mouse clicks via :focus-visible. Keeps
+   the WCAG 2.4.7 "Focus Visible" criterion satisfied without
+   touching per-component styles.
+   ─────────────────────────────────────────────────────────────── */
+:where(a, button, [role="button"], input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.dark :where(a, button, [role="button"], input, select, textarea, [tabindex]):focus-visible {
+  outline-color: #34d399;
+}
+
+/* Keyboard shortcut <kbd> element styling */
+kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85em;
+}

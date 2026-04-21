@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { SearchX, Home, Map, AlertCircle, BookOpen, Newspaper } from "lucide-react";
+import { SearchX, Home, Map, AlertCircle, BookOpen, Newspaper, Search } from "lucide-react";
+import { NotFoundTracker } from "./NotFoundTracker";
 
 export default function NotFound() {
   const quickLinks = [
@@ -11,6 +12,7 @@ export default function NotFound() {
 
   return (
     <div className="container-narrow py-16 md:py-24 max-w-lg text-center">
+      <NotFoundTracker />
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center">
         <SearchX size={36} className="text-[var(--color-text-muted)]" />
       </div>
@@ -18,13 +20,29 @@ export default function NotFound() {
       <p className="text-lg text-[var(--color-text-muted)] mb-8">
         Pagina pe care o cauți nu există sau a fost mutată.
       </p>
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors mb-8"
-      >
-        <Home size={16} />
-        Pagina principală
-      </Link>
+
+      <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
+        <Link
+          href="/"
+          className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+        >
+          <Home size={16} />
+          Pagina principală
+        </Link>
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof document !== "undefined") {
+              document.dispatchEvent(new CustomEvent("open-command-palette"));
+            }
+          }}
+          className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
+        >
+          <Search size={16} />
+          Caută pe site <kbd className="text-[10px] px-1.5 py-0.5 bg-[var(--color-border)] rounded font-mono">Ctrl K</kbd>
+        </button>
+      </div>
+
       <div className="mt-8 pt-6 border-t border-[var(--color-border)]">
         <p className="text-sm text-[var(--color-text-muted)] mb-4">Sau încearcă:</p>
         <div className="flex flex-wrap justify-center gap-3">

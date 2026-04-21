@@ -55,11 +55,34 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
   const iconSize = size === "sm" ? 13 : 15;
   const px = size === "sm" ? "px-2 py-1" : "px-3 py-1.5";
 
+  // Prefer the native Web Share API when available (mobile browsers,
+  // Chrome desktop 89+). Falls through to the menu if the user cancels
+  // or the platform lacks support.
+  const tryNativeShare = async (): Promise<boolean> => {
+    const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+    if (typeof nav.share !== "function") return false;
+    try {
+      await nav.share({ title, url });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return (
     <>
       <div ref={ref} className="relative inline-block" data-no-print>
         <button
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(!open); }}
+          onClick={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // On touch / small screens try the OS share sheet first.
+            if (typeof window !== "undefined" && window.matchMedia?.("(pointer: coarse)").matches) {
+              const shared = await tryNativeShare();
+              if (shared) return;
+            }
+            setOpen(!open);
+          }}
           className={cn(
             "inline-flex items-center gap-1 rounded-[8px] text-xs font-medium transition-colors",
             px,
