@@ -15,7 +15,8 @@ import {
 import { SESIZARE_TIPURI } from "@/lib/constants";
 import { getAuthoritiesFor } from "@/lib/sesizari/authorities";
 import { detectSectorFromCoords } from "@/lib/geo/sector-from-coords";
-import { detectGen, subsemnatulForm, domiciliatForm } from "@/lib/sesizari/gen";
+// Gender-detection helpers are no longer needed — the new email template uses
+// the neutral "Mă numesc X, locuiesc în Y" opening instead of Subsemnatul(a).
 import { cn } from "@/lib/utils";
 import { PhotoUploader } from "./PhotoUploader";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -463,10 +464,6 @@ export function SesizareForm() {
   const tipInfo = SESIZARE_TIPURI.find((t) => t.value === data.tip);
   const recipients = data.tip ? getAuthoritiesFor(data.tip, data.sector, detectedCounty, data.locatie) : null;
 
-  const gen = data.nume ? detectGen(data.nume) : null;
-  const subsemnatul = gen ? subsemnatulForm(gen) : "Subsemnatul(a)";
-  const domiciliat = gen ? domiciliatForm(gen) : "domiciliat(ă)";
-
   const LUNI_RO = ["ianuarie","februarie","martie","aprilie","mai","iunie","iulie","august","septembrie","octombrie","noiembrie","decembrie"];
   const now = new Date();
   const today = `${now.getDate()} ${LUNI_RO[now.getMonth()]} ${now.getFullYear()}`;
@@ -505,18 +502,21 @@ export function SesizareForm() {
       })
     : `Bună ziua,
 
-${subsemnatul} ${data.nume || "[NUMELE]"}, ${domiciliat} în ${data.adresa || "[ADRESA]"}, vă adresez prezenta sesizare în temeiul OG 27/2002, semnalată astăzi, ${today}.
+Mă numesc ${data.nume || "[NUMELE]"}, locuiesc în ${data.adresa || "[ADRESA]"} și doresc să vă aduc la cunoștință o problemă care afectează calitatea vieții pe ${data.locatie || "[LOCAȚIA]"}.
 
-Vă sesizez cu privire la ${tipInfo?.label.toLowerCase() || "[tipul problemei]"}${constatareText}, în următoarea locație: ${data.locatie || "[LOCAȚIA]"}.
-
-${data.descriere || "[DESCRIEREA DETALIATĂ A PROBLEMEI]"}
+Astăzi, ${today}, am observat ${tipInfo?.label.toLowerCase() || "[tipul problemei]"}${constatareText} în această zonă. ${data.descriere || "[DESCRIEREA DETALIATĂ A PROBLEMEI]"}
 ${evidenceText}
-Vă solicit:
-1. Remedierea problemei semnalate.
-2. Comunicarea unui răspuns în termenul legal de 30 de zile (art. 8, OG 27/2002).
-3. Confirmarea înregistrării sesizării cu număr de înregistrare.
+Pentru a rezolva această situație, vă solicit respectuos să luați următoarele măsuri:
 
-Cu respect,
+1. Verificare la fața locului: constatarea situației și identificarea măsurilor necesare.
+2. Intervenție corespunzătoare: remedierea problemei în termen rezonabil.
+3. Comunicare răspuns: informare privind măsurile luate, conform OG 27/2002.
+
+De asemenea, vă rog să îmi furnizați un număr de înregistrare pentru această sesizare, pentru a putea urmări progresul soluționării.
+
+Vă mulțumesc anticipat pentru atenția acordată.
+
+Cu stimă,
 ${data.nume || "[NUMELE]"}
 ${today}`;
 

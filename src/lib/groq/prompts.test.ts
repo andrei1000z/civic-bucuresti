@@ -15,8 +15,11 @@ describe("Groq system prompts", () => {
 
   it("SYSTEM_PROMPT_FORMAL uses classic letter template", () => {
     expect(SYSTEM_PROMPT_FORMAL).toContain("Bună ziua");
-    expect(SYSTEM_PROMPT_FORMAL).toContain("Cu respect");
+    // Accept either the legacy "Cu respect" or the new warmer "Cu stimă"
+    expect(SYSTEM_PROMPT_FORMAL).toMatch(/Cu (respect|stim[ăa])/);
     expect(SYSTEM_PROMPT_FORMAL).toContain("OG 27/2002");
+    // New narrative opening
+    expect(SYSTEM_PROMPT_FORMAL).toContain("Mă numesc");
   });
 
   it("SYSTEM_PROMPT_CLASSIFIER lists all 16 types", () => {
