@@ -9,6 +9,8 @@ import { sanitizeText, escapeHtml } from "@/lib/sanitize";
 import { humanizeSupabaseError } from "@/lib/supabase/errors";
 import { sendEmail, emailTemplate } from "@/lib/email/resend";
 import { invalidateSesizariCache } from "@/lib/cached-queries";
+import { polishSesizare } from "@/lib/sesizari/polish";
+import { forwardGeocode } from "@/lib/sesizari/geocoding";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +41,21 @@ const createSchema = z.object({
   // Accept any value here (mobile autofill sometimes fills it) — we check manually below.
   _honey: z.string().optional().default(""),
 });
+
+// Great-circle distance in km between two WGS84 points. Used to detect
+// "the user's GPS was clearly wrong" at sesizare creation time — if parsed
+// coords are >20 km from a Nominatim forward-geocode of their text, we
+// trust the text.
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -86,15 +103,46 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
 
     const code = await generateUniqueCode();
+
+    // Polish title + descriere + locatie via AI before saving. User input
+    // is often ALL CAPS, imperative and without diacritics — not something
+    // we want as the public face of the sesizare. Fast model, ~200ms.
+    const polished = await polishSesizare({
+      titlu: sanitizeText(parsed.titlu, 200),
+      descriere: sanitizeText(parsed.descriere, 2000),
+      locatie: sanitizeText(parsed.locatie, 300),
+      tip: parsed.tip,
+    });
+
+    // If the submitted lat/lng doesn't match the location text (common when
+    // the user skipped GPS and we fell back to a default center), re-forward-
+    // geocode the polished location text and use those coordinates instead.
+    let finalLat = parsed.lat;
+    let finalLng = parsed.lng;
+    try {
+      const hit = await forwardGeocode(polished.locatie);
+      if (hit) {
+        // If the parsed lat/lng is >20km away from the geocoded result,
+        // the user's coords are almost certainly wrong — prefer geocode.
+        const distKm = haversineKm(parsed.lat, parsed.lng, hit.lat, hit.lng);
+        if (distKm > 20) {
+          finalLat = hit.lat;
+          finalLng = hit.lng;
+        }
+      }
+    } catch { /* silent — keep original coords */ }
+
     try {
       const row = await createSesizare({
         code,
         user_id: user?.id ?? null,
         ...parsed,
         author_name: sanitizeText(parsed.author_name, 120),
-        titlu: sanitizeText(parsed.titlu, 200),
-        locatie: sanitizeText(parsed.locatie, 300),
-        descriere: sanitizeText(parsed.descriere, 2000),
+        titlu: polished.titlu,
+        locatie: polished.locatie,
+        descriere: polished.descriere,
+        lat: finalLat,
+        lng: finalLng,
       });
 
       // Bust stats cache so /impact, LiveStatsBar, /api/v1/stats see the new

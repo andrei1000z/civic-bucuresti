@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CheckCircle2, XCircle, Eye, Loader2, MapPin } from "lucide-react";
+import { CheckCircle2, XCircle, Eye, Loader2, MapPin, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
 import { timeAgo } from "@/lib/utils";
@@ -56,6 +56,32 @@ export default function AdminSesizariPage() {
       toast(action === "approve" ? "Sesizare aprobată" : "Sesizare respinsă", "success");
     } catch (e) {
       toast(e instanceof Error ? e.message : "Eroare", "error");
+    } finally {
+      setActing(null);
+    }
+  };
+
+  const polish = async (code: string) => {
+    setActing(`polish-${code}`);
+    try {
+      const res = await fetch(`/api/admin/sesizari/${code}/polish`, { method: "POST" });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || "Eroare polish");
+      setRows((prev) =>
+        prev.map((r) =>
+          r.code === code
+            ? {
+                ...r,
+                titlu: j.data.titlu ?? r.titlu,
+                locatie: j.data.locatie ?? r.locatie,
+              }
+            : r,
+        ),
+      );
+      const note = j.data.geocodeNote ? ` (${j.data.geocodeNote})` : "";
+      toast(`Polished ${code}${note}`, "success");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Eroare polish", "error");
     } finally {
       setActing(null);
     }
@@ -140,6 +166,14 @@ export default function AdminSesizariPage() {
                   >
                     <Eye size={14} />
                   </Link>
+                  <button
+                    onClick={() => polish(s.code)}
+                    disabled={acting === `polish-${s.code}`}
+                    className="w-9 h-9 rounded-[8px] bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center hover:brightness-110 disabled:opacity-50 transition-all"
+                    title="Rescrie cu AI + re-geocode"
+                  >
+                    {acting === `polish-${s.code}` ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                  </button>
                   {s.moderation_status !== "approved" && (
                     <button
                       onClick={() => moderate(s.code, "approve")}
