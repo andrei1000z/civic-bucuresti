@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageCircle, X, Send, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trackAiUsage, trackCustomEvent } from "@/components/analytics/CiviaTracker";
 
 interface Message {
   role: "user" | "assistant";
@@ -135,6 +136,14 @@ export function CivicAssistant() {
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || streaming) return;
     const userMsg: Message = { role: "user", content: text.trim() };
+    // Track each question for the admin dashboard — helps spot content
+    // gaps ("what do people keep asking that we don't have a page for?")
+    // and validates which quick-actions get used.
+    trackAiUsage("chat");
+    trackCustomEvent("ai-chat-message", {
+      question: text.trim().slice(0, 160),
+      turn: messages.length,
+    });
     setMessages((prev) => {
       const next = [...prev, userMsg, { role: "assistant" as const, content: "" }];
       return next;

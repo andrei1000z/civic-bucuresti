@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { SITE_NAME } from "@/lib/constants";
 import { CookiePreferencesButton } from "./FooterClientLinks";
+import { FooterFeedback } from "./FooterFeedback";
 
 const linkCls =
   "text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors";
@@ -93,6 +94,10 @@ export function Footer() {
             </ul>
           </div>
         </div>
+
+        {/* Feedback + newsletter — pinned above the copyright bar so
+            they get decent engagement without hijacking the fold. */}
+        <FooterFeedback />
 
         {/* ── Bottom bar ────────────────────────────────────── */}
         <div className="mt-10 pt-6 border-t border-[var(--color-border)]">

@@ -478,6 +478,45 @@ async function handleSummary() {
     ]),
   ]);
 
+  // Feedback messages + newsletter subscribers — stored in separate
+  // Redis lists so we can read them without polluting the main tuple.
+  const [feedbackList, feedbackCounts, newsletterList, newsletterCounts] =
+    await Promise.all([
+      r.lrange("civia:feedback:messages", 0, 49),
+      r.hgetall<Record<string, string>>("civia:feedback:counts"),
+      r.lrange("civia:newsletter:subscribers", 0, 99),
+      r.hgetall<Record<string, string>>("civia:newsletter:counts"),
+    ]);
+
+  const parseList = <T,>(raw: (string | null)[]): T[] =>
+    (raw || [])
+      .map((s) => {
+        try {
+          return typeof s === "string" ? (JSON.parse(s) as T) : (s as T);
+        } catch {
+          return null;
+        }
+      })
+      .filter((x): x is T => x !== null);
+
+  type FeedbackEntry = {
+    t: number;
+    kind: string;
+    message: string;
+    email: string | null;
+    userId: string | null;
+    country: string | null;
+    pathname: string | null;
+  };
+  type NewsletterEntry = {
+    t: number;
+    email: string;
+    sectors: string[];
+    country: string | null;
+  };
+  const feedback = parseList<FeedbackEntry>(feedbackList);
+  const newsletter = parseList<NewsletterEntry>(newsletterList);
+
   // Funnel is a separate fetch (one HGETALL per named funnel) since the
   // set of funnels is enumerated ahead of time.
   const FUNNELS = ["sesizare-create"] as const;
@@ -591,6 +630,10 @@ async function handleSummary() {
     copyEvents: copyEvents || {},
     pwaEvents: pwaEvents || {},
     funnels: funnelData,
+    feedback,
+    feedbackCounts: feedbackCounts || {},
+    newsletter,
+    newsletterCounts: newsletterCounts || {},
     serverTime: Date.now(),
   });
 }

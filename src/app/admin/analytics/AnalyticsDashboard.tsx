@@ -5,6 +5,7 @@ import {
   Activity, Users, Eye, Gauge, Globe2, MapPin, Smartphone, Monitor,
   Link2, TrendingUp, Clock, AlertTriangle, RefreshCw, Zap, MousePointerClick,
   Frown, Search, Bot, LogIn, Copy, Download, ExternalLink,
+  MessageSquareMore, Mail,
 } from "lucide-react";
 
 interface Vitals {
@@ -52,6 +53,23 @@ interface Summary {
   copyEvents: Record<string, string | number>;
   pwaEvents: Record<string, string | number>;
   funnels: Record<string, Record<string, string | number>>;
+  feedback: Array<{
+    t: number;
+    kind: string;
+    message: string;
+    email: string | null;
+    userId: string | null;
+    country: string | null;
+    pathname: string | null;
+  }>;
+  feedbackCounts: Record<string, string | number>;
+  newsletter: Array<{
+    t: number;
+    email: string;
+    sectors: string[];
+    country: string | null;
+  }>;
+  newsletterCounts: Record<string, string | number>;
   serverTime: number;
 }
 
@@ -583,6 +601,109 @@ export function AnalyticsDashboard() {
       {/* Error paths — where crashes happen */}
       {sum(data.errorPaths) > 0 && (
         <BreakdownList title="Erori per pagină" icon={AlertTriangle} data={data.errorPaths} max={15} />
+      )}
+
+      {/* Feedback inbox — what users told us */}
+      {data.feedback && data.feedback.length > 0 && (
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <MessageSquareMore size={16} className="text-[var(--color-primary)]" />
+              <h3 className="font-semibold text-sm">
+                Feedback · {data.feedback.length} mesaje
+              </h3>
+            </div>
+            <div className="flex gap-3 text-[11px]">
+              {Object.entries(data.feedbackCounts).map(([k, v]) => (
+                <span key={k} className="text-[var(--color-text-muted)]">
+                  {k}: <span className="font-semibold text-[var(--color-text)] tabular-nums">{toNum(v)}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+          <ul className="space-y-3 max-h-[420px] overflow-y-auto pr-2">
+            {data.feedback.map((f, i) => (
+              <li
+                key={i}
+                className="p-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)]"
+              >
+                <div className="flex items-center gap-2 mb-2 text-[11px]">
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider ${
+                      f.kind === "bug"
+                        ? "bg-red-500/15 text-red-600 dark:text-red-400"
+                        : f.kind === "idea"
+                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                        : f.kind === "question"
+                        ? "bg-blue-500/15 text-blue-600 dark:text-blue-400"
+                        : "bg-[var(--color-border)] text-[var(--color-text-muted)]"
+                    }`}
+                  >
+                    {f.kind}
+                  </span>
+                  <span className="text-[var(--color-text-muted)] tabular-nums">
+                    {timeAgo(f.t)}
+                  </span>
+                  {f.country && (
+                    <span className="text-[var(--color-text-muted)]">
+                      {COUNTRY_FLAGS[f.country] || f.country}
+                    </span>
+                  )}
+                  {f.email && (
+                    <a
+                      href={`mailto:${f.email}`}
+                      className="text-[var(--color-primary)] hover:underline font-mono truncate"
+                    >
+                      {f.email}
+                    </a>
+                  )}
+                </div>
+                <p className="text-sm whitespace-pre-wrap break-words">{f.message}</p>
+                {f.pathname && (
+                  <p className="text-[10px] text-[var(--color-text-muted)] mt-2 font-mono truncate">
+                    ← {f.pathname}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Newsletter subscribers */}
+      {data.newsletter && data.newsletter.length > 0 && (
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Mail size={16} className="text-[var(--color-primary)]" />
+              <h3 className="font-semibold text-sm">
+                Newsletter subscribers · {data.newsletter.length} recente
+              </h3>
+            </div>
+            <span className="text-[11px] text-[var(--color-text-muted)]">
+              Total: <span className="font-semibold text-[var(--color-text)] tabular-nums">{toNum(data.newsletterCounts.total)}</span>
+            </span>
+          </div>
+          <ul className="space-y-1 text-xs max-h-[320px] overflow-y-auto pr-2">
+            {data.newsletter.map((n, i) => (
+              <li
+                key={i}
+                className="flex items-center justify-between gap-3 py-1.5 px-2 rounded hover:bg-[var(--color-surface-2)]"
+              >
+                <a
+                  href={`mailto:${n.email}`}
+                  className="font-mono text-[var(--color-primary)] hover:underline truncate"
+                >
+                  {n.email}
+                </a>
+                <div className="flex items-center gap-2 shrink-0 text-[var(--color-text-muted)]">
+                  {n.country && <span>{COUNTRY_FLAGS[n.country] || n.country}</span>}
+                  <span className="tabular-nums">{timeAgo(n.t)}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {/* Real-time feed */}
