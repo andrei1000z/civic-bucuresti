@@ -276,7 +276,9 @@ export function SesizareForm() {
   const imaginiKey = imagini.join("|");
   useEffect(() => {
     if (imagini.length === 0) return;
-    if (!data.formal_text) return;
+    // Trigger vision analysis whenever a photo is uploaded AND the user
+    // has enough context (descriere + tip). No need to wait for a prior
+    // formal_text — the vision pass will generate it fresh.
     if (data.descriere.length < 10 || !data.tip) return;
     void handleAIImprove({ withPhotos: true, silent: true });
     // Intentionally omit handleAIImprove — it reads latest state via closure.

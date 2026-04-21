@@ -101,7 +101,19 @@ export async function POST(req: Request) {
     ].filter(Boolean).join("\n");
 
     const visionInstruction = hasPhotos
-      ? `\n\nFOTOGRAFII ATAȘATE (${photos.length}):\nAnalizează imaginile de mai jos. Bazează descrierea problemei pe ce VEZI EFECTIV, nu pe clișee.\n- Dacă trotuarul e lat și pietonii au loc, NU scrie "forțați pe carosabil".\n- Dacă nu sunt mașini pe trotuar, NU inventa blocaje.\n- Menționează doar fapte concrete observabile: lățime trotuar, număr mașini parcate, tip degradare, pericol real.\nDacă descrierea cetățeanului contrazice ce vezi în poze, prioritizează fotografia și corectează.\n\nReturnează în JSON:\n{ "formal_text": "...", "descriere_rafinata": "o propoziție-două care descriu cu acuratețe ce se vede în poze" }`
+      ? `\n\n⚠️ ATENȚIE — ${photos.length} FOTOGRAFII ATAȘATE mai jos. Le ANALIZEZI PRIMELE, apoi scrii sesizarea.
+
+REGULI VISION (OBLIGATORII):
+1. INTERZIS să scrii "pietonii sunt forțați să circule pe carosabil" decât dacă se VEDE clar că trotuarul e complet blocat și nu mai au pe unde merge.
+2. Dacă se vede trotuar lat cu mașini doar pe o parte → scrie EXACT: "mașinile ocupă X% din lățimea trotuarului, rămâne spațiu de trecere de aproximativ Y metri."
+3. Dacă se vede trotuar îngust/blocat → atunci poți menționa blocarea pietonilor.
+4. Numără mașinile parcate în poze și menționează numărul concret.
+5. Descrie doar fapte observabile: tip de stradă, lățime, număr mașini, starea pavajului, prezența/absența stâlpișorilor existenți, lăți­mea spațiului liber.
+6. NU inventa copii, persoane cu dizabilități, biciclete, animale care nu se văd în poze.
+7. Dacă descrierea cetățeanului spune "blocat complet" dar pozele arată că pietonii au loc, CORECTEAZĂ în sesizare pe baza pozelor.
+
+Răspunde JSON:
+{ "formal_text": "...", "descriere_rafinata": "propoziție scurtă (1-2 rânduri) care descrie fidelis ce vezi în poze, fără dramatizare" }`
       : "";
 
     const groq = getGroqClient();

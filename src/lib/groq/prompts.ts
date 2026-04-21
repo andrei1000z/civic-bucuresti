@@ -12,9 +12,9 @@ Bună ziua,
 
 Vă sesizez cu privire la {PROBLEMA}, constatată {DATA_ORA — doar dacă e furnizată}, în locația: {LOCAȚIA}.
 
-{1-2 propoziții scurte cu descrierea problemei, concis}
+{1-2 propoziții scurte cu descrierea problemei, concis — bazat STRICT pe ce spune cetățeanul și ce se vede în poze dacă sunt atașate}
 
-{1 propoziție cu pericolul concret — ex: pietonii sunt forțați pe carosabil}
+{1 propoziție cu pericolul concret — DERIVĂ acest pericol din descrierea cetățeanului și din poze. NU folosi formule generice tip "pietonii forțați pe carosabil" decât dacă se vede clar în poză că nu au loc. Dacă trotuarul e lat și pietonii au loc de trecere, menționează riscul REAL (ex: copii care se apropie de mașini, oglinzi laterale care lovesc pietoni, blocarea accesului persoanelor cu dizabilități la anumite intrări). DACĂ NU EXISTĂ UN PERICOL CLAR OBSERVABIL, omite complet această propoziție.}
 
 Sesizarea se întemeiază pe OG 27/2002 și {LEGISLAȚIE_SPECIFICĂ}.
 
@@ -27,16 +27,18 @@ Cu respect,
 {NUMELE}
 {DATA_DE_AZI — scrie data reală de azi, nu placeholder}
 
-REGULI:
-1. FII SCURT — max 200 cuvinte, fără repetiții
-2. Rânduri libere între fiecare secțiune
-3. Diacritice corecte
-4. Ton ferm, scurt, profesionist — NU pompos, NU lung
-5. NU repeta aceeași idee de 2 ori (ex: nu spune "pericol" în 2 paragrafe diferite)
-6. Pericolul: O SINGURĂ propoziție concretă
-7. Descrierea: 1-2 propoziții, nu mai mult
-6. Alege legislația specifică tipului de problemă
-7. Maxim 350 cuvinte
+REGULI ABSOLUTE:
+1. INTERZIS să folosești CLIȘEE nejustificate. Exemple de clișee PROHIBITE când nu se văd în poze: "pietonii sunt forțați să circule pe carosabil", "trotuarul este complet blocat", "accesul este imposibil", "risc iminent de accident", "pericol de viață".
+2. Dacă descrierea cetățeanului și pozele arată că trotuarul e lat și pietonii au loc, scrie FAPTUL CONCRET: "mașinile ocupă aprox. jumătate din trotuar, rămâne spațiu de trecere limitat dar pietonii pot circula."
+3. NU inventa victime, copii, persoane cu dizabilități, biciclete etc. care NU sunt menționate de cetățean sau vizibile în poze.
+4. FII SCURT — max 200 cuvinte, fără repetiții.
+5. Rânduri libere între fiecare secțiune.
+6. Diacritice corecte.
+7. Ton ferm, scurt, profesionist — NU pompos, NU lung, NU dramatic.
+8. NU repeta aceeași idee de 2 ori.
+9. Descrierea: 1-2 propoziții, nu mai mult.
+10. Alege legislația specifică tipului de problemă.
+11. Maxim 350 cuvinte.
 
 ACORD GRAMATICAL — GEN:
 Bărbat → "Subsemnatul {Nume}, domiciliat"; Femeie → "Subsemnata {Nume}, domiciliată".
