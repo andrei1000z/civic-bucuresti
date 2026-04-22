@@ -157,7 +157,18 @@ export function SesizareForm() {
     try {
       const raw = localStorage.getItem(DRAFT_KEY);
       if (!raw) return;
-      const parsed = JSON.parse(raw) as { t: number; data: FormData };
+      // Shape extended to persist uploaded photo URLs + parking
+      // state, not just form fields. Earlier drafts only kept `data`;
+      // we detect them and restore the partial payload gracefully.
+      const parsed = JSON.parse(raw) as {
+        t: number;
+        data: FormData;
+        imagini?: string[];
+        parkingSlots?: { plate: string | null; vehicle: string | null; context: string | null };
+        parkingPlateText?: string;
+        parkingJurisdiction?: ParkingJurisdiction | "";
+        parkingObservedAt?: string;
+      };
       if (!parsed?.data) return;
       const ageMs = Date.now() - (parsed.t || 0);
       if (ageMs > 7 * 24 * 3600 * 1000) {
@@ -167,12 +178,22 @@ export function SesizareForm() {
       // Offer restore only if the draft has real content
       const hasContent =
         (parsed.data.descriere?.length ?? 0) > 10 ||
-        (parsed.data.locatie?.length ?? 0) > 3;
+        (parsed.data.locatie?.length ?? 0) > 3 ||
+        (parsed.imagini?.length ?? 0) > 0;
       if (!hasContent) return;
       setData(parsed.data);
+      // Photo URLs live on Supabase storage indefinitely — safe to
+      // restore by reference. If a URL 404s because the user deleted
+      // the project, the <img> inside PhotoUploader already handles
+      // display: none onError, so it degrades gracefully.
+      if (parsed.imagini?.length) setImagini(parsed.imagini);
+      if (parsed.parkingSlots) setParkingSlots(parsed.parkingSlots);
+      if (parsed.parkingPlateText) setParkingPlateText(parsed.parkingPlateText);
+      if (parsed.parkingJurisdiction) setParkingJurisdiction(parsed.parkingJurisdiction);
+      if (parsed.parkingObservedAt) setParkingObservedAt(parsed.parkingObservedAt);
       setDraftRestoredAt(new Date(parsed.t).toLocaleString("ro-RO"));
     } catch { /* corrupt draft — ignore */ }
-     
+
   }, []);
 
   // Debounced save — write the current form state every 4s, but only
@@ -183,18 +204,27 @@ export function SesizareForm() {
     const hasContent =
       (data.descriere?.length ?? 0) > 10 ||
       (data.locatie?.length ?? 0) > 3 ||
-      !!data.tip;
+      !!data.tip ||
+      imagini.length > 0;
     if (!hasContent) return;
     const timer = setTimeout(() => {
       try {
         localStorage.setItem(
           DRAFT_KEY,
-          JSON.stringify({ t: Date.now(), data }),
+          JSON.stringify({
+            t: Date.now(),
+            data,
+            imagini,
+            parkingSlots,
+            parkingPlateText,
+            parkingJurisdiction,
+            parkingObservedAt,
+          }),
         );
       } catch { /* quota exceeded — silent */ }
     }, 4000);
     return () => clearTimeout(timer);
-  }, [data, submitted]);
+  }, [data, imagini, parkingSlots, parkingPlateText, parkingJurisdiction, parkingObservedAt, submitted]);
 
   // Funnel entry — user landed on the form
   useEffect(() => {
@@ -837,12 +867,18 @@ ${today}`;
                 if (typeof window !== "undefined") {
                   localStorage.removeItem(DRAFT_KEY);
                 }
+                // Full reset — mirror what onAnother() does on the
+                // success screen so the form actually looks empty
+                // (was leaving parking slots + plate text behind).
                 setData(INITIAL);
                 setImagini([]);
+                setParkingSlots({ plate: null, vehicle: null, context: null });
+                setParkingPlateText("");
+                setParkingJurisdiction("");
                 setDraftDismissed(true);
                 setDraftRestoredAt(null);
               }}
-              className="text-xs font-medium text-red-600 hover:text-red-700 shrink-0 underline"
+              className="text-xs font-medium text-red-600 hover:text-red-700 shrink-0 underline focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded"
             >
               Golește
             </button>

@@ -4,6 +4,7 @@ import { getGroqClient, GROQ_MODEL, GROQ_MODEL_VISION } from "@/lib/groq/client"
 import { SYSTEM_PROMPT_FORMAL } from "@/lib/groq/prompts";
 import { getTemplate } from "@/lib/groq/templates";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
+import { isProd } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 45;
@@ -90,12 +91,28 @@ export async function POST(req: Request) {
     const photos = (imagini ?? []).slice(0, MAX_PHOTOS);
     const hasPhotos = photos.length > 0;
 
+    // Today's date as a literal Romanian string — passed to the model
+    // so it doesn't try to "compute" a date itself. Previously the
+    // prompt just said "DATA_DE_AZI — scrie data reală de azi", and
+    // Llama occasionally emitted `+ (new Date()).toLocaleDateString(
+    // "ro-RO")` — a JavaScript expression inside the JSON string —
+    // which broke response_format:json_object and returned a 400
+    // `json_validate_failed` error. Giving it the literal date
+    // eliminates the hallucination path entirely.
+    const LUNI_RO = [
+      "ianuarie", "februarie", "martie", "aprilie", "mai", "iunie",
+      "iulie", "august", "septembrie", "octombrie", "noiembrie", "decembrie",
+    ];
+    const now = new Date();
+    const todayRo = `${now.getDate()} ${LUNI_RO[now.getMonth()]} ${now.getFullYear()}`;
+
     const textContext = [
       `Descrierea brută a cetățeanului: ${descriere}`,
       locatie ? `Locație: ${locatie}` : "",
       nume ? `Nume cetățean: ${nume}` : "Nume: [NUMELE]",
       adresa ? `Adresa cetățean: ${adresa}` : "Adresa: [ADRESA]",
       tip ? `Tip problemă: ${tip}` : "",
+      `DATA DE AZI (pune-o literal în semnătură, NU folosi JavaScript / new Date / expresii — doar string exact): ${todayRo}`,
       `Ghid pentru {DESCRIEREA_FORMALA_A_PROBLEMEI}: ${template.problema_ghid}`,
       `Ghid pentru {PROPUNEREA_CONCRETA}: ${template.propunere}`,
     ].filter(Boolean).join("\n");
@@ -153,6 +170,14 @@ Răspunde JSON:
       throw new Error("AI response missing formal_text");
     }
 
+    // Last-mile scrub: if Llama slipped a JavaScript expression
+    // through despite the prompt (e.g. `+ (new Date()).toLocale...`),
+    // replace it with the literal Romanian date. Better a clean
+    // literal than raw JS code in the email signature.
+    parsed.formal_text = parsed.formal_text
+      .replace(/\+\s*\(?\s*new\s+Date\s*\([^)]*\)[^,\n"]*\)?/gi, todayRo)
+      .replace(/\$\{[^}]*new\s+Date[^}]*\}/gi, todayRo);
+
     parsed.formal_text = normalizeFormatting(parsed.formal_text);
 
     return NextResponse.json({ data: parsed });
@@ -160,7 +185,28 @@ Răspunde JSON:
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: "Input invalid" }, { status: 400 });
     }
-    const msg = e instanceof Error ? e.message : "AI unavailable";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    // Translate upstream Groq errors to a clean Romanian message
+    // instead of dumping the raw JSON blob onto the form. The
+    // "json_validate_failed" case was the one the user saw — now
+    // maps to a generic retry hint; devs can still read the full
+    // error in server logs via the caught exception.
+    const raw = e instanceof Error ? e.message : "";
+    if (!isProd()) console.error("[ai-improve]", raw);
+    if (/json_validate_failed|invalid JSON/i.test(raw)) {
+      return NextResponse.json(
+        { error: "AI-ul a generat un răspuns invalid. Încearcă din nou — de obicei reușește a doua oară." },
+        { status: 502 }
+      );
+    }
+    if (/rate[- ]?limit|429/i.test(raw)) {
+      return NextResponse.json(
+        { error: "AI-ul e sub presiune. Încearcă în câteva secunde." },
+        { status: 429 }
+      );
+    }
+    return NextResponse.json(
+      { error: "AI-ul e temporar indisponibil. Scrie manual sau reîncearcă în câteva minute." },
+      { status: 503 }
+    );
   }
 }

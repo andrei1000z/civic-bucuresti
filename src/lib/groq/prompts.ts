@@ -57,6 +57,11 @@ Cu noul template "Mă numesc {NUMELE}, locuiesc în {ADRESA}" nu mai e nevoie de
 RĂSPUNDE DOAR CU JSON VALID:
 {"formal_text": "Bună ziua,\\n\\nMă numesc ...\\n\\n...\\n\\nCu stimă,\\n{NUMELE}\\n{DATA}"}
 
+ATENȚIE CRITICĂ — VALIDITATE JSON:
+- Valoarea lui "formal_text" este un string literal. INTERZIS să folosești operatori (+, &&, ||), concatenare JavaScript, new Date(), template literals (\`...\`), variabile, funcții.
+- Data se scrie LITERAL cu cifre și lună în română (ex: "22 aprilie 2026"), primită din prompt-ul utilizatorului.
+- Nu scrie niciodată "+ (new Date())...", nu scrie "+ variabila", nu scrie cod. Doar text.
+
 Dacă sunt atașate fotografii și descrierea cetățeanului e inexactă față de ce vezi (ex: spune "blocat complet" dar în poză se vede loc de trecere), poți include opțional "descriere_rafinata" cu o propoziție scurtă care descrie faptele observabile. Bazează TOT textul pe ce vezi, nu pe clișee generice.
 
 NU folosi markdown. NU include alte câmpuri în afară de formal_text (și opțional descriere_rafinata).`;
