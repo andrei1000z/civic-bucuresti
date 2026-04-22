@@ -2,26 +2,23 @@ import { ImageResponse } from "next/og";
 import { getCountyBySlug, ALL_COUNTIES } from "@/data/counties";
 
 // Node runtime — the county lookup uses a plain JS import which can't run
-// in edge. The 42 static variants are generated at build via
-// generateImageMetadata so each county gets its own cached PNG.
+// in edge. One PNG per county, generated statically.
 export const runtime = "nodejs";
 export const alt = "Civia — platformă civică pe județul tău";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export async function generateImageMetadata({
-  params,
-}: {
-  params: Promise<{ judet: string }>;
-}) {
-  const { judet } = await params;
-  const county = getCountyBySlug(judet) ?? ALL_COUNTIES[0]!;
-  return [{ id: county.slug, alt: `Civia — ${county.name}`, contentType: "image/png", size }];
+// Without an explicit generateStaticParams on this file, Next.js tries to
+// probe the route with an undefined `judet` at collect-page-data time and
+// `getCountyBySlug` crashes on `.toLowerCase()`. We mirror the county list
+// that [judet]/page.tsx already prerenders.
+export function generateStaticParams() {
+  return ALL_COUNTIES.map((c) => ({ judet: c.slug }));
 }
 
 export default async function OgImage({ params }: { params: Promise<{ judet: string }> }) {
   const { judet } = await params;
-  const county = getCountyBySlug(judet);
+  const county = judet ? getCountyBySlug(judet) : undefined;
   const name = county?.name ?? "România";
 
   return new ImageResponse(
