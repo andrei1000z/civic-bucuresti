@@ -274,9 +274,17 @@ export default async function EvenimentDetailPage({
             <>
               <h2>Rezumat</h2>
               <p>{eveniment.descriere}</p>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                Detalii complete în curs de documentare.
-              </p>
+              <div className="not-prose mt-6 p-4 rounded-[12px] bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+                <p className="text-sm text-[var(--color-text-muted)] mb-3">
+                  📝 Detalii complete (cronologie, cauze, impact, surse) sunt în curs de documentare. Dacă ai informații verificabile despre acest eveniment, <Link href="/#footer-feedback" className="text-[var(--color-primary)] hover:underline">scrie-ne</Link>.
+                </p>
+                <Link
+                  href="/evenimente"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary)] hover:underline"
+                >
+                  ← Vezi toate evenimentele documentate
+                </Link>
+              </div>
             </>
           )}
         </article>
