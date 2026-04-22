@@ -22,6 +22,14 @@ export interface CalendarEvent {
   location?: string;
   url?: string;
   countyId?: string; // null = national
+  /**
+   * Annual recurring deadline (impozit clădire, declarație ANAF,
+   * ziua comemorării cutremurului 1977, etc). When true, a passed
+   * date auto-advances by N years until it lands in the future,
+   * so users always see the NEXT occurrence instead of nothing.
+   * Default: false (one-off event — e.g. 2024 elections).
+   */
+  recurring?: boolean;
 }
 
 export const CALENDAR_EVENTS: CalendarEvent[] = [
@@ -34,6 +42,7 @@ export const CALENDAR_EVENTS: CalendarEvent[] = [
       "Prima rată a impozitului anual pe clădiri, terenuri și auto. Achitare până 31 martie pentru bonus 10% reducere dacă plătești integral.",
     category: "taxe",
     url: "https://www.ghiseul.ro",
+    recurring: true,
   },
   {
     id: "tax-impozit-2",
@@ -43,6 +52,7 @@ export const CALENDAR_EVENTS: CalendarEvent[] = [
       "A doua rată a impozitului anual pe clădiri, terenuri și auto. Se plătește până 30 septembrie.",
     category: "taxe",
     url: "https://www.ghiseul.ro",
+    recurring: true,
   },
   {
     id: "tax-declaratie-unica",
@@ -52,6 +62,7 @@ export const CALENDAR_EVENTS: CalendarEvent[] = [
       "Toate persoanele fizice cu venituri din activități independente, chirii, dividende, capital trebuie să depună Declarația Unică până pe 25 mai.",
     category: "deadline",
     url: "https://anaf.ro",
+    recurring: true,
   },
   {
     id: "tax-impozit-venit",
@@ -61,6 +72,7 @@ export const CALENDAR_EVENTS: CalendarEvent[] = [
       "Plata impozitului datorat pentru veniturile din activități independente, chirii, alte surse conform declarației unice.",
     category: "taxe",
     url: "https://anaf.ro",
+    recurring: true,
   },
 
   // === ALEGERI ===
@@ -145,6 +157,7 @@ export const CALENDAR_EVENTS: CalendarEvent[] = [
     description:
       "Zi liberă legală. Parade militare la București, Alba Iulia și alte orașe. Comemorarea Marii Uniri de la 1918.",
     category: "eveniment",
+    recurring: true,
   },
   {
     id: "ziua-europei",
@@ -153,6 +166,7 @@ export const CALENDAR_EVENTS: CalendarEvent[] = [
     description:
       "Sărbătoare europeană. Primăriile organizează evenimente, prezentări, concerte. Steagul UE arborat oficial.",
     category: "eveniment",
+    recurring: true,
   },
   {
     id: "ziua-revolutiei",
@@ -161,6 +175,7 @@ export const CALENDAR_EVENTS: CalendarEvent[] = [
     description:
       "Ziua de doliu național. Comemorarea victimelor Revoluției din Decembrie 1989. Ceremonii la Timișoara, București, Sibiu, Cluj.",
     category: "eveniment",
+    recurring: true,
   },
   {
     id: "ziua-cutremur-1977",
@@ -169,19 +184,55 @@ export const CALENDAR_EVENTS: CalendarEvent[] = [
     description:
       "Comemorarea victimelor cutremurului din 4 martie 1977 (1.578 morți). Ceremonii simbolice și exerciții de protecție civilă organizate de IGSU.",
     category: "eveniment",
+    recurring: true,
   },
 ];
 
 /**
+ * Advance a recurring event's date (and optional endDate) to the
+ * next future occurrence of its month/day. Non-recurring events
+ * pass through unchanged. Keeps the same month/day — useful for
+ * yearly deadlines like "impozit clădire — 31 martie" which
+ * doesn't need a new entry every year.
+ */
+function advanceRecurring(e: CalendarEvent, today: Date): CalendarEvent {
+  if (!e.recurring) return e;
+  const d = new Date(e.date);
+  if (isNaN(d.getTime())) return e;
+  // Same month + day, but target year >= current year; bump forward
+  // if the resulting date is still in the past.
+  const target = new Date(d);
+  target.setFullYear(today.getFullYear());
+  if (target < today) target.setFullYear(today.getFullYear() + 1);
+  const yearsDelta = target.getFullYear() - d.getFullYear();
+  if (yearsDelta === 0) return e;
+  const iso = target.toISOString().slice(0, 10);
+  let endIso: string | undefined;
+  if (e.endDate) {
+    const end = new Date(e.endDate);
+    if (!isNaN(end.getTime())) {
+      end.setFullYear(end.getFullYear() + yearsDelta);
+      endIso = end.toISOString().slice(0, 10);
+    }
+  }
+  return { ...e, date: iso, ...(endIso ? { endDate: endIso } : {}) };
+}
+
+/**
  * Next N upcoming events from now. Sorted ascending by date.
+ * Recurring events (taxes, national holidays) auto-advance to
+ * their next future occurrence so the calendar doesn't look stale
+ * every April when March deadlines pass.
  */
 export function getUpcomingEvents(limit = 10): CalendarEvent[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  return CALENDAR_EVENTS.filter((e) => {
-    const endDate = e.endDate ? new Date(e.endDate) : new Date(e.date);
-    return endDate >= today;
-  })
+  return CALENDAR_EVENTS
+    .map((e) => advanceRecurring(e, today))
+    .filter((e) => {
+      const endDate = e.endDate ? new Date(e.endDate) : new Date(e.date);
+      return endDate >= today;
+    })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, limit);
 }
