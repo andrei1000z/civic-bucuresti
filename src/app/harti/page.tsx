@@ -5,16 +5,16 @@ import { ALL_COUNTIES } from "@/data/counties";
 import { HartiMap } from "@/components/maps/HartiMap";
 
 export const metadata: Metadata = {
-  title: "Hărți România — mobilitate și infrastructură",
+  title: "Hărți interactive ale României — cum te miști în oraș",
   description:
-    "Hartă interactivă națională cu piste de biciclete, transport public, zone pietonale. Date din OpenStreetMap pentru toate județele.",
+    "Piste de biciclete, trotuare, drumuri, transport public, stații, calitatea aerului live — toate pe o singură hartă interactivă, cu date de la OpenStreetMap + senzori europeni de aer.",
   alternates: { canonical: "/harti" },
 };
 
 export default function HartiPage() {
   return (
     <>
-      <h1 className="sr-only">Hărți de mobilitate România — piste, transport, trasee</h1>
+      <h1 className="sr-only">Hărți interactive ale României — biciclete, trotuare, transport, aer</h1>
 
       {/* National map (București layers loaded) */}
       <div className="h-[calc(100vh-64px-48px)]">
@@ -24,7 +24,7 @@ export default function HartiPage() {
       {/* Counties quick links */}
       <div className="bg-[var(--color-surface)] border-t border-[var(--color-border)] px-4 py-3">
         <div className="container-narrow flex items-center gap-3 overflow-x-auto no-scrollbar">
-          <span className="text-xs text-[var(--color-text-muted)] shrink-0">Hărți per județ:</span>
+          <span className="text-xs text-[var(--color-text-muted)] shrink-0">Zoom pe județul tău:</span>
           {ALL_COUNTIES.slice(0, 15).map((c) => (
             <Link
               key={c.id}
@@ -35,7 +35,7 @@ export default function HartiPage() {
             </Link>
           ))}
           <Link href="/judete" className="text-xs text-[var(--color-primary)] hover:underline shrink-0 font-medium">
-            + toate județele →
+            Vezi toate cele 42 de județe →
           </Link>
         </div>
       </div>

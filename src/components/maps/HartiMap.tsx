@@ -30,11 +30,11 @@ const HartiLayers = dynamic(() => import("./HartiLayers"), { ssr: false });
 type Tab = "bicicleta" | "pejos" | "auto" | "transport" | "statistici";
 
 const tabs = [
-  { id: "bicicleta" as const, label: "Bicicletă", icon: Bike, href: "/harti/bicicleta" },
+  { id: "bicicleta" as const, label: "Cu bicicleta", icon: Bike, href: "/harti/bicicleta" },
   { id: "pejos" as const, label: "Pe jos", icon: Footprints, href: "/harti/pejos" },
   { id: "auto" as const, label: "Cu mașina", icon: Car, href: "/harti/cumasina" },
-  { id: "transport" as const, label: "Transport", icon: Bus, href: "/harti/transport" },
-  { id: "statistici" as const, label: "Aer", icon: BarChart3, href: "/aer" },
+  { id: "transport" as const, label: "Transport public", icon: Bus, href: "/harti/transport" },
+  { id: "statistici" as const, label: "Calitatea aerului", icon: BarChart3, href: "/aer" },
 ];
 
 export function HartiMap({
@@ -161,16 +161,16 @@ export function HartiMap({
           {activeTab === "bicicleta" && (
             <div>
               <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Piste de biciclete{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
+                Unde poți merge cu bicicleta{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
                 {scopeName
-                  ? `Piste de biciclete și benzi marcate din ${scopeName} — date OpenStreetMap.`
-                  : "Piste de biciclete și benzi marcate din toată România — date OpenStreetMap."}
+                  ? `Piste dedicate, benzi marcate și drumuri permise bicicletei din ${scopeName}. Date oficiale din OpenStreetMap.`
+                  : "Piste dedicate și benzi marcate pentru biciclete din toată România. Date colaborative de la OpenStreetMap — actualizate de voluntari."}
               </p>
               <div className="flex items-start gap-3 mb-4">
                 <span className="w-6 h-1 rounded-full mt-2 shrink-0" style={{ background: "#059669" }} />
-                <p className="text-sm text-[var(--color-text-muted)]">Piste dedicate + benzi marcate</p>
+                <p className="text-sm text-[var(--color-text-muted)]">Verde = piste și benzi ciclabile permise</p>
               </div>
             </div>
           )}
@@ -178,15 +178,15 @@ export function HartiMap({
           {activeTab === "pejos" && (
             <div>
               <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Trasee pedestre{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
+                Unde mergi pe jos{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
                 {scopeName
-                  ? `Parcuri, trotuare și zone pietonale din ${scopeName}.`
-                  : "Parcuri din toată România + trotuare/zone pietonale încărcate live din OpenStreetMap pe zona vizibilă."}
+                  ? `Parcuri, trotuare și zone pietonale din ${scopeName}. Trotuarele se încarcă în timp ce navighezi pe hartă.`
+                  : "Parcuri din toată România plus trotuare și zone pietonale — trotuarele se încarcă live din OpenStreetMap pe zona vizibilă, ca să nu aștepți 20MB degeaba."}
               </p>
               <p className="text-xs text-[var(--color-text-muted)] mb-4 p-2 rounded-[6px] bg-[var(--color-surface-2)]">
-                🔍 Zoom la nivelul orașului pentru a vedea trotuarele — se încarcă automat din OpenStreetMap.
+                🔍 Mărește (zoom) la nivel de oraș ca să vezi trotuarele — se încarcă automat.
               </p>
               <div className="space-y-3 mb-5">
                 <Toggle
@@ -196,7 +196,7 @@ export function HartiMap({
                   onChange={setShowParcuri}
                 />
                 <Toggle
-                  label="Trotuare + zone pietonale"
+                  label="Trotuare și zone pietonale"
                   color="#059669"
                   checked={showPietonal}
                   onChange={setShowPietonal}
@@ -218,10 +218,10 @@ export function HartiMap({
           {activeTab === "auto" && (
             <div>
               <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Drumuri România
+                Drumurile României — clasificate
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                131.834 segmente de drumuri din toată România — date reale OpenStreetMap.
+                Toate autostrăzile, drumurile naționale, județene și comunale din țară — 131.834 segmente din OpenStreetMap, cu codificare de culori după clasă.
               </p>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
@@ -269,10 +269,10 @@ export function HartiMap({
           {activeTab === "transport" && (
             <div>
               <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Transport public
+                Transport public — metrou + tramvai + autobuz
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                Metrou București (63 stații) + tramvai. Date OpenStreetMap.
+                Metroul bucureștean (5 magistrale, 63 stații), rețeaua de tramvai și stații de autobuz — ultimele se încarcă pe măsură ce navighezi. Date OpenStreetMap.
               </p>
               <div className="space-y-2 mb-5">
                 {METRO_INFO.map((line) => {
