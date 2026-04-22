@@ -91,8 +91,9 @@ export function Navbar() {
                   >
                     <Link
                       href={link.href}
+                      aria-current={pathname.startsWith("/ghiduri") ? "page" : undefined}
                       className={cn(
-                        "flex items-center gap-1 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all",
+                        "flex items-center gap-1 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
                         pathname.startsWith("/ghiduri")
                           ? "text-[var(--color-primary)] bg-[var(--color-primary-soft)]"
                           : "text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
@@ -113,9 +114,9 @@ export function Navbar() {
                         <Link
                           key={ghid.href}
                           href={countySlug ? `/${countySlug}${ghid.href}` : ghid.href}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]"
                         >
-                          <span className="text-xl">{ghid.icon}</span>
+                          <span className="text-xl" aria-hidden="true">{ghid.icon}</span>
                           <span className="text-[var(--color-text)]">{ghid.label}</span>
                         </Link>
                       ))}
@@ -128,8 +129,9 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all",
+                    "px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
                     isActive
                       ? "text-[var(--color-primary)] bg-[var(--color-primary-soft)]"
                       : "text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
@@ -148,11 +150,13 @@ export function Navbar() {
             >
               <button
                 type="button"
+                onClick={() => setMoreDropdown((v) => !v)}
                 className={cn(
-                  "flex items-center gap-1 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all",
+                  "flex items-center gap-1 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
                   "text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
                 )}
                 aria-expanded={moreDropdown}
+                aria-haspopup="menu"
               >
                 Mai mult
                 <ChevronDown size={14} className={cn("transition-transform", moreDropdown && "rotate-180")} />
@@ -169,13 +173,14 @@ export function Navbar() {
                   <Link
                     key={link.href}
                     href={countySlug ? `/${countySlug}${link.href}` : link.href}
-                    className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
+                    onClick={() => setMoreDropdown(false)}
+                    className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]"
                   >
-                    <span className="text-lg">{link.icon}</span>
+                    <span className="text-lg" aria-hidden="true">{link.icon}</span>
                     <span className="text-[var(--color-text)]">{link.label}</span>
                   </Link>
                 ))}
-                <div className="my-2 border-t border-[var(--color-border)]" />
+                <div className="my-2 border-t border-[var(--color-border)]" role="separator" />
                 <div className="px-4 py-1 text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
                   Date publice
                 </div>
@@ -183,9 +188,10 @@ export function Navbar() {
                   <Link
                     key={link.href}
                     href={countySlug ? `/${countySlug}${link.href}` : link.href}
-                    className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
+                    onClick={() => setMoreDropdown(false)}
+                    className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]"
                   >
-                    <span className="text-lg">{link.icon}</span>
+                    <span className="text-lg" aria-hidden="true">{link.icon}</span>
                     <span className="text-[var(--color-text)]">{link.label}</span>
                   </Link>
                 ))}
