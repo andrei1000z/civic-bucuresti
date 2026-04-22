@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { ENV } from "@/lib/env";
 
 // ⚠️ Server-only. Uses service_role key — bypasses RLS.
 // NEVER import this from client components.
@@ -7,12 +8,9 @@ let cached: SupabaseClient | null = null;
 
 export function createSupabaseAdmin(): SupabaseClient {
   if (cached) return cached;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY or NEXT_PUBLIC_SUPABASE_URL");
-  }
-  cached = createClient(url, key, {
+  // ENV.* throws a specific Romanian error if the var is missing,
+  // instead of the prior "undefined" runtime crash deep in the SDK.
+  cached = createClient(ENV.SUPABASE_URL(), ENV.SUPABASE_SERVICE_ROLE_KEY(), {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
