@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 // 5-minute ISR cache. An EMSC quake in Romania is rare enough that 5 min
 // latency is acceptable; the AlertBanner client polls every 5 min anyway.
@@ -76,7 +77,10 @@ async function fetchRecentQuake(): Promise<AlertPayload | null> {
  *
  * All sources fail-open — a 5xx from any external API results in null.
  */
-export async function GET() {
+export async function GET(req: Request) {
+  const rl = await rateLimitAsync(`alerts:${getClientIp(req)}`, { limit: 60, windowMs: 60_000 });
+  if (!rl.success) return NextResponse.json({ error: "Prea multe cereri" }, { status: 429 });
+
   const alerts: AlertPayload[] = [];
 
   // 1. Earthquake feed (EMSC)

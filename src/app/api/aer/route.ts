@@ -5,6 +5,7 @@ import { fetchOpenAQ } from "./sources/openaq";
 import { fetchWaqi } from "./sources/waqi";
 import type { UnifiedSensor, AirDataResponse } from "@/lib/aer/types";
 import { DEDUP_RADIUS_M } from "@/lib/aer/constants";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const revalidate = 300; // 5 min ISR cache
 
@@ -55,7 +56,9 @@ function dedup(sensors: UnifiedSensor[]): UnifiedSensor[] {
   return kept;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const rl = await rateLimitAsync(`aer:${getClientIp(req)}`, { limit: 30, windowMs: 60_000 });
+  if (!rl.success) return NextResponse.json({ error: "Prea multe cereri" }, { status: 429 });
   const startTime = Date.now();
 
   // Fetch all sources in parallel — don't fail if one is down

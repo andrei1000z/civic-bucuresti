@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const revalidate = 300; // 5 min cache
 
@@ -10,7 +11,9 @@ interface SesRow {
   resolved_at: string | null;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const rl = await rateLimitAsync(`stats-scorecard:${getClientIp(req)}`, { limit: 60, windowMs: 60_000 });
+  if (!rl.success) return NextResponse.json({ error: "Prea multe cereri" }, { status: 429 });
   try {
     const supabase = await createSupabaseServer();
     const { data, error } = await supabase

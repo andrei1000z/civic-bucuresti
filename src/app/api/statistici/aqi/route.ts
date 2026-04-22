@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +9,9 @@ export const dynamic = "force-dynamic";
  * Defaults to București if no coords provided.
  */
 export async function GET(req: Request) {
+  const rl = await rateLimitAsync(`statistici-aqi:${getClientIp(req)}`, { limit: 60, windowMs: 60_000 });
+  if (!rl.success) return NextResponse.json({ error: "Prea multe cereri" }, { status: 429 });
+
   const { searchParams } = new URL(req.url);
   const lat = Number(searchParams.get("lat") || "44.43");
   const lng = Number(searchParams.get("lng") || "26.10");

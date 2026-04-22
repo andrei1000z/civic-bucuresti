@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const revalidate = 120;
 
@@ -19,6 +20,9 @@ export async function OPTIONS() {
 }
 
 export async function GET(req: Request) {
+  const rl = await rateLimitAsync(`public-sesizari:${getClientIp(req)}`, { limit: 60, windowMs: 60_000 });
+  if (!rl.success) return NextResponse.json({ error: "Prea multe cereri" }, { status: 429 });
+
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status");
   const sector = searchParams.get("sector");

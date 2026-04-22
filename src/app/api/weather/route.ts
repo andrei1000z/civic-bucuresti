@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const revalidate = 600; // 10 minutes
 
@@ -8,6 +9,9 @@ export const revalidate = 600; // 10 minutes
  * Accepts optional lat/lng params — defaults to București if not provided.
  */
 export async function GET(req: Request) {
+  const rl = await rateLimitAsync(`weather:${getClientIp(req)}`, { limit: 60, windowMs: 60_000 });
+  if (!rl.success) return NextResponse.json({ error: "Prea multe cereri" }, { status: 429 });
+
   const { searchParams } = new URL(req.url);
   const lat = Number(searchParams.get("lat") || "44.43");
   const lng = Number(searchParams.get("lng") || "26.10");

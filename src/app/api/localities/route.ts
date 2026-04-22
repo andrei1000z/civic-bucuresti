@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const revalidate = 86400; // 24h cache
 
@@ -8,6 +9,9 @@ export const revalidate = 86400; // 24h cache
  * Search localities by county and/or name (autocomplete).
  */
 export async function GET(req: Request) {
+  const rl = await rateLimitAsync(`localities:${getClientIp(req)}`, { limit: 120, windowMs: 60_000 });
+  if (!rl.success) return NextResponse.json({ error: "Prea multe cereri" }, { status: 429 });
+
   const { searchParams } = new URL(req.url);
   const county = searchParams.get("county");
   const q = (searchParams.get("q") ?? "").trim();

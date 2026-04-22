@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSesizariStatsCached } from "@/lib/cached-queries";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const revalidate = 300;
 
@@ -8,7 +9,9 @@ export const revalidate = 300;
  * Shares an in-memory cache with /impact and other callers — a single
  * stats pull serves all of them within the TTL window.
  */
-export async function GET() {
+export async function GET(req: Request) {
+  const rl = await rateLimitAsync(`stats-summary:${getClientIp(req)}`, { limit: 120, windowMs: 60_000 });
+  if (!rl.success) return NextResponse.json({ error: "Prea multe cereri" }, { status: 429 });
   try {
     const data = await getSesizariStatsCached();
     return NextResponse.json(
