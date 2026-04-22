@@ -1130,11 +1130,10 @@ ${today}`;
               Atașează poze clare, cu rezoluție mare și lumină bună. Ideal: o poză apropiată cu problema + o poză de context mai largă cu un reper vizibil (stâlp, clădire, număr casă). Fotografiază din mai multe unghiuri. Cu cât mai multe poze relevante, cu atât mai bine.
             </p>
             {imagini.length > 0 && (
-              <div className="mt-2 flex items-start gap-2 p-3 rounded-[8px] bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 text-xs text-emerald-900 dark:text-emerald-300">
-                <span className="shrink-0 mt-0.5">✓</span>
+              <div className="mt-2 flex items-start gap-2 p-3 rounded-[8px] bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-300">
+                <span className="shrink-0 mt-0.5">⚠️</span>
                 <p>
-                  <strong>Pozele se includ automat în email</strong> —
-                  primăria primește linkuri directe către ele, fără să trebuiască să le atașezi tu.
+                  <strong>Atașează pozele manual în emailul către autorități</strong> — sunt salvate public pe Civia la linkul sesizării tale, dar e mai profesionist să le pui tu direct în email ca atașamente.
                 </p>
               </div>
             )}
