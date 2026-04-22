@@ -39,11 +39,21 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullText)}&url=${encodeURIComponent(url)}`;
   const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
 
+  // Helper — fire a "share" custom analytics event with the channel
+  // so /admin/analytics can show which sharing surfaces are hot.
+  // Dynamic import keeps CiviaTracker out of the ShareMenu bundle.
+  const trackShare = (channel: string) => {
+    import("@/components/analytics/CiviaTracker").then(({ trackCustomEvent }) => {
+      trackCustomEvent("share", { channel, url });
+    }).catch(() => { /* silent */ });
+  };
+
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(`${fullText}\n${url}`);
       setCopied(true);
       toast("Link copiat!", "success", 2000);
+      trackShare("clipboard");
       setTimeout(() => setCopied(false), 2000);
     } catch {
       window.prompt("Copiază:", url);
@@ -63,6 +73,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
     if (typeof nav.share !== "function") return false;
     try {
       await nav.share({ title, url });
+      trackShare("native");
       return true;
     } catch {
       return false;
@@ -104,40 +115,40 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
+              onClick={() => { setOpen(false); trackShare("whatsapp"); }}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)]"
             >
-              <MessageCircle size={16} className="text-[#25D366]" />
+              <MessageCircle size={16} className="text-[#25D366]" aria-hidden="true" />
               <span>WhatsApp</span>
             </a>
             <a
               href={telegramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
+              onClick={() => { setOpen(false); trackShare("telegram"); }}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)]"
             >
-              <Send size={16} className="text-[#0088cc]" />
+              <Send size={16} className="text-[#0088cc]" aria-hidden="true" />
               <span>Telegram</span>
             </a>
             <a
               href={twitterUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
+              onClick={() => { setOpen(false); trackShare("twitter"); }}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)]"
             >
-              <span className="w-4 h-4 flex items-center justify-center text-sm font-bold">𝕏</span>
+              <span className="w-4 h-4 flex items-center justify-center text-sm font-bold" aria-hidden="true">𝕏</span>
               <span>Twitter/X</span>
             </a>
             <a
               href={facebookUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
+              onClick={() => { setOpen(false); trackShare("facebook"); }}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)]"
             >
-              <span className="w-4 h-4 flex items-center justify-center text-sm font-bold text-[#1877F2]">f</span>
+              <span className="w-4 h-4 flex items-center justify-center text-sm font-bold text-[#1877F2]" aria-hidden="true">f</span>
               <span>Facebook</span>
             </a>
             <div className="border-t border-[var(--color-border)]" />
