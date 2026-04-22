@@ -43,6 +43,7 @@ export default function ContPage() {
   const [saved, setSaved] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [form, setForm] = useState({ display_name: "", full_name: "", address: "", phone: "", hide_name: false });
@@ -424,13 +425,15 @@ export default function ContPage() {
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a
             href="/api/profile/export"
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)]"
+            download={`civia-export-${new Date().toISOString().slice(0, 10)}.json`}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
-            📥 Exportă datele mele (JSON)
+            📥 Descarcă datele mele (JSON)
           </a>
           <button
+            type="button"
             onClick={() => setDeleteModal(true)}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] border border-red-300 dark:border-red-900 text-red-700 dark:text-red-400 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-950/30"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] border border-red-300 dark:border-red-900 text-red-700 dark:text-red-400 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-950/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             🗑️ Șterge contul definitiv
           </button>
@@ -485,15 +488,33 @@ export default function ContPage() {
                 Sesizările publice pe care le-ai depus rămân pe platformă, dar vor fi anonimizate
                 (numele înlocuit cu &ldquo;Cetățean&rdquo;).
               </p>
+              <div className="pt-2">
+                <label htmlFor="confirm-delete" className="block text-xs font-medium mb-1.5 text-[var(--color-text)]">
+                  Tastează <span className="font-mono font-bold">ȘTERGE</span> pentru a confirma
+                </label>
+                <input
+                  id="confirm-delete"
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  className="w-full h-10 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-mono uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-red-500"
+                  disabled={deleting}
+                />
+              </div>
               <div className="flex gap-2 pt-2">
                 <button
-                  onClick={() => setDeleteModal(false)}
+                  type="button"
+                  onClick={() => { setDeleteModal(false); setDeleteConfirmText(""); }}
                   disabled={deleting}
-                  className="flex-1 h-11 rounded-[8px] bg-[var(--color-surface-2)] text-sm font-medium hover:bg-[var(--color-border)] disabled:opacity-50"
+                  className="flex-1 h-11 rounded-[8px] bg-[var(--color-surface-2)] text-sm font-medium hover:bg-[var(--color-border)] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 >
                   Anulează
                 </button>
                 <button
+                  type="button"
                   onClick={async () => {
                     setDeleting(true);
                     try {
@@ -506,8 +527,8 @@ export default function ContPage() {
                       setDeleting(false);
                     }
                   }}
-                  disabled={deleting}
-                  className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-50"
+                  disabled={deleting || deleteConfirmText.trim().toUpperCase() !== "ȘTERGE"}
+                  className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-red-500"
                 >
                   {deleting ? <Loader2 size={14} className="animate-spin" /> : null}
                   Da, șterge definitiv
