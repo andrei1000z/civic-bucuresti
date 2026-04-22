@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { X, Keyboard } from "lucide-react";
 
 const SHORTCUTS: Array<{ keys: string[]; label: string }> = [
   { keys: ["Ctrl", "K"], label: "Deschide căutarea globală" },
-  { keys: ["/"], label: "Caută (alternativă)" },
-  { keys: ["?"], label: "Arată acest panou" },
-  { keys: ["g", "h"], label: "Mergi la pagina principală" },
-  { keys: ["g", "s"], label: "Mergi la sesizări" },
-  { keys: ["g", "m"], label: "Mergi la hărți" },
-  { keys: ["g", "i"], label: "Mergi la știri" },
+  { keys: ["/"], label: "Focus pe căutare (alternativă)" },
+  { keys: ["?"], label: "Arată acest panou de scurtături" },
+  { keys: ["g", "h"], label: "Acasă" },
+  { keys: ["g", "s"], label: "Trimite o sesizare" },
+  { keys: ["g", "p"], label: "Sesizări publice" },
+  { keys: ["g", "u"], label: "Urmărește sesizarea ta" },
+  { keys: ["g", "m"], label: "Hărți" },
+  { keys: ["g", "a"], label: "Calitatea aerului" },
+  { keys: ["g", "i"], label: "Știri locale" },
+  { keys: ["g", "d"], label: "Ghiduri" },
   { keys: ["Esc"], label: "Închide modal / panou" },
 ];
 
@@ -21,6 +26,7 @@ const SHORTCUTS: Array<{ keys: string[]; label: string }> = [
  */
 export function KeyboardShortcuts() {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -64,19 +70,27 @@ export function KeyboardShortcuts() {
       // "g X" chord navigation
       if (isEditableTarget(e.target)) return;
       if (chord === "g") {
+        // Chord destinations. \"a\" now goes to /aer (public)
+        // instead of /admin (admin-only — was a usability trap for
+        // non-admins who hit g,a). \"d\" is ghiduri (\"documente\"),
+        // \"u\" urmărește, \"p\" publice.
         const dest: Record<string, string> = {
           h: "/",
           s: "/sesizari",
+          p: "/sesizari-publice",
+          u: "/urmareste",
           m: "/harti",
+          a: "/aer",
           i: "/stiri",
-          g: "/ghiduri",
+          d: "/ghiduri",
           c: "/calendar-civic",
-          a: "/admin",
         };
         const url = dest[e.key];
         if (url) {
           e.preventDefault();
-          window.location.href = url;
+          // Soft nav — stays inside the SPA, keeps scroll/state
+          // behaviour consistent with clicking a <Link>.
+          router.push(url);
         }
         chord = null;
         if (chordTimer) clearTimeout(chordTimer);
@@ -95,7 +109,7 @@ export function KeyboardShortcuts() {
       window.removeEventListener("keydown", onKey);
       if (chordTimer) clearTimeout(chordTimer);
     };
-  }, [open]);
+  }, [open, router]);
 
   if (!open) return null;
 
