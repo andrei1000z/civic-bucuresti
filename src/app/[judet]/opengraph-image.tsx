@@ -103,7 +103,7 @@ export default async function OgImage({ params }: { params: Promise<{ judet: str
             <span>🌬️ Aer live</span>
             <span>📊 Statistici</span>
           </div>
-          <div>civia.ro/{county?.slug ?? "ro"}</div>
+          <div style={{ display: "flex" }}>{`civia.ro/${county?.slug ?? "ro"}`}</div>
         </div>
       </div>
     ),
