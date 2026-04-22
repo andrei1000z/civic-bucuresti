@@ -59,26 +59,50 @@ export function AlertBanner() {
     setDismissed(loadDismissed());
 
     let cancelled = false;
-    fetch("/api/alerts")
-      .then((r) => r.json())
-      .then((j) => {
-        if (!cancelled && j.data) setAlert(j.data as AlertPayload);
-      })
-      .catch(() => {});
+    // Helper: treat res.ok===false as silent-skip (keep previous
+    // alert visible) instead of nulling the banner out. Prevents
+    // a 5xx from /api/alerts hiding an alert that was valid 30s ago.
+    const fetchAlert = async () => {
+      try {
+        const r = await fetch("/api/alerts");
+        if (!r.ok) return;
+        const j = await r.json();
+        if (!cancelled) setAlert(j.data as AlertPayload | null);
+      } catch {
+        /* silent — network blip, retry next tick */
+      }
+    };
 
-    // Re-check every 5 minutes for new alerts
-    const interval = setInterval(() => {
-      fetch("/api/alerts")
-        .then((r) => r.json())
-        .then((j) => {
-          if (!cancelled) setAlert(j.data as AlertPayload | null);
-        })
-        .catch(() => {});
-    }, 5 * 60_000);
+    fetchAlert();
+
+    // Re-check every 5 minutes, but only while the tab is visible.
+    // Background tabs polling every 5 min drained phone battery
+    // with no user benefit.
+    let interval: ReturnType<typeof setInterval> | null = null;
+    const start = () => {
+      if (interval) return;
+      interval = setInterval(fetchAlert, 5 * 60_000);
+    };
+    const stop = () => {
+      if (!interval) return;
+      clearInterval(interval);
+      interval = null;
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        start();
+        fetchAlert(); // catch-up when user returns to the tab
+      } else {
+        stop();
+      }
+    };
+    if (document.visibilityState === "visible") start();
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 
