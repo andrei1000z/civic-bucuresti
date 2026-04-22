@@ -37,7 +37,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
                 {it.href && !isLast ? (
                   <Link
                     href={it.href}
-                    className="hover:text-[var(--color-primary)] hover:underline transition-colors"
+                    className="hover:text-[var(--color-primary)] hover:underline transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded px-0.5"
                   >
                     {it.label}
                   </Link>
@@ -46,7 +46,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
                     {it.label}
                   </span>
                 )}
-                {!isLast && <ChevronRight size={12} aria-hidden />}
+                {!isLast && <ChevronRight size={12} aria-hidden="true" className="shrink-0" />}
               </li>
             );
           })}
