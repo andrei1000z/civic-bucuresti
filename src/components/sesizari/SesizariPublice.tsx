@@ -98,8 +98,9 @@ export function SesizariPublice() {
         <div className="inline-flex rounded-[8px] bg-[var(--color-surface-2)] p-1">
           <button
             onClick={() => setView("list")}
+            aria-pressed={view === "list"}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-medium transition-all",
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
               view === "list" ? "bg-[var(--color-surface)] shadow-sm" : "text-[var(--color-text-muted)]"
             )}
           >
@@ -107,8 +108,9 @@ export function SesizariPublice() {
           </button>
           <button
             onClick={() => setView("map")}
+            aria-pressed={view === "map"}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-medium transition-all",
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
               view === "map" ? "bg-[var(--color-surface)] shadow-sm" : "text-[var(--color-text-muted)]"
             )}
           >
@@ -214,14 +216,14 @@ export function SesizariPublice() {
                       setFilterSector("toate");
                       setSort("recent");
                     }}
-                    className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
+                    className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   >
                     🔄 Resetează filtrele
                   </button>
                 )}
                 <Link
                   href={county ? `/${county.slug}/sesizari` : "/sesizari"}
-                  className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+                  className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
                 >
                   Fă o sesizare acum →
                 </Link>
@@ -344,7 +346,7 @@ export function SesizariPublice() {
                 }
               }}
               disabled={loadingMore}
-              className="inline-flex items-center gap-2 h-11 px-6 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] disabled:opacity-50 transition-colors"
+              className="inline-flex items-center gap-2 h-11 px-6 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
               {loadingMore ? (
                 <><Loader2 size={14} className="animate-spin" /> Se încarcă...</>

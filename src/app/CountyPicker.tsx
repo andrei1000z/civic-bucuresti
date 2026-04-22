@@ -124,7 +124,7 @@ export function CountyPicker() {
           <button
             onClick={handleGPS}
             disabled={detecting}
-            className="h-12 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 inline-flex items-center gap-2 shrink-0"
+            className="h-12 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 inline-flex items-center gap-2 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
           >
             {detecting ? (
               <><Loader2 size={16} className="animate-spin" /> Se detectează...</>

@@ -96,7 +96,7 @@ export function NearMeWidget() {
         <button
           onClick={findNearby}
           disabled={loading}
-          className="shrink-0 inline-flex items-center gap-2 h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+          className="shrink-0 inline-flex items-center gap-2 h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
           {loading ? (
             <Loader2 size={14} className="animate-spin" />

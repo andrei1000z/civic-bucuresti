@@ -62,12 +62,14 @@ export function StiriList() {
   const county = useCountyOptional();
   const [rows, setRows] = useState<StireRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [category, setCategory] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(12);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setFetchError(null);
     const params = new URLSearchParams();
     if (category !== "all") params.set("category", category);
     if (query) params.set("q", query);
@@ -75,10 +77,12 @@ export function StiriList() {
     params.set("limit", "100");
     try {
       const res = await fetch(`/api/stiri?${params.toString()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       setRows(json.data ?? []);
-    } catch {
+    } catch (e) {
       setRows([]);
+      setFetchError(e instanceof Error ? e.message : "Eroare");
     } finally {
       setLoading(false);
     }
@@ -144,12 +148,30 @@ export function StiriList() {
         </div>
       ) : rows.length === 0 ? (
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-10 text-center">
-          <p className="text-[var(--color-text-muted)] mb-2">
-            Știrile se actualizează.
-          </p>
-          <p className="text-xs text-[var(--color-text-muted)]">
-            Revino în câteva minute sau încearcă alt filtru.
-          </p>
+          {fetchError ? (
+            <>
+              <p className="text-[var(--color-text-muted)] mb-2">
+                Nu am putut încărca știrile.
+              </p>
+              <p className="text-xs text-[var(--color-text-muted)] mb-4">
+                Eroare: {fetchError}. Verifică conexiunea și încearcă din nou.
+              </p>
+              <button
+                type="button"
+                onClick={() => load()}
+                className="inline-flex items-center gap-2 h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              >
+                Reîncearcă
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-[var(--color-text-muted)] mb-2">Știrile se actualizează.</p>
+              <p className="text-xs text-[var(--color-text-muted)]">
+                Revino în câteva minute sau încearcă alt filtru.
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <>

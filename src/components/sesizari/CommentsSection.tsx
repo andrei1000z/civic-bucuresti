@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { MessageSquare, Send, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useToast } from "@/components/Toast";
 import { timeAgo } from "@/lib/utils";
 import type { SesizareCommentRow } from "@/lib/supabase/types";
 
@@ -13,6 +14,7 @@ interface CommentsSectionProps {
 
 export function CommentsSection({ code, initialComments }: CommentsSectionProps) {
   const { user, openAuthModal } = useAuth();
+  const { toast } = useToast();
   const [comments, setComments] = useState(initialComments);
   const [body, setBody] = useState("");
   const [posting, setPosting] = useState(false);
@@ -42,7 +44,11 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
       setComments((prev) => [...prev, json.data]);
       setBody("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Eroare");
+      const msg = e instanceof Error ? e.message : "Eroare";
+      setError(msg);
+      // Also push a toast — the inline error below the form can be
+      // missed on long pages, and the submit happens at the bottom.
+      toast(msg, "error");
     } finally {
       setPosting(false);
     }
@@ -99,9 +105,20 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
 
       {/* List */}
       {comments.length === 0 ? (
-        <p className="text-sm text-[var(--color-text-muted)] text-center py-8">
-          Niciun comentariu încă. Fii primul!
-        </p>
+        <div className="text-sm text-[var(--color-text-muted)] text-center py-8 space-y-1">
+          <p>Niciun comentariu încă.</p>
+          {user ? (
+            <p className="text-xs">Lasă tu primul comentariu — alți cetățeni pot adăuga context.</p>
+          ) : (
+            <button
+              type="button"
+              onClick={openAuthModal}
+              className="text-xs text-[var(--color-primary)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
+            >
+              Autentifică-te ca să lași primul comentariu →
+            </button>
+          )}
+        </div>
       ) : (
         <div className="space-y-3">
           {comments.map((c) => (

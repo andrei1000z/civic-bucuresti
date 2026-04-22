@@ -112,14 +112,14 @@ export function MarkResolvedButton({ code, status, authorEmail, userId }: Props)
               <div className="flex gap-2">
                 <button
                   onClick={() => setOpen(false)}
-                  className="flex-1 h-11 rounded-[8px] bg-[var(--color-surface-2)] text-sm font-medium hover:bg-[var(--color-border)]"
+                  className="flex-1 h-11 rounded-[8px] bg-[var(--color-surface-2)] text-sm font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 >
                   Anulează
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-emerald-500 text-white text-sm font-medium hover:brightness-110 disabled:opacity-50"
+                  className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-emerald-500 text-white text-sm font-medium hover:brightness-110 disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-500"
                 >
                   {submitting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
                   Confirmă rezolvarea
