@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,22 @@ export async function GET() {
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
+
+  // Export is expensive: 5 Supabase queries + aggregation + a
+  // potentially-large JSON serialization. A well-meaning user who
+  // refreshes the download several times in a row shouldn't hit
+  // our DB that hard. 5/hour per user is plenty for legitimate
+  // GDPR exercise; blocks accidental loops.
+  const rl = await rateLimitAsync(`profile-export:${user.id}`, {
+    limit: 5,
+    windowMs: 60 * 60_000,
+  });
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Prea multe cereri de export. Reîncearcă peste o oră." },
+      { status: 429 },
+    );
+  }
 
   const admin = createSupabaseAdmin();
 

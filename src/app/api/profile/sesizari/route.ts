@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +9,17 @@ export async function GET() {
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
+
+  // /cont polls this every time the page mounts. 60/min per user
+  // is a generous ceiling — normal navigation never reaches it,
+  // but a runaway refresh loop gets curbed.
+  const rl = await rateLimitAsync(`profile-sesizari:${user.id}`, {
+    limit: 60,
+    windowMs: 60_000,
+  });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Prea multe cereri" }, { status: 429 });
+  }
 
   // Use admin to fetch regardless of publica flag (user sees own sesizari always).
   // Two separate queries instead of .or() to avoid PostgREST filter injection via email.
