@@ -5,8 +5,8 @@ import { ghiduri } from "@/data/ghiduri";
 import { Badge } from "@/components/ui/Badge";
 
 export const metadata: Metadata = {
-  title: "Ghiduri pentru cetățeni",
-  description: "11 ghiduri practice: Legea 544, contestare amendă, ajutoare sociale, ONG, dezbatere publică, drepturi cetățean, sesizări, bicicletă, cutremur, caniculă, transport.",
+  title: "Ghiduri practice — ce să faci când statul e dificil",
+  description: "11 ghiduri pas-cu-pas pentru cetățeni: Legea 544, contestarea unei amenzi, ajutoare sociale, cum înființezi un ONG, drepturi și proceduri explicate simplu — fără jargon juridic.",
   alternates: { canonical: "/ghiduri" },
 };
 
@@ -27,10 +27,10 @@ export default function GhiduriPage() {
             📚 Ghiduri practice
           </Badge>
           <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-6xl font-bold mb-4">
-            Ghiduri pentru cetățeni
+            Ce să faci când te lovești de stat
           </h1>
           <p className="text-lg md:text-xl text-white/85 max-w-2xl">
-            Informații clare, structurate și verificate pentru a naviga mai ușor prin orașul tău — de la bicicletă la cutremur.
+            11 ghiduri scurte, cu pași concreți. Contestarea unei amenzi, cererea de informații publice, înființarea unui ONG, pregătirea pentru cutremur — lucrurile pe care nu le înveți la școală dar pe care toți le înfruntăm.
           </p>
         </div>
       </section>

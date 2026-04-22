@@ -19,8 +19,8 @@ const chapters = [
 export default function GhidAjutorSocialPage() {
   return (
     <GhidLayout
-      title="Ajutoare sociale — ghid complet pentru cetățeni"
-      subtitle="Statul oferă mai multe ajutoare sociale decât știi. Iată cine le poate primi, cât, cum le ceri și unde."
+      title="Ajutoare sociale — cele pe care le-ai plătit deja"
+      subtitle="Statul oferă mai multe tipuri de ajutor decât auzi la TV: venit minim, alocații, indemnizații pentru dizabilități, ajutor de încălzire, cantine sociale. Ghid concret: cine le primește, cât, cu ce acte și la ce birou."
       icon="💰"
       gradient="from-emerald-600 via-green-700 to-teal-800"
       chapters={chapters}

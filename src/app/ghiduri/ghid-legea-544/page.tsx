@@ -52,8 +52,8 @@ export default function GhidLegea544Page() {
         ]}
       />
       <GhidLayout
-      title="Legea 544/2001 — cum obții orice informație publică"
-      subtitle="Orice cetățean poate cere informații de la o autoritate publică. Autoritatea e OBLIGATĂ să răspundă. Iată cum."
+      title="Legea 544/2001 — arma ta împotriva secretomaniței"
+      subtitle="Poți cere oficial orice informație pe care o are statul: contracte, bugete, decizii, documente. Autoritatea e obligată prin lege să răspundă în 10 zile, gratuit. Iată cum o faci corect, de la prima cerere la contencios."
       icon="🔓"
       gradient="from-indigo-600 via-violet-700 to-fuchsia-800"
       chapters={chapters}

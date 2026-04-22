@@ -55,8 +55,8 @@ export default function GhidContestatieAmendaPage() {
         ]}
       />
       <GhidLayout
-      title="Cum contești o amendă — ghid complet"
-      subtitle="Amenzile contravenționale se contestă în 15 zile. Până atunci, ai 15 zile să plătești jumătate. Iată cum decizi și cum procedezi."
+      title="Cum contești o amendă și câștigi"
+      subtitle="Ai 15 zile. Fie plătești jumătate, fie contești — nu ambele. Dacă pare nedreaptă sau procesul-verbal are vreo greșeală (și adesea are), nu plăti: taxa de timbru e 20 lei, iar procentul de câștig pe greșeli formale e surprinzător de mare."
       icon="⚖️"
       gradient="from-orange-600 via-red-700 to-rose-900"
       chapters={chapters}

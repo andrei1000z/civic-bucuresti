@@ -19,8 +19,8 @@ const chapters = [
 export default function GhidCutremurPage() {
   return (
     <GhidLayout
-      title="Ghid cutremur — ce faci înainte, în timpul și după"
-      subtitle="România se află într-o zonă cu risc seismic ridicat. Pregătește-te acum, nu după."
+      title="Cutremur în România — cum te pregătești ca să supraviețuiești"
+      subtitle="Vrancea e a doua cea mai activă zonă seismică din Europa. Un cutremur major ne lovește în medie o dată la 30-40 de ani — ultimul a fost în 1977 (1.578 morți). Statistic, suntem în fereastră. Pregătirea de 30 de minute de acum poate face diferența."
       icon="🌍"
       gradient="from-red-700 via-rose-800 to-red-900"
       chapters={chapters}

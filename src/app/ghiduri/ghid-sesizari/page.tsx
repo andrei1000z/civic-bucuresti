@@ -50,8 +50,8 @@ export default function GhidSesizariPage() {
         ]}
       />
       <GhidLayout
-      title="Ghid sesizări — cum obții rezultate"
-      subtitle="De la prima gropă raportată până la câștigarea procesului administrativ, tot ce trebuie să știi."
+      title="Sesizări care nu sunt aruncate la coș"
+      subtitle="Diferența între o sesizare ignorată și una rezolvată stă în detalii: cum formulezi, cui trimiți, ce dovezi atașezi. Ghid complet, de la prima gropă raportată până la plângerea în contencios administrativ dacă te-ai lovit de pereți."
       icon="📮"
       gradient="from-purple-600 via-fuchsia-700 to-pink-800"
       chapters={chapters}

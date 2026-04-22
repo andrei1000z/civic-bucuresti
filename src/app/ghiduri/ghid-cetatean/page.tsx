@@ -21,8 +21,8 @@ const chapters = [
 export default function GhidCetateanPage() {
   return (
     <GhidLayout
-      title="Ghid cetățean — drepturile tale în relația cu administrația locală"
-      subtitle="Tot ce trebuie să știi ca să-ți exerciți drepturile în relația cu primăria și consiliul local."
+      title="Drepturile tale, pe bucăți mici"
+      subtitle="Primăria, consiliul local, prefectura — ce îți datorează prin lege și cum să ceri. Fără jargon juridic, doar pașii reali care funcționează."
       icon="⚖️"
       gradient="from-slate-700 via-zinc-800 to-slate-900"
       chapters={chapters}

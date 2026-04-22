@@ -19,8 +19,8 @@ const chapters = [
 export default function GhidOngPage() {
   return (
     <GhidLayout
-      title="Cum înființezi un ONG — ghid pas cu pas"
-      subtitle="Asociație, fundație sau federație — aceleași reguli. Ghid complet cu costuri reale, acte necesare și capcane de evitat."
+      title="Cum îți faci un ONG — fără să te piardă birocrația"
+      subtitle="Asociație, fundație sau federație — aceleași reguli OG 26/2000. Ghid practic: pașii exacți, actele pe care chiar le cere notarul, taxele reale, plus capcanele la care multe ONG-uri cad (statutul greșit, consiliu director, raport anual uitat)."
       icon="🤝"
       gradient="from-teal-600 via-cyan-700 to-blue-800"
       chapters={chapters}
