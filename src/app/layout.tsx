@@ -80,6 +80,28 @@ export const metadata: Metadata = {
   other: {
     "theme-color": "#1C4ED8",
   },
+  keywords: [
+    "sesizări România",
+    "hărți civice",
+    "primăria București",
+    "date publice",
+    "buget național",
+    "transport public București",
+    "Poliția Locală",
+    "parcare ilegală",
+    "civia.ro",
+    "platformă civică",
+  ],
+  alternates: {
+    canonical: SITE_URL,
+    // Site is RO-only; declaring ro-RO + x-default helps Google pick the
+    // right index for international searchers and prevents duplicate-URL
+    // indexing when a user visits via www / non-www.
+    languages: {
+      "ro-RO": SITE_URL,
+      "x-default": SITE_URL,
+    },
+  },
 };
 
 export const viewport = {

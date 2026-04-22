@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { GhidLayout, Chapter, Callout } from "@/components/ghiduri/GhidLayout";
+import { HowToJsonLd } from "@/components/JsonLd";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Ghid Legea 544/2001 — acces la informații publice",
@@ -19,7 +21,37 @@ const chapters = [
 
 export default function GhidLegea544Page() {
   return (
-    <GhidLayout
+    <>
+      <HowToJsonLd
+        name="Cum ceri o informație publică prin Legea 544/2001"
+        description="Procedură pas-cu-pas pentru a obține orice document sau informație deținută de o instituție publică din România."
+        url={`${SITE_URL}/ghiduri/ghid-legea-544`}
+        totalTime="PT30M"
+        estimatedCost="0"
+        steps={[
+          {
+            name: "Identifică instituția care deține informația",
+            text: "Fiecare autoritate publică are un responsabil pentru aplicarea Legii 544/2001. Găsește adresa de email pe site-ul instituției la secțiunea „Informații publice”.",
+          },
+          {
+            name: "Scrie cererea în format simplu",
+            text: "Titlu: „Cerere în temeiul Legii 544/2001”. Precizează clar ce documente/informații dorești, fără să trebuiască să motivezi. Cere formatul electronic (PDF/email).",
+          },
+          {
+            name: "Trimite cererea prin email, cu confirmare",
+            text: "Email oficial sau poștă cu confirmare de primire. Păstrează dovada — e baza contestației dacă răspunsul nu vine.",
+          },
+          {
+            name: "Așteaptă răspunsul în termenul legal",
+            text: "Termenul standard e 10 zile lucrătoare. Se poate prelungi cu 20 de zile pentru informații complexe, dar trebuie să primești notificare.",
+          },
+          {
+            name: "Dacă te refuză sau nu răspunde — contestă",
+            text: "Reclamație administrativă la conducătorul instituției în 30 de zile. Dacă nu se rezolvă, acționează în contencios administrativ.",
+          },
+        ]}
+      />
+      <GhidLayout
       title="Legea 544/2001 — cum obții orice informație publică"
       subtitle="Orice cetățean poate cere informații de la o autoritate publică. Autoritatea e OBLIGATĂ să răspundă. Iată cum."
       icon="🔓"
@@ -223,5 +255,6 @@ export default function GhidLegea544Page() {
         </Callout>
       </Chapter>
     </GhidLayout>
+    </>
   );
 }

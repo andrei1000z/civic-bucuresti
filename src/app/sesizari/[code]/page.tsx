@@ -28,6 +28,8 @@ import { FollowButton } from "@/components/sesizari/FollowButton";
 import { DeleteSesizareButton } from "@/components/sesizari/DeleteSesizareButton";
 import { PhotoGallery } from "@/components/sesizari/PhotoGallery";
 import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
+import { GovernmentServiceJsonLd } from "@/components/JsonLd";
+import { getAuthoritiesFor } from "@/lib/sesizari/authorities";
 import { stripPrivateAddress } from "@/lib/privacy";
 import { SITE_URL } from "@/lib/constants";
 
@@ -120,6 +122,20 @@ export default async function SesizareDetailPage({
         { name: "Sesizări", url: `${SITE_URL}/sesizari` },
         { name: sesizare.titlu, url: `${SITE_URL}/sesizari/${sesizare.code}` },
       ]} />
+      <GovernmentServiceJsonLd
+        code={sesizare.code}
+        titlu={sesizare.titlu}
+        tip={tipLabel}
+        locatie={sesizare.locatie}
+        descriere={sesizare.descriere ?? undefined}
+        url={`${SITE_URL}/sesizari/${sesizare.code}`}
+        providerName={
+          getAuthoritiesFor(sesizare.tip, sesizare.sector, sesizare.county, sesizare.locatie)
+            .primary[0]?.name ?? "Primăria locală"
+        }
+        createdAt={sesizare.created_at}
+        status={STATUS_LABELS[sesizare.status] ?? sesizare.status}
+      />
       <Link
         href="/sesizari"
         className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"

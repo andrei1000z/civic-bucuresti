@@ -1,0 +1,114 @@
+import { ImageResponse } from "next/og";
+import { getCountyBySlug, ALL_COUNTIES } from "@/data/counties";
+
+// Node runtime — the county lookup uses a plain JS import which can't run
+// in edge. The 42 static variants are generated at build via
+// generateImageMetadata so each county gets its own cached PNG.
+export const runtime = "nodejs";
+export const alt = "Civia — platformă civică pe județul tău";
+export const size = { width: 1200, height: 630 };
+export const contentType = "image/png";
+
+export async function generateImageMetadata({
+  params,
+}: {
+  params: Promise<{ judet: string }>;
+}) {
+  const { judet } = await params;
+  const county = getCountyBySlug(judet) ?? ALL_COUNTIES[0]!;
+  return [{ id: county.slug, alt: `Civia — ${county.name}`, contentType: "image/png", size }];
+}
+
+export default async function OgImage({ params }: { params: Promise<{ judet: string }> }) {
+  const { judet } = await params;
+  const county = getCountyBySlug(judet);
+  const name = county?.name ?? "România";
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          background: "linear-gradient(135deg, #059669 0%, #047857 50%, #0a0a0a 100%)",
+          padding: "80px",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+          }}
+        />
+
+        <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 36 }}>
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 14,
+              background: "linear-gradient(135deg, #ffffff, #dbeafe)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 32,
+            }}
+          >
+            🏛️
+          </div>
+          <div style={{ color: "#fff", fontSize: 28, fontWeight: 700 }}>Civia</div>
+        </div>
+
+        <div style={{ color: "#86efac", fontSize: 26, fontWeight: 500, marginBottom: 8, letterSpacing: 2, textTransform: "uppercase" }}>
+          Județul
+        </div>
+
+        <div
+          style={{
+            color: "#fff",
+            fontSize: 128,
+            fontWeight: 800,
+            lineHeight: 1.0,
+            letterSpacing: -3,
+            marginBottom: 28,
+          }}
+        >
+          {name}
+        </div>
+
+        <div style={{ color: "#bfdbfe", fontSize: 30, fontWeight: 400, maxWidth: 1040, lineHeight: 1.3 }}>
+          Sesizări, calitate aer, hărți, statistici și ghiduri civice — toate dintr-un singur loc.
+        </div>
+
+        <div
+          style={{
+            position: "absolute",
+            bottom: 60,
+            left: 80,
+            right: 80,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            color: "rgba(255,255,255,0.7)",
+            fontSize: 22,
+          }}
+        >
+          <div style={{ display: "flex", gap: 28 }}>
+            <span>📮 Sesizări</span>
+            <span>🗺️ Hărți</span>
+            <span>🌬️ Aer live</span>
+            <span>📊 Statistici</span>
+          </div>
+          <div>civia.ro/{county?.slug ?? "ro"}</div>
+        </div>
+      </div>
+    ),
+    size
+  );
+}

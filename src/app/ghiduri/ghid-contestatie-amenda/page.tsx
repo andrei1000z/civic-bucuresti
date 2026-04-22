@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { GhidLayout, Chapter, Callout } from "@/components/ghiduri/GhidLayout";
+import { HowToJsonLd } from "@/components/JsonLd";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Ghid contestare amendă — cum câștigi procesul",
@@ -18,7 +20,41 @@ const chapters = [
 
 export default function GhidContestatieAmendaPage() {
   return (
-    <GhidLayout
+    <>
+      <HowToJsonLd
+        name="Cum contești o amendă contravențională în România"
+        description="Procedură pas-cu-pas pentru contestarea unei amenzi: decizie, termen, plângere contravențională, proces în judecătorie, apel."
+        url={`${SITE_URL}/ghiduri/ghid-contestatie-amenda`}
+        totalTime="PT2H"
+        estimatedCost="20"
+        steps={[
+          {
+            name: "Verifică procesul-verbal în ziua primirii",
+            text: "Citește cu atenție data constatării, articolul invocat, dovada și numele agentului constatator. Orice lipsă sau greșeală e motiv de anulare.",
+          },
+          {
+            name: "Decide: plătește 50% în 15 zile SAU contestă",
+            text: "Dacă plătești în 15 zile, reducerea e 50%. Dacă contești, nu mai ai reducerea dar poți câștiga integral.",
+          },
+          {
+            name: "Depune plângerea contravențională",
+            text: "Plângerea se depune la judecătoria unde s-a săvârșit fapta, în 15 zile de la comunicare. Taxa de timbru e 20 lei.",
+          },
+          {
+            name: "Pregătește probele și argumentarea",
+            text: "Adună martori, poze, filmări, documente. Motivele frecvente care reușesc: nelegalitate formală, prescripție, lipsă de probă.",
+          },
+          {
+            name: "Prezintă-te la proces sau trimite avocat",
+            text: "Procesul durează 3–6 luni. Poți solicita judecare în lipsă dacă locuiești în altă localitate.",
+          },
+          {
+            name: "Dacă pierzi: fă apel în 30 de zile",
+            text: "Hotărârea primei instanțe se atacă la tribunal. Apel taxă: 20 lei.",
+          },
+        ]}
+      />
+      <GhidLayout
       title="Cum contești o amendă — ghid complet"
       subtitle="Amenzile contravenționale se contestă în 15 zile. Până atunci, ai 15 zile să plătești jumătate. Iată cum decizi și cum procedezi."
       icon="⚖️"
@@ -193,5 +229,6 @@ export default function GhidContestatieAmendaPage() {
         </ul>
       </Chapter>
     </GhidLayout>
+    </>
   );
 }

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { GhidLayout, Chapter, Callout } from "@/components/ghiduri/GhidLayout";
+import { HowToJsonLd } from "@/components/JsonLd";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Ghid sesizări — cum obții rezultate",
@@ -17,7 +19,37 @@ const chapters = [
 
 export default function GhidSesizariPage() {
   return (
-    <GhidLayout
+    <>
+      <HowToJsonLd
+        name="Cum trimiți o sesizare civică eficientă la autorități"
+        description="De la descrierea problemei la formularea cererii, trimiterea către autoritățile competente și urmărirea răspunsului în termenul legal."
+        url={`${SITE_URL}/ghiduri/ghid-sesizari`}
+        totalTime="PT15M"
+        estimatedCost="0"
+        steps={[
+          {
+            name: "Documentează problema cu poze și locație",
+            text: "Fotografiază din 2-3 unghiuri, inclusiv un reper vizibil (nume stradă, clădire). Salvează momentul constatării — data + ora exactă sunt obligatorii pentru parcare și contravenții.",
+          },
+          {
+            name: "Descrie faptul concret, fără dramatizare",
+            text: "Exact ce vezi: „trotuarul e spart pe 3 metri, adâncime 10 cm” nu „un dezastru, cineva o să-și rupă gâtul”. Limbajul neutru primește mai multe răspunsuri favorabile.",
+          },
+          {
+            name: "Identifică autoritatea competentă",
+            text: "Sesizarea trimisă la autoritatea greșită se întoarce cu „nu este de competența noastră”. Civia generează automat destinatarii corecți pe bază de sector + tip problemă.",
+          },
+          {
+            name: "Trimite prin email cu confirmare de primire",
+            text: "Atașează pozele originale. Scrie în subiectul emailului codul Civia al sesizării pentru urmărire rapidă.",
+          },
+          {
+            name: "Urmărește răspunsul în termenul legal (30 zile)",
+            text: "Conform OG 27/2002, autoritatea are 30 de zile să răspundă, prelungibil cu 15. Dacă nu răspunde, trimite revenire. Dacă refuză, fă plângere administrativă.",
+          },
+        ]}
+      />
+      <GhidLayout
       title="Ghid sesizări — cum obții rezultate"
       subtitle="De la prima gropă raportată până la câștigarea procesului administrativ, tot ce trebuie să știi."
       icon="📮"
@@ -189,5 +221,6 @@ export default function GhidSesizariPage() {
         </p>
       </Chapter>
     </GhidLayout>
+    </>
   );
 }

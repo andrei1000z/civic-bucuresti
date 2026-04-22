@@ -22,6 +22,7 @@ import { evenimenteDetails } from "@/data/evenimente-detail";
 import { formatDate } from "@/lib/utils";
 import type { EvenimentCategory, EvenimentSeverity } from "@/types";
 import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
+import { HistoricalEventJsonLd } from "@/components/JsonLd";
 import { SITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-static";
@@ -100,6 +101,18 @@ export default async function EvenimentDetailPage({
         { name: "Evenimente", url: `${SITE_URL}/evenimente` },
         { name: eveniment.titlu, url: `${SITE_URL}/evenimente/${eveniment.slug}` },
       ]} />
+      <HistoricalEventJsonLd
+        name={eveniment.titlu}
+        description={eveniment.descriere}
+        startDate={eveniment.data}
+        url={`${SITE_URL}/evenimente/${eveniment.slug}`}
+        location={`Județul ${eveniment.county}, România`}
+        image={
+          eveniment.image
+            ? `${SITE_URL}/images/evenimente/${eveniment.image}.webp`
+            : undefined
+        }
+      />
       {/* Hero */}
       <section className={`relative bg-gradient-to-br ${eveniment.gradient} text-white overflow-hidden`}>
         {eveniment.image && (
