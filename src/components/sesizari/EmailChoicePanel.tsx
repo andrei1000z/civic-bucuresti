@@ -59,7 +59,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
         <a
           href={buildGmailLink(input)}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-2 h-12 px-4 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] shadow-md transition-all"
         >
           <Mail size={18} />
@@ -69,7 +69,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
         <a
           href={buildOutlookLink(input)}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-2 h-12 px-4 rounded-[8px] bg-[#0078d4] text-white font-semibold hover:brightness-110 shadow-md transition-all"
         >
           <Mail size={18} />
@@ -83,7 +83,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
         <a
           href={buildYahooLink(input)}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
         >
           Yahoo Mail

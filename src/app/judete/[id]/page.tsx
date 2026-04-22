@@ -168,7 +168,7 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
                                 </span>
                               )}
                               {auth.website && (
-                                <a href={auth.website} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[var(--color-primary)]">
+                                <a href={auth.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-[var(--color-primary)]">
                                   <Globe size={11} /> Site
                                 </a>
                               )}

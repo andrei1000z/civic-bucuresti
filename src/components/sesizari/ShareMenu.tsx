@@ -103,7 +103,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
             <a
               href={whatsappUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               onClick={() => setOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
             >
@@ -113,7 +113,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
             <a
               href={telegramUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               onClick={() => setOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
             >
@@ -123,7 +123,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
             <a
               href={twitterUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               onClick={() => setOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
             >
@@ -133,7 +133,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
             <a
               href={facebookUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               onClick={() => setOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors"
             >

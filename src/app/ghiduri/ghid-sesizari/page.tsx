@@ -172,7 +172,7 @@ export default function GhidSesizariPage() {
 
         <h3>Pasul 3: Avocatul Poporului</h3>
         <p>
-          <a href="https://avp.ro" target="_blank" rel="noreferrer">avp.ro</a> — dacă o autoritate
+          <a href="https://avp.ro" target="_blank" rel="noopener noreferrer">avp.ro</a> — dacă o autoritate
           încalcă drepturile cetățenești. Gratuit, răspuns în 30 zile.
         </p>
 

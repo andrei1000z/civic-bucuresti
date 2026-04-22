@@ -41,9 +41,9 @@ export function ImageLightbox({ urls, initialIndex = 0, onClose }: Props) {
           href={urls[index]}
           download
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+          className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           aria-label="Salvează"
           title="Salvează imaginea"
         >

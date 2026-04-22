@@ -75,16 +75,16 @@ export default function BiletePage() {
         </p>
         <p className="text-xs text-[var(--color-text-muted)] mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
           ⚠️ Prețurile se pot modifica. Verifică pe{" "}
-          <a href="https://stbsa.ro/tarife" target="_blank" rel="noreferrer" className="text-[var(--color-primary)] hover:underline font-medium">stbsa.ro/tarife</a>
+          <a href="https://stbsa.ro/tarife" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:underline font-medium">stbsa.ro/tarife</a>
           {" "}/{" "}
-          <a href="https://metrorex.ro" target="_blank" rel="noreferrer" className="text-[var(--color-primary)] hover:underline font-medium">metrorex.ro</a>
+          <a href="https://metrorex.ro" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:underline font-medium">metrorex.ro</a>
           .
         </p>
         <div className="flex flex-wrap gap-3">
           <a
             href="https://stbsa.ro"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-sm text-[var(--color-primary)] hover:underline"
           >
             stbsa.ro <ExternalLink size={12} />
@@ -92,7 +92,7 @@ export default function BiletePage() {
           <a
             href="https://metrorex.ro"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-sm text-[var(--color-primary)] hover:underline"
           >
             metrorex.ro <ExternalLink size={12} />
@@ -100,7 +100,7 @@ export default function BiletePage() {
           <a
             href="https://primariavoluntari.ro"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-sm text-[var(--color-primary)] hover:underline"
           >
             voluntari.ro <ExternalLink size={12} />

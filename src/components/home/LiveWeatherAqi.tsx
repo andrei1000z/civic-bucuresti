@@ -51,10 +51,19 @@ export function LiveWeatherAqi() {
     const params = county?.center
       ? `?lat=${county.center[0]}&lng=${county.center[1]}`
       : "";
+    const safeJson = async (url: string) => {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        return await res.json();
+      } catch {
+        return null;
+      }
+    };
     const load = () => {
       Promise.all([
-        fetch(`/api/weather${params}`).then((r) => r.json()).catch(() => null),
-        fetch(`/api/statistici/aqi${params}`).then((r) => r.json()).catch(() => null),
+        safeJson(`/api/weather${params}`),
+        safeJson(`/api/statistici/aqi${params}`),
       ]).then(([w, a]) => {
         if (w?.data) setWeather(w.data);
         if (a?.data && a.data.aqi != null) setAqi({ aqi: a.data.aqi, quality: a.data.quality ?? "Moderat" });

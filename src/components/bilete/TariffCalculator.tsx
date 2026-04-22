@@ -223,8 +223,8 @@ export function TariffCalculator() {
       <a
         href={cheapest.link}
         target="_blank"
-        rel="noreferrer"
-        className="block mt-6 w-full h-12 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] transition-colors flex items-center justify-center gap-2"
+        rel="noopener noreferrer"
+        className="block mt-6 w-full h-12 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] transition-colors flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
       >
         Cumpără {cheapest.name} →
       </a>

@@ -263,7 +263,7 @@ export default async function EvenimentDetailPage({
                 {detail.sources.map((src, i) => (
                   <li key={i} className="flex items-center gap-2 text-[var(--color-text-muted)]">
                     <ExternalLink size={14} />
-                    <a href={src.url} target="_blank" rel="noreferrer" className="hover:text-[var(--color-primary)] hover:underline">
+                    <a href={src.url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--color-primary)] hover:underline">
                       {src.name}
                     </a>
                   </li>

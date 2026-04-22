@@ -209,7 +209,7 @@ export default function GhidCetateanPage() {
         <ul>
           <li>Contactează responsabilul DPO (Data Protection Officer) al primăriei — datele de contact se găsesc pe site-ul oficial</li>
           <li>Răspuns în 30 zile</li>
-          <li>Dacă refuză: plângere la ANSPDCP (<a href="https://dataprotection.ro" target="_blank" rel="noreferrer">dataprotection.ro</a>)</li>
+          <li>Dacă refuză: plângere la ANSPDCP (<a href="https://dataprotection.ro" target="_blank" rel="noopener noreferrer">dataprotection.ro</a>)</li>
         </ul>
       </Chapter>
 
@@ -229,7 +229,7 @@ export default function GhidCetateanPage() {
 
         <h3>Cum îl sesizezi</h3>
         <ul>
-          <li>Online: <a href="https://avp.ro" target="_blank" rel="noreferrer">avp.ro</a></li>
+          <li>Online: <a href="https://avp.ro" target="_blank" rel="noopener noreferrer">avp.ro</a></li>
           <li>Email: <code>avp@avp.ro</code></li>
           <li>Telefon gratuit: 0800 810 300</li>
         </ul>

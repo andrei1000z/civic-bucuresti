@@ -217,7 +217,7 @@ export default async function StireDetailPage({
           <a
             href={stire.url}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-[var(--color-primary)] hover:underline ml-auto"
           >
             <ExternalLink size={14} />
@@ -293,7 +293,7 @@ export default async function StireDetailPage({
             <a
               href={stire.url}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 w-full justify-center h-10 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
             >
               <ExternalLink size={14} />

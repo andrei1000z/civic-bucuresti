@@ -15,9 +15,21 @@ export function LiveStatsBar() {
   const [data, setData] = useState<LiveData | null>(null);
 
   useEffect(() => {
+    // Helper: treat 4xx/5xx as failures too, not just network errors.
+    // Returning the fallback object here keeps the ticker from jumping
+    // to "Se încarcă..." forever on a bad backend response.
+    const fetchJson = async <T,>(url: string, fallback: T): Promise<T> => {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return fallback;
+        return (await res.json()) as T;
+      } catch {
+        return fallback;
+      }
+    };
     Promise.all([
-      fetch("/api/statistici/summary").then((r) => r.json()).catch(() => ({ data: null })),
-      fetch("/api/statistici/aqi").then((r) => r.json()).catch(() => ({ data: { aqi: 65, quality: "Moderat" } })),
+      fetchJson<{ data: { total: number; today: number; inLucru: number } | null }>("/api/statistici/summary", { data: null }),
+      fetchJson<{ data: { aqi: number; quality: string } | null }>("/api/statistici/aqi", { data: { aqi: 65, quality: "Moderat" } }),
     ]).then(([summary, aqi]) => {
       const s = summary.data ?? { total: 0, today: 0, inLucru: 0 };
       setData({

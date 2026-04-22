@@ -91,7 +91,7 @@ export default function ConfidentialitatePage() {
         <h2>Contact</h2>
         <p>
           Pentru întrebări sau solicitări GDPR, deschide un issue pe{" "}
-          <a href="https://github.com/andrei1000z/civic-bucuresti/issues" target="_blank" rel="noreferrer" className="text-[var(--color-primary)]">
+          <a href="https://github.com/andrei1000z/civic-bucuresti/issues" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)]">
             GitHub
           </a>.
         </p>

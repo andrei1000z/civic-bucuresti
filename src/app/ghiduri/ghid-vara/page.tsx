@@ -51,7 +51,7 @@ export default function GhidVaraPage() {
           <li>Aplicația <strong>RO-Alert</strong> (obligatorie pe telefoanele din România)</li>
           <li>SMS automat de la operatorii telecom când ești în zona afectată</li>
           <li>Aplicația <strong>DIGI Alerte</strong> sau INFP Alert</li>
-          <li>Site-ul <a href="https://www.meteoromania.ro" target="_blank" rel="noreferrer">meteoromania.ro</a></li>
+          <li>Site-ul <a href="https://www.meteoromania.ro" target="_blank" rel="noopener noreferrer">meteoromania.ro</a></li>
         </ul>
       </Chapter>
 

@@ -56,7 +56,7 @@ export function PhotoGallery({ urls, title = "Foto" }: Props) {
               href={url}
               download
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-black/80 transition-all"
               aria-label="Salvează imaginea"

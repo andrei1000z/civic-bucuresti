@@ -277,9 +277,9 @@ export function SesizariPublice() {
                     {s.imagini.slice(0, s.resolved_photo_url ? 2 : 3).map((url, i) => (
                       <div key={i} className="relative w-14 h-14 rounded-[8px] bg-[var(--color-surface-2)] overflow-hidden flex items-center justify-center">
                         {url.startsWith("http") ? (
-                          <Image src={url} alt="" fill sizes="56px" className="object-cover" />
+                          <Image src={url} alt={`Fotografie sesizare ${s.code ?? ""}`} fill sizes="56px" className="object-cover" />
                         ) : (
-                          <ImgIcon size={16} className="text-[var(--color-text-muted)]" />
+                          <ImgIcon size={16} className="text-[var(--color-text-muted)]" aria-label="Imagine indisponibilă" />
                         )}
                         {i === 0 && s.resolved_photo_url && (
                           <span className="absolute bottom-0 inset-x-0 bg-red-500/90 text-white text-[8px] font-bold text-center leading-tight py-0.5">

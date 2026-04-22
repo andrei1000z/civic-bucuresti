@@ -192,7 +192,7 @@ export function StiriList() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={featured.image_url}
-                      alt=""
+                      alt={featured.title}
                       className="absolute inset-0 w-full h-full object-cover opacity-90"
                       onError={(e) => (e.currentTarget.style.display = "none")}
                     />
@@ -250,7 +250,7 @@ export function StiriList() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={stire.image_url}
-                      alt=""
+                      alt={stire.title}
                       className="absolute inset-0 w-full h-full object-cover opacity-90"
                       onError={(e) => (e.currentTarget.style.display = "none")}
                     />

@@ -87,10 +87,10 @@ export function Footer() {
               Resurse oficiale
             </h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="https://data.gov.ro" target="_blank" rel="noreferrer" className={linkCls}>data.gov.ro</a></li>
-              <li><a href="https://www.anpm.ro" target="_blank" rel="noreferrer" className={linkCls}>anpm.ro</a></li>
-              <li><a href="https://www.politiaromana.ro" target="_blank" rel="noreferrer" className={linkCls}>politiaromana.ro</a></li>
-              <li><a href="https://www.ghiseul.ro" target="_blank" rel="noreferrer" className={linkCls}>ghiseul.ro</a></li>
+              <li><a href="https://data.gov.ro" target="_blank" rel="noopener noreferrer" className={linkCls}>data.gov.ro</a></li>
+              <li><a href="https://www.anpm.ro" target="_blank" rel="noopener noreferrer" className={linkCls}>anpm.ro</a></li>
+              <li><a href="https://www.politiaromana.ro" target="_blank" rel="noopener noreferrer" className={linkCls}>politiaromana.ro</a></li>
+              <li><a href="https://www.ghiseul.ro" target="_blank" rel="noopener noreferrer" className={linkCls}>ghiseul.ro</a></li>
             </ul>
           </div>
         </div>
