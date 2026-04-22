@@ -37,7 +37,27 @@ const tabs = [
   { id: "statistici" as const, label: "Aer", icon: BarChart3, href: "/aer" },
 ];
 
-export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}) {
+export function HartiMap({
+  defaultTab = "bicicleta",
+  center = [45.9432, 24.9668],
+  zoom = 7,
+  scopeName,
+  countySlug,
+}: {
+  defaultTab?: Tab;
+  /** Initial map center. Defaults to geographic center of România. */
+  center?: [number, number];
+  /** Initial zoom. 7 = whole country, 10-11 = county, 13 = city. */
+  zoom?: number;
+  /** Label shown in the sidebar header — e.g. "Cluj" renders
+   *  "Piste biciclete · Cluj". The underlying GeoJSON is still
+   *  Romania-wide; the viewport narrows what's displayed. */
+  scopeName?: string;
+  /** When set, nav tabs (Bicicletă / Pe jos / Cu mașina / Transport /
+   *  Aer) prepend /{countySlug} so they stay within the county scope
+   *  instead of kicking the user back to the Romania-wide view. */
+  countySlug?: string;
+} = {}) {
   const [activeTab, setActiveTab] = useState<Tab>(defaultTab);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [layersOpen, setLayersOpen] = useState(false);
@@ -112,11 +132,17 @@ export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
+            // "Aer" is a separate top-level page (/aer) and doesn't
+            // have a per-county sibling — leave that href absolute.
+            const scopedHref =
+              countySlug && tab.id !== "statistici"
+                ? `/${countySlug}${tab.href}`
+                : tab.href;
             return (
               <Link
                 key={tab.id}
-                href={tab.href}
-                onClick={(e) => { e.preventDefault(); setActiveTab(tab.id); window.history.pushState(null, "", tab.href); }}
+                href={scopedHref}
+                onClick={(e) => { e.preventDefault(); setActiveTab(tab.id); window.history.pushState(null, "", scopedHref); }}
                 className={cn(
                   "flex-1 flex flex-col items-center gap-1 py-3 px-2 text-xs font-medium border-b-2 transition-colors",
                   isActive
@@ -135,10 +161,12 @@ export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}
           {activeTab === "bicicleta" && (
             <div>
               <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Piste de biciclete
+                Piste de biciclete{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                Piste de biciclete și benzi marcate din toată România — date OpenStreetMap.
+                {scopeName
+                  ? `Piste de biciclete și benzi marcate din ${scopeName} — date OpenStreetMap.`
+                  : "Piste de biciclete și benzi marcate din toată România — date OpenStreetMap."}
               </p>
               <div className="flex items-start gap-3 mb-4">
                 <span className="w-6 h-1 rounded-full mt-2 shrink-0" style={{ background: "#059669" }} />
@@ -308,7 +336,7 @@ export function HartiMap({ defaultTab = "bicicleta" }: { defaultTab?: Tab } = {}
 
       {/* Map */}
       <div className="flex-1 relative">
-        <LeafletMap center={[45.9432, 24.9668]} zoom={7} scrollWheelZoom flyToTarget={flyTarget} tileStyle={mapStyle}>
+        <LeafletMap center={center} zoom={zoom} scrollWheelZoom flyToTarget={flyTarget} tileStyle={mapStyle}>
           <HartiLayers
             activeTab={activeTab}
             showDedicate={showDedicate}
