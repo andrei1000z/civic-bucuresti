@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MapPin, ArrowRight } from "lucide-react";
 import { ALL_COUNTIES } from "@/data/counties";
 import { HartiMap } from "@/components/maps/HartiMap";
 

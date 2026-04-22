@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getCountyBySlug } from "@/data/counties";
-import { Zap, FileText, Eye, CheckCircle2, ArrowRight } from "lucide-react";
+import { FileText, Eye, CheckCircle2 } from "lucide-react";
 import { SesizareForm } from "@/components/sesizari/SesizareForm";
 
 export async function generateMetadata({

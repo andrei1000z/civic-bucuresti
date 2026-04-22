@@ -425,7 +425,7 @@ export default function ContPage() {
           ștergi contul. Sesizările tale publice rămân (anonimizate) pentru interesul public.
         </p>
         <div className="flex flex-wrap gap-2">
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          { }
           <a
             href="/api/profile/export"
             download={`civia-export-${new Date().toISOString().slice(0, 10)}.json`}

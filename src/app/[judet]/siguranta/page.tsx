@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ShieldAlert, AlertTriangle, TrendingUp, MapPin, ExternalLink, ArrowRight } from "lucide-react";
+import { AlertTriangle, TrendingUp, MapPin, ExternalLink, ArrowRight } from "lucide-react";
 import { getCountyBySlug } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
 import { CRIMINALITATE } from "@/data/date-publice";

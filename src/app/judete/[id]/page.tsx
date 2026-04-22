@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Building2, Mail, Phone, Globe, MapPin, FileText, ArrowRight } from "lucide-react";
+import { ChevronLeft, Building2, Mail, Phone, Globe, FileText, ArrowRight } from "lucide-react";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import { Badge } from "@/components/ui/Badge";
 
 // ISR: county authorities rarely change; sesizari list is small. 5 min refresh.
 export const revalidate = 300;

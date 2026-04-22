@@ -172,7 +172,7 @@ export function SesizareForm() {
       setData(parsed.data);
       setDraftRestoredAt(new Date(parsed.t).toLocaleString("ro-RO"));
     } catch { /* corrupt draft — ignore */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // Debounced save — write the current form state every 4s, but only
@@ -199,7 +199,7 @@ export function SesizareForm() {
   // Funnel entry — user landed on the form
   useEffect(() => {
     trackFunnelStep("sesizare-create", "start");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // Abandon signal — if the user leaves without hitting submit, fire a
@@ -217,7 +217,7 @@ export function SesizareForm() {
     };
     window.addEventListener("pagehide", onUnload);
     return () => window.removeEventListener("pagehide", onUnload);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [data.tip, data.descriere, data.locatie, submitted]);
 
   // Auto-fill from profile (auth) or localStorage (anonymous)

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Building2, Users, ArrowRight, Clock, MapPin } from "lucide-react";
+import { Building2, Users, ArrowRight, Clock } from "lucide-react";
 import { getCountyBySlug } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
 import { primari, consiliiGenerale } from "@/data/primari";
