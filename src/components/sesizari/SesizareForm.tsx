@@ -19,6 +19,7 @@ import { detectSectorFromCoords } from "@/lib/geo/sector-from-coords";
 // the neutral "Mă numesc X, locuiesc în Y" opening instead of Subsemnatul(a).
 import { cn } from "@/lib/utils";
 import { PhotoUploader } from "./PhotoUploader";
+import { VoiceInput } from "./VoiceInput";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { EmailChoicePanel } from "./EmailChoicePanel";
 import { buildFormalText, buildGmailLink, buildMailtoLink, type MailtoInput } from "@/lib/sesizari/mailto";
@@ -100,6 +101,61 @@ export function SesizareForm() {
     setData((d) => ({ ...d, [key]: value }));
     setError(null);
   };
+
+  // Draft persistence — snapshot the form every ~4s so a refresh /
+  // accidental tab close doesn't vaporize what the user typed.
+  // Clears on successful submit. Kept separate from civic_user_data
+  // (which is just name/address/email) so profile autofill stays
+  // intact but the full draft restores on reload.
+  const DRAFT_KEY = "civic_sesizare_draft";
+  const [draftRestoredAt, setDraftRestoredAt] = useState<string | null>(null);
+  const [draftDismissed, setDraftDismissed] = useState(false);
+
+  // Restore draft on mount (once) — only offer if it's < 7 days old and
+  // the current form is empty (user didn't start typing over it).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as { t: number; data: FormData };
+      if (!parsed?.data) return;
+      const ageMs = Date.now() - (parsed.t || 0);
+      if (ageMs > 7 * 24 * 3600 * 1000) {
+        localStorage.removeItem(DRAFT_KEY);
+        return;
+      }
+      // Offer restore only if the draft has real content
+      const hasContent =
+        (parsed.data.descriere?.length ?? 0) > 10 ||
+        (parsed.data.locatie?.length ?? 0) > 3;
+      if (!hasContent) return;
+      setData(parsed.data);
+      setDraftRestoredAt(new Date(parsed.t).toLocaleString("ro-RO"));
+    } catch { /* corrupt draft — ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Debounced save — write the current form state every 4s, but only
+  // if something substantive is there. Skips empty drafts.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (submitted) return;
+    const hasContent =
+      (data.descriere?.length ?? 0) > 10 ||
+      (data.locatie?.length ?? 0) > 3 ||
+      !!data.tip;
+    if (!hasContent) return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({ t: Date.now(), data }),
+        );
+      } catch { /* quota exceeded — silent */ }
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [data, submitted]);
 
   // Funnel entry — user landed on the form
   useEffect(() => {
@@ -481,6 +537,11 @@ export function SesizareForm() {
           JSON.stringify({ name: data.nume, address: data.adresa, email: data.email })
         );
       }
+      // Draft is safely committed to the server — drop the local backup
+      // so a future visit starts with a clean form.
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(DRAFT_KEY);
+      }
       setSubmitted({ code: json.data.code });
       trackFunnelStep("sesizare-create", "submitted", { hasPhotos: imagini.length > 0 ? 1 : 0 });
     } catch (e) {
@@ -610,6 +671,35 @@ ${today}`;
           />
         </div>
 
+        {draftRestoredAt && !draftDismissed && (
+          <div className="mb-4 p-3 rounded-[8px] border border-emerald-500/30 bg-emerald-500/5 flex items-start gap-3">
+            <span className="text-lg" aria-hidden>📝</span>
+            <div className="flex-1 text-xs">
+              <p className="font-semibold text-emerald-700 dark:text-emerald-400">
+                Ciornă restaurată
+              </p>
+              <p className="text-[var(--color-text-muted)] mt-0.5">
+                Am recuperat sesizarea la care lucrai — salvată pe {draftRestoredAt}. Verifică și trimite sau golește formularul.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  localStorage.removeItem(DRAFT_KEY);
+                }
+                setData(INITIAL);
+                setImagini([]);
+                setDraftDismissed(true);
+                setDraftRestoredAt(null);
+              }}
+              className="text-xs font-medium text-red-600 hover:text-red-700 shrink-0 underline"
+            >
+              Golește
+            </button>
+          </div>
+        )}
+
         <Field label="Numele tău" required>
           <input
             type="text"
@@ -675,16 +765,30 @@ ${today}`;
         </div>
 
         <Field label="Descrierea problemei" required>
-          <textarea
-            value={data.descriere}
-            onChange={(e) => update("descriere", e.target.value.slice(0, 2000))}
-            rows={mode === "complet" ? 6 : 4}
-            placeholder={mode === "complet"
-              ? "Scrie liber și natural. Specifică detalii cât mai precise: dimensiuni aproximative, localizare exactă (între ce intersecții, ce bandă), dacă sunt mai multe probleme pe tronson, dacă afectează siguranța (trecere pietoni, școală, spital). Cu cât mai detaliat, cu atât se rezolvă mai rapid."
-              : "Descrie problema în câteva cuvinte. AI-ul va genera textul formal automat."
-            }
-            className={cn(inputClass, "resize-none py-3")}
-          />
+          <div className="relative">
+            <textarea
+              value={data.descriere}
+              onChange={(e) => update("descriere", e.target.value.slice(0, 2000))}
+              rows={mode === "complet" ? 6 : 4}
+              placeholder={mode === "complet"
+                ? "Scrie liber și natural. Specifică detalii cât mai precise: dimensiuni aproximative, localizare exactă (între ce intersecții, ce bandă), dacă sunt mai multe probleme pe tronson, dacă afectează siguranța (trecere pietoni, școală, spital). Cu cât mai detaliat, cu atât se rezolvă mai rapid."
+                : "Descrie problema în câteva cuvinte. AI-ul va genera textul formal automat."
+              }
+              className={cn(inputClass, "resize-none py-3 pr-12")}
+            />
+            <div className="absolute top-2 right-2">
+              <VoiceInput
+                onTranscript={(delta) => {
+                  // Append dictated text with a space separator,
+                  // respecting the 2000-char cap so nothing gets
+                  // silently truncated mid-word.
+                  const current = data.descriere;
+                  const joiner = current && !/\s$/.test(current) ? " " : "";
+                  update("descriere", (current + joiner + delta).slice(0, 2000));
+                }}
+              />
+            </div>
+          </div>
           <p className="text-xs text-[var(--color-text-muted)] mt-1">
             {data.descriere.length}/2000 · minim 10 caractere
           </p>
