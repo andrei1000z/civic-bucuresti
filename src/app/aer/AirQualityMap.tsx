@@ -42,12 +42,13 @@ export default function AirQualityMap({
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch("/api/aer");
+      if (!res.ok) return;
       const data = (await res.json()) as AirDataResponse;
       setSensors(data.sensors);
       setMeta(data.meta);
       setLastFetch(new Date());
     } catch {
-      // silent
+      // network — keep stale data visible, next tick will retry
     } finally {
       setLoading(false);
     }
@@ -55,8 +56,36 @@ export default function AirQualityMap({
 
   useEffect(() => {
     fetchData();
-    const id = setInterval(fetchData, REFRESH_INTERVAL);
-    return () => clearInterval(id);
+    // Only poll while the tab is visible. Previously the setInterval
+    // fired every REFRESH_INTERVAL ms (≥1 min) regardless — a mobile
+    // user who pinned the tab in the background burned battery + ate
+    // their mobile data plan on refresh calls they'd never see.
+    let id: ReturnType<typeof setInterval> | null = null;
+    const start = () => {
+      if (id) return;
+      id = setInterval(fetchData, REFRESH_INTERVAL);
+    };
+    const stop = () => {
+      if (!id) return;
+      clearInterval(id);
+      id = null;
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        start();
+        // One catch-up fetch on becoming visible again so the map
+        // doesn't display data that's 10+ minutes stale.
+        fetchData();
+      } else {
+        stop();
+      }
+    };
+    if (document.visibilityState === "visible") start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [fetchData]);
 
   const handleLocate = () => {

@@ -11,13 +11,23 @@ export function NationalAqiLayer() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/aer")
-      .then((r) => r.json())
+    const ctrl = new AbortController();
+    fetch("/api/aer", { signal: ctrl.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((j: AirDataResponse) => {
         if (j.sensors) setSensors(j.sensors);
       })
-      .catch(() => {})
+      .catch(() => {
+        // Swallow — the layer simply doesn't render if we can't get
+        // data. No banner/toast here because this layer runs inside
+        // /harti with other layers active and we don't want to spam
+        // error UI for a best-effort overlay.
+      })
       .finally(() => setLoading(false));
+    return () => ctrl.abort();
   }, []);
 
   if (loading || sensors.length === 0) return null;
