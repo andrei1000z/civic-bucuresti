@@ -72,10 +72,10 @@ export function CookieBanner() {
         </div>
         <button
           onClick={dismiss}
-          className="w-6 h-6 rounded-full hover:bg-[var(--color-surface-2)] flex items-center justify-center shrink-0"
-          aria-label="Închide"
+          className="w-9 h-9 -mt-1 -mr-1 rounded-full hover:bg-[var(--color-surface-2)] flex items-center justify-center shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          aria-label="Închide banner cookies"
         >
-          <X size={14} />
+          <X size={16} />
         </button>
       </div>
     </div>

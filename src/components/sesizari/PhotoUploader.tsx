@@ -209,9 +209,10 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onChange(urls.filter((_, j) => j !== i)); }}
-                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label={`Șterge poza ${i + 1}`}
+                className="absolute top-1 right-1 w-8 h-8 rounded-full bg-red-500/90 text-white flex items-center justify-center hover:bg-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100 transition-opacity"
               >
-                <X size={14} />
+                <X size={16} />
               </button>
             </div>
           ))}

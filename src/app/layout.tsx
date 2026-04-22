@@ -109,6 +109,13 @@ export const viewport = {
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0F172A" },
   ],
+  // viewport-fit=cover extends content into iOS safe areas (notch,
+  // home indicator). Combined with env(safe-area-inset-*) in layout
+  // CSS, the fixed bottom-right MobileFab stays clear of the home
+  // indicator rather than being hidden behind it.
+  viewportFit: "cover" as const,
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
