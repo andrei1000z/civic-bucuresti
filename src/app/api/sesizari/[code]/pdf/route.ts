@@ -78,7 +78,7 @@ ${sesizare.formal_text
 ${sesizare.imagini.length > 0 ? `
 <p style="font-size:10pt;color:#555;margin-bottom:8px"><strong>Fotografii atașate:</strong></p>
 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">
-  ${sesizare.imagini.map((url: string) => `<img src="${url}" style="max-width:200px;max-height:150px;border:1px solid #ddd;border-radius:4px" />`).join("")}
+  ${sesizare.imagini.map((url: string, i: number) => `<img src="${url}" alt="Fotografie sesizare ${i + 1}" style="max-width:200px;max-height:150px;border:1px solid #ddd;border-radius:4px" />`).join("")}
 </div>` : ""}
 
 <div class="footer">
