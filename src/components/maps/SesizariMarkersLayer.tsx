@@ -36,16 +36,16 @@ export default function SesizariMarkersLayer({ data }: { data: MarkerData[] }) {
                 >
                   {STATUS_LABELS[s.status] ?? s.status}
                 </span>
-                <span className="text-[10px] text-gray-500">{formatDate(s.data)}</span>
+                <span className="text-[10px] text-[var(--color-text-muted)]">{formatDate(s.data)}</span>
               </div>
               <p className="font-semibold text-sm mb-1">{s.titlu}</p>
-              <p className="text-xs text-gray-600">{s.locatie}</p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-[var(--color-text-muted)]">{s.locatie}</p>
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">
                 {s.voturi} voturi · {s.comentarii} comentarii
               </p>
               <Link
                 href={`/sesizari/${s.code}`}
-                className="inline-block mt-2 text-xs font-medium text-blue-600 hover:underline"
+                className="inline-block mt-2 text-xs font-medium text-[var(--color-primary)] hover:underline"
               >
                 Vezi detalii →
               </Link>

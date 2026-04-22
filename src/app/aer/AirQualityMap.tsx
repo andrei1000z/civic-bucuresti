@@ -130,7 +130,7 @@ export default function AirQualityMap({
                       >
                         AQI {sensor.aqi ?? "—"}
                       </span>
-                      <span className="text-[10px] text-gray-500 capitalize">{sensor.source}</span>
+                      <span className="text-[10px] text-[var(--color-text-muted)] capitalize">{sensor.source}</span>
                     </div>
                     {sensor.stationName && (
                       <p className="font-semibold text-sm">{sensor.stationName}</p>
@@ -144,9 +144,9 @@ export default function AirQualityMap({
                       {sensor.humidity != null && <span>💧 {sensor.humidity.toFixed(0)}%</span>}
                     </div>
                     {sensor.sensorType && (
-                      <p className="text-[10px] text-gray-400">Senzor: {sensor.sensorType}</p>
+                      <p className="text-[10px] text-[var(--color-text-muted)]">Senzor: {sensor.sensorType}</p>
                     )}
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-[10px] text-[var(--color-text-muted)]">
                       Actualizat: {new Date(sensor.updatedAt).toLocaleTimeString("ro-RO")}
                     </p>
                   </div>

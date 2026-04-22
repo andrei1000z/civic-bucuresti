@@ -52,7 +52,7 @@ export function LiveStatsBar() {
         { icon: Thermometer, text: "Date oficiale INS + INSP + OpenAQ", color: "text-purple-500" },
       ]
     : [
-        { icon: AlertCircle, text: "Se încarcă statisticile live...", color: "text-gray-400" },
+        { icon: AlertCircle, text: "Se încarcă statisticile live...", color: "text-[var(--color-text-muted)]" },
       ];
 
   return (
