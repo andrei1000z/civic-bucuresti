@@ -10,9 +10,9 @@ import { LiveWeatherAqi } from "@/components/home/LiveWeatherAqi";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: { absolute: `${SITE_NAME} — Platforma civică a României` },
+  title: { absolute: `${SITE_NAME} — Sesizări civice gratuite către primării, cu AI` },
   description:
-    "Sesizări, hărți, statistici, știri și ghiduri civice pentru toate cele 42 de județe ale României.",
+    "Trimite o sesizare formală la primărie în 2 minute. AI-ul scrie textul cu temei legal, găsim autoritatea competentă, iar tu urmărești răspunsul. Gratuit, pentru toate județele României.",
   alternates: { canonical: "/" },
 };
 
@@ -28,34 +28,34 @@ export default function HomePage() {
         <div className="container-narrow relative z-10 py-20 md:py-28 lg:py-32">
           <div className="max-w-3xl mx-auto text-center">
             <p className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-white border border-white/20 text-xs font-semibold mb-8 backdrop-blur-sm">
-              🇷🇴 Platformă civică pentru România
+              🇷🇴 Civia — gratuit, open-source, fără politică
             </p>
 
             <h1 className="font-[family-name:var(--font-sora)] text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.08] tracking-tight">
-              România,{" "}
+              Orașul tău,{" "}
               <span className="bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">
-                în mâinile tale.
+                rezolvat pe email.
               </span>
             </h1>
 
             <p className="text-lg md:text-xl text-emerald-100/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Ai observat o problemă în orașul tău? Dă câteva detalii și te ajutăm
-              să o trimiți la autorități să o rezolve. Plus hărți, statistici, știri și ghiduri civice.
+              Fă o poză, scrie 2 rânduri, apeși trimite. Noi construim sesizarea formală,
+              alegem autoritatea corectă și îți dăm codul prin care urmărești răspunsul de 30 de zile.
             </p>
 
             {/* CTA */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
-                href="/#county-picker"
-                className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
+                href="/sesizari"
+                className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-700"
               >
-                Fă o sesizare <ArrowRight size={18} />
+                Trimite o sesizare acum <ArrowRight size={18} />
               </Link>
               <Link
                 href="/#county-picker"
-                className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 transition-colors"
+                className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
-                Alege județul pentru mai multe
+                Explorează după județ
               </Link>
             </div>
           </div>
@@ -76,10 +76,10 @@ export default function HomePage() {
         <div className="container-narrow">
           <div className="text-center mb-6">
             <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold">
-              Alege județul tău
+              Alege-ți județul
             </h2>
             <p className="text-[var(--color-text-muted)] mt-2">
-              Vezi sesizări, hărți, statistici și știri locale.
+              Sesizări, hărți, calitate aer, știri și date publice — filtrate pe județul tău.
             </p>
           </div>
         </div>
@@ -94,13 +94,13 @@ export default function HomePage() {
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold flex items-center gap-2">
                   <TrendingUp size={22} className="text-[var(--color-primary)]" />
-                  Se întâmplă acum
+                  Ce semnalează cetățenii acum
                 </h2>
                 <Link
                   href="/sesizari-publice"
                   className="text-sm text-[var(--color-primary)] hover:underline inline-flex items-center gap-1"
                 >
-                  Toate sesizările <ArrowRight size={14} />
+                  Vezi toate <ArrowRight size={14} />
                 </Link>
               </div>
               <TopVotedWidget />
@@ -108,14 +108,14 @@ export default function HomePage() {
             <div>
               <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold flex items-center gap-2 mb-5">
                 <Wind size={22} className="text-[var(--color-primary)]" />
-                Aerul acum
+                Aerul respirat acum
               </h2>
               <LiveWeatherAqi />
               <Link
                 href="/aer"
                 className="mt-3 text-sm text-[var(--color-primary)] hover:underline inline-flex items-center gap-1"
               >
-                Vezi harta completă <ArrowRight size={14} />
+                Harta live a calității aerului <ArrowRight size={14} />
               </Link>
             </div>
           </div>
@@ -127,10 +127,10 @@ export default function HomePage() {
         <div className="container-narrow">
           <div className="text-center mb-12">
             <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-2">
-              Cum funcționează
+              De la problemă la răspuns oficial, în 3 pași
             </h2>
             <p className="text-[var(--color-text-muted)]">
-              Trei pași simpli până la o sesizare formală.
+              Sub 2 minute. Fără formulare complicate, fără drumuri la primărie.
             </p>
           </div>
 
@@ -139,27 +139,27 @@ export default function HomePage() {
               <div className="w-14 h-14 rounded-full bg-[var(--color-primary-soft)] flex items-center justify-center mx-auto mb-4">
                 <span className="text-lg font-bold text-[var(--color-primary)]">1</span>
               </div>
-              <h3 className="font-[family-name:var(--font-sora)] font-bold text-base mb-2">Alege județul</h3>
+              <h3 className="font-[family-name:var(--font-sora)] font-bold text-base mb-2">Fotografiază și localizează</h3>
               <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                Selectează județul din listă sau lasă GPS-ul să te detecteze automat.
+                O poză clară cu problema + un reper. GPS-ul tău prinde automat adresa și sectorul.
               </p>
             </div>
             <div className="text-center">
               <div className="w-14 h-14 rounded-full bg-[var(--color-primary-soft)] flex items-center justify-center mx-auto mb-4">
                 <span className="text-lg font-bold text-[var(--color-primary)]">2</span>
               </div>
-              <h3 className="font-[family-name:var(--font-sora)] font-bold text-base mb-2">Descrie problema</h3>
+              <h3 className="font-[family-name:var(--font-sora)] font-bold text-base mb-2">Scrie 2-3 rânduri în română simplă</h3>
               <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                Spune-ne în cuvintele tale ce e în neregulă — o groapă, un copac căzut, gunoi necolectat.
+                AI-ul transformă textul tău într-o cerere formală cu temei legal (OUG 195/2002, OG 27/2002) și alege autoritatea competentă.
               </p>
             </div>
             <div className="text-center">
               <div className="w-14 h-14 rounded-full bg-[var(--color-primary-soft)] flex items-center justify-center mx-auto mb-4">
                 <span className="text-lg font-bold text-[var(--color-primary)]">3</span>
               </div>
-              <h3 className="font-[family-name:var(--font-sora)] font-bold text-base mb-2">AI generează sesizarea</h3>
+              <h3 className="font-[family-name:var(--font-sora)] font-bold text-base mb-2">Trimite și urmărește răspunsul</h3>
               <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                Primești o sesizare formală cu temei legal, gata de trimis la primărie sau instituția competentă.
+                Un click deschide emailul către primărie, deja completat. Primești un cod cu care urmărești răspunsul de 30 de zile.
               </p>
             </div>
           </div>

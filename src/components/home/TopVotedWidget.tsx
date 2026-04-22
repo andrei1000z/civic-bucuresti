@@ -43,13 +43,13 @@ export function TopVotedWidget() {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400 text-xs font-semibold mb-2">
               <TrendingUp size={12} />
-              PRESIUNE CETĂȚENEASCĂ
+              PRESIUNE PUBLICĂ
             </div>
             <h2 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold mb-1">
-              Top 5 probleme cerute de comunitate
+              Problemele pe care le vrem rezolvate
             </h2>
             <p className="text-[var(--color-text-muted)]">
-              Cele mai votate sesizări nerezolvate — dacă ele rămân ignorate, primăria are o problemă.
+              Cele mai votate sesizări încă nerezolvate. Fiecare vot e un cetățean care cere răspuns — autoritățile le văd.
             </p>
           </div>
           <Link

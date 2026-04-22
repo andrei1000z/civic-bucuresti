@@ -44,15 +44,15 @@ export function LiveStatsBar() {
 
   const stats = data
     ? [
-        { icon: AlertCircle, text: `${data.sesizariAzi} sesizări noi azi`, color: "text-red-500" },
-        { icon: Clock, text: `${data.sesizariInLucru} în lucru acum`, color: "text-amber-500" },
-        { icon: Wind, text: `AQI: ${data.aqi} — ${data.aqiQuality}`, color: "text-sky-500" },
-        { icon: Activity, text: `${data.totalSesizari} sesizări totale`, color: "text-emerald-500" },
-        { icon: TrendingUp, text: "Live de pe platformă", color: "text-blue-500" },
-        { icon: Thermometer, text: "Bucuresti — live", color: "text-purple-500" },
+        { icon: AlertCircle, text: `${data.sesizariAzi} sesizări noi astăzi`, color: "text-red-500" },
+        { icon: Clock, text: `${data.sesizariInLucru} în lucru la autorități`, color: "text-amber-500" },
+        { icon: Wind, text: `AQI București: ${data.aqi} — ${data.aqiQuality}`, color: "text-sky-500" },
+        { icon: Activity, text: `${data.totalSesizari.toLocaleString("ro-RO")} sesizări trimise în total`, color: "text-emerald-500" },
+        { icon: TrendingUp, text: "Actualizat în timp real", color: "text-blue-500" },
+        { icon: Thermometer, text: "Date oficiale INS + INSP + OpenAQ", color: "text-purple-500" },
       ]
     : [
-        { icon: AlertCircle, text: "Se încarcă date live...", color: "text-gray-400" },
+        { icon: AlertCircle, text: "Se încarcă statisticile live...", color: "text-gray-400" },
       ];
 
   return (
