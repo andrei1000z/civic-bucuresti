@@ -41,7 +41,10 @@ export async function GET(req: Request) {
       {
         headers: {
           "Access-Control-Allow-Origin": "*",
-          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
+          // 1-hour CDN cache with 1h stale-while-revalidate. Authority
+          // records change monthly at most; aggressive caching cuts
+          // Supabase egress by ~20x on this endpoint.
+          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=3600",
         },
       }
     );

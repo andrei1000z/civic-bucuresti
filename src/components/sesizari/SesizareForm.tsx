@@ -18,9 +18,24 @@ import { detectSectorFromCoords } from "@/lib/geo/sector-from-coords";
 // Gender-detection helpers are no longer needed — the new email template uses
 // the neutral "Mă numesc X, locuiesc în Y" opening instead of Subsemnatul(a).
 import { cn } from "@/lib/utils";
+import nextDynamic from "next/dynamic";
 import { PhotoUploader } from "./PhotoUploader";
-import { ParkingProofUploader } from "./ParkingProofUploader";
-import { ParkingHotspotModal } from "./ParkingHotspotModal";
+// Parking-specific UI — heavy (Tesseract.js + canvas work). Only mount
+// when the user actually picks tip="parcare" so the rest of the form
+// ships without the OCR bundle.
+const ParkingProofUploader = nextDynamic(
+  () => import("./ParkingProofUploader").then((m) => ({ default: m.ParkingProofUploader })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-48 rounded-[8px] bg-[var(--color-surface-2)] animate-pulse" aria-hidden="true" />
+    ),
+  },
+);
+const ParkingHotspotModal = nextDynamic(
+  () => import("./ParkingHotspotModal").then((m) => ({ default: m.ParkingHotspotModal })),
+  { ssr: false },
+);
 import { PARKING_JURISDICTION_OPTIONS, type ParkingJurisdiction } from "@/lib/sesizari/parking";
 import { VoiceInput } from "./VoiceInput";
 import { useAuth } from "@/components/auth/AuthProvider";

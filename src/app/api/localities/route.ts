@@ -36,7 +36,10 @@ export async function GET(req: Request) {
       {
         headers: {
           "Access-Control-Allow-Origin": "*",
-          "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=3600",
+          // 24h CDN cache — localities are administrative data that
+          // changes only when new villages are registered. SWR keeps
+          // the response warm for autocomplete typing.
+          "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
         },
       }
     );
