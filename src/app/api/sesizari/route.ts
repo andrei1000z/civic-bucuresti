@@ -164,23 +164,75 @@ export async function POST(req: Request) {
       const authorEmail = parsed.author_email;
       if (authorEmail) {
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://civia.ro";
+        const firstName = (parsed.author_name ?? "").split(/\s+/)[0] ?? "Cetățean";
+        const cleanTitle = sanitizeText(parsed.titlu, 120);
+        const cleanLocation = sanitizeText(parsed.locatie, 120);
         sendEmail({
           to: authorEmail,
-          subject: `Sesizare ${code} — înregistrată pe Civia`,
+          subject: `✓ Sesizare ${code} înregistrată — Civia`,
           html: emailTemplate({
-            title: "Sesizare înregistrată",
-            preheader: `Codul tău: ${code}. Urmărește statusul pe civia.ro.`,
+            title: "Sesizarea ta e în sistem",
+            kicker: "Sesizare înregistrată",
+            icon: "✓",
+            preheader: `Codul tău de urmărire: ${code}. Răspunsul oficial vine în max 30 de zile.`,
             body: `
-              <p>Salut <strong>${escapeHtml(parsed.author_name)}</strong>,</p>
-              <p>Sesizarea ta a fost înregistrată cu succes pe Civia.</p>
-              <table style="background:#f1f5f9;border-radius:8px;padding:16px;width:100%;margin:16px 0">
-                <tr><td style="color:#64748b;font-size:12px;padding:4px 0">Cod unic</td><td style="font-weight:700;font-size:18px;color:#1C4ED8">${escapeHtml(code)}</td></tr>
-                <tr><td style="color:#64748b;font-size:12px;padding:4px 0">Titlu</td><td>${escapeHtml(sanitizeText(parsed.titlu, 100))}</td></tr>
-                <tr><td style="color:#64748b;font-size:12px;padding:4px 0">Locație</td><td>${escapeHtml(sanitizeText(parsed.locatie, 100))}</td></tr>
+              <p style="font-size:16px;margin:0 0 8px">Salut, <strong>${escapeHtml(firstName)}</strong> 👋</p>
+              <p style="margin:0 0 24px;color:#64748b">Mulțumim că te implici. Am înregistrat-o — iată ce urmează.</p>
+
+              <!-- Cod unic — hero element -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%);border:1px solid #a7f3d0;border-radius:14px;padding:24px;margin:0 0 20px">
+                <tr><td align="center">
+                  <p style="color:#047857;font-size:11px;margin:0 0 8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Codul tău de urmărire</p>
+                  <p style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:42px;font-weight:800;color:#064e3b;margin:0;letter-spacing:4px;line-height:1">${escapeHtml(code)}</p>
+                  <p style="color:#059669;font-size:12px;margin:10px 0 0">Salvează-l — îți trebuie pentru urmărire</p>
+                </td></tr>
               </table>
-              <p>Poți urmări statusul sesizării oricând:</p>
+
+              <!-- Metadata rows -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin:0 0 24px">
+                <tr>
+                  <td style="padding:14px 18px;border-bottom:1px solid #e5e7eb;font-size:12px;color:#64748b;letter-spacing:0.5px;text-transform:uppercase;font-weight:600;width:32%;vertical-align:top">Titlu</td>
+                  <td style="padding:14px 18px 14px 0;border-bottom:1px solid #e5e7eb;font-size:14px;color:#0f172a;line-height:1.5">${escapeHtml(cleanTitle)}</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 18px;font-size:12px;color:#64748b;letter-spacing:0.5px;text-transform:uppercase;font-weight:600;vertical-align:top">Locație</td>
+                  <td style="padding:14px 18px 14px 0;font-size:14px;color:#0f172a;line-height:1.5">📍 ${escapeHtml(cleanLocation)}</td>
+                </tr>
+              </table>
+
+              <!-- What happens next — 3-step timeline -->
+              <p style="font-size:14px;font-weight:600;color:#0f172a;margin:0 0 14px">Ce urmează:</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 8px">
+                <tr>
+                  <td style="width:28px;vertical-align:top;padding:2px 0">
+                    <div style="width:22px;height:22px;border-radius:50%;background:#059669;color:#fff;font-size:12px;font-weight:700;text-align:center;line-height:22px">✓</div>
+                  </td>
+                  <td style="padding:0 0 16px 12px;font-size:13px;line-height:1.5;color:#334155">
+                    <strong style="color:#0f172a">Înregistrată pe Civia</strong><br>
+                    <span style="color:#64748b">Acum — vizibilă la <a href="${siteUrl}/sesizari/${code}" style="color:#059669;text-decoration:none">/sesizari/${escapeHtml(code)}</a></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="width:28px;vertical-align:top;padding:2px 0">
+                    <div style="width:22px;height:22px;border-radius:50%;background:#f1f5f9;border:2px solid #cbd5e1;color:#64748b;font-size:12px;font-weight:700;text-align:center;line-height:18px">2</div>
+                  </td>
+                  <td style="padding:0 0 16px 12px;font-size:13px;line-height:1.5;color:#334155">
+                    <strong style="color:#0f172a">Trimisă la autoritate</strong><br>
+                    <span style="color:#64748b">Când apeși „Deschide în Gmail/Outlook" — emailul pleacă în numele tău la instituția corectă</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="width:28px;vertical-align:top;padding:2px 0">
+                    <div style="width:22px;height:22px;border-radius:50%;background:#f1f5f9;border:2px solid #cbd5e1;color:#64748b;font-size:12px;font-weight:700;text-align:center;line-height:18px">3</div>
+                  </td>
+                  <td style="padding:0 0 4px 12px;font-size:13px;line-height:1.5;color:#334155">
+                    <strong style="color:#0f172a">Răspuns oficial</strong><br>
+                    <span style="color:#64748b">Max 30 de zile (OG 27/2002). Te notificăm când apare un update.</span>
+                  </td>
+                </tr>
+              </table>
             `,
-            ctaText: "Vezi sesizarea ta",
+            ctaText: "Deschide sesizarea",
             ctaUrl: `${siteUrl}/sesizari/${code}`,
           }),
         }).catch((err) => {
