@@ -8,11 +8,14 @@ import { useToast } from "@/components/Toast";
 
 interface Props {
   code: string;
-  authorEmail: string | null;
-  userId: string | null;
+  /**
+   * Pre-computed server-side — avoids leaking author_email into
+   * every visitor's HTML payload just to gate this button.
+   */
+  isAuthor: boolean;
 }
 
-export function DeleteSesizareButton({ code, authorEmail, userId }: Props) {
+export function DeleteSesizareButton({ code, isAuthor }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
@@ -20,8 +23,7 @@ export function DeleteSesizareButton({ code, authorEmail, userId }: Props) {
   const [deleting, setDeleting] = useState(false);
 
   // Only show to author
-  const canDelete = user && (user.id === userId || user.email === authorEmail);
-  if (!canDelete) return null;
+  if (!user || !isAuthor) return null;
 
   const handleDelete = async () => {
     setDeleting(true);

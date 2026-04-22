@@ -10,11 +10,16 @@ import { PhotoUploader } from "./PhotoUploader";
 interface Props {
   code: string;
   status: string;
-  authorEmail: string | null;
-  userId: string | null;
+  /**
+   * Pre-computed server-side so the author's email doesn't leak
+   * into the HTML payload of every visitor. Page.tsx already knows
+   * whether the current user owns this sesizare; we just pass the
+   * boolean down.
+   */
+  isAuthor: boolean;
 }
 
-export function MarkResolvedButton({ code, status, authorEmail, userId }: Props) {
+export function MarkResolvedButton({ code, status, isAuthor }: Props) {
   const { user, openAuthModal } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
@@ -25,7 +30,7 @@ export function MarkResolvedButton({ code, status, authorEmail, userId }: Props)
 
   if (status === "rezolvat") return null;
 
-  const canResolve = user && (user.id === userId || user.email === authorEmail);
+  const canResolve = !!user && isAuthor;
 
   const handleClick = () => {
     if (!user) {

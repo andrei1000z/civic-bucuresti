@@ -190,8 +190,7 @@ export default async function SesizareDetailPage({
           <MarkResolvedButton
             code={sesizare.code}
             status={sesizare.status}
-            authorEmail={sesizare.author_email}
-            userId={sesizare.user_id}
+            isAuthor={isAuthor}
           />
           <FollowButton
             code={sesizare.code}
@@ -205,8 +204,7 @@ export default async function SesizareDetailPage({
           />
           <DeleteSesizareButton
             code={sesizare.code}
-            authorEmail={sesizare.author_email}
-            userId={sesizare.user_id}
+            isAuthor={isAuthor}
           />
         </div>
       </div>
