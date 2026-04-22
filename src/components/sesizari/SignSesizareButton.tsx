@@ -120,10 +120,10 @@ export function SignSesizareButton({
             ? "h-11 px-5 text-sm bg-[var(--color-secondary)] text-white hover:brightness-110 shadow-md"
             : "h-9 px-3 text-xs bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)]"
         )}
-        title="Co-semnează și trimite și tu"
+        title="Trimiți același email la autorități, cu numele tău — dă mai multă greutate sesizării"
       >
         <UserPlus size={variant === "primary" ? 16 : 13} />
-        {variant === "primary" ? "Trimite și tu sesizarea" : "Co-semnează"}
+        {variant === "primary" ? "Co-semnez și trimit și eu" : "Co-semnează"}
       </button>
 
       {open && (
@@ -144,12 +144,12 @@ export function SignSesizareButton({
                 <X size={16} />
               </button>
               <h3 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-1">
-                {step === "form" ? "Trimite și tu această sesizare" : "Alege serviciul de email"}
+                {step === "form" ? "Co-semnează această sesizare" : "Alege cum trimiți emailul"}
               </h3>
               <p className="text-sm text-white/85">
                 {step === "form"
-                  ? "Co-semnezi cu numele tău și trimiți la autorități."
-                  : "Deschide în tab nou și apeși Send."}
+                  ? "Trimiți și tu același email la autorități, cu numele tău. Multiple semnături = prioritate mare."
+                  : "Se deschide în tab nou, ajunge la emailul tău complet pregătit. Tu apeși „Trimite”."}
               </p>
             </header>
 
@@ -201,16 +201,16 @@ export function SignSesizareButton({
                     className="mt-0.5 w-4 h-4 accent-[var(--color-primary)]"
                   />
                   <span className="text-xs text-[var(--color-text-muted)]">
-                    Salvează datele în browser (nu mai pui data viitoare)
+                    Ține minte datele în browser (data viitoare nu mai le tastezi)
                   </span>
                 </label>
 
                 <button
                   type="submit"
                   disabled={!canContinue}
-                  className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
                 >
-                  Continuă
+                  Pregătește emailul
                   <ArrowRight size={16} />
                 </button>
               </form>
@@ -219,16 +219,16 @@ export function SignSesizareButton({
                 <div className="flex items-start gap-2 p-3 rounded-[8px] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900">
                   <AlertCircle size={14} className="text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
                   <p className="text-xs text-blue-900 dark:text-blue-300">
-                    Se va deschide un tab nou cu email-ul pregătit. Verifică, apoi apeși <strong>Send</strong>.
+                    Se deschide un tab nou cu emailul deja completat — destinatari, subiect, corp. Citește pentru verificare și apeși <strong>Trimite</strong>.
                   </p>
                 </div>
                 <EmailChoicePanel input={emailInput} />
                 <button
                   type="button"
                   onClick={() => setStep("form")}
-                  className="w-full h-9 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                  className="w-full h-9 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded-[8px]"
                 >
-                  ← Înapoi la date
+                  ← Înapoi la datele tale
                 </button>
               </div>
             )}

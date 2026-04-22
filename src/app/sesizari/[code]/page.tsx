@@ -137,10 +137,10 @@ export default async function SesizareDetailPage({
         status={STATUS_LABELS[sesizare.status] ?? sesizare.status}
       />
       <Link
-        href="/sesizari"
+        href="/sesizari-publice"
         className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"
       >
-        <ChevronLeft size={16} /> Toate sesizările
+        <ChevronLeft size={16} /> Toate sesizările publice
       </Link>
 
       {/* Header */}

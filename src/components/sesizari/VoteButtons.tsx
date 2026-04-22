@@ -89,7 +89,8 @@ export function VoteButtons({
             : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)]",
           textClass
         )}
-        aria-label="Votează util"
+        aria-label="Mă afectează și pe mine — votează pozitiv"
+        title="Mă afectează și pe mine — votează pozitiv"
       >
         <ThumbsUp size={iconSize} />
         {upvotes}
@@ -104,7 +105,8 @@ export function VoteButtons({
             : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)]",
           textClass
         )}
-        aria-label="Votează neutil"
+        aria-label="Nu cred că e o problemă reală — votează negativ"
+        title="Nu cred că e o problemă reală — votează negativ"
       >
         <ThumbsDown size={iconSize} />
         {downvotes}

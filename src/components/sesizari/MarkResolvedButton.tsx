@@ -68,7 +68,7 @@ export function MarkResolvedButton({ code, status, authorEmail, userId }: Props)
         className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-emerald-500 text-white text-sm font-medium hover:brightness-110 transition-all shadow-sm"
       >
         <CheckCircle2 size={15} />
-        Marchează ca rezolvată
+        S-a rezolvat — marchează ca rezolvată
       </button>
       {error && !open && (
         <p className="text-xs text-red-600 mt-1">{error}</p>
@@ -91,16 +91,16 @@ export function MarkResolvedButton({ code, status, authorEmail, userId }: Props)
                 <X size={16} />
               </button>
               <h3 className="font-[family-name:var(--font-sora)] text-xl font-bold">
-                Marchează ca rezolvată
+                Confirmi că s-a rezolvat?
               </h3>
               <p className="text-sm text-white/85 mt-1">
-                Confirmi că problema a fost rezolvată. Opțional, atașează o poză after/before.
+                Marchează sesizarea ca rezolvată și, opțional, atașează o poză „după” — alimentează galeria publică de dovezi.
               </p>
             </div>
             <div className="p-5 space-y-4">
               <div>
                 <label className="text-sm font-medium block mb-2">
-                  Fotografie după rezolvare (opțional)
+                  Poza „după rezolvare” (opțional, dar puternic)
                 </label>
                 <PhotoUploader urls={photo} onChange={setPhoto} max={1} />
               </div>
@@ -122,7 +122,7 @@ export function MarkResolvedButton({ code, status, authorEmail, userId }: Props)
                   className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-emerald-500 text-white text-sm font-medium hover:brightness-110 disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-500"
                 >
                   {submitting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-                  Confirmă rezolvarea
+                  Da, a fost rezolvată
                 </button>
               </div>
             </div>
