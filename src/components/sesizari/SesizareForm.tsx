@@ -841,19 +841,19 @@ ${today}`;
           </div>
         )}
 
-        <Field label="Numele tău" required>
+        <Field label="Numele tău complet" required>
           <input
             type="text"
             autoComplete="name"
             value={data.nume}
             onChange={(e) => update("nume", e.target.value)}
             onBlur={() => { if (data.nume) update("nume", capitalizeName(data.nume)); }}
-            placeholder="Ex: Maria Popescu"
+            placeholder="Maria Popescu"
             className={inputClass}
           />
         </Field>
 
-        <Field label="Adresa ta (domiciliu)">
+        <Field label="Adresa ta de domiciliu">
           <input
             type="text"
             autoComplete="street-address"
@@ -865,15 +865,15 @@ ${today}`;
           />
         </Field>
 
-        <Field label="Descrierea problemei" required>
+        <Field label="Descrie problema" required>
           <div className="relative">
             <textarea
               value={data.descriere}
               onChange={(e) => update("descriere", e.target.value.slice(0, 2000))}
               rows={mode === "complet" ? 6 : 4}
               placeholder={mode === "complet"
-                ? "Scrie liber și natural. Specifică detalii cât mai precise: dimensiuni aproximative, localizare exactă (între ce intersecții, ce bandă), dacă sunt mai multe probleme pe tronson, dacă afectează siguranța (trecere pietoni, școală, spital). Cu cât mai detaliat, cu atât se rezolvă mai rapid."
-                : "Descrie problema în câteva cuvinte. AI-ul va genera textul formal automat."
+                ? "Scrie liber, în limbaj normal. Cu cât mai concret, cu atât primești răspuns mai rapid: dimensiuni aproximative (2m adâncime, 50m trotuar), între ce intersecții, pe ce bandă, dacă afectează o trecere de pietoni sau școală. AI-ul va pune asta în formă oficială."
+                : "Scrie în 2-3 propoziții ce ai văzut. AI-ul generează textul formal cu temei legal."
               }
               className={cn(inputClass, "resize-none py-3 pr-12")}
             />
@@ -948,7 +948,7 @@ ${today}`;
         {recipients && (
           <div className="rounded-[8px] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 p-3 text-xs">
             <p className="font-semibold text-blue-900 dark:text-blue-300 mb-2 flex items-center gap-1">
-              <Mail size={12} /> Se trimite la {recipients.primary.length + recipients.cc.length} autorități:
+              <Mail size={12} /> Emailul tău va ajunge la {recipients.primary.length + recipients.cc.length} destinatari oficiali:
             </p>
             <ul className="space-y-1">
               {recipients.primary.map((a) => (
@@ -977,33 +977,35 @@ ${today}`;
           </div>
         )}
 
-        <Field label="Titlu sesizare">
+        <Field label="Titlu scurt (opțional)">
           <input
             type="text"
             value={data.titlu}
             onChange={(e) => update("titlu", e.target.value.slice(0, 200))}
-            placeholder="Se completează automat din descriere"
+            placeholder="Se generează automat din descriere — completează doar dacă vrei să-l personalizezi"
             className={inputClass}
           />
         </Field>
 
-        <Field label="Locația problemei" required>
+        <Field label="Unde exact se află problema?" required>
           <div className="flex gap-2">
             <input
               type="text"
               value={data.locatie}
               onChange={(e) => update("locatie", e.target.value)}
-              placeholder="Calea Victoriei 45"
+              placeholder="Calea Victoriei 45, în fața clădirii BCR"
               className={cn(inputClass, "flex-1")}
             />
             <button
               type="button"
               onClick={getLocation}
               disabled={geoLoading}
-              className="shrink-0 h-11 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors flex items-center gap-2 text-sm disabled:opacity-50"
+              className="shrink-0 h-11 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors flex items-center gap-2 text-sm disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              aria-label={geoLoading ? "Se detectează locația" : "Folosește GPS-ul pentru a prinde locația actuală"}
+              title="Folosește GPS-ul pentru a prinde locația actuală"
             >
               {geoLoading ? <Loader2 size={16} className="animate-spin" /> : <Locate size={16} />}
-              <span className="hidden sm:inline">{geoLoading ? "..." : "GPS"}</span>
+              <span className="hidden sm:inline">{geoLoading ? "Se detectează..." : "GPS"}</span>
             </button>
           </div>
           {data.lat && data.lng && (
@@ -1124,9 +1126,9 @@ ${today}`;
             className="w-5 h-5 rounded accent-[var(--color-primary)]"
           />
           <div className="flex-1">
-            <p className="text-sm font-medium">Publică pe platformă</p>
+            <p className="text-sm font-medium">Publică sesizarea pe Civia (recomandat)</p>
             <p className="text-xs text-[var(--color-text-muted)]">
-              Alți cetățeni pot vota, comenta și <strong>trimite și ei aceeași sesizare</strong> la autorități — cu cât mai multe voci, cu atât răspunsul e mai rapid.
+              Alți cetățeni din zonă o văd pe hartă, o pot <strong>vota</strong>, <strong>co-semna</strong> și <strong>retrimite la autorități</strong>. Multiple semnături oficiale pe aceeași problemă = prioritate mare la primărie. Datele tale personale (nume, adresă) rămân private.
             </p>
           </div>
         </label>
@@ -1142,10 +1144,10 @@ ${today}`;
           type="button"
           disabled={!canSubmit}
           onClick={handleSubmit}
-          className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
           {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-          {submitting ? "Se trimite..." : "Trimite sesizarea"}
+          {submitting ? "Se generează textul și se salvează..." : "Trimite sesizarea la autorități"}
         </button>
       </div>
 
