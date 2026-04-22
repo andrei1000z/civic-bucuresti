@@ -109,6 +109,16 @@ export function SesizareForm() {
   }>({ plate: null, vehicle: null, context: null });
   const [parkingPlateText, setParkingPlateText] = useState("");
   const [parkingJurisdiction, setParkingJurisdiction] = useState<ParkingJurisdiction | "">("");
+  // datetime-local value "YYYY-MM-DDTHH:MM" in the user's local timezone.
+  // Defaults to "now" on first render so the common case (constatare
+  // pe loc) is a zero-click field. User can dial it back if they're
+  // reporting a car they saw earlier in the day.
+  const [parkingObservedAt, setParkingObservedAt] = useState(() => {
+    const d = new Date();
+    d.setSeconds(0, 0);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  });
   const [hotspotShown, setHotspotShown] = useState(false);
 
   const update = <K extends keyof FormData>(key: K, value: FormData[K]) => {
@@ -567,7 +577,11 @@ export function SesizareForm() {
             author_email: data.email || null,
             author_address: data.adresa || null,
             imagini,
-            parking: { plate: parkingPlateText, jurisdiction: parkingJurisdiction },
+            parking: {
+              plate: parkingPlateText,
+              jurisdiction: parkingJurisdiction,
+              observedAt: parkingObservedAt || null,
+            },
           })
         : data.formal_text || null;
 
@@ -656,7 +670,11 @@ export function SesizareForm() {
         imagini,
         parking:
           data.tip === "parcare"
-            ? { plate: parkingPlateText, jurisdiction: parkingJurisdiction || null }
+            ? {
+                plate: parkingPlateText,
+                jurisdiction: parkingJurisdiction || null,
+                observedAt: parkingObservedAt || null,
+              }
             : undefined,
       })
     : `Bună ziua,
@@ -715,7 +733,11 @@ ${today}`;
       code: submitted.code,
       parking:
         data.tip === "parcare"
-          ? { plate: parkingPlateText, jurisdiction: parkingJurisdiction || null }
+          ? {
+              plate: parkingPlateText,
+              jurisdiction: parkingJurisdiction || null,
+              observedAt: parkingObservedAt || null,
+            }
           : undefined,
     };
     const showHotspot =
@@ -733,6 +755,12 @@ ${today}`;
             setParkingSlots({ plate: null, vehicle: null, context: null });
             setParkingPlateText("");
             setParkingJurisdiction("");
+            const d = new Date();
+            d.setSeconds(0, 0);
+            const pad = (n: number) => String(n).padStart(2, "0");
+            setParkingObservedAt(
+              `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`,
+            );
             setHotspotShown(false);
           }}
         />
@@ -1033,6 +1061,26 @@ ${today}`;
                   </label>
                 ))}
               </div>
+            </Field>
+
+            <Field label="Data și ora constatării" required>
+              <input
+                type="datetime-local"
+                value={parkingObservedAt}
+                onChange={(e) => setParkingObservedAt(e.target.value)}
+                max={(() => {
+                  // Block picking a moment in the future — a sesizare
+                  // can't be for a fact not yet observed.
+                  const d = new Date();
+                  d.setSeconds(0, 0);
+                  const pad = (n: number) => String(n).padStart(2, "0");
+                  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                })()}
+                className="w-full h-11 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                Poliția are nevoie de momentul EXACT al constatării — intră direct în procesul-verbal. Completat automat cu acum, poți corecta dacă ai văzut mașina mai devreme.
+              </p>
             </Field>
           </>
         ) : (

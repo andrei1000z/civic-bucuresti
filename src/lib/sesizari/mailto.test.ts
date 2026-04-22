@@ -118,6 +118,25 @@ describe("buildEmailPayload — parcare legal template", () => {
     expect(p.to[0]).toBe("bpr@b.politiaromana.ro");
   });
 
+  it("uses the user-picked observedAt (datetime-local string) in the body, to the minute", () => {
+    const p = buildEmailPayload({
+      tip: "parcare",
+      titlu: "x",
+      locatie: "Strada A 1, Sector 3",
+      sector: "S3",
+      descriere: "x",
+      author_name: "A",
+      author_address: "B",
+      parking: {
+        plate: "B 7 BBB",
+        jurisdiction: "trotuar",
+        observedAt: "2026-04-22T14:37",
+      },
+    });
+    expect(p.body).toMatch(/22 aprilie 2026/);
+    expect(p.body).toMatch(/la ora 14:37/);
+  });
+
   it("applies Sector 5 override — strips dead S5 mailboxes, keeps PL București", () => {
     const p = buildEmailPayload({
       tip: "parcare",

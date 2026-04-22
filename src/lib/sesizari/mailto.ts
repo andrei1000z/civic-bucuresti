@@ -20,6 +20,13 @@ export interface MailtoInput {
   parking?: {
     plate?: string | null;
     jurisdiction?: ParkingJurisdiction | null;
+    /**
+     * Moment of observation — either an ISO-ish "YYYY-MM-DDTHH:MM"
+     * string from a <input type="datetime-local">, or a Date. Parsed
+     * into the template's "data" + "ora" slots. Defaults to "now" when
+     * not supplied so legacy callers keep working.
+     */
+    observedAt?: string | Date | null;
   };
 }
 
@@ -152,6 +159,20 @@ export function buildFormalText(input: MailtoInput): string {
       { jurisdiction: input.parking.jurisdiction },
     );
     const authorityName = recipients.primary[0]?.name ?? "Autoritatea competentă";
+
+    // Normalize the observedAt input — the form supplies a browser
+    // datetime-local string (local timezone, no offset); callers wiring
+    // this up from the server could send a Date. Anything unparseable
+    // falls through to "now".
+    let observedAt: Date | undefined;
+    const raw = input.parking.observedAt;
+    if (raw instanceof Date) {
+      observedAt = raw;
+    } else if (typeof raw === "string" && raw) {
+      const d = new Date(raw);
+      if (!Number.isNaN(d.getTime())) observedAt = d;
+    }
+
     return buildParkingLegalText({
       authorityName,
       authorName: input.author_name || "[NUMELE]",
@@ -161,6 +182,7 @@ export function buildFormalText(input: MailtoInput): string {
       locatie: input.locatie,
       lat: input.lat ?? null,
       lng: input.lng ?? null,
+      observedAt,
       photoCount: numarFoto,
     });
   }
