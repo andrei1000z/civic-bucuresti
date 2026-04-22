@@ -1,7 +1,9 @@
 // Civia — Minimal Service Worker
 // Strategy: network-first for HTML/API, cache-first for static assets.
 
-const CACHE_VERSION = "v3";
+// Bump CACHE_VERSION whenever this list changes so the new SW
+// drops old caches on activate and picks up the new precache set.
+const CACHE_VERSION = "v4";
 const STATIC_CACHE = `civia-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `civia-runtime-${CACHE_VERSION}`;
 
@@ -26,7 +28,11 @@ const STATIC_ASSETS = [
   "/ghiduri/ghid-dezbatere-publica",
   // Key public pages — accessible offline
   "/sesizari",
+  "/sesizari-publice",
+  "/sesizari-rezolvate",
+  "/urmareste",
   "/harti",
+  "/aer",
   "/bilete",
   "/accesibilitate",
   "/calendar-civic",
@@ -36,6 +42,8 @@ const STATIC_ASSETS = [
   "/sanatate",
   "/impact",
   "/dezvoltatori",
+  "/judete",
+  "/evenimente",
 ];
 
 self.addEventListener("install", (event) => {
