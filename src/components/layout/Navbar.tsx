@@ -265,11 +265,13 @@ export function Navbar() {
             <Link
               key={link.href}
               href={link.href}
+              onClick={() => setMobileOpen(false)}
+              aria-current={pathname === link.href ? "page" : undefined}
               style={{
                 transitionDelay: mobileOpen ? `${i * 40}ms` : "0ms",
               }}
               className={cn(
-                "block px-4 py-3 rounded-[var(--radius-button)] text-base font-medium transition-all duration-200",
+                "block px-4 py-3 rounded-[var(--radius-button)] text-base font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
                 mobileOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4",
                 pathname === link.href
                   ? "bg-[var(--color-primary)] text-white"
@@ -288,9 +290,10 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={countySlug ? `/${countySlug}${link.href}` : link.href}
-                className="block px-4 py-2 rounded-[var(--radius-button)] text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
+                onClick={() => setMobileOpen(false)}
+                className="block px-4 py-2 rounded-[var(--radius-button)] text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               >
-                {link.icon} {link.label}
+                <span aria-hidden="true">{link.icon}</span> {link.label}
               </Link>
             ))}
           </div>
@@ -304,9 +307,10 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={countySlug ? `/${countySlug}${link.href}` : link.href}
-                className="block px-4 py-2 rounded-[var(--radius-button)] text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
+                onClick={() => setMobileOpen(false)}
+                className="block px-4 py-2 rounded-[var(--radius-button)] text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               >
-                {link.icon} {link.label}
+                <span aria-hidden="true">{link.icon}</span> {link.label}
               </Link>
             ))}
           </div>
