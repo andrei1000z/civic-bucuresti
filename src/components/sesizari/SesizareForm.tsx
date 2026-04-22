@@ -865,6 +865,20 @@ ${today}`;
           />
         </Field>
 
+        <Field label="Email de contact (opțional)">
+          <input
+            type="email"
+            autoComplete="email"
+            value={data.email}
+            onChange={(e) => update("email", e.target.value)}
+            placeholder="nume@exemplu.ro"
+            className={inputClass}
+          />
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+            Dacă vrei să primești un email de confirmare cu codul de urmărire și notificări când autoritatea răspunde. Nu apare public.
+          </p>
+        </Field>
+
         <Field label="Descrie problema" required>
           <div className="relative">
             <textarea
@@ -1108,11 +1122,11 @@ ${today}`;
               Atașează poze clare, cu rezoluție mare și lumină bună. Ideal: o poză apropiată cu problema + o poză de context mai largă cu un reper vizibil (stâlp, clădire, număr casă). Fotografiază din mai multe unghiuri. Cu cât mai multe poze relevante, cu atât mai bine.
             </p>
             {imagini.length > 0 && (
-              <div className="mt-2 flex items-start gap-2 p-3 rounded-[8px] bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-300">
-                <span className="shrink-0 mt-0.5">⚠️</span>
+              <div className="mt-2 flex items-start gap-2 p-3 rounded-[8px] bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 text-xs text-emerald-900 dark:text-emerald-300">
+                <span className="shrink-0 mt-0.5">✓</span>
                 <p>
-                  <strong>Atașează pozele și la emailul trimis către autorități</strong> —
-                  pozele de aici sunt salvate pe platformă, dar trebuie adăugate manual în email.
+                  <strong>Pozele se includ automat în email</strong> —
+                  primăria primește linkuri directe către ele, fără să trebuiască să le atașezi tu.
                 </p>
               </div>
             )}

@@ -240,7 +240,28 @@ export function buildEmailPayload(input: MailtoInput): EmailPayload {
   }
   // Plain-text body: strip the bold markers the parking template uses.
   // Mail clients receiving text/plain can't render bold anyway.
-  const body = buildFormalText(input).replace(/\[\[BOLD]]([^[]+?)\[\[\/BOLD]]/g, "$1");
+  let body = buildFormalText(input).replace(/\[\[BOLD]]([^[]+?)\[\[\/BOLD]]/g, "$1");
+
+  // Append a photo appendix with clickable URLs. Previously the
+  // formal_text rewriter stripped Supabase URLs to keep the narrative
+  // clean, but it never re-added them, so the authority received a
+  // text-only email with "Anexez N fotografii" and no way to see them.
+  // The citizen had to manually attach files to every email — most
+  // don't, and the complaint gets dismissed as unverifiable.
+  // Fix: add a structured "Fotografii atașate (accesibile online)"
+  // section at the very end of the body. Each URL is on its own line
+  // so both plain-text clients (Outlook desktop) and webmail (Gmail)
+  // render it as a clickable link.
+  const urls = (input.imagini ?? []).filter((u) => typeof u === "string" && u.startsWith("http"));
+  if (urls.length > 0) {
+    const trackingLink = input.code
+      ? `\n\nDetalii complete și status public al sesizării: https://civia.ro/sesizari/${input.code}`
+      : "";
+    body = `${body.trimEnd()}\n\n---\nFotografii atașate (click pentru vizualizare):\n${urls.map((u, i) => `${i + 1}. ${u}`).join("\n")}${trackingLink}`;
+  } else if (input.code) {
+    body = `${body.trimEnd()}\n\n---\nStatus public al sesizării: https://civia.ro/sesizari/${input.code}`;
+  }
+
   return {
     to: recipients.primary.map((a) => a.email),
     cc: recipients.cc.map((a) => a.email),
