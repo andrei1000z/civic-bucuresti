@@ -4,8 +4,12 @@ import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const revalidate = 120;
 
-// Public API — CORS enabled for third-party civic apps, journalists, researchers
-// GET /api/public/sesizari?status=nou&sector=S3&limit=100
+// LEGACY public API — deprecated in favour of /api/v1/sesizari which
+// returns a more complete field set, has proper versioning and
+// pagination cursors. This endpoint stays so existing consumers
+// don't break, but it's soft-deprecated via the Deprecation +
+// Sunset headers (RFC 8594 / draft-ietf-httpapi-deprecation).
+// New consumers should call /api/v1/sesizari. Target removal: 2027.
 
 export async function OPTIONS() {
   return new NextResponse(null, {
@@ -51,6 +55,8 @@ export async function GET(req: Request) {
         count: data?.length ?? 0,
         limit,
         offset,
+        deprecation: "This endpoint is deprecated. Migrate to /api/v1/sesizari for richer fields + pagination.",
+        replacement: "https://civia.ro/api/v1/sesizari",
         license: "CC BY 4.0 — free to use with attribution to Civia",
         license_url: "https://creativecommons.org/licenses/by/4.0/",
       },
@@ -59,6 +65,12 @@ export async function GET(req: Request) {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         "Cache-Control": "public, s-maxage=120, stale-while-revalidate=60",
+        // RFC 8594 — indicates the endpoint is deprecated as of
+        // 2026-04-22, and will be removed on 2027-04-22 (1-year runway
+        // for consumers). Link header points to the replacement.
+        "Deprecation": "Wed, 22 Apr 2026 00:00:00 GMT",
+        "Sunset": "Thu, 22 Apr 2027 00:00:00 GMT",
+        "Link": '</api/v1/sesizari>; rel="successor-version"; type="application/json"',
       },
     });
   } catch (e) {
