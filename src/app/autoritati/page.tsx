@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ALL_COUNTIES } from "@/data/counties";
 import {
   PRIMARII,
@@ -7,6 +6,7 @@ import {
   getCityCount,
   getPolitiaLocalaCount,
 } from "@/data/autoritati-contact";
+import { SITE_URL } from "@/lib/constants";
 import { AutoritatiSearch } from "./AutoritatiSearch";
 
 export const metadata: Metadata = {
@@ -41,8 +41,39 @@ export default function AutoritatiIndexPage() {
     })),
   ];
 
+  // schema.org Dataset — helps Google surface this as a data catalog
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    name: "Autorități publice — România",
+    description:
+      "Date de contact verificate pentru primăriile, Poliția Locală și prefecturile din toate județele României, plus orașele non-capitale.",
+    url: `${SITE_URL}/autoritati`,
+    keywords: [
+      "primării România",
+      "Poliția Locală",
+      "prefecturi",
+      "contacte autorități",
+      "sesizări civice",
+    ],
+    license: "https://creativecommons.org/publicdomain/zero/1.0/",
+    creator: {
+      "@type": "Organization",
+      name: "Civia",
+      url: SITE_URL,
+    },
+    spatialCoverage: {
+      "@type": "Country",
+      name: "Romania",
+    },
+  };
+
   return (
     <div className="container-narrow py-12 md:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <header className="mb-10">
         <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
           Autorități publice — România
