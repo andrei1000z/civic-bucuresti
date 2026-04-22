@@ -11,6 +11,16 @@ export interface PolishResult {
   titlu: string;
   descriere: string;
   locatie: string;
+  /**
+   * True when the AI call actually returned JSON we could parse.
+   * False when we fell back to the raw input (Groq down, API key
+   * missing, invalid JSON, etc). The admin diff modal uses this to
+   * show a "AI n-a putut contacta modelul" warning instead of a
+   * silent no-op.
+   */
+  aiSucceeded: boolean;
+  /** Optional error tag for the admin — short, non-fatal. */
+  error?: string;
 }
 
 const SYSTEM_PROMPT = `Ești un editor de conținut pentru o platformă civică românească. Primești titlul, descrierea și locația scrise de un cetățean, adesea în grabă (ALL CAPS, fără diacritice, scurt și imperativ). Trebuie să le normalizezi în format public publicabil.
@@ -33,11 +43,13 @@ Nu adăuga text înainte/după. Nu folosi markdown. Păstrează toate informați
  * unchanged.
  */
 export async function polishSesizare(input: PolishInput): Promise<PolishResult> {
-  const fallback: PolishResult = {
+  const fallback = (error: string): PolishResult => ({
     titlu: input.titlu,
     descriere: input.descriere,
     locatie: input.locatie,
-  };
+    aiSucceeded: false,
+    error,
+  });
   try {
     const groq = getGroqClient();
     const completion = await groq.chat.completions.create({
@@ -61,14 +73,16 @@ export async function polishSesizare(input: PolishInput): Promise<PolishResult> 
       response_format: { type: "json_object" },
     });
     const content = completion.choices[0]?.message?.content;
-    if (!content) return fallback;
+    if (!content) return fallback("AI a returnat răspuns gol");
     const parsed = JSON.parse(content) as Partial<PolishResult>;
     return {
-      titlu: (parsed.titlu || fallback.titlu).trim().slice(0, 200),
-      descriere: (parsed.descriere || fallback.descriere).trim().slice(0, 2000),
-      locatie: (parsed.locatie || fallback.locatie).trim().slice(0, 300),
+      titlu: (parsed.titlu || input.titlu).trim().slice(0, 200),
+      descriere: (parsed.descriere || input.descriere).trim().slice(0, 2000),
+      locatie: (parsed.locatie || input.locatie).trim().slice(0, 300),
+      aiSucceeded: true,
     };
-  } catch {
-    return fallback;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return fallback(msg.slice(0, 120));
   }
 }

@@ -106,6 +106,11 @@ export async function POST(
       lat: newLat,
       lng: newLng,
       geocodeNote,
+      // Surface AI health so the admin diff modal can distinguish
+      // "already clean" (AI ran, nothing to improve) from "AI call
+      // actually failed and we fell back to the raw input".
+      aiSucceeded: polished.aiSucceeded,
+      aiError: polished.error ?? null,
       // Include the pre-polish snapshot so the admin UI can show a
       // side-by-side diff without needing another round-trip.
       before: {

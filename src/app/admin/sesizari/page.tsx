@@ -29,6 +29,8 @@ interface PolishDiff {
   before: { titlu: string; descriere: string; locatie: string; lat: number; lng: number };
   after: { titlu: string; descriere: string; locatie: string; lat: number; lng: number };
   geocodeNote: string | null;
+  aiSucceeded: boolean;
+  aiError: string | null;
 }
 
 export default function AdminSesizariPage() {
@@ -107,6 +109,8 @@ export default function AdminSesizariPage() {
           lng: j.data.lng,
         },
         geocodeNote: j.data.geocodeNote ?? null,
+        aiSucceeded: j.data.aiSucceeded ?? true,
+        aiError: j.data.aiError ?? null,
       });
       toast(`Polished ${code}`, "success");
     } catch (e) {
@@ -145,6 +149,20 @@ export default function AdminSesizariPage() {
               </button>
             </div>
             <div className="p-5 space-y-4 text-sm">
+              {/* AI health banner — warn the admin when the polish call
+                  actually failed (Groq down, quota hit, etc) so they
+                  don't confuse "already clean" with "AI didn't run". */}
+              {!polishDiff.aiSucceeded && (
+                <div className="p-3 rounded-[8px] border border-red-500/30 bg-red-500/5 text-xs text-red-700 dark:text-red-400">
+                  <strong>⚠ AI nu a putut contacta modelul.</strong> Textele au rămas
+                  la valoarea din DB. Coordonatele au fost totuși verificate prin
+                  geocoder.
+                  {polishDiff.aiError && (
+                    <p className="font-mono opacity-70 mt-1 text-[11px]">{polishDiff.aiError}</p>
+                  )}
+                </div>
+              )}
+
               {[
                 { label: "Titlu", before: polishDiff.before.titlu, after: polishDiff.after.titlu },
                 { label: "Locație", before: polishDiff.before.locatie, after: polishDiff.after.locatie },
@@ -154,7 +172,12 @@ export default function AdminSesizariPage() {
                 return (
                   <div key={row.label}>
                     <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-1.5">
-                      {row.label} {changed && <span className="text-emerald-500 normal-case">· schimbat</span>}
+                      {row.label}{" "}
+                      {changed ? (
+                        <span className="text-emerald-500 normal-case">· schimbat</span>
+                      ) : (
+                        <span className="text-[var(--color-text-muted)] normal-case">· neschimbat</span>
+                      )}
                     </p>
                     <div className="grid md:grid-cols-2 gap-2">
                       <div className="p-3 rounded-[8px] bg-red-500/5 border border-red-500/20">
@@ -170,29 +193,38 @@ export default function AdminSesizariPage() {
                 );
               })}
 
-              {/* Geocode row */}
-              {(polishDiff.before.lat !== polishDiff.after.lat ||
-                polishDiff.before.lng !== polishDiff.after.lng) && (
-                <div>
-                  <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-1.5">
-                    Coordonate <span className="text-emerald-500 normal-case">· re-geocodate</span>
-                  </p>
-                  <div className="flex items-center gap-3 p-3 rounded-[8px] bg-[var(--color-surface-2)] font-mono text-xs">
-                    <span className="text-red-600 dark:text-red-400">
-                      {polishDiff.before.lat.toFixed(4)}, {polishDiff.before.lng.toFixed(4)}
-                    </span>
-                    <ArrowRight size={12} className="text-[var(--color-text-muted)]" />
-                    <span className="text-emerald-600 dark:text-emerald-400">
-                      {polishDiff.after.lat.toFixed(4)}, {polishDiff.after.lng.toFixed(4)}
-                    </span>
-                  </div>
-                  {polishDiff.geocodeNote && (
-                    <p className="text-[11px] text-[var(--color-text-muted)] italic mt-1">
-                      {polishDiff.geocodeNote}
+              {/* Coordonate — always shown with the actual status so the
+                  admin can tell whether the geocoder ran and what it
+                  concluded, even when the pin didn't need to move. */}
+              {(() => {
+                const moved =
+                  polishDiff.before.lat !== polishDiff.after.lat ||
+                  polishDiff.before.lng !== polishDiff.after.lng;
+                return (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-1.5">
+                      Coordonate{" "}
+                      <span className={moved ? "text-emerald-500 normal-case" : "text-[var(--color-text-muted)] normal-case"}>
+                        · {moved ? "re-geocodate" : "neschimbate"}
+                      </span>
                     </p>
-                  )}
-                </div>
-              )}
+                    <div className="flex flex-wrap items-center gap-3 p-3 rounded-[8px] bg-[var(--color-surface-2)] font-mono text-xs">
+                      <span className={moved ? "text-red-600 dark:text-red-400" : "text-[var(--color-text-muted)]"}>
+                        {polishDiff.before.lat.toFixed(5)}, {polishDiff.before.lng.toFixed(5)}
+                      </span>
+                      <ArrowRight size={12} className="text-[var(--color-text-muted)]" />
+                      <span className={moved ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--color-text-muted)]"}>
+                        {polishDiff.after.lat.toFixed(5)}, {polishDiff.after.lng.toFixed(5)}
+                      </span>
+                    </div>
+                    {polishDiff.geocodeNote && (
+                      <p className="text-[11px] text-[var(--color-text-muted)] italic mt-1">
+                        {polishDiff.geocodeNote}
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
             <div className="flex justify-end gap-2 px-5 py-4 border-t border-[var(--color-border)]">
               <Link
