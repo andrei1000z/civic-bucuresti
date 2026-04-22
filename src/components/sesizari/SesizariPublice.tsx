@@ -220,7 +220,7 @@ export function SesizariPublice() {
                   </button>
                 )}
                 <Link
-                  href={county ? `/${county.slug}/sesizari` : "/b/sesizari"}
+                  href={county ? `/${county.slug}/sesizari` : "/sesizari"}
                   className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
                 >
                   Fă o sesizare acum →

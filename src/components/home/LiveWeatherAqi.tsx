@@ -66,11 +66,14 @@ export function LiveWeatherAqi() {
   }, [county]);
 
   if (!weather && !aqi) {
+    // Skeleton sized to match the final widget so there's no CLS when
+    // the real data lands. Same pill height + approximate width for a
+    // typical "☀️ 18° · AQI 32 Bun" payload.
     return (
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-        Se încarcă...
-      </div>
+      <div
+        className="inline-flex items-center gap-2 h-[30px] w-[140px] rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] animate-pulse"
+        aria-hidden="true"
+      />
     );
   }
 

@@ -30,7 +30,11 @@ export function TopVotedWidget() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading || rows.length === 0) return null;
+  // Hide the whole section only when we've confirmed there's nothing
+  // to show. While loading we render skeletons so the page doesn't
+  // shuffle its layout mid-paint, and the hero→CTA flow below stays
+  // in the same place.
+  if (!loading && rows.length === 0) return null;
 
   return (
     <section className="py-16">
@@ -55,6 +59,24 @@ export function TopVotedWidget() {
             Toate sesizările <ArrowRight size={16} />
           </Link>
         </div>
+
+        {loading && (
+          <div className="space-y-3" aria-hidden="true">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-4 p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] animate-pulse"
+              >
+                <div className="shrink-0 w-12 h-12 rounded-[12px] bg-[var(--color-surface-2)]" />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="h-3 w-24 rounded bg-[var(--color-surface-2)]" />
+                  <div className="h-4 w-3/4 rounded bg-[var(--color-surface-2)]" />
+                  <div className="h-3 w-1/2 rounded bg-[var(--color-surface-2)]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="space-y-3">
           {rows.map((s, i) => {

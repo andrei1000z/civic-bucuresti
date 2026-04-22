@@ -21,7 +21,7 @@ export function MobileFab() {
   const pathSlug = pathname.match(/^\/([a-z]{1,2})(?:\/|$)/)?.[1] ?? null;
   const validated = pathSlug && ALL_COUNTIES.some((c) => c.slug === pathSlug) ? pathSlug : null;
   const countySlug = county?.slug ?? validated;
-  const target = countySlug ? `/${countySlug}/sesizari` : "/b/sesizari";
+  const target = countySlug ? `/${countySlug}/sesizari` : "/sesizari";
 
   // Hide on the form itself + admin/auth pages to avoid CTA duplication.
   const hidden =

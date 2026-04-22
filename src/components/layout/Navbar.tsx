@@ -213,7 +213,7 @@ export function Navbar() {
             <NotificationBell />
             <UserMenu />
             <Link
-              href={countySlug ? `/${countySlug}/sesizari` : "/b/sesizari"}
+              href={countySlug ? `/${countySlug}/sesizari` : "/sesizari"}
               className="hidden md:inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-button)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] shadow-md transition-all"
             >
               <AlertCircle size={16} />
@@ -306,7 +306,7 @@ export function Navbar() {
           </div>
           <div className="pt-4 mt-4 border-t border-[var(--color-border)] space-y-2">
             <Link
-              href={countySlug ? `/${countySlug}/sesizari` : "/b/sesizari"}
+              href={countySlug ? `/${countySlug}/sesizari` : "/sesizari"}
               className="flex items-center justify-center gap-2 h-12 rounded-[var(--radius-button)] bg-[var(--color-primary)] text-white font-medium"
             >
               <AlertCircle size={18} />

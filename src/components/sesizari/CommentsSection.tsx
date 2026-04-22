@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageSquare, Send } from "lucide-react";
+import { MessageSquare, Send, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { timeAgo } from "@/lib/utils";
 import type { SesizareCommentRow } from "@/lib/supabase/types";
@@ -77,9 +77,10 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
               <button
                 type="submit"
                 disabled={!body.trim() || posting}
-                className="inline-flex items-center gap-2 h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors"
+                className="inline-flex items-center gap-2 h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-busy={posting}
               >
-                <Send size={14} />
+                {posting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
                 {posting ? "Se trimite..." : "Trimite"}
               </button>
             </div>
