@@ -21,6 +21,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const globalRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, lastModified: now, changeFrequency: "daily", priority: 1.0 },
     { url: `${base}/judete`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    // High-traffic sesizare views that were missing from the sitemap.
+    // /sesizari-publice and /sesizari-rezolvate are the two main
+    // discovery surfaces after the form itself; /urmareste is the
+    // code-lookup page that users search for by name.
+    { url: `${base}/sesizari-publice`, lastModified: now, changeFrequency: "hourly", priority: 0.8 },
+    { url: `${base}/sesizari-rezolvate`, lastModified: now, changeFrequency: "daily", priority: 0.7 },
+    { url: `${base}/urmareste`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/legal/confidentialitate`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/legal/termeni`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/dezvoltatori`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
