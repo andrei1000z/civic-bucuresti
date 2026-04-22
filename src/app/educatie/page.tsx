@@ -10,9 +10,9 @@ import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
 
 export const metadata: Metadata = {
-  title: "Educație — statistici BAC, licee și învățământ",
+  title: "Educația în România — BAC, licee, abandon școlar",
   description:
-    "Promovabilitate Bacalaureat, clasament top licee România, cheltuieli cu educația. Date oficiale MEN și INS.",
+    "Promovabilitatea la Bacalaureat pe ani, top 10 licee naționale, abandon școlar, comparație cu Uniunea Europeană. Date oficiale de la Ministerul Educației și INS.",
   alternates: { canonical: "/educatie" },
 };
 
@@ -40,11 +40,10 @@ export default function EducatiePage() {
       <Badge className="mb-4">Educație</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
         <GraduationCap size={40} className="text-[var(--color-primary)]" />
-        Educația în România
+        Școala pe care o plătim
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Rezultatele Bacalaureatului, top liceelor și cum se compară România cu UE. Date de la
-        Ministerul Educației și INS.
+        Rezultatele Bacalaureatului, topul liceelor, abandonul școlar — cât de bine îi pregătește sistemul public pe copiii noștri și cum stăm comparat cu restul Uniunii Europene. Cifre oficiale de la Ministerul Educației și INS.
       </p>
 
       {/* KEY NUMBERS */}

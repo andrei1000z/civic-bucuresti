@@ -9,9 +9,9 @@ import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
 
 export const metadata: Metadata = {
-  title: "Sănătate — sistem medical România",
+  title: "Sistemul medical românesc — în cifre reale",
   description:
-    "Speranță de viață, mortalitate infantilă, medici per capita, top spitale publice. Date oficiale INS și OMS.",
+    "Speranță de viață, mortalitate infantilă, medici per capita, top spitalele publice. Comparație cu Uniunea Europeană. Date oficiale INS, Ministerul Sănătății, Eurostat.",
   alternates: { canonical: "/sanatate" },
 };
 
@@ -31,11 +31,10 @@ export default function SanatatePage() {
       <Badge className="mb-4">Sănătate publică</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
         <Heart size={40} className="text-[var(--color-primary)]" />
-        Sănătatea în România
+        Cât trăim și cum trăim
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Sistemul medical românesc — în cifre. Speranță de viață, acces la servicii, top
-        spitalele publice. Date INS, MS și Eurostat.
+        Speranța de viață, accesul la medici, topul spitalelor publice și cum se compară sistemul nostru cu restul UE. Date agregate de la INS, Ministerul Sănătății și Eurostat — fără filtre, fără ascunzișuri.
       </p>
 
       {/* KEY NUMBERS */}

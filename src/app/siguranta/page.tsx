@@ -10,9 +10,9 @@ import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
 
 export const metadata: Metadata = {
-  title: "Siguranță publică & criminalitate — statistici România",
+  title: "Siguranța pe străzile României — statistici reale",
   description:
-    "Date oficiale despre criminalitate în România. Evoluție 2019-2024 pe tipuri de infracțiuni și pe județe.",
+    "Infracțiuni sesizate pe categorii și județe, 2019–2024. Cât de sigur e județul tău? Date oficiale Poliția Română, cu contextul pe care nu ți-l dă niciun buletin de știri.",
   alternates: { canonical: "/siguranta" },
 };
 
@@ -36,11 +36,10 @@ export default function SigurantaPage() {
       <Badge className="mb-4">Siguranță publică</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
         <ShieldAlert size={40} className="text-[var(--color-primary)]" />
-        Criminalitate în România
+        Cât de sigură e România
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Infracțiuni sesizate Poliției Române pe tipuri și evoluție în timp. Datele exclud
-        infracțiuni ne-raportate (&quot;cifra neagră&quot;) care se estimează la 30-50% în funcție de categorie.
+        Infracțiunile înregistrate de Poliția Română, defalcate pe tipuri și județe. Sunt doar cele <em>sesizate</em> oficial — „cifra neagră” a celor neraportate se estimează la 30–50% în funcție de categorie, deci realitatea pe teren e puțin mai gravă.
       </p>
 
       {/* KEY NUMBERS */}

@@ -9,9 +9,9 @@ import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
 
 export const metadata: Metadata = {
-  title: "Buget național România — execuție bugetară",
+  title: "Bugetul României — unde merg banii din taxele noastre",
   description:
-    "Venituri, cheltuieli și deficit bugetar al României. Date oficiale Ministerul Finanțelor. Evoluție 2020-2025.",
+    "Venituri, cheltuieli și deficit bugetar România 2020–2026. Câți bani strânge statul, pe ce îi cheltuie, cât împrumutăm. Date oficiale Ministerul Finanțelor + INS, vizualizate simplu.",
   alternates: { canonical: "/buget" },
 };
 
@@ -35,11 +35,10 @@ export default function BugetPage() {
       <Badge className="mb-4">Transparență fiscală</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
         <Wallet size={40} className="text-[var(--color-primary)]" />
-        Bugetul României
+        Banii tăi, pe românește
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Banii publici veniți din taxele noastre — unde merg și cum evoluează deficitul.
-        Date agregate de la Ministerul Finanțelor și INS.
+        Din fiecare leu plătit la taxe, unde ajunge? Cât strânge statul, cât cheltuie, cât împrumută. Cifre oficiale de la Ministerul Finanțelor și INS, explicate fără jargon financiar.
       </p>
 
       {/* KEY NUMBERS */}
