@@ -104,13 +104,16 @@ export function StiriList() {
       <div className="sticky top-16 z-30 bg-[var(--color-bg)]/95 backdrop-blur py-4 mb-6 border-b border-[var(--color-border)]">
         <div>
           <div className="flex flex-col lg:flex-row gap-3">
-            <div className="flex gap-2 overflow-x-auto no-scrollbar flex-1">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar flex-1" role="tablist" aria-label="Filtre categorie știri">
               {categories.map((cat) => (
                 <button
                   key={cat.id}
+                  type="button"
                   onClick={() => setCategory(cat.id)}
+                  role="tab"
+                  aria-selected={category === cat.id}
                   className={cn(
-                    "px-4 py-2 rounded-[20px] text-xs font-medium whitespace-nowrap transition-all",
+                    "px-4 py-2 rounded-[20px] text-xs font-medium whitespace-nowrap transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]",
                     category === cat.id
                       ? "bg-[var(--color-primary)] text-white"
                       : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
@@ -129,7 +132,8 @@ export function StiriList() {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Caută știri..."
+                placeholder="Caută în titlu..."
+                aria-label="Caută în titlurile știrilor"
                 className="w-full h-10 pl-9 pr-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               />
             </div>
@@ -137,9 +141,15 @@ export function StiriList() {
         </div>
       </div>
 
-      {/* Results count */}
-      <p className="text-sm text-[var(--color-text-muted)] mb-4">
-        {loading ? "Se încarcă..." : `${rows.length} articole din RSS real (Digi24, B365, Hotnews)`}
+      {/* Results count — plural-aware + reflects filters */}
+      <p className="text-sm text-[var(--color-text-muted)] mb-4" aria-live="polite">
+        {loading
+          ? "Se încarcă..."
+          : rows.length === 1
+            ? "1 articol găsit"
+            : rows.length === 0
+              ? "Niciun articol"
+              : `${rows.length} articole${query || category !== "all" ? " (filtrat)" : ""} · sursele: Digi24, B365, Hotnews`}
       </p>
 
       {loading && rows.length === 0 ? (

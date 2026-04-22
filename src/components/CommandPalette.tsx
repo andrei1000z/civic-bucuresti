@@ -119,6 +119,11 @@ export function CommandPalette() {
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal: controller.signal });
+        // res.ok check so a 500 from search doesn't bubble up as
+        // "results: []" — that looked like "no matches" but was
+        // actually a backend error. Now we keep the last known
+        // results on failure and silently retry on the next keystroke.
+        if (!res.ok) return;
         const json = await res.json();
         const hits = (json.data ?? []) as SearchResult[];
         setResults(hits);
@@ -129,7 +134,7 @@ export function CommandPalette() {
         import("@/components/analytics/CiviaTracker").then(({ trackSearchQuery }) => {
           trackSearchQuery(query, hits.length, "command-palette");
         }).catch(() => { /* silent */ });
-      } catch { /* aborted */ }
+      } catch { /* aborted or network */ }
       finally { setLoading(false); }
     }, 200);
     return () => { clearTimeout(timer); controller.abort(); };
