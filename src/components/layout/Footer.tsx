@@ -24,73 +24,75 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-sm text-[var(--color-text-muted)] mb-4 max-w-xs">
-              Platformă civică independentă pentru cetățenii din România.
+              Platformă civică independentă. Gratuită, fără politică, open-source — pentru cetățenii din România.
             </p>
           </div>
 
           {/* Column 2 — Platformă */}
           <div>
             <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">
-              Platformă
+              Folosește platforma
             </h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/sesizari" className={linkCls}>Sesizări</Link></li>
-              <li><Link href="/harti" className={linkCls}>Hărți</Link></li>
-              <li><Link href="/statistici" className={linkCls}>Statistici</Link></li>
-              <li><Link href="/stiri" className={linkCls}>Știri</Link></li>
-              <li><Link href="/evenimente" className={linkCls}>Evenimente</Link></li>
+              <li><Link href="/sesizari" className={linkCls}>Trimite o sesizare</Link></li>
+              <li><Link href="/sesizari-publice" className={linkCls}>Sesizări publice</Link></li>
+              <li><Link href="/harti" className={linkCls}>Hărți interactive</Link></li>
+              <li><Link href="/aer" className={linkCls}>Calitatea aerului — live</Link></li>
+              <li><Link href="/stiri" className={linkCls}>Știri locale</Link></li>
+              <li><Link href="/evenimente" className={linkCls}>Evenimente civice</Link></li>
               <li><Link href="/calendar-civic" className={linkCls}>Calendar civic</Link></li>
-              <li><Link href="/judete" className={linkCls}>Toate județele</Link></li>
-              <li><Link href="/compara" className={linkCls}>Compară județe</Link></li>
+              <li><Link href="/judete" className={linkCls}>Toate cele 42 de județe</Link></li>
+              <li><Link href="/compara" className={linkCls}>Compară două județe</Link></li>
             </ul>
             <h4 className="font-semibold mt-5 mb-3 text-[var(--color-text)] text-sm">
-              Date publice
+              Transparență bugete
             </h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/buget" className={linkCls}>Buget național</Link></li>
-              <li><Link href="/siguranta" className={linkCls}>Siguranță</Link></li>
-              <li><Link href="/educatie" className={linkCls}>Educație</Link></li>
-              <li><Link href="/sanatate" className={linkCls}>Sănătate</Link></li>
+              <li><Link href="/buget" className={linkCls}>Bugetul țării</Link></li>
+              <li><Link href="/sanatate" className={linkCls}>Sănătate publică</Link></li>
+              <li><Link href="/educatie" className={linkCls}>Educație și BAC</Link></li>
+              <li><Link href="/siguranta" className={linkCls}>Criminalitate și siguranță</Link></li>
             </ul>
           </div>
 
           {/* Column 3 — Ghiduri */}
           <div>
             <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">
-              Ghiduri
+              Ghiduri practice
             </h4>
             <ul className="space-y-2 text-sm">
+              <li><Link href="/ghiduri/ghid-sesizari" className={linkCls}>Cum faci o sesizare</Link></li>
+              <li><Link href="/ghiduri/ghid-contestatie-amenda" className={linkCls}>Cum contești o amendă</Link></li>
+              <li><Link href="/ghiduri/ghid-legea-544" className={linkCls}>Informații publice (L 544)</Link></li>
               <li><Link href="/ghiduri/ghid-cetatean" className={linkCls}>Drepturile cetățeanului</Link></li>
-              <li><Link href="/ghiduri/ghid-sesizari" className={linkCls}>Ghid sesizări</Link></li>
-              <li><Link href="/ghiduri/ghid-legea-544" className={linkCls}>Legea 544/2001</Link></li>
-              <li><Link href="/ghiduri/ghid-biciclist" className={linkCls}>Ghidul biciclistului</Link></li>
-              <li><Link href="/ghiduri/ghid-vara" className={linkCls}>Ghid de vară</Link></li>
-              <li><Link href="/ghiduri/ghid-cutremur" className={linkCls}>Ghid cutremur</Link></li>
-              <li><Link href="/ghiduri/ghid-transport" className={linkCls}>Ghid transport</Link></li>
+              <li><Link href="/ghiduri/ghid-cutremur" className={linkCls}>Pregătire cutremur</Link></li>
+              <li><Link href="/ghiduri/ghid-vara" className={linkCls}>Caniculă și vară</Link></li>
+              <li><Link href="/ghiduri/ghid-transport" className={linkCls}>Transport public</Link></li>
+              <li><Link href="/ghiduri/ghid-biciclist" className={linkCls}>Biciclist în oraș</Link></li>
             </ul>
           </div>
 
           {/* Column 4 — Legal */}
           <div>
             <h4 className="font-semibold mb-3 text-[var(--color-text)] text-sm">
-              Legal
+              Despre Civia
             </h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/legal/confidentialitate" className={linkCls}>Confidențialitate</Link></li>
-              <li><Link href="/legal/termeni" className={linkCls}>Termeni</Link></li>
-              <li><Link href="/accesibilitate" className={linkCls}>Accesibilitate</Link></li>
-              <li><Link href="/dezvoltatori" className={linkCls}>API dezvoltatori</Link></li>
-              <li><Link href="/impact" className={linkCls}>Dashboard impact</Link></li>
+              <li><Link href="/impact" className={linkCls}>Ce s-a rezolvat prin Civia</Link></li>
+              <li><Link href="/dezvoltatori" className={linkCls}>API public — pentru jurnaliști</Link></li>
+              <li><Link href="/accesibilitate" className={linkCls}>Accesibilitate (WCAG 2.1)</Link></li>
+              <li><Link href="/legal/confidentialitate" className={linkCls}>Confidențialitate și GDPR</Link></li>
+              <li><Link href="/legal/termeni" className={linkCls}>Termenii de utilizare</Link></li>
               <li><CookiePreferencesButton /></li>
             </ul>
             <h4 className="font-semibold mt-5 mb-3 text-[var(--color-text)] text-sm">
               Resurse oficiale
             </h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="https://data.gov.ro" target="_blank" rel="noopener noreferrer" className={linkCls}>data.gov.ro</a></li>
-              <li><a href="https://www.anpm.ro" target="_blank" rel="noopener noreferrer" className={linkCls}>anpm.ro</a></li>
-              <li><a href="https://www.politiaromana.ro" target="_blank" rel="noopener noreferrer" className={linkCls}>politiaromana.ro</a></li>
-              <li><a href="https://www.ghiseul.ro" target="_blank" rel="noopener noreferrer" className={linkCls}>ghiseul.ro</a></li>
+              <li><a href="https://data.gov.ro" target="_blank" rel="noopener noreferrer" className={linkCls}>Portalul datelor publice</a></li>
+              <li><a href="https://www.ghiseul.ro" target="_blank" rel="noopener noreferrer" className={linkCls}>Plăți taxe (Ghișeul.ro)</a></li>
+              <li><a href="https://www.anpm.ro" target="_blank" rel="noopener noreferrer" className={linkCls}>Agenția de Mediu</a></li>
+              <li><a href="https://www.politiaromana.ro" target="_blank" rel="noopener noreferrer" className={linkCls}>Poliția Română</a></li>
             </ul>
           </div>
         </div>
@@ -102,7 +104,7 @@ export function Footer() {
         {/* ── Bottom bar ────────────────────────────────────── */}
         <div className="mt-10 pt-6 border-t border-[var(--color-border)]">
           <p className="text-xs text-[var(--color-text-muted)] text-center">
-            &copy; 2026 Civia.ro
+            &copy; 2026 Civia — platformă civică independentă · Fără reclame · Fără politică · Open-source
           </p>
         </div>
       </div>

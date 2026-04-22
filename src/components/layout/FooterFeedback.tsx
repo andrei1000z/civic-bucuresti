@@ -89,10 +89,10 @@ export function FooterFeedback() {
       <section>
         <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
           <MessageSquareMore size={16} className="text-[var(--color-primary)]" />
-          Ai găsit o problemă? Ai o sugestie?
+          Ce nu-ți place la Civia? Ce lipsește?
         </h4>
         <p className="text-xs text-[var(--color-text-muted)] mb-3 leading-relaxed">
-          Scrie-mi direct — citesc tot. Răspund dacă lași un email.
+          Platforma se construiește cu tine. Un bug, o idee, o pagină lipsă — orice feedback ajunge direct la mine. Răspund dacă lași un email.
         </p>
         <form onSubmit={submitFeedback} className="space-y-2.5">
           <div className="flex gap-1.5">
@@ -164,11 +164,10 @@ export function FooterFeedback() {
       <section>
         <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
           <Mail size={16} className="text-[var(--color-primary)]" />
-          Newsletter civic săptămânal
+          Newsletter săptămânal — vinerea
         </h4>
         <p className="text-xs text-[var(--color-text-muted)] mb-3 leading-relaxed">
-          Top sesizări rezolvate, deadlines civice apropiate, evenimente pe
-          care le ratezi. Un singur mail pe săptămână.
+          Cele mai votate sesizări rezolvate, deadline-uri civice, evenimente locale — tot ce s-a mișcat în România săptămâna asta, într-un singur email de 2 minute.
         </p>
         <form onSubmit={submitNewsletter} className="space-y-2.5">
           <div className="flex flex-col sm:flex-row gap-2">

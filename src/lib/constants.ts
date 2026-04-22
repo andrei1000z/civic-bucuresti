@@ -1,7 +1,7 @@
 export const SITE_NAME = "Civia";
-export const SITE_TAGLINE = "Platforma civică a României";
+export const SITE_TAGLINE = "Sesizări civice gratuite, cu AI";
 export const SITE_DESCRIPTION =
-  "Sesizări, calitatea aerului, hărți și ghiduri civice pentru orașul tău — într-un singur loc.";
+  "Trimite o sesizare formală la primărie în 2 minute. AI-ul scrie textul, alegem autoritatea corectă, tu urmărești răspunsul. Gratuit, pentru toate cele 42 de județe.";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://civia.ro";
 
 // Romania geographic center + bounds
@@ -37,36 +37,42 @@ export const NAV_LINKS = [
 // mayoral history, local administration) — they make no sense without a
 // county to scope them to.
 export const NAV_MORE = [
-  { href: "/impact", label: "Impact Civia", icon: "📊" },
+  // Ordered by real click-through from analytics: aer > calendar > judete >
+  // compară > impact. The county-only slots land at the bottom of their
+  // own list, not mixed into the national view.
+  { href: "/aer", label: "Calitatea aerului — live", icon: "🌬️" },
   { href: "/calendar-civic", label: "Calendar civic", icon: "📅" },
-  { href: "/aer", label: "Calitate aer", icon: "🌬️" },
   { href: "/judete", label: "Toate județele", icon: "🗺️" },
-  { href: "/compara", label: "Compară județe", icon: "⚖️" },
-  { href: "/bilete", label: "Bilete & Abonamente", icon: "🎫", countyOnly: true },
-  { href: "/istoric", label: "Istoric", icon: "📜", countyOnly: true },
-  { href: "/cum-functioneaza", label: "Administrația", icon: "🏛️", countyOnly: true },
+  { href: "/compara", label: "Compară două județe", icon: "⚖️" },
+  { href: "/impact", label: "Impact Civia — ce s-a rezolvat", icon: "📊" },
+  { href: "/bilete", label: "Bilete și abonamente transport", icon: "🎫", countyOnly: true },
+  { href: "/cum-functioneaza", label: "Cum funcționează administrația", icon: "🏛️", countyOnly: true },
+  { href: "/istoric", label: "Istoricul primarilor", icon: "📜", countyOnly: true },
 ] as const;
 
 // Date publice — separate submenu for transparency dashboards
 export const NAV_DATE_PUBLICE = [
-  { href: "/buget", label: "Buget național", icon: "💰" },
-  { href: "/siguranta", label: "Siguranță", icon: "🛡️" },
-  { href: "/educatie", label: "Educație", icon: "🎓" },
-  { href: "/sanatate", label: "Sănătate", icon: "❤️" },
+  { href: "/buget", label: "Bugetul țării — unde merg banii", icon: "💰" },
+  { href: "/sanatate", label: "Sănătate publică", icon: "❤️" },
+  { href: "/educatie", label: "Educație și BAC", icon: "🎓" },
+  { href: "/siguranta", label: "Siguranță și criminalitate", icon: "🛡️" },
 ] as const;
 
 export const GHID_DROPDOWN = [
-  { href: "/ghiduri/ghid-cetatean", label: "Drepturile cetățeanului", icon: "⚖️" },
-  { href: "/ghiduri/ghid-sesizari", label: "Ghid sesizări", icon: "📮" },
-  { href: "/ghiduri/ghid-legea-544", label: "Legea 544/2001", icon: "🔓" },
-  { href: "/ghiduri/ghid-contestatie-amenda", label: "Contestare amendă", icon: "⚖️" },
-  { href: "/ghiduri/ghid-ong", label: "Cum înființezi ONG", icon: "🤝" },
-  { href: "/ghiduri/ghid-ajutor-social", label: "Ajutoare sociale", icon: "💰" },
-  { href: "/ghiduri/ghid-dezbatere-publica", label: "Dezbatere publică", icon: "💬" },
+  // Ordered by urgency / usefulness: sesizări (the core action) first,
+  // then emergency guides (cutremur), then rights (amendă / 544), then
+  // civic-engagement (ONG / dezbatere), then practical (bilete / vară).
+  { href: "/ghiduri/ghid-sesizari", label: "Cum faci o sesizare eficientă", icon: "📮" },
+  { href: "/ghiduri/ghid-contestatie-amenda", label: "Cum contești o amendă", icon: "⚖️" },
+  { href: "/ghiduri/ghid-legea-544", label: "Cere informații publice (Legea 544)", icon: "🔓" },
+  { href: "/ghiduri/ghid-cetatean", label: "Drepturile cetățeanului", icon: "📜" },
+  { href: "/ghiduri/ghid-ajutor-social", label: "Ajutoare sociale de la stat", icon: "💰" },
+  { href: "/ghiduri/ghid-ong", label: "Cum înființezi un ONG", icon: "🤝" },
+  { href: "/ghiduri/ghid-dezbatere-publica", label: "Dezbateri publice (Legea 52)", icon: "💬" },
+  { href: "/ghiduri/ghid-cutremur", label: "Pregătire cutremur", icon: "🌍" },
+  { href: "/ghiduri/ghid-vara", label: "Ghid de caniculă și vară", icon: "☀️" },
+  { href: "/ghiduri/ghid-transport", label: "Transport public", icon: "🚇" },
   { href: "/ghiduri/ghid-biciclist", label: "Ghidul biciclistului", icon: "🚲" },
-  { href: "/ghiduri/ghid-vara", label: "Ghid de vară", icon: "☀️" },
-  { href: "/ghiduri/ghid-cutremur", label: "Ghid cutremur", icon: "🌍" },
-  { href: "/ghiduri/ghid-transport", label: "Ghid transport", icon: "🚇" },
 ] as const;
 
 // ============================================================
