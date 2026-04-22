@@ -52,7 +52,14 @@ export async function POST(
   let newLng = sesizare.lng;
   let geocodeNote: string | null = null;
   try {
-    const hit = await forwardGeocode(polished.locatie);
+    // Pass the sesizare's county NAME (not code) so the extractor can
+    // scope fallback queries to the right city — a Bucharest-scoped
+    // extractor running on a Cluj sesizare would otherwise move the
+    // pin 400 km off.
+    const { getCountyById } = await import("@/data/counties");
+    const countyObj = sesizare.county ? getCountyById(sesizare.county) : null;
+    const countyHint = countyObj?.name ?? null;
+    const hit = await forwardGeocode(polished.locatie, countyHint);
     if (hit) {
       const R = 6371;
       const toRad = (d: number) => (d * Math.PI) / 180;

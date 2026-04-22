@@ -129,7 +129,11 @@ export async function POST(req: Request) {
     let finalLat = parsed.lat;
     let finalLng = parsed.lng;
     try {
-      const hit = await forwardGeocode(polished.locatie);
+      // County code → name so the geocode extractor's fallback queries
+      // land in the right city.
+      const { getCountyById } = await import("@/data/counties");
+      const countyName = parsed.county ? (getCountyById(parsed.county)?.name ?? null) : null;
+      const hit = await forwardGeocode(polished.locatie, countyName);
       if (hit) {
         const distKm = haversineKm(parsed.lat, parsed.lng, hit.lat, hit.lng);
         if (distKm > 1.5) {
