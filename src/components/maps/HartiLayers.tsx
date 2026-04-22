@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 
 const DynamicRoadsLayer = dynamic(() => import("./DynamicRoadsLayer").then(m => ({ default: m.DynamicRoadsLayer })), { ssr: false });
 const DynamicPedestrianLayer = dynamic(() => import("./DynamicPedestrianLayer").then(m => ({ default: m.DynamicPedestrianLayer })), { ssr: false });
+const DynamicTransitLayer = dynamic(() => import("./DynamicTransitLayer").then(m => ({ default: m.DynamicTransitLayer })), { ssr: false });
 import { METRO_COLORS } from "@/lib/constants";
 import type { PathOptions } from "leaflet";
 import type { Feature } from "geojson";
@@ -207,9 +208,14 @@ export default function HartiLayers(props: HartiLayersProps) {
   if (activeTab === "transport") {
     return (
       <>
+        {/* Static: metro lines + stations + national tram backbone —
+            always on, small file sizes, give the bird's-eye view */}
         <GeoJsonLayer key="metro-lines" url="/geojson/metrou.json" style={memoizedMetroStyle} popupFormatter={metroLinePopup} />
         <GeoJsonLayer key="metro-stations" url="/geojson/metrou-statii.json" style={metroStationStyle()} popupFormatter={metroStationPopup} />
         <GeoJsonLayer key="trams" url="/geojson/tramvai-romania.json" style={tramStyle} />
+        {/* Dynamic: bus stops, trolley lines, tram stations progressively
+            stream in from Overpass at zoom >= 13 */}
+        <DynamicTransitLayer />
       </>
     );
   }
