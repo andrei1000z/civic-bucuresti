@@ -199,13 +199,13 @@ export function SesizariPublice() {
               <div className="text-6xl mb-4 opacity-40">📮</div>
               <p className="text-lg font-semibold mb-2">
                 {hasActiveFilter
-                  ? "Nicio sesizare cu aceste filtre"
-                  : "Încă nu sunt sesizări publice"}
+                  ? "Nu există sesizări cu filtrele actuale"
+                  : "Fii primul care semnalează ceva în această zonă"}
               </p>
               <p className="text-sm text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">
                 {hasActiveFilter
-                  ? "Încearcă alte combinații de filtre sau resetează-le."
-                  : "Fii primul cetățean care semnalează o problemă. Platforma generează automat textul formal și îl trimite la autoritatea competentă."}
+                  ? "Încearcă alte combinații de filtre, sau resetează-le ca să vezi toate sesizările disponibile."
+                  : "Platforma e gratuită și nu cere cont. 2 minute — noi scriem textul formal, identificăm autoritatea competentă, tu primești un cod de urmărire."}
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 {hasActiveFilter && (

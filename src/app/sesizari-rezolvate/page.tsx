@@ -8,8 +8,8 @@ import { formatDate } from "@/lib/utils";
 import type { SesizareRow } from "@/lib/supabase/types";
 
 export const metadata: Metadata = {
-  title: "Sesizări rezolvate — Civia",
-  description: "Galerie before & after cu sesizări rezolvate în România. Dovada că implicarea civică funcționează.",
+  title: "Probleme rezolvate — Civia",
+  description: "Galerie „înainte / după” cu sesizări rezolvate efectiv de primării și autorități. Dovada că implicarea civică mișcă lucrurile în România.",
   alternates: { canonical: "/sesizari-rezolvate" },
 };
 
@@ -48,15 +48,15 @@ export default async function SesizariResolvatePage() {
         href="/sesizari"
         className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"
       >
-        <ChevronLeft size={16} /> Înapoi la sesizări
+        <ChevronLeft size={16} /> Trimit și eu o sesizare
       </Link>
 
       <div className="mb-10">
         <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
-          Sesizări rezolvate
+          Probleme rezolvate — dovada că funcționează
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">
-          Dovada că implicarea civică funcționează. Fiecare sesizare rezolvată este o victorie pentru comunitate.
+          Fiecare poză „înainte / după” de mai jos este o sesizare trimisă prin Civia, acționată de primărie sau de autoritate. Scris-am, a răspuns, au reparat. Așa arată implicarea civică.
         </p>
       </div>
 
@@ -64,16 +64,16 @@ export default async function SesizariResolvatePage() {
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-10 text-center">
           <CheckCircle2 size={40} className="mx-auto mb-4 text-emerald-500" />
           <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2">
-            Încă nu avem sesizări rezolvate
+            Galeria se completează în timp
           </h2>
           <p className="text-[var(--color-text-muted)] mb-6">
-            Fii primul care contribuie! Trimite o sesizare și urmărește rezolvarea ei.
+            Încă nu avem suficiente sesizări rezolvate cu poză „după”. Ajută-ne să construim dovada — trimite o sesizare acum, iar când autoritatea o rezolvă încarcă și o poză „după”.
           </p>
           <Link
-            href="/#county-picker"
-            className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] transition-colors"
+            href="/sesizari"
+            className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
           >
-            Fă o sesizare
+            Trimite o sesizare acum
           </Link>
         </div>
       ) : (
@@ -82,7 +82,7 @@ export default async function SesizariResolvatePage() {
           {withPhotos.length > 0 && (
             <section className="mb-12">
               <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-6">
-                Before & After
+                Înainte și după — galerie foto
               </h2>
               <div className="grid md:grid-cols-2 gap-6">
                 {withPhotos.map((s) => {
@@ -136,7 +136,7 @@ export default async function SesizariResolvatePage() {
           {withoutPhotos.length > 0 && (
             <section>
               <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-6">
-                Alte sesizări rezolvate
+                Alte rezolvări (fără poză „după”)
               </h2>
               <div className="space-y-3">
                 {withoutPhotos.map((s) => {

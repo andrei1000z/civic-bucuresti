@@ -5,10 +5,10 @@ import { NotFoundSearchButton } from "./NotFoundSearchButton";
 
 export default function NotFound() {
   const quickLinks = [
+    { href: "/sesizari", label: "Trimit o sesizare", icon: AlertCircle },
     { href: "/harti", label: "Hărți", icon: Map },
-    { href: "/sesizari", label: "Sesizări", icon: AlertCircle },
-    { href: "/ghiduri", label: "Ghiduri", icon: BookOpen },
-    { href: "/stiri", label: "Știri", icon: Newspaper },
+    { href: "/ghiduri", label: "Ghiduri practice", icon: BookOpen },
+    { href: "/stiri", label: "Știri locale", icon: Newspaper },
   ];
 
   return (
@@ -18,23 +18,26 @@ export default function NotFound() {
         <SearchX size={36} className="text-[var(--color-text-muted)]" />
       </div>
       <h1 className="font-[family-name:var(--font-sora)] text-5xl font-bold mb-2">404</h1>
-      <p className="text-lg text-[var(--color-text-muted)] mb-8">
-        Pagina pe care o cauți nu există sau a fost mutată.
+      <p className="text-lg text-[var(--color-text-muted)] mb-2">
+        N-am găsit pagina asta.
+      </p>
+      <p className="text-sm text-[var(--color-text-muted)] mb-8">
+        Probabil ai un link vechi sau ai tastat greșit URL-ul. Scrie-ne <Link href="/#footer-feedback" className="text-[var(--color-primary)] hover:underline">aici</Link> dacă ai venit din altă parte de pe site — reparăm linkul.
       </p>
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
         <Link
           href="/"
-          className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+          className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
           <Home size={16} />
-          Pagina principală
+          Înapoi la pagina principală
         </Link>
         <NotFoundSearchButton />
       </div>
 
       <div className="mt-8 pt-6 border-t border-[var(--color-border)]">
-        <p className="text-sm text-[var(--color-text-muted)] mb-4">Sau încearcă:</p>
+        <p className="text-sm text-[var(--color-text-muted)] mb-4">Sau mergi direct la:</p>
         <div className="flex flex-wrap justify-center gap-3">
           {quickLinks.map((link) => {
             const Icon = link.icon;
