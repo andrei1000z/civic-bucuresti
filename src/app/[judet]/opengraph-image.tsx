@@ -62,12 +62,13 @@ export default async function OgImage({ params }: { params: Promise<{ judet: str
           <div style={{ color: "#fff", fontSize: 28, fontWeight: 700 }}>Civia</div>
         </div>
 
-        <div style={{ color: "#86efac", fontSize: 26, fontWeight: 500, marginBottom: 8, letterSpacing: 2, textTransform: "uppercase" }}>
+        <div style={{ display: "flex", color: "#86efac", fontSize: 26, fontWeight: 500, marginBottom: 8, letterSpacing: 2, textTransform: "uppercase" }}>
           Județul
         </div>
 
         <div
           style={{
+            display: "flex",
             color: "#fff",
             fontSize: 128,
             fontWeight: 800,
@@ -79,7 +80,7 @@ export default async function OgImage({ params }: { params: Promise<{ judet: str
           {name}
         </div>
 
-        <div style={{ color: "#bfdbfe", fontSize: 30, fontWeight: 400, maxWidth: 1040, lineHeight: 1.3 }}>
+        <div style={{ display: "flex", color: "#bfdbfe", fontSize: 30, fontWeight: 400, maxWidth: 1040, lineHeight: 1.3 }}>
           Sesizări, calitate aer, hărți, statistici și ghiduri civice — toate dintr-un singur loc.
         </div>
 
