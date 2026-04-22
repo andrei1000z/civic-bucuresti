@@ -115,8 +115,9 @@ export function AlertBanner() {
         <button
           type="button"
           onClick={dismiss}
-          className="shrink-0 w-9 h-9 sm:w-8 sm:h-8 -mr-2 rounded-full hover:bg-white/20 flex items-center justify-center"
-          aria-label="Închide"
+          className="shrink-0 w-9 h-9 sm:w-8 sm:h-8 -mr-2 rounded-full hover:bg-white/20 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          aria-label="Închide această alertă"
+          title="Închide alerta"
         >
           <X size={16} />
         </button>

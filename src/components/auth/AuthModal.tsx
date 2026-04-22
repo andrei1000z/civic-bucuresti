@@ -68,30 +68,33 @@ export function AuthModal() {
   };
 
   return (
-    <Modal open={isAuthModalOpen} onClose={handleClose} title="Autentificare">
+    <Modal open={isAuthModalOpen} onClose={handleClose} title="Intră în contul tău Civia">
       {status === "sent" ? (
         <div className="text-center py-4">
           <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
             <CheckCircle2 size={28} className="text-emerald-600 dark:text-emerald-400" />
           </div>
-          <h3 className="font-semibold text-lg mb-2">Link trimis!</h3>
+          <h3 className="font-semibold text-lg mb-2">Verifică-ți emailul</h3>
           <p className="text-sm text-[var(--color-text-muted)] mb-4">
-            Ți-am trimis un link de autentificare la <strong>{email}</strong>.
-            Deschide-l din email ca să te logezi.
+            Ți-am trimis linkul de autentificare la <strong>{email}</strong>.
+            Dă click pe el din inbox și te conectezi instant — fără parolă de reținut.
+          </p>
+          <p className="text-xs text-[var(--color-text-muted)] mb-4">
+            Nu vezi emailul? Verifică folderul Spam/Promotions.
           </p>
           <button
             onClick={handleClose}
-            className="h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
+            className="h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
-            Închide
+            Am înțeles
           </button>
         </div>
       ) : (
         <div>
           <p className="text-sm text-[var(--color-text-muted)] mb-4">
             {ANY_OAUTH
-              ? "Conectează-te rapid cu un provider, ori primește un link magic pe email."
-              : "Primești un link prin email — fără parole. Autentificarea e necesară pentru vot și comentarii."}
+              ? "Google sau email — alege cum preferi. Fără parole de ținut minte. Contul îți permite să votezi, să comentezi, să urmărești sesizări."
+              : "Îți trimitem un link unic pe email. Click și ești conectat — fără parolă. Contul e necesar ca să votezi, comentezi sau urmărești sesizări."}
           </p>
 
           {ANY_OAUTH && (
@@ -171,14 +174,14 @@ export function AuthModal() {
             <button
               type="submit"
               disabled={status === "sending" || !email || oauthLoading !== null}
-              className="w-full h-11 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full h-11 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
-              {status === "sending" ? "Se trimite..." : "Trimite link pe email"}
+              {status === "sending" ? "Se trimite linkul..." : "Trimite-mi linkul de conectare"}
             </button>
           </form>
 
           <p className="text-xs text-[var(--color-text-muted)] mt-4 text-center">
-            Prin autentificare ești de acord cu <Link href="/legal/termeni" className="text-[var(--color-primary)] hover:underline">termenii</Link> platformei.
+            Conectarea înseamnă că ești de acord cu <Link href="/legal/termeni" className="text-[var(--color-primary)] hover:underline">termenii</Link> și cu <Link href="/legal/confidentialitate" className="text-[var(--color-primary)] hover:underline">politica de confidențialitate</Link>. Datele tale nu sunt vândute nimănui.
           </p>
         </div>
       )}

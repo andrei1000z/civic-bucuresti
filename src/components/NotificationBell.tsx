@@ -292,13 +292,13 @@ export function NotificationBell() {
           className="fixed sm:absolute top-16 sm:top-auto left-2 right-2 sm:left-auto sm:right-0 sm:mt-2 sm:w-80 max-h-[calc(100dvh-5rem)] sm:max-h-[480px] overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-xl z-50 flex flex-col"
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
-            <div className="text-sm font-semibold">Notificări</div>
+            <div className="text-sm font-semibold">Ce s-a mișcat</div>
             {notifs.length > 0 && (
               <button
                 onClick={clearAll}
-                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded px-1"
               >
-                Șterge tot
+                Marchează toate ca citite
               </button>
             )}
           </div>
@@ -306,9 +306,9 @@ export function NotificationBell() {
           {notifs.length === 0 ? (
             <div className="px-4 py-10 text-center text-sm text-[var(--color-text-muted)]">
               <Bell size={28} className="mx-auto mb-2 opacity-40" />
-              Fără notificări noi.
-              <div className="text-xs mt-1">
-                Urmărește sesizări ca să primești update-uri aici.
+              <p className="font-medium">Totul e liniștit aici</p>
+              <div className="text-xs mt-2">
+                Urmărește sesizările care te interesează și îți dăm semn când primăria răspunde sau când ceva se mișcă.
               </div>
             </div>
           ) : (

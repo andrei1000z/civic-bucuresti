@@ -47,9 +47,9 @@ export function CookieBanner() {
       <div className="flex items-start gap-3">
         <Cookie size={20} className="text-[var(--color-primary)] mt-0.5 shrink-0" />
         <div className="flex-1 text-sm">
-          <p className="font-semibold mb-1">Folosim cookies esențiale</p>
+          <p className="font-semibold mb-1">Folosim doar cookies esențiale</p>
           <p className="text-xs text-[var(--color-text-muted)] mb-3">
-            Doar pentru autentificare și preferințe tema. Fără tracking. Vezi{" "}
+            Strictul necesar pentru autentificare și salvarea temei (dark/light). Nu te trackăm, nu vindem date, nu avem reclame. Detalii în{" "}
             <Link href="/legal/confidentialitate" className="text-[var(--color-primary)] underline">
               politica de confidențialitate
             </Link>
@@ -58,15 +58,15 @@ export function CookieBanner() {
           <div className="flex gap-2">
             <button
               onClick={accept}
-              className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)]"
+              className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
-              Am înțeles
+              Bine, continuă
             </button>
             <button
               onClick={dismiss}
-              className="h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] text-xs font-medium hover:bg-[var(--color-border)]"
+              className="h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] text-xs font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
-              Închide
+              Mai târziu
             </button>
           </div>
         </div>

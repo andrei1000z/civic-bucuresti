@@ -14,10 +14,10 @@ export default async function AdminDashboard() {
   ]);
 
   const cards = [
-    { label: "Sesizări totale", value: total.count ?? 0, icon: FileText, href: "/admin/sesizari", color: "#2563EB" },
-    { label: "Așteaptă moderare", value: pending.count ?? 0, icon: Shield, href: "/admin/sesizari?status=pending", color: "#F59E0B" },
-    { label: "Știri în cache", value: stiri.count ?? 0, icon: Newspaper, href: "/stiri", color: "#059669" },
-    { label: "Utilizatori", value: users.count ?? 0, icon: Users, href: "#", color: "#8B5CF6" },
+    { label: "Sesizări primite (total)", value: total.count ?? 0, icon: FileText, href: "/admin/sesizari", color: "#2563EB" },
+    { label: "Necesită moderare", value: pending.count ?? 0, icon: Shield, href: "/admin/sesizari?status=pending", color: "#F59E0B" },
+    { label: "Articole știri indexate", value: stiri.count ?? 0, icon: Newspaper, href: "/stiri", color: "#059669" },
+    { label: "Conturi active", value: users.count ?? 0, icon: Users, href: "#", color: "#8B5CF6" },
   ];
 
   return (
@@ -40,7 +40,7 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
-        <h2 className="font-semibold mb-4">Acțiuni rapide</h2>
+        <h2 className="font-semibold mb-4">Unde mergi de aici</h2>
         <div className="grid md:grid-cols-2 gap-3">
           <Link
             href="/admin/sesizari"
@@ -48,8 +48,8 @@ export default async function AdminDashboard() {
           >
             <Shield size={20} className="text-amber-500" />
             <div>
-              <p className="font-medium text-sm">Moderare sesizări</p>
-              <p className="text-xs text-[var(--color-text-muted)]">{pending.count ?? 0} în așteptare</p>
+              <p className="font-medium text-sm">Moderează sesizările noi</p>
+              <p className="text-xs text-[var(--color-text-muted)]">{pending.count ?? 0} așteaptă aprobare sau respingere</p>
             </div>
           </Link>
           <Link
@@ -58,8 +58,8 @@ export default async function AdminDashboard() {
           >
             <BarChart3 size={20} className="text-blue-500" />
             <div>
-              <p className="font-medium text-sm">Analytics live</p>
-              <p className="text-xs text-[var(--color-text-muted)]">Trafic, device, țări, erori</p>
+              <p className="font-medium text-sm">Analytics în timp real</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Trafic, dispozitive, țări, erori, performanță</p>
             </div>
           </Link>
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
@@ -69,8 +69,8 @@ export default async function AdminDashboard() {
           >
             <Newspaper size={20} className="text-emerald-500" />
             <div>
-              <p className="font-medium text-sm">Refresh știri RSS</p>
-              <p className="text-xs text-[var(--color-text-muted)]">Fetch manual din surse</p>
+              <p className="font-medium text-sm">Reîncarcă feed-urile RSS</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Forțează un fetch imediat al tuturor surselor</p>
             </div>
           </a>
         </div>

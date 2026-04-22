@@ -67,22 +67,22 @@ export function InstallPrompt() {
           <Download size={18} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm mb-0.5">Instalează Civia</p>
+          <p className="font-semibold text-sm mb-0.5">Pune Civia pe ecranul de start</p>
           <p className="text-xs text-[var(--color-text-muted)] mb-3">
-            Acces rapid din home screen, funcționează și offline.
+            Click rapid din home screen, fără bara de browser. Ghidurile civice rămân disponibile offline — util la dezastre și unde n-ai semnal.
           </p>
           <div className="flex gap-2">
             <button
               onClick={install}
-              className="h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)]"
+              className="h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
-              Instalează
+              Adaugă pe ecran
             </button>
             <button
               onClick={dismiss}
-              className="h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] text-xs font-medium hover:bg-[var(--color-border)]"
+              className="h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] text-xs font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
-              Mai târziu
+              Nu acum
             </button>
           </div>
         </div>
