@@ -53,9 +53,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/statistici`, lastModified: now, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/bilete`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/impact`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/cum-functioneaza`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/cum-functioneaza`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/evenimente`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
-    { url: `${base}/istoric`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    // /istoric redirects to /b/istoric — no point indexing the
+    // redirect target separately here since /[judet]/istoric
+    // already covers every county.
   ];
 
   // Ghiduri

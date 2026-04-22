@@ -41,12 +41,12 @@ export const NAV_MORE = [
   // compară > impact. The county-only slots land at the bottom of their
   // own list, not mixed into the national view.
   { href: "/aer", label: "Calitatea aerului — live", icon: "🌬️" },
+  { href: "/cum-functioneaza", label: "Cum funcționează administrația", icon: "🏛️" },
   { href: "/calendar-civic", label: "Calendar civic", icon: "📅" },
   { href: "/judete", label: "Toate județele", icon: "🗺️" },
   { href: "/compara", label: "Compară două județe", icon: "⚖️" },
   { href: "/impact", label: "Impact Civia — ce s-a rezolvat", icon: "📊" },
   { href: "/bilete", label: "Bilete și abonamente transport", icon: "🎫", countyOnly: true },
-  { href: "/cum-functioneaza", label: "Cum funcționează administrația", icon: "🏛️", countyOnly: true },
   { href: "/istoric", label: "Istoricul primarilor", icon: "📜", countyOnly: true },
 ] as const;
 
