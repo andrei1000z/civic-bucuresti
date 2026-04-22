@@ -42,6 +42,7 @@ export function VoiceInput({
 }) {
   const [supported, setSupported] = useState(false);
   const [listening, setListening] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const recRef = useRef<Recognition | null>(null);
 
   useEffect(() => {
@@ -49,6 +50,14 @@ export function VoiceInput({
     const w = window as SpeechWindow;
     const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
     setSupported(!!Ctor);
+  }, []);
+
+  // Stop any in-progress recording when the component unmounts —
+  // avoids ghost mic access if user navigates away mid-dictation.
+  useEffect(() => {
+    return () => {
+      try { recRef.current?.stop(); } catch { /* already stopped */ }
+    };
   }, []);
 
   if (!supported) return null;
@@ -61,6 +70,7 @@ export function VoiceInput({
     const w = window as SpeechWindow;
     const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
     if (!Ctor) return;
+    setError(null);
     const rec = new Ctor();
     rec.continuous = true;
     rec.interimResults = false;
@@ -74,27 +84,51 @@ export function VoiceInput({
         }
       }
     };
-    rec.onerror = () => setListening(false);
+    rec.onerror = (e: unknown) => {
+      setListening(false);
+      // Common browser errors: "not-allowed" (mic permission denied)
+      // or "no-speech" (silence). Translate for the user.
+      const code = (e as { error?: string })?.error ?? "";
+      if (code === "not-allowed" || code === "service-not-allowed") {
+        setError("Permisiunea microfonului a fost refuzată. Activează-o din setările browser-ului.");
+      } else if (code === "no-speech") {
+        setError("Nu te-am auzit. Încearcă mai aproape de microfon.");
+      } else if (code === "network") {
+        setError("Fără conexiune — dictarea are nevoie de net.");
+      }
+    };
     rec.onend = () => setListening(false);
-    rec.start();
-    recRef.current = rec;
-    setListening(true);
+    try {
+      rec.start();
+      recRef.current = rec;
+      setListening(true);
+    } catch {
+      // .start() throws InvalidStateError if the underlying service
+      // is already running (double-click). Ignore — next end fires.
+    }
   };
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={listening ? "Oprește dictarea" : "Dictează"}
-      aria-pressed={listening}
-      className={`inline-flex items-center justify-center w-9 h-9 rounded-[8px] transition-colors ${
-        listening
-          ? "bg-red-500 text-white animate-pulse"
-          : "bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:bg-[var(--color-surface)] text-[var(--color-text-muted)]"
-      } ${className ?? ""}`}
-      title={listening ? "Înregistrează... apasă pentru stop" : "Dictează în română"}
-    >
-      {listening ? <MicOff size={14} /> : <Mic size={14} />}
-    </button>
+    <div className="inline-flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={listening ? "Oprește dictarea" : "Dictează în română"}
+        aria-pressed={listening}
+        className={`inline-flex items-center justify-center w-9 h-9 rounded-[8px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
+          listening
+            ? "bg-red-500 text-white animate-pulse"
+            : "bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:bg-[var(--color-surface)] text-[var(--color-text-muted)]"
+        } ${className ?? ""}`}
+        title={listening ? "Înregistrează... apasă pentru stop" : "Dictează în română (clic pentru start)"}
+      >
+        {listening ? <MicOff size={14} /> : <Mic size={14} />}
+      </button>
+      {error && (
+        <p className="text-[10px] text-red-500 max-w-[180px] text-right" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
   );
 }
