@@ -478,6 +478,153 @@ export const ORASE_IMPORTANTE: Record<string, CityContact> = {
     website: "https://www.primariadragasani.ro",
     address: "Str. Gib Mihăescu nr. 35, Drăgășani",
   },
+  // Caraș-Severin
+  caransebes: {
+    countyCode: "CS", name: "Caransebeș",
+    phone: "0255-514-885", email: "contact@primaria-caransebes.ro",
+    website: "https://www.primaria-caransebes.ro",
+    address: "P-ța Revoluției nr. 1, Caransebeș",
+  },
+  // Ialomița
+  fetesti: {
+    countyCode: "IL", name: "Fetești",
+    phone: "0243-364-410", email: "contact@primariafetesti.ro",
+    website: "https://www.primariafetesti.ro",
+    address: "Str. Călărași nr. 595, Fetești",
+  },
+  // Constanța — suplimentar
+  eforie: {
+    countyCode: "CT", name: "Eforie",
+    phone: "0241-741-602", email: "contact@primariaeforie.ro",
+    website: "https://www.primariaeforie.ro",
+    address: "Str. Progresului nr. 1, Eforie",
+  },
+  // Galați — suplimentar
+  "tg-bujor": {
+    countyCode: "GL", name: "Târgu Bujor",
+    phone: "0236-340-514", email: "primariatgbujor@yahoo.com",
+    website: "https://www.primaria-tg-bujor.ro",
+    address: "Str. Gen. Eremia Grigorescu nr. 101, Târgu Bujor",
+  },
+  // Vrancea
+  adjud: {
+    countyCode: "VN", name: "Adjud",
+    phone: "0237-641-908", email: "contact@primariaadjud.ro",
+    website: "https://www.primariaadjud.ro",
+    address: "Str. Stadionului nr. 2, Adjud",
+  },
+  // Bihor — suplimentar
+  "marghita": {
+    countyCode: "BH", name: "Marghita",
+    phone: "0259-362-001", email: "contact@primariamarghita.ro",
+    website: "https://www.primariamarghita.ro",
+    address: "Calea Republicii nr. 1, Marghita",
+  },
+  // Neamț — suplimentar
+  "targu-neamt": {
+    countyCode: "NT", name: "Târgu Neamț",
+    phone: "0233-790-245", email: "contact@primariatgneamt.ro",
+    website: "https://www.primariatgneamt.ro",
+    address: "Str. Ștefan cel Mare nr. 62, Târgu Neamț",
+  },
+  // Sibiu — suplimentar
+  cisnadie: {
+    countyCode: "SB", name: "Cisnădie",
+    phone: "0269-561-016", email: "contact@primariacisnadie.ro",
+    website: "https://www.primariacisnadie.ro",
+    address: "Str. Cetății nr. 1, Cisnădie",
+  },
+  // Bacău — suplimentar
+  comanesti: {
+    countyCode: "BC", name: "Comănești",
+    phone: "0234-374-211", email: "contact@primariacomanesti.ro",
+    website: "https://www.primariacomanesti.ro",
+    address: "Str. Vasile Alecsandri nr. 1, Comănești",
+  },
+  // Argeș — suplimentar
+  "curtea-de-arges": {
+    countyCode: "AG", name: "Curtea de Argeș",
+    phone: "0248-721-033", email: "contact@primariacurteadearges.ro",
+    website: "https://www.primariacurteadearges.ro",
+    address: "B-dul Basarabilor nr. 99, Curtea de Argeș",
+  },
+  // Dâmbovița — suplimentar
+  "moreni": {
+    countyCode: "DB", name: "Moreni",
+    phone: "0245-667-265", email: "contact@primariamoreni.ro",
+    website: "https://www.primariamoreni.ro",
+    address: "Str. Victoriei nr. 62, Moreni",
+  },
+  // Tulcea — suplimentar
+  macin: {
+    countyCode: "TL", name: "Măcin",
+    phone: "0240-571-102", email: "contact@primariamacin.ro",
+    website: "https://www.primariamacin.ro",
+    address: "Str. Florilor nr. 1, Măcin",
+  },
+  // Timiș — suplimentar
+  jimbolia: {
+    countyCode: "TM", name: "Jimbolia",
+    phone: "0256-360-203", email: "contact@primariajimbolia.ro",
+    website: "https://www.primariajimbolia.ro",
+    address: "Str. Tudor Vladimirescu nr. 81, Jimbolia",
+  },
+  // Arad — suplimentar
+  ineu: {
+    countyCode: "AR", name: "Ineu",
+    phone: "0257-511-550", email: "contact@primariaineu.ro",
+    website: "https://www.primariaineu.ro",
+    address: "Str. Republicii nr. 5, Ineu",
+  },
+  // Olt — suplimentar
+  caracal: {
+    countyCode: "OT", name: "Caracal",
+    phone: "0249-511-384", email: "contact@primariacaracal.ro",
+    website: "https://www.primariacaracal.ro",
+    address: "Str. Piața Victoriei nr. 10, Caracal",
+  },
+  // Dolj — suplimentar
+  calafat: {
+    countyCode: "DJ", name: "Calafat",
+    phone: "0251-231-424", email: "primarie@primariacalafat.ro",
+    website: "https://www.primariacalafat.ro",
+    address: "Str. T. Vladimirescu nr. 24, Calafat",
+  },
+  // Teleorman — suplimentar
+  "rosiorii-de-vede": {
+    countyCode: "TR", name: "Roșiorii de Vede",
+    phone: "0247-466-250", email: "contact@primariarosioriidevede.ro",
+    website: "https://www.primariarosioriidevede.ro",
+    address: "Str. Dunării nr. 58, Roșiorii de Vede",
+  },
+  // Buzău — suplimentar
+  "ramnicu-sarat": {
+    countyCode: "BZ", name: "Râmnicu Sărat",
+    phone: "0238-561-941", email: "contact@primariermsarat.ro",
+    website: "https://www.primariermsarat.ro",
+    address: "Str. Nicolae Bălcescu nr. 1, Râmnicu Sărat",
+  },
+  // Mehedinți — suplimentar
+  orsova: {
+    countyCode: "MH", name: "Orșova",
+    phone: "0252-361-317", email: "contact@primariaorsova.ro",
+    website: "https://www.primariaorsova.ro",
+    address: "P-ța 1800 nr. 25, Orșova",
+  },
+  // Covasna — suplimentar
+  "targu-secuiesc": {
+    countyCode: "CV", name: "Târgu Secuiesc",
+    phone: "0267-361-325", email: "contact@kezdi.ro",
+    website: "https://www.kezdi.ro",
+    address: "P-ța Gábor Áron nr. 24, Târgu Secuiesc",
+  },
+  // Giurgiu — suplimentar
+  "bolintin-vale": {
+    countyCode: "GR", name: "Bolintin-Vale",
+    phone: "0246-270-990", email: "contact@bolintinvale.ro",
+    website: "https://www.bolintinvale.ro",
+    address: "Str. Libertății nr. 1, Bolintin-Vale",
+  },
 };
 
 /** Check if a county has real authority data */
@@ -533,4 +680,26 @@ export function findCityContact(
 /** Total count of cities in the database — for /stats display */
 export function getCityCount(): number {
   return Object.keys(ORASE_IMPORTANTE).length;
+}
+
+/** Total count of county-level PL entries (includes București) */
+export function getPolitiaLocalaCount(): number {
+  return Object.keys(POLITIA_LOCALA_JUDET).length;
+}
+
+/**
+ * Returns all cities grouped by county code. Useful for the per-county
+ * "Alte orașe din județ" block and for the national autoritati index.
+ */
+export function getCitiesByCounty(): Record<string, Array<{ slug: string } & CityContact>> {
+  const out: Record<string, Array<{ slug: string } & CityContact>> = {};
+  for (const [slug, city] of Object.entries(ORASE_IMPORTANTE)) {
+    if (!out[city.countyCode]) out[city.countyCode] = [];
+    out[city.countyCode]!.push({ slug, ...city });
+  }
+  // Sort each county's cities alphabetically
+  for (const code of Object.keys(out)) {
+    out[code]!.sort((a, b) => a.name.localeCompare(b.name, "ro"));
+  }
+  return out;
 }
