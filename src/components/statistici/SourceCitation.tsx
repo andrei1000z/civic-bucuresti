@@ -19,8 +19,8 @@ export function SourceCitation({ sourceKey }: { sourceKey: string }) {
         <a
           href={sursa.url}
           target={isExternal ? "_blank" : undefined}
-          rel={isExternal ? "noreferrer" : undefined}
-          className="shrink-0 text-[var(--color-primary)] hover:underline inline-flex items-center gap-0.5"
+          rel={isExternal ? "noopener noreferrer" : undefined}
+          className="shrink-0 text-[var(--color-primary)] hover:underline inline-flex items-center gap-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
         >
           {isExternal ? (
             <>

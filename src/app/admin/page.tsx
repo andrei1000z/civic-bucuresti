@@ -13,28 +13,48 @@ export default async function AdminDashboard() {
     admin.from("profiles").select("*", { count: "exact", head: true }),
   ]);
 
+  // Only the first 3 cards are clickable — "Conturi active" is
+  // a read-only metric until we build a user-management page, so
+  // it renders as a plain div. Having it pretend to be a Link
+  // ("#") was a broken affordance.
   const cards = [
     { label: "Sesizări primite (total)", value: total.count ?? 0, icon: FileText, href: "/admin/sesizari", color: "#2563EB" },
     { label: "Necesită moderare", value: pending.count ?? 0, icon: Shield, href: "/admin/sesizari?status=pending", color: "#F59E0B" },
     { label: "Articole știri indexate", value: stiri.count ?? 0, icon: Newspaper, href: "/stiri", color: "#059669" },
-    { label: "Conturi active", value: users.count ?? 0, icon: Users, href: "#", color: "#8B5CF6" },
-  ];
+    { label: "Conturi active", value: users.count ?? 0, icon: Users, href: null, color: "#8B5CF6" },
+  ] as const;
 
   return (
     <div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {cards.map((card) => {
           const Icon = card.icon;
-          return (
-            <Link
-              key={card.label}
-              href={card.href}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 hover:shadow-[var(--shadow-md)] transition-all"
-            >
+          const inner = (
+            <>
               <Icon size={20} style={{ color: card.color }} className="mb-2" />
               <p className="text-3xl font-bold" style={{ color: card.color }}>{card.value}</p>
               <p className="text-xs text-[var(--color-text-muted)] mt-1">{card.label}</p>
-            </Link>
+            </>
+          );
+          if (card.href) {
+            return (
+              <Link
+                key={card.label}
+                href={card.href}
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 hover:shadow-[var(--shadow-md)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              >
+                {inner}
+              </Link>
+            );
+          }
+          return (
+            <div
+              key={card.label}
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5"
+              aria-label={`${card.label}: ${card.value}`}
+            >
+              {inner}
+            </div>
           );
         })}
       </div>
