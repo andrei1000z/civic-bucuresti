@@ -93,7 +93,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
           aria-expanded={open}
         >
           <Share2 size={iconSize} />
-          <span>Share</span>
+          <span>Distribuie</span>
         </button>
 
         {open && (

@@ -4,8 +4,8 @@ import { ChevronLeft } from "lucide-react";
 import { UrmarireSesizare } from "@/components/sesizari/UrmarireSesizare";
 
 export const metadata: Metadata = {
-  title: "Urmărește sesizarea — Civia",
-  description: "Verifică statusul sesizării tale. Introdu codul unic primit la trimitere.",
+  title: "Urmărește-ți sesizarea — Civia",
+  description: "Ai trimis o sesizare prin Civia? Introdu codul primit la trimitere și vezi unde e — pe ce autoritate a ajuns, dacă a fost aprobată public, câți cetățeni au co-semnat.",
   alternates: { canonical: "/urmareste" },
 };
 
@@ -16,15 +16,15 @@ export default function UrmarestePage() {
         href="/sesizari"
         className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"
       >
-        <ChevronLeft size={16} /> Înapoi la sesizări
+        <ChevronLeft size={16} /> Înapoi la formularul de sesizări
       </Link>
 
       <div className="mb-8">
         <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
-          Urmărește sesizarea
+          Unde a ajuns sesizarea ta?
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">
-          Introdu codul unic primit la trimiterea sesizării pentru a vedea statusul actual.
+          Introdu codul unic de 6 caractere pe care l-ai primit când ai trimis sesizarea. Vezi statusul oficial, voturile primite, comentariile și dacă a fost marcată drept rezolvată.
         </p>
       </div>
 

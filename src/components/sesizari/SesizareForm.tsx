@@ -899,12 +899,13 @@ ${today}`;
           type="button"
           onClick={() => handleAIImprove({ withPhotos: imagini.length > 0 })}
           disabled={aiLoading || data.descriere.length < 10}
-          className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-purple-500"
+          title={imagini.length > 0 ? "AI citește descrierea + vede pozele și rescrie textul oficial" : "AI rescrie descrierea ta în limbaj oficial cu temei legal"}
         >
           {aiLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
           {aiLoading
-            ? (imagini.length > 0 ? "AI analizează pozele..." : "AI procesează...")
-            : (imagini.length > 0 ? "Îmbunătățește cu AI (vede pozele)" : "Îmbunătățește cu AI")}
+            ? (imagini.length > 0 ? "AI analizează pozele..." : "AI rescrie textul...")
+            : (imagini.length > 0 ? "Rescrie cu AI — citește și pozele" : "Rescrie cu AI în limbaj oficial")}
         </button>
 
         <Field label="Tip problemă" required>

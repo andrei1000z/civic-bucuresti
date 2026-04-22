@@ -60,20 +60,20 @@ export function EmailChoicePanel({ input, compact }: Props) {
           href={buildGmailLink(input)}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 h-12 px-4 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] shadow-md transition-all"
+          className="inline-flex items-center justify-center gap-2 h-12 px-4 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
           <Mail size={18} />
-          Trimite prin Gmail
+          Deschide în Gmail
           <ExternalLink size={12} className="opacity-70" />
         </a>
         <a
           href={buildOutlookLink(input)}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 h-12 px-4 rounded-[8px] bg-[#0078d4] text-white font-semibold hover:brightness-110 shadow-md transition-all"
+          className="inline-flex items-center justify-center gap-2 h-12 px-4 rounded-[8px] bg-[#0078d4] text-white font-semibold hover:brightness-110 shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0078d4]"
         >
           <Mail size={18} />
-          Trimite prin Outlook
+          Deschide în Outlook
           <ExternalLink size={12} className="opacity-70" />
         </a>
       </div>
@@ -86,28 +86,29 @@ export function EmailChoicePanel({ input, compact }: Props) {
           rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
         >
-          Yahoo Mail
+          Yahoo
         </a>
         <a
           href={buildMailtoLink(input)}
           className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
+          title="Folosește aplicația ta de email nativă"
         >
-          App email (mailto)
+          Mail nativ
         </a>
         <button
           type="button"
           onClick={copyAll}
-          className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
+          className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         >
           {copied === "all" ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
-          {copied === "all" ? "Copiat!" : "Copiază tot"}
+          {copied === "all" ? "Copiat în clipboard" : "Copiază emailul"}
         </button>
       </div>
 
       {!compact && (
         <details className="bg-[var(--color-surface-2)] rounded-[8px] p-3 text-xs">
           <summary className="font-medium cursor-pointer select-none">
-            Sau scrie email-ul manual
+            Trimit manual din alt client de email
           </summary>
           <div className="mt-3 space-y-3">
             <div>
@@ -124,7 +125,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
                   onClick={copyTo}
                   className="h-8 px-2 rounded bg-[var(--color-surface)] text-[10px] font-medium hover:bg-[var(--color-border)]"
                 >
-                  {copied === "to" ? "✓" : "Copy"}
+                  {copied === "to" ? "✓ Copiat" : "Copiază"}
                 </button>
               </div>
             </div>
@@ -146,7 +147,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
                   onClick={copyBody}
                   className="h-7 px-2 rounded bg-[var(--color-surface)] text-[10px] font-medium hover:bg-[var(--color-border)]"
                 >
-                  {copied === "body" ? "✓ Copiat" : "Copy"}
+                  {copied === "body" ? "✓ Copiat" : "Copiază textul"}
                 </button>
               </div>
               <pre className="p-2 rounded bg-[var(--color-surface)] text-[10px] whitespace-pre-wrap font-mono max-h-60 overflow-y-auto">
