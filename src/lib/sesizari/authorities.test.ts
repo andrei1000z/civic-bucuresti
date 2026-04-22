@@ -78,3 +78,55 @@ describe("getAuthoritiesFor — Sector 5 dead-address scrub", () => {
     expect(r.primary.map((a) => a.email)).not.toContain("primarie@sector5.ro");
   });
 });
+
+describe("getAuthoritiesFor — county routing (non-București)", () => {
+  it("routes Cluj-Napoca 'groapa' to the fixed primăria (not the broken pfrecluj-napoca.ro)", () => {
+    const r = getAuthoritiesFor("groapa", null, "CJ", "Str. Mărăști 9, Cluj-Napoca");
+    const emails = r.primary.map((a) => a.email);
+    expect(emails).toContain("registratura@primariaclujnapoca.ro");
+    expect(emails.some((e) => e.includes("pfrecluj"))).toBe(false);
+  });
+
+  it("routes Timișoara 'parcare' to the fixed primăria + Poliția Locală Timișoara", () => {
+    const r = getAuthoritiesFor("parcare", null, "TM", "Str. Piatra Craiului 2, Timișoara");
+    const emails = r.primary.map((a) => a.email);
+    // Fixed email — was the broken pfriatimisoara.ro
+    expect(emails).toContain("primariatm@primariatm.ro");
+    // Poliția Locală now gets the TO slot for parcare
+    expect(emails).toContain("politialocala@primariatm.ro");
+    expect(emails.some((e) => e.includes("pfriatimisoara"))).toBe(false);
+  });
+
+  it("routes Focșani to the fixed focsani.info domain (not the broken primariafcsani.ro)", () => {
+    const r = getAuthoritiesFor("groapa", null, "VN", "Str. Republicii, Focșani");
+    const emails = r.primary.map((a) => a.email);
+    expect(emails).toContain("primarie@focsani.info");
+    expect(emails.some((e) => e.includes("fcsani"))).toBe(false);
+  });
+
+  it("routes a non-capital city (Turda, CJ) to its own primărie, not Cluj-Napoca's", () => {
+    const r = getAuthoritiesFor("groapa", null, "CJ", "Str. Avram Iancu 10, Turda");
+    const emails = r.primary.map((a) => a.email);
+    expect(emails).toContain("contact@primariaturda.ro");
+    expect(emails).not.toContain("registratura@primariaclujnapoca.ro");
+  });
+
+  it("routes a non-capital city 'parcare' to its own Poliția Locală when available", () => {
+    const r = getAuthoritiesFor("parcare", null, "CJ", "Str. Libertății, Turda");
+    const emails = r.primary.map((a) => a.email);
+    expect(emails).toContain("politialocala@primariaturda.ro");
+  });
+
+  it("routes Voluntari (Ilfov) to its own primărie, not Buftea's", () => {
+    const r = getAuthoritiesFor("groapa", null, "IF", "B-dul Voluntari 15, Voluntari");
+    const emails = r.primary.map((a) => a.email);
+    expect(emails).toContain("contact@primariavoluntari.ro");
+    expect(emails).not.toContain("contact@primariabuftea.ro");
+  });
+
+  it("Prefectura always appears in CC for county-level routing", () => {
+    const r = getAuthoritiesFor("groapa", null, "TM", "Timișoara");
+    const ccEmails = r.cc.map((a) => a.email);
+    expect(ccEmails).toContain("prefectura@prefecturatimis.ro");
+  });
+});

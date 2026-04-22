@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
 import { getCountyBySlug } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
-import { PREFECTURI, POLITIE, PRIMARII, hasAuthorityData } from "@/data/autoritati-contact";
+import {
+  PREFECTURI,
+  POLITIE,
+  PRIMARII,
+  POLITIA_LOCALA_JUDET,
+  ORASE_IMPORTANTE,
+  hasAuthorityData,
+} from "@/data/autoritati-contact";
 import type { AuthorityContact } from "@/data/autoritati-contact";
-import { Building2, Phone, Globe, Mail, MapPin, Users, Bus } from "lucide-react";
+import { Building2, Phone, Globe, Mail, MapPin, Users, Bus, Shield } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -119,6 +126,10 @@ export default async function AutoritatiPage({
   const prefectura = PREFECTURI[county.id];
   const politie = POLITIE[county.id];
   const primarie = PRIMARII[county.id];
+  const politialocala = POLITIA_LOCALA_JUDET[county.id];
+  const orasImportante = Object.entries(ORASE_IMPORTANTE)
+    .filter(([, c]) => c.countyCode === county.id)
+    .map(([slug, c]) => ({ slug, ...c }));
 
   return (
     <div className="container-narrow py-12 md:py-16">
@@ -169,6 +180,19 @@ export default async function AutoritatiPage({
         />
 
         <InstitutionCard
+          name={isBucuresti ? "Poliția Locală București" : `Poliția Locală ${county.name}`}
+          role="Subordine locală — primărie"
+          icon={Shield}
+          contact={politialocala}
+          details={[
+            "Parcare neregulamentară, trotuar blocat",
+            "Liniște publică (zgomot după ora 22:00)",
+            "Disciplină construcții, graffiti, mobilier stradal",
+            "Cel mai bun destinatar pentru sesizări civice",
+          ]}
+        />
+
+        <InstitutionCard
           name={stats?.transportPublicOperator ?? "Transport public"}
           role="Operator transport public local"
           icon={Bus}
@@ -201,6 +225,39 @@ export default async function AutoritatiPage({
           ]}
         />
       </div>
+
+      {orasImportante.length > 0 && (
+        <section className="mb-10">
+          <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-1">
+            Alte orașe din {county.name}
+          </h2>
+          <p className="text-sm text-[var(--color-text-muted)] mb-5">
+            Locuiești într-unul din aceste orașe? Trimite sesizarea direct la
+            primăria ta — e mai rapid decât să treci prin reședința de județ.
+          </p>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {orasImportante.map((oras) => (
+              <div
+                key={oras.slug}
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4"
+              >
+                <h3 className="font-[family-name:var(--font-sora)] font-semibold text-base mb-1">
+                  {oras.name}
+                </h3>
+                <p className="text-xs text-[var(--color-text-muted)] mb-3">Primărie + Poliție Locală</p>
+                <ContactLinks
+                  contact={{
+                    phone: oras.phone,
+                    email: oras.email,
+                    website: oras.website,
+                    address: oras.address,
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {!hasData && (
         <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[12px] p-4 text-sm mb-6">

@@ -2,6 +2,13 @@
 
 import { detectSectorFromText } from "./sector-detect";
 import type { ParkingJurisdiction } from "./parking";
+import {
+  PRIMARII as COUNTY_PRIMARII,
+  PREFECTURI as COUNTY_PREFECTURI,
+  POLITIE as COUNTY_POLITIE,
+  POLITIA_LOCALA_JUDET,
+  findCityContact,
+} from "@/data/autoritati-contact";
 
 export interface Authority {
   id: string;
@@ -83,7 +90,7 @@ export function getAuthoritiesFor(
 ): ResolvedRecipients {
   // If not București, route to county authorities
   if (countyCode && countyCode !== "B") {
-    return getCountyAuthorities(tip, countyCode);
+    return getCountyAuthorities(tip, countyCode, locationText);
   }
   const primary: Authority[] = [];
   const cc: Authority[] = [];
@@ -262,39 +269,87 @@ export function getAuthoritiesFor(
 
 /**
  * Route complaints to county-specific authorities for non-București locations.
+ *
+ * Routing priority:
+ *   1. If the location text matches a non-capital city from ORASE_IMPORTANTE,
+ *      route to that city's primărie + poliție locală (most specific).
+ *   2. Otherwise route to the county reședință's primărie + POLITIA_LOCALA_JUDET.
+ *   3. Prefectura always in CC (oversight authority).
  */
-function getCountyAuthorities(tip: string, countyCode: string): ResolvedRecipients {
-  // Try to import county contacts dynamically
-  let PRIMARII: Record<string, { email?: string; phone?: string; website?: string }> = {};
-  let PREFECTURI: Record<string, { email?: string; phone?: string }> = {};
-  let POLITIE: Record<string, { email?: string; phone?: string }> = {};
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const contacts = require("@/data/autoritati-contact");
-    PRIMARII = contacts.PRIMARII ?? {};
-    PREFECTURI = contacts.PREFECTURI ?? {};
-    POLITIE = contacts.POLITIE ?? {};
-  } catch {
-    // Fallback if module not available
-  }
+function getCountyAuthorities(
+  tip: string,
+  countyCode: string,
+  locationText?: string | null,
+): ResolvedRecipients {
+  const PRIMARII = COUNTY_PRIMARII;
+  const PREFECTURI = COUNTY_PREFECTURI;
+  const POLITIE = COUNTY_POLITIE;
 
   const primary: Authority[] = [];
   const cc: Authority[] = [];
 
-  const primarie = PRIMARII[countyCode];
+  // 1. Try to match a non-capital city from the location text
+  const cityMatch = locationText ? findCityContact(locationText, countyCode) : null;
+
+  if (cityMatch) {
+    const { slug, city } = cityMatch;
+    // City-level routing takes precedence
+    if (city.email) {
+      primary.push({
+        id: `primarie-${slug}`,
+        name: `Primăria ${city.name}`,
+        email: city.email,
+        ...(city.phone ? { phone: city.phone } : {}),
+      });
+    }
+    // For parcare/zgomot/graffiti, add city's Poliția Locală if available
+    if (
+      ["parcare", "zgomot", "graffiti"].includes(tip) &&
+      city.politieLocala?.email
+    ) {
+      primary.unshift({
+        id: `pl-${slug}`,
+        name: `Poliția Locală ${city.name}`,
+        email: city.politieLocala.email,
+        ...(city.politieLocala.phone ? { phone: city.politieLocala.phone } : {}),
+      });
+    }
+  } else {
+    // 2. County capital fallback
+    const primarie = PRIMARII[countyCode];
+    const politiaLocala = POLITIA_LOCALA_JUDET[countyCode];
+    const politie = POLITIE[countyCode];
+
+    if (primarie?.email) {
+      primary.push({
+        id: `primarie-${countyCode}`,
+        name: `Primăria ${countyCode}`,
+        email: primarie.email,
+        ...(primarie.phone ? { phone: primarie.phone } : {}),
+      });
+    }
+
+    // For parcare/zgomot/graffiti/mobilier/gunoi, Poliția Locală takes the
+    // TO slot; IPJ falls to CC (they only intervene on criminal matters).
+    const plTags = new Set(["parcare", "zgomot", "graffiti", "mobilier", "gunoi"]);
+    if (plTags.has(tip) && politiaLocala?.email) {
+      primary.unshift({
+        id: `pl-${countyCode}`,
+        name: `Poliția Locală ${countyCode}`,
+        email: politiaLocala.email,
+        ...(politiaLocala.phone ? { phone: politiaLocala.phone } : {}),
+      });
+    }
+
+    // IPJ in CC when tip is criminal-adjacent (parcare blocking access,
+    // zgomot) — but most IPJ entries have no email, only phone.
+    if (["parcare", "zgomot"].includes(tip) && politie?.email) {
+      cc.push({ id: `politie-${countyCode}`, name: `IPJ ${countyCode}`, email: politie.email });
+    }
+  }
+
+  // 3. Prefectura always in CC (oversight)
   const prefectura = PREFECTURI[countyCode];
-  const politie = POLITIE[countyCode];
-
-  // Generic county routing
-  if (primarie?.email) {
-    primary.push({ id: `primarie-${countyCode}`, name: `Primăria ${countyCode}`, email: primarie.email });
-  }
-
-  // Add specialized authorities based on tip
-  if (["parcare", "zgomot", "graffiti"].includes(tip) && politie?.email) {
-    primary.unshift({ id: `politie-${countyCode}`, name: `IPJ ${countyCode}`, email: politie.email });
-  }
-
   if (prefectura?.email) {
     cc.push({ id: `prefectura-${countyCode}`, name: `Prefectura ${countyCode}`, email: prefectura.email });
   }
