@@ -78,9 +78,9 @@ export function SesizareForm() {
   const mode = "complet"; // single mode, no choice screen
   const [data, setData] = useState<FormData>(INITIAL);
   const [imagini, setImagini] = useState<string[]>([]);
-  const [dataConstatarii, setDataConstatarii] = useState<string>(new Date().toISOString().split("T")[0] ?? "2026-04-14");
-  const [oraConstatarii, setOraConstatarii] = useState(new Date().toTimeString().slice(0, 5));
-  const [unknownDate, setUnknownDate] = useState(false);
+  // Data/ora constatării a fost scoasă — majoritatea cetățenilor nu
+  // văd valoare în câmp. "Astăzi, {data_de_azi}" din textul formal
+  // acoperă oricum momentul trimiterii.
   const [aiLoading, setAiLoading] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
   const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
@@ -558,17 +558,8 @@ export function SesizareForm() {
   const now = new Date();
   const today = `${now.getDate()} ${LUNI_RO[now.getMonth()]} ${now.getFullYear()}`;
 
-  // Format constatare date for email
-  const constatareText = unknownDate
-    ? ""
-    : (() => {
-        try {
-          const d = new Date(`${dataConstatarii}T${oraConstatarii}`);
-          return `, constatată în data de ${d.getDate()} ${LUNI_RO[d.getMonth()]} ${d.getFullYear()} la ora ${oraConstatarii}`;
-        } catch {
-          return `, constatată în data de ${dataConstatarii} la ora ${oraConstatarii}`;
-        }
-      })();
+  // Data/ora constatării scoasă din flow — "Astăzi, {today}" e suficient.
+  const constatareText = "";
 
   const evidenceText = imagini.length > 0
     ? `\nAnexez ${imagini.length} ${imagini.length === 1 ? "fotografie" : "fotografii"}.\n`
@@ -723,46 +714,6 @@ ${today}`;
             className={inputClass}
           />
         </Field>
-
-        {/* Date/time */}
-        <div>
-          <p className="text-sm font-medium mb-2">Data și ora constatării</p>
-          <label className="flex items-center gap-2 cursor-pointer mb-3">
-            <input
-              type="checkbox"
-              checked={unknownDate}
-              onChange={(e) => setUnknownDate(e.target.checked)}
-              className="w-4 h-4 rounded border-[var(--color-border)] accent-[var(--color-primary)]"
-            />
-            <span className="text-xs text-[var(--color-text-muted)]">Nu știu data/ora exactă</span>
-          </label>
-          {!unknownDate && (() => {
-            const parts = dataConstatarii.split("-").map(Number);
-            const yr = parts[0] ?? 2026;
-            const mo = parts[1] ?? 1;
-            const dy = parts[2] ?? 1;
-            const isLeap = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
-            const daysInMonth = [0,31, isLeap(yr) ? 29 : 28, 31,30,31,30,31,31,30,31,30,31][mo] ?? 31;
-            // Auto-clamp day if month changed
-            if (dy > daysInMonth) setDataConstatarii(`${yr}-${String(mo).padStart(2,"0")}-${String(daysInMonth).padStart(2,"0")}`);
-            return (
-            <div className="grid grid-cols-5 gap-1.5">
-              <select value={dataConstatarii.split("-")[2] || ""} onChange={(e) => { const p = dataConstatarii.split("-"); setDataConstatarii(`${p[0] ?? ""}-${p[1] ?? ""}-${e.target.value.padStart(2,"0")}`); }} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]">
-                {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => (<option key={d} value={String(d).padStart(2,"0")}>{d}</option>))}
-              </select>
-              <select value={dataConstatarii.split("-")[1] || ""} onChange={(e) => { const p = dataConstatarii.split("-"); setDataConstatarii(`${p[0] ?? ""}-${e.target.value}-${p[2] ?? ""}`); }} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)] col-span-2">
-                {["Ian","Feb","Mar","Apr","Mai","Iun","Iul","Aug","Sep","Oct","Nov","Dec"].map((m, i) => (<option key={i} value={String(i+1).padStart(2,"0")}>{m}</option>))}
-              </select>
-              <select value={oraConstatarii.split(":")[0] || "12"} onChange={(e) => setOraConstatarii(`${e.target.value}:${oraConstatarii.split(":")[1] || "00"}`)} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]">
-                {Array.from({ length: 24 }, (_, i) => (<option key={i} value={String(i).padStart(2,"0")}>{String(i).padStart(2,"0")}h</option>))}
-              </select>
-              <select value={oraConstatarii.split(":")[1] || "00"} onChange={(e) => setOraConstatarii(`${oraConstatarii.split(":")[0] || "12"}:${e.target.value}`)} className="h-9 px-2 text-xs rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]">
-                {Array.from({ length: 12 }, (_, i) => i * 5).map((m) => (<option key={m} value={String(m).padStart(2,"0")}>{String(m).padStart(2,"0")}m</option>))}
-              </select>
-            </div>
-            );
-          })()}
-        </div>
 
         <Field label="Descrierea problemei" required>
           <div className="relative">

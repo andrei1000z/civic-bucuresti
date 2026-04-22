@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, MapPin, Calendar, User, Clock, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, MapPin, Calendar, User, Clock, CheckCircle2, UserPlus, Send, XCircle, FileCheck, MapPinned, Route as RouteIcon } from "lucide-react";
 import {
   getSesizareByCode,
   getTimeline,
@@ -40,6 +40,17 @@ const EVENT_LABELS: Record<string, string> = {
   in_teren: "Inspector pe teren",
   rezolvat: "Problemă rezolvată",
   respins: "Sesizare respinsă",
+  cosemnat: "Un alt cetățean a trimis și el această sesizare",
+};
+
+const EVENT_ACCENT: Record<string, string> = {
+  depusa: "#2563EB",
+  inregistrata: "#6366F1",
+  rutata: "#8B5CF6",
+  in_teren: "#F59E0B",
+  rezolvat: "#059669",
+  respins: "#DC2626",
+  cosemnat: "#0891B2",
 };
 
 export async function generateMetadata(
@@ -278,23 +289,57 @@ export default async function SesizareDetailPage({
 
           {/* Timeline */}
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
-            <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-4">
-              Status
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold">
+                Status & activitate
+              </p>
+              {(() => {
+                const cosemneNr = timeline.filter((e) => e.event_type === "cosemnat").length;
+                return cosemneNr > 0 ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-400">
+                    <UserPlus size={10} />
+                    +{cosemneNr} cetățeni
+                  </span>
+                ) : null;
+              })()}
+            </div>
             {timeline.length === 0 ? (
-              <p className="text-sm text-[var(--color-text-muted)]">Nu există evenimente.</p>
+              <p className="text-sm text-[var(--color-text-muted)]">Nu există evenimente încă.</p>
             ) : (
               <ol className="relative border-l-2 border-[var(--color-border)] ml-3 space-y-4">
                 {timeline.map((step, i) => {
                   const isLast = i === timeline.length - 1;
+                  const accent = EVENT_ACCENT[step.event_type] ?? "#64748B";
+                  const Icon =
+                    step.event_type === "cosemnat"
+                      ? UserPlus
+                      : step.event_type === "rezolvat"
+                      ? CheckCircle2
+                      : step.event_type === "respins"
+                      ? XCircle
+                      : step.event_type === "inregistrata"
+                      ? FileCheck
+                      : step.event_type === "rutata"
+                      ? RouteIcon
+                      : step.event_type === "in_teren"
+                      ? MapPinned
+                      : Send;
                   return (
                     <li key={step.id} className="ml-6">
-                      <span className="absolute -left-[13px] w-6 h-6 rounded-full flex items-center justify-center bg-[var(--color-secondary)] text-white">
-                        <CheckCircle2 size={13} />
+                      <span
+                        className="absolute -left-[13px] w-6 h-6 rounded-full flex items-center justify-center text-white ring-2 ring-[var(--color-surface)]"
+                        style={{ backgroundColor: accent }}
+                      >
+                        <Icon size={12} />
                       </span>
                       <p className={`text-sm ${isLast ? "font-semibold" : "font-medium"}`}>
                         {EVENT_LABELS[step.event_type] ?? step.event_type}
                       </p>
+                      {step.description && step.event_type !== "cosemnat" && (
+                        <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                          {step.description}
+                        </p>
+                      )}
                       <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-1 mt-0.5">
                         <Clock size={10} />
                         {formatDateTime(step.created_at)}

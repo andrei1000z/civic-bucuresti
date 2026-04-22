@@ -82,6 +82,11 @@ export function SignSesizareButton({
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
     setStep("send");
+    // Record the co-sign on the server so it shows up in the timeline
+    // of everyone following the sesizare — "A mai depus cineva pe
+    // {data} la {ora}". Fire-and-forget; a failure here shouldn't block
+    // the send flow.
+    fetch(`/api/sesizari/${code}/cosign`, { method: "POST" }).catch(() => { /* silent */ });
   };
 
   const canContinue = data.name.length >= 2 && data.address.length >= 3;
