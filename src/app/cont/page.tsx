@@ -166,11 +166,13 @@ export default function ContPage() {
           </p>
         </div>
         <button
-          onClick={() => {
-            signOut();
+          type="button"
+          onClick={async () => {
+            await signOut();
+            toast("Te-ai deconectat. La revedere!", "info");
             router.push("/");
           }}
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         >
           <LogOut size={14} />
           Deconectare
@@ -310,7 +312,8 @@ export default function ContPage() {
             <button
               type="submit"
               disabled={saving}
-              className="mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors"
+              aria-busy={saving}
+              className="mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
               {saving ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -319,7 +322,7 @@ export default function ContPage() {
               ) : (
                 <Save size={14} />
               )}
-              {saving ? "Se salvează..." : saved ? "Salvat!" : "Salvează modificări"}
+              {saving ? "Se salvează..." : saved ? "Salvat!" : "Salvează modificările"}
             </button>
           </form>
         </aside>
