@@ -43,9 +43,11 @@ export async function POST(
     tip: sesizare.tip,
   });
 
-  // Re-forward-geocode. If the stored coords are close to the geocoded
-  // hit (<5 km) we keep them — GPS is usually more precise than a text
-  // search. If they're wildly off (>10 km) we trust the text.
+  // Admin explicitly asked to polish — ALWAYS trust the forward-geocode
+  // result when it succeeds. No "close enough" threshold: the whole
+  // point of clicking sparkle is "this pin is wrong, fix it". The
+  // author's GPS was probably their couch, the real problem is 3-5 km
+  // away, and we shouldn't second-guess the admin.
   let newLat = sesizare.lat;
   let newLng = sesizare.lng;
   let geocodeNote: string | null = null;
@@ -62,11 +64,14 @@ export async function POST(
           Math.cos(toRad(hit.lat)) *
           Math.sin(dLng / 2) ** 2;
       const distKm = 2 * R * Math.asin(Math.sqrt(a));
-      if (distKm > 10) {
-        newLat = hit.lat;
-        newLng = hit.lng;
-        geocodeNote = `coords moved ${distKm.toFixed(1)} km to match location text`;
-      }
+      newLat = hit.lat;
+      newLng = hit.lng;
+      geocodeNote =
+        distKm < 0.05
+          ? "coords confirmed (already matched location text)"
+          : `coords moved ${distKm.toFixed(1)} km to match location text`;
+    } else {
+      geocodeNote = "Nominatim nu a găsit adresa — coordonatele rămân neschimbate";
     }
   } catch { /* keep original */ }
 

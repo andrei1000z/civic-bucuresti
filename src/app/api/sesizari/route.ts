@@ -114,18 +114,25 @@ export async function POST(req: Request) {
       tip: parsed.tip,
     });
 
-    // If the submitted lat/lng doesn't match the location text (common when
-    // the user skipped GPS and we fell back to a default center), re-forward-
-    // geocode the polished location text and use those coordinates instead.
+    // If the submitted lat/lng doesn't match the polished location text,
+    // replace it with the forward-geocode result. Most users type the
+    // sesizare on their couch, so the submitted coord is their HOME,
+    // not the problem spot — we pick up on that by comparing the
+    // geocoded address of the problem ("Calea Griviței 234") with the
+    // coords the browser sent.
+    //
+    // Threshold is intentionally tight (1.5 km). Bigger means "user's
+    // GPS was probably accurate, don't second-guess"; smaller means "we
+    // don't trust browser-reported coords when the text is specific".
+    // A street-level geocode hit is usually < 50 m off; anything past
+    // 1.5 km is noise.
     let finalLat = parsed.lat;
     let finalLng = parsed.lng;
     try {
       const hit = await forwardGeocode(polished.locatie);
       if (hit) {
-        // If the parsed lat/lng is >20km away from the geocoded result,
-        // the user's coords are almost certainly wrong — prefer geocode.
         const distKm = haversineKm(parsed.lat, parsed.lng, hit.lat, hit.lng);
-        if (distKm > 20) {
+        if (distKm > 1.5) {
           finalLat = hit.lat;
           finalLng = hit.lng;
         }
