@@ -35,9 +35,17 @@ export function AuthModal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmed = email.trim();
+    // Client-side guard so a typo doesn't trigger a Supabase round-trip
+    // with an opaque "rate limit" or "invalid email format" error.
+    if (!/^[\w.+-]+@[\w-]+\.[\w.-]+$/.test(trimmed)) {
+      setStatus("error");
+      setErrorMsg("Adresă de email incorectă. Verifică formatul (ex: nume@exemplu.ro).");
+      return;
+    }
     setStatus("sending");
     setErrorMsg(null);
-    const { error } = await signInWithEmail(email);
+    const { error } = await signInWithEmail(trimmed);
     if (error) {
       setStatus("error");
       setErrorMsg(error);

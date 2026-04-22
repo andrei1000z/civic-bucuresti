@@ -62,14 +62,19 @@ export function FooterFeedback() {
 
   const submitNewsletter = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newsletterEmail.trim()) return;
+    const trimmed = newsletterEmail.trim();
+    if (!trimmed) return;
+    if (!/^[\w.+-]+@[\w-]+\.[\w.-]+$/.test(trimmed)) {
+      setNlError("Adresă de email incorectă — verifică formatul.");
+      return;
+    }
     setNlSending(true);
     setNlError(null);
     try {
       const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: newsletterEmail.trim() }),
+        body: JSON.stringify({ email: trimmed }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Eroare");

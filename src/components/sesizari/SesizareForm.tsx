@@ -538,6 +538,12 @@ export function SesizareForm() {
     data.tip !== "parcare" ||
     (!!parkingSlots.plate && !!parkingSlots.vehicle && parkingPlateText.trim().length >= 5 && !!parkingJurisdiction);
 
+  // Email is optional — but if the user provided one, it has to
+  // look like an email. The server validates too (zod .email()),
+  // but catching it here prevents a round-trip on the submit.
+  const emailLooksValid =
+    !data.email.trim() || /^[\w.+-]+@[\w-]+\.[\w.-]+$/.test(data.email.trim());
+
   const canSubmit =
     data.nume.length >= 2 &&
     data.tip &&
@@ -545,6 +551,7 @@ export function SesizareForm() {
     data.locatie.length >= 3 &&
     data.descriere.length >= 10 &&
     parkingValid &&
+    emailLooksValid &&
     !submitting;
 
   const handleSubmit = async () => {
@@ -554,6 +561,7 @@ export function SesizareForm() {
       if (!data.tip) missing.push("Tip problemă");
       if (data.descriere.length < 10) missing.push("Descrierea problemei (min 10 caractere)");
       if (data.locatie.length < 3) missing.push("Locația problemei");
+      if (!emailLooksValid) missing.push("Email de contact (format corect, ex: nume@exemplu.ro)");
       if (data.tip === "parcare") {
         if (!parkingSlots.plate) missing.push("Poza numărului de înmatriculare");
         if (!parkingSlots.vehicle) missing.push("Poza mașinii fără șofer");
