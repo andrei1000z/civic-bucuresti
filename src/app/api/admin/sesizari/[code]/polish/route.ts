@@ -94,6 +94,15 @@ export async function POST(
       lat: newLat,
       lng: newLng,
       geocodeNote,
+      // Include the pre-polish snapshot so the admin UI can show a
+      // side-by-side diff without needing another round-trip.
+      before: {
+        titlu: sesizare.titlu,
+        descriere: sesizare.descriere,
+        locatie: sesizare.locatie,
+        lat: sesizare.lat,
+        lng: sesizare.lng,
+      },
     },
   });
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CheckCircle2, XCircle, Eye, Loader2, MapPin, Sparkles } from "lucide-react";
+import { CheckCircle2, XCircle, Eye, Loader2, MapPin, Sparkles, X as CloseX, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
 import { timeAgo } from "@/lib/utils";
@@ -12,6 +12,7 @@ interface SesizareRow {
   id: string;
   code: string;
   titlu: string;
+  descriere?: string;
   locatie: string;
   sector: string;
   tip: string;
@@ -19,6 +20,15 @@ interface SesizareRow {
   moderation_status: string;
   author_name: string;
   created_at: string;
+  lat?: number;
+  lng?: number;
+}
+
+interface PolishDiff {
+  code: string;
+  before: { titlu: string; descriere: string; locatie: string; lat: number; lng: number };
+  after: { titlu: string; descriere: string; locatie: string; lat: number; lng: number };
+  geocodeNote: string | null;
 }
 
 export default function AdminSesizariPage() {
@@ -27,6 +37,7 @@ export default function AdminSesizariPage() {
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
+  const [polishDiff, setPolishDiff] = useState<PolishDiff | null>(null);
 
   useEffect(() => {
     fetch("/api/sesizari?limit=200")
@@ -67,19 +78,37 @@ export default function AdminSesizariPage() {
       const res = await fetch(`/api/admin/sesizari/${code}/polish`, { method: "POST" });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "Eroare polish");
+      // Sync every field the endpoint may have changed into local state
+      // so the list reflects the new titlu / locatie / descriere / lat /
+      // lng without a reload.
       setRows((prev) =>
         prev.map((r) =>
           r.code === code
             ? {
                 ...r,
                 titlu: j.data.titlu ?? r.titlu,
+                descriere: j.data.descriere ?? r.descriere,
                 locatie: j.data.locatie ?? r.locatie,
+                lat: j.data.lat ?? r.lat,
+                lng: j.data.lng ?? r.lng,
               }
             : r,
         ),
       );
-      const note = j.data.geocodeNote ? ` (${j.data.geocodeNote})` : "";
-      toast(`Polished ${code}${note}`, "success");
+      // Pop a diff modal so the admin sees exactly what AI changed.
+      setPolishDiff({
+        code,
+        before: j.data.before,
+        after: {
+          titlu: j.data.titlu,
+          descriere: j.data.descriere,
+          locatie: j.data.locatie,
+          lat: j.data.lat,
+          lng: j.data.lng,
+        },
+        geocodeNote: j.data.geocodeNote ?? null,
+      });
+      toast(`Polished ${code}`, "success");
     } catch (e) {
       toast(e instanceof Error ? e.message : "Eroare polish", "error");
     } finally {
@@ -91,6 +120,99 @@ export default function AdminSesizariPage() {
 
   return (
     <div>
+      {polishDiff && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-start md:items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setPolishDiff(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-3xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] shadow-[var(--shadow-xl)] overflow-hidden my-8"
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
+              <div className="flex items-center gap-2">
+                <Sparkles size={18} className="text-purple-500" />
+                <h3 className="font-semibold">
+                  Polish aplicat pe {polishDiff.code}
+                </h3>
+              </div>
+              <button
+                onClick={() => setPolishDiff(null)}
+                className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)]"
+                aria-label="Închide"
+              >
+                <CloseX size={16} />
+              </button>
+            </div>
+            <div className="p-5 space-y-4 text-sm">
+              {[
+                { label: "Titlu", before: polishDiff.before.titlu, after: polishDiff.after.titlu },
+                { label: "Locație", before: polishDiff.before.locatie, after: polishDiff.after.locatie },
+                { label: "Descriere", before: polishDiff.before.descriere, after: polishDiff.after.descriere },
+              ].map((row) => {
+                const changed = row.before !== row.after;
+                return (
+                  <div key={row.label}>
+                    <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-1.5">
+                      {row.label} {changed && <span className="text-emerald-500 normal-case">· schimbat</span>}
+                    </p>
+                    <div className="grid md:grid-cols-2 gap-2">
+                      <div className="p-3 rounded-[8px] bg-red-500/5 border border-red-500/20">
+                        <p className="text-[10px] text-red-600 dark:text-red-400 font-semibold mb-1">ÎNAINTE</p>
+                        <p className="whitespace-pre-wrap break-words">{row.before || "—"}</p>
+                      </div>
+                      <div className="p-3 rounded-[8px] bg-emerald-500/5 border border-emerald-500/20">
+                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mb-1">DUPĂ</p>
+                        <p className="whitespace-pre-wrap break-words">{row.after || "—"}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Geocode row */}
+              {(polishDiff.before.lat !== polishDiff.after.lat ||
+                polishDiff.before.lng !== polishDiff.after.lng) && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-1.5">
+                    Coordonate <span className="text-emerald-500 normal-case">· re-geocodate</span>
+                  </p>
+                  <div className="flex items-center gap-3 p-3 rounded-[8px] bg-[var(--color-surface-2)] font-mono text-xs">
+                    <span className="text-red-600 dark:text-red-400">
+                      {polishDiff.before.lat.toFixed(4)}, {polishDiff.before.lng.toFixed(4)}
+                    </span>
+                    <ArrowRight size={12} className="text-[var(--color-text-muted)]" />
+                    <span className="text-emerald-600 dark:text-emerald-400">
+                      {polishDiff.after.lat.toFixed(4)}, {polishDiff.after.lng.toFixed(4)}
+                    </span>
+                  </div>
+                  {polishDiff.geocodeNote && (
+                    <p className="text-[11px] text-[var(--color-text-muted)] italic mt-1">
+                      {polishDiff.geocodeNote}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 px-5 py-4 border-t border-[var(--color-border)]">
+              <Link
+                href={`/sesizari/${polishDiff.code}`}
+                target="_blank"
+                className="inline-flex items-center gap-1 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
+              >
+                <Eye size={12} /> Deschide sesizarea
+              </Link>
+              <button
+                onClick={() => setPolishDiff(null)}
+                className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] transition-colors"
+              >
+                OK, am văzut
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-2 mb-6">
         {(["all", "pending", "approved", "rejected"] as const).map((f) => (
           <button

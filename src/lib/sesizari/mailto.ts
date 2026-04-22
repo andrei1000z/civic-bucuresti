@@ -60,29 +60,42 @@ function rewriteFormalText(formalText: string, input: MailtoInput): string {
   // 2. Rewrite the identity paragraph. New template uses "Mă numesc X,
   // locuiesc în Y..."; legacy templates used "Subsemnatul X, domiciliat
   // în Y...". Handle both so co-signing works on older formal_texts too.
+  //
+  // The tricky bit: the AI-generated opener often contains the user's
+  // address with internal commas ("Strada X 12, Sector 5"). A naive
+  // greedy rewrite then re-inserts the sector comma on top of the tail
+  // we're trying to keep ("Sector 5, Sector 5, și doresc..."). Fix:
+  // match the identity clause up to a verb marker via LOOKAHEAD so the
+  // preamble after it ("și doresc...", "vă aduc...", ".") stays intact
+  // OUTSIDE the replacement span — no doubling possible.
   if (name && address) {
-    // New style line — what the current prompt produces.
-    const newStyleRe = /^\s*Mă\s+numesc\s+[^,\n]+,\s*locuiesc\s+(?:\s*pe|\s*în)?[^\n]*$/im;
-    // Keep the preamble the AI already wrote after the comma ("doresc să vă
-    // aduc la cunoștință…") — we only swap the name + address part.
-    text = text.replace(newStyleRe, (match) => {
-      const afterLocuiesc = match.match(/locuiesc\s+(?:pe\s+|în\s+)?[^,\n]+(,\s*.*)$/i);
-      const tail = afterLocuiesc?.[1] ?? " și doresc să vă aduc la cunoștință o problemă care necesită intervenția dumneavoastră.";
-      return `Mă numesc ${name}, locuiesc în ${address}${tail}`;
-    });
+    // Sentinel for "end of address" — same rules as scrub-public:
+    // stops at " și/şi/si/vă/va/mă/ma/îmi/imi/doresc/solicit/adresez/
+    // aduc" verb cues, end of sentence (.?!), paragraph break, or EOS.
+    const END = String.raw`(?=\s*(?:\s+(?:și|şi|si)\s+\w+|\s+(?:vă|va|mă|ma|îmi|imi|doresc|solicit|adresez|aduc)\b|[.?!]\s|\n\s*\n|$))`;
 
-    // Legacy "Subsemnatul/Subsemnata..." — replace with new style so every
-    // email lands in the same format.
-    const legacyRe = /(Subsemnat(?:ul|a|ul\(a\)|a\/Subsemnatul)?)\b[^\n]*$/im;
-    if (legacyRe.test(text)) {
-      text = text.replace(
-        legacyRe,
-        `Mă numesc ${name}, locuiesc în ${address} și doresc să vă aduc la cunoștință o problemă care necesită intervenția dumneavoastră.`,
-      );
-    }
+    // New style: "Mă numesc {name}, locuiesc (pe|în) {address}" — replace
+    // the captured span with our corrected version. Tail is not captured
+    // and stays as-is.
+    const newStyleRe = new RegExp(
+      String.raw`M[ăa]\s+numesc\s+[^,\n]+,\s*locuiesc\s+(?:pe|în|in)\s+[^\n]+?${END}`,
+      "gim",
+    );
+    text = text.replace(newStyleRe, `Mă numesc ${name}, locuiesc în ${address}`);
+
+    // Legacy "Subsemnatul/Subsemnata X, domiciliat(ă) pe/în Y" → same
+    // new-style landing. Lookahead keeps the tail intact here too.
+    const legacyRe = new RegExp(
+      String.raw`Subsemnat(?:ul|a|ul\(a\)|a\/Subsemnatul)?\s+[^,\n]+,\s*domiciliat(?:\(?ă\)?|ă|a)?\s+(?:pe|în|in)\s+[^\n]+?${END}`,
+      "gim",
+    );
+    text = text.replace(
+      legacyRe,
+      `Mă numesc ${name}, locuiesc în ${address}`,
+    );
 
     // Fallback: no identity line at all — inject after "Bună ziua,"
-    if (!newStyleRe.test(text) && !/Subsemnat/i.test(text) && !/Mă\s+numesc/i.test(text)) {
+    if (!/M[ăa]\s+numesc/i.test(text) && !/Subsemnat/i.test(text)) {
       text = text.replace(
         /(Bun[ăa] ziua,?)/i,
         `$1\n\nMă numesc ${name}, locuiesc în ${address} și doresc să vă aduc la cunoștință o problemă care necesită intervenția dumneavoastră.`,
