@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getAuthoritiesFor } from "./authorities";
+import { getAuthoritiesFor, PRIMARII_SECTOR, POLITIA_LOCALA_SECTOR } from "./authorities";
 
 describe("getAuthoritiesFor — parcare jurisdiction split", () => {
   it("routes 'trotuar' parking to local police (PL sector + PL Bucharest)", () => {
@@ -22,24 +22,42 @@ describe("getAuthoritiesFor — parcare jurisdiction split", () => {
   });
 });
 
-describe("getAuthoritiesFor — Sector 5 override", () => {
-  it("replaces every Sector 5 address with primarie@sector5.ro on parking sesizări", () => {
+describe("Sector 5 — dead addresses removed, working ones kept", () => {
+  it("PRIMARII_SECTOR.S5 uses primarie@sector5.ro (not the dead sesizari@)", () => {
+    expect(PRIMARII_SECTOR.S5?.email).toBe("primarie@sector5.ro");
+    expect(PRIMARII_SECTOR.S5?.email).not.toBe("sesizari@sector5.ro");
+  });
+
+  it("POLITIA_LOCALA_SECTOR.S5 uses politialocala@sector5.ro (not the dead office@politialocalasector5.ro)", () => {
+    expect(POLITIA_LOCALA_SECTOR.S5?.email).toBe("politialocala@sector5.ro");
+    expect(POLITIA_LOCALA_SECTOR.S5?.email).not.toBe("office@politialocalasector5.ro");
+  });
+});
+
+describe("getAuthoritiesFor — Sector 5 dead-address scrub", () => {
+  it("strips the known-dead sesizari@sector5.ro + office@politialocalasector5.ro from the recipients", () => {
+    const r = getAuthoritiesFor("parcare", "S5", "B", "Calea 13 Septembrie", {
+      jurisdiction: "trotuar",
+    });
+    const emails = [...r.primary.map((a) => a.email), ...r.cc.map((a) => a.email)];
+    expect(emails).not.toContain("sesizari@sector5.ro");
+    expect(emails).not.toContain("office@politialocalasector5.ro");
+  });
+
+  it("keeps the NEW working S5 addresses — primarie@ + politialocala@", () => {
     const r = getAuthoritiesFor("parcare", "S5", "B", "Calea 13 Septembrie", {
       jurisdiction: "trotuar",
     });
     const emails = r.primary.map((a) => a.email);
     expect(emails).toContain("primarie@sector5.ro");
-    // None of the known-dead S5 addresses should still be in the list.
-    expect(emails).not.toContain("sesizari@sector5.ro");
-    expect(emails).not.toContain("office@politialocalasector5.ro");
+    expect(emails).toContain("politialocala@sector5.ro");
   });
 
-  it("keeps non-S5 addresses (PL Bucharest, Brigada Rutieră) after the S5 override", () => {
+  it("keeps non-S5 addresses (PL Bucharest, Brigada Rutieră) on banda route", () => {
     const r = getAuthoritiesFor("parcare", "S5", "B", "Calea 13 Septembrie", {
       jurisdiction: "banda",
     });
     const emails = r.primary.map((a) => a.email);
-    expect(emails).toContain("primarie@sector5.ro");
     expect(emails).toContain("bpr@b.politiaromana.ro");
     expect(emails).toContain("office@plmb.ro");
   });
@@ -48,7 +66,9 @@ describe("getAuthoritiesFor — Sector 5 override", () => {
     const r = getAuthoritiesFor("parcare", null, "B", "Strada Ana Ipătescu, Sector 5", {
       jurisdiction: "trotuar",
     });
-    expect(r.primary.map((a) => a.email)).toContain("primarie@sector5.ro");
+    const emails = r.primary.map((a) => a.email);
+    expect(emails).toContain("primarie@sector5.ro");
+    expect(emails).not.toContain("sesizari@sector5.ro");
   });
 
   it("does NOT rewrite other sectors when Sector 5 is not involved", () => {

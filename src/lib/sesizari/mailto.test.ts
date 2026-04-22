@@ -79,6 +79,51 @@ Altcineva
     expect(out).toContain("În ultima perioadă am observat");
     expect(out).not.toMatch(/Sector 5,?\s*Sector 6/);
   });
+
+  it("does not append a redundant 'Anexez N fotografii.' when AI text already mentions photos", () => {
+    // AI commonly writes "am atașat imagini care ilustrează ..." —
+    // the old regex only matched "Anexez N fotografii" literal, so
+    // we were double-mentioning attachments.
+    const aiText = `Bună ziua,
+
+Mă numesc X, locuiesc în Y și doresc să vă aduc la cunoștință o problemă.
+
+În sprijinul acestei sesizări, am atașat imagini care ilustrează situația actuală.
+
+Cu stimă,
+X
+20 martie 2024`;
+    // trotuar tip (non-parking) so it goes through the generic path
+    const out = buildFormalText({
+      ...BASE,
+      tip: "trotuar",
+      formal_text: aiText,
+      imagini: ["https://x/1.jpg", "https://x/2.jpg", "https://x/3.jpg", "https://x/4.jpg"],
+    });
+    // Count how many times "fotografi" appears — should stay at 0 (AI
+    // used "imagini", we shouldn't add our "Anexez N fotografii" line).
+    expect(out).not.toMatch(/Anexez\s+4\s+fotografi/i);
+    expect(out).toMatch(/am atașat imagini/i);
+  });
+
+  it("still appends the evidence line when AI forgot to mention photos", () => {
+    const aiText = `Bună ziua,
+
+Mă numesc X, locuiesc în Y și doresc să vă aduc la cunoștință o problemă cu trotuarul.
+
+Vă rog să verificați la fața locului.
+
+Cu stimă,
+X
+20 martie 2024`;
+    const out = buildFormalText({
+      ...BASE,
+      tip: "trotuar",
+      formal_text: aiText,
+      imagini: ["https://x/1.jpg", "https://x/2.jpg"],
+    });
+    expect(out).toMatch(/Anexez\s+2\s+fotografi/i);
+  });
 });
 
 describe("buildEmailPayload — parcare legal template", () => {
@@ -137,7 +182,7 @@ describe("buildEmailPayload — parcare legal template", () => {
     expect(p.body).toMatch(/la ora 14:37/);
   });
 
-  it("applies Sector 5 override — strips dead S5 mailboxes, keeps PL București", () => {
+  it("applies Sector 5 scrub — dead mailboxes removed, working ones survive", () => {
     const p = buildEmailPayload({
       tip: "parcare",
       titlu: "Parcare pe trotuar S5",
@@ -148,9 +193,14 @@ describe("buildEmailPayload — parcare legal template", () => {
       author_address: "B",
       parking: { plate: "B 42 ABC", jurisdiction: "trotuar" },
     });
+    // Working addresses stay
     expect(p.to).toContain("primarie@sector5.ro");
+    expect(p.to).toContain("politialocala@sector5.ro");
+    expect(p.to).toContain("office@plmb.ro");
+    // Dead addresses that bounced on delivery are scrubbed
     expect(p.to).not.toContain("sesizari@sector5.ro");
     expect(p.to).not.toContain("office@politialocalasector5.ro");
-    expect(p.to).toContain("office@plmb.ro");
+    expect(p.cc).not.toContain("sesizari@sector5.ro");
+    expect(p.cc).not.toContain("office@politialocalasector5.ro");
   });
 });

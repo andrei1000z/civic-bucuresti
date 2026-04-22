@@ -32,7 +32,11 @@ export const PRIMARII_SECTOR: Record<string, Authority> = {
   S2: { id: "primarie-s2", name: "Primăria Sector 2", email: "infopublice@ps2.ro" },
   S3: { id: "primarie-s3", name: "Primăria Sector 3", email: "relatiipublice@primarie3.ro" },
   S4: { id: "primarie-s4", name: "Primăria Sector 4", email: "contact@ps4.ro" },
-  S5: { id: "primarie-s5", name: "Primăria Sector 5", email: "sesizari@sector5.ro" },
+  // S5: sesizari@sector5.ro used to bounce ("adresa nu există").
+  // Verified on sector5.ro/contacte — primarie@sector5.ro is the
+  // canonical inbox. Kept here in PRIMARII_SECTOR even though the
+  // parking path forces it anyway, so non-parking tip uses it too.
+  S5: { id: "primarie-s5", name: "Primăria Sector 5", email: "primarie@sector5.ro" },
   S6: { id: "primarie-s6", name: "Primăria Sector 6", email: "prim6@primarie6.ro" },
 };
 
@@ -42,7 +46,10 @@ export const POLITIA_LOCALA_SECTOR: Record<string, Authority> = {
   S2: { id: "pl-s2", name: "Poliția Locală Sector 2", email: "office@politialocalas2.ro", phone: "021 9941" },
   S3: { id: "pl-s3", name: "Poliția Locală Sector 3", email: "secretariat.dgpl@primarie3.ro", phone: "021 9543" },
   S4: { id: "pl-s4", name: "Poliția Locală Sector 4", email: "sesizari@politialocala4.ro", phone: "021 9441" },
-  S5: { id: "pl-s5", name: "Poliția Locală Sector 5", email: "office@politialocalasector5.ro", phone: "021 9541" },
+  // S5: office@politialocalasector5.ro used to bounce. The working
+  // inbox is politialocala@sector5.ro (verified on sector5.ro +
+  // infocontact.ro listings). Phone dispatcher 24/7: 031 988 5.
+  S5: { id: "pl-s5", name: "Poliția Locală Sector 5", email: "politialocala@sector5.ro", phone: "031 9885" },
   S6: { id: "pl-s6", name: "Poliția Locală Sector 6", email: "contact@politia6.ro", phone: "021 9546" },
 };
 
@@ -145,33 +152,26 @@ export function getAuthoritiesFor(
         addCc(AUTH.pmb);
       }
 
-      // Sector 5 exception: Poliția Locală S5 + sesizari@sector5.ro +
-      // other sector inboxes have been unreachable (NXDOMAIN / bounce
-      // loops). The one address known to actually deliver is
-      // primarie@sector5.ro — force it as the sole primary recipient so
-      // the email doesn't silently die in an SMTP dead-letter queue.
+      // Sector 5 exception: user reports that sesizari@sector5.ro
+      // and office@politialocalasector5.ro bounce ("adresa nu
+      // există"). Kept a DEAD_S5 blocklist that strips ONLY those
+      // two specific addresses — the new PRIMARII_SECTOR.S5 and
+      // POLITIA_LOCALA_SECTOR.S5 emails (primarie@sector5.ro and
+      // politialocala@sector5.ro, verified on sector5.ro/contacte
+      // in April 2026) survive. No broad @sector5.ro strip anymore.
       if (resolvedSector === "S5") {
-        const S5_FORCED: Authority = {
-          id: "primarie-s5-forced",
-          name: "Primăria Sector 5",
-          email: "primarie@sector5.ro",
-        };
-        // Drop every other S5 / local-police / local-primărie address
-        // from primary AND cc — keep non-S5 destinations (Brigada
-        // Rutieră, PMB) because those actually work.
-        const isS5Address = (a: Authority) =>
-          a.email.endsWith("@sector5.ro") ||
-          a.email === POLITIA_LOCALA_SECTOR.S5?.email ||
-          a.email === PRIMARII_SECTOR.S5?.email;
+        const DEAD_S5 = new Set([
+          "sesizari@sector5.ro",
+          "office@politialocalasector5.ro",
+        ]);
         for (let i = primary.length - 1; i >= 0; i--) {
           const a = primary[i];
-          if (a && isS5Address(a)) primary.splice(i, 1);
+          if (a && DEAD_S5.has(a.email)) primary.splice(i, 1);
         }
         for (let i = cc.length - 1; i >= 0; i--) {
           const c = cc[i];
-          if (c && isS5Address(c)) cc.splice(i, 1);
+          if (c && DEAD_S5.has(c.email)) cc.splice(i, 1);
         }
-        primary.unshift(S5_FORCED);
       }
       break;
     }

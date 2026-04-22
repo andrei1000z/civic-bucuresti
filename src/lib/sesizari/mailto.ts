@@ -189,8 +189,17 @@ export function buildFormalText(input: MailtoInput): string {
 
   if (input.formal_text) {
     const rewritten = rewriteFormalText(input.formal_text, input);
-    // Append the photo-count line (no URLs!) if we have photos.
-    return numarFoto > 0 && !/Anexez\s+\d+\s+fotografi/i.test(rewritten)
+    // Append "Anexez N fotografii." only if the AI text doesn't
+    // already mention attached images. The previous regex only
+    // matched the exact "Anexez N fotografii" phrase — but the AI
+    // prompt instructs the model to write "am atașat imagini care
+    // ilustrează...", so the check missed it and we appended a
+    // redundant line. Broadened to match any Romanian phrasing:
+    //   am atașat / atașez / anexez / am anexat / atașate /
+    //   anexate — combined with imagi / fotografi / poze.
+    const photoMentionRe =
+      /(am\s+)?(ata[șs]at|anex[ae]z|anex[ae]t)\b[^.]*?(imagini|fotografi|poze)|(imagini|fotografi|poze)[^.]*?(ata[șs]at|anex[ae]t)/i;
+    return numarFoto > 0 && !photoMentionRe.test(rewritten)
       ? `${rewritten}${evidence}`
       : rewritten;
   }
