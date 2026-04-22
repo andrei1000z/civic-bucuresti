@@ -273,8 +273,11 @@ export function SesizareForm() {
       setData((d) => ({ ...d, sector: s }));
     }
 
-    // Full reverse geocode (async, for all of Romania)
+    // Full reverse geocode (async, for all of Romania). 5s hard timeout
+    // so a hung Nominatim call doesn't freeze the "se detectează..."
+    // UI — the form still has lat/lng, we just skip the address polish.
     const ctrl = new AbortController();
+    const timeoutId = setTimeout(() => ctrl.abort(), 5_000);
     fetch(`/api/geocode?lat=${data.lat}&lng=${data.lng}`, { signal: ctrl.signal })
       .then((r) => r.json())
       .then((j) => {
@@ -291,8 +294,12 @@ export function SesizareForm() {
           }
         }
       })
-      .catch(() => {});
-    return () => ctrl.abort();
+      .catch(() => {})
+      .finally(() => clearTimeout(timeoutId));
+    return () => {
+      clearTimeout(timeoutId);
+      ctrl.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.lat, data.lng]);
 
@@ -383,12 +390,16 @@ export function SesizareForm() {
     const target = 10;
     setGpsAccuracy(null);
 
-    // Reverse geocode — can be called multiple times as precision improves
+    // Reverse geocode — can be called multiple times as precision improves.
+    // Each call gets a 5s timeout so a slow Nominatim doesn't stall the
+    // "detectare GPS..." spinner forever.
     const doReverseGeocode = async (lat: number, lng: number, acc: number) => {
       geocodeCount++;
       const thisCall = geocodeCount;
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 5_000);
       try {
-        const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
+        const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`, { signal: ctrl.signal });
         const json = await res.json();
         if (json.data && thisCall === geocodeCount) {
           // Use shortAddress (clean format) or fall back to full address
@@ -405,6 +416,8 @@ export function SesizareForm() {
       } catch {
         // Keep coordinates as fallback
         setData((d) => ({ ...d, locatie: d.locatie || `${lat.toFixed(5)}, ${lng.toFixed(5)}` }));
+      } finally {
+        clearTimeout(tid);
       }
     };
 

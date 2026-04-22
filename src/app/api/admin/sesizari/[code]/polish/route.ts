@@ -5,6 +5,7 @@ import { getSesizareByCode } from "@/lib/sesizari/repository";
 import { polishSesizare } from "@/lib/sesizari/polish";
 import { forwardGeocode } from "@/lib/sesizari/geocoding";
 import { invalidateSesizariCache } from "@/lib/cached-queries";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -30,6 +31,18 @@ export async function POST(
     .maybeSingle();
   if ((profile as { role?: string } | null)?.role !== "admin") {
     return NextResponse.json({ error: "Admin required" }, { status: 403 });
+  }
+
+  // Polish calls Groq + Nominatim, so even an admin-authenticated
+  // endpoint deserves a ceiling. 30/min per admin is plenty for
+  // moderating a queue, but stops a runaway loop from burning through
+  // AI quota or tripping Nominatim's 1 req/s ban.
+  const rl = await rateLimitAsync(`admin-polish:${user.id}`, { limit: 30, windowMs: 60_000 });
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Prea multe polish-uri rapide. Așteaptă un minut." },
+      { status: 429 }
+    );
   }
 
   const { code } = await params;

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { addComment, getComments, getSesizareByCode } from "@/lib/sesizari/repository";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { rateLimitAsync } from "@/lib/ratelimit";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 import { sanitizeText } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
@@ -34,11 +34,28 @@ export async function POST(
   { params }: { params: Promise<{ code: string }> }
 ) {
   try {
+    // IP-scoped ceiling first so unauthenticated spam can't drain
+    // Supabase auth + sesizare lookups. A legit logged-in user will
+    // typically make <1 comment/min; 30/min per IP leaves plenty of
+    // room for shared-network users.
+    const ipRl = await rateLimitAsync(`comment-ip:${getClientIp(req)}`, {
+      limit: 30,
+      windowMs: 60_000,
+    });
+    if (!ipRl.success) {
+      return NextResponse.json({ error: "Prea multe cereri" }, { status: 429 });
+    }
+
     const { code } = await params;
     const supabase = await createSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Auth required" }, { status: 401 });
+    }
+
+    const rl = await rateLimitAsync(`comment:${user.id}`, { limit: 10, windowMs: 60_000 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Prea multe comentarii" }, { status: 429 });
     }
 
     const sesizare = await getSesizareByCode(code);
@@ -55,11 +72,6 @@ export async function POST(
       .eq("id", user.id)
       .maybeSingle();
     const displayName = (profile as { display_name: string } | null)?.display_name;
-
-    const rl = await rateLimitAsync(`comment:${user.id}`, { limit: 10, windowMs: 60_000 });
-    if (!rl.success) {
-      return NextResponse.json({ error: "Prea multe comentarii" }, { status: 429 });
-    }
 
     const row = await addComment({
       sesizareId: sesizare.id,

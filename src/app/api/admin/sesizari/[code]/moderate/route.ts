@@ -5,6 +5,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
 import { invalidateSesizariCache } from "@/lib/cached-queries";
 import { sendEmail, emailTemplate } from "@/lib/email/resend";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +34,17 @@ export async function POST(
 
   if ((profile as { role?: string } | null)?.role !== "admin") {
     return NextResponse.json({ error: "Admin required" }, { status: 403 });
+  }
+
+  // Each approve/reject triggers a Resend email — cap per-admin moderate
+  // rate to stop a runaway script (or stolen admin session) from
+  // flooding user inboxes.
+  const rl = await rateLimitAsync(`admin-moderate:${user.id}`, { limit: 60, windowMs: 60_000 });
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Prea multe acțiuni de moderare. Așteaptă un minut." },
+      { status: 429 }
+    );
   }
 
   const sesizare = await getSesizareByCode(code);

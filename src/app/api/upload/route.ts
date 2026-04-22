@@ -24,10 +24,10 @@ export async function POST(req: Request) {
     const files = formData.getAll("files") as File[];
 
     if (files.length === 0) {
-      return NextResponse.json({ error: "No files provided" }, { status: 400 });
+      return NextResponse.json({ error: "Niciun fișier selectat" }, { status: 400 });
     }
     if (files.length > 5) {
-      return NextResponse.json({ error: "Max 5 files" }, { status: 400 });
+      return NextResponse.json({ error: "Maxim 5 fișiere pe upload" }, { status: 400 });
     }
 
     // Validate each file — MIME + size + magic number
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
         });
 
       if (error) {
-        return NextResponse.json({ error: `Upload failed: ${error.message}` }, { status: 500 });
+        return NextResponse.json({ error: `Eroare upload: ${error.message}` }, { status: 500 });
       }
 
       const { data } = supabase.storage.from("sesizari-photos").getPublicUrl(path);
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ data: { urls: uploaded } });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Upload error";
+    const msg = e instanceof Error ? e.message : "Eroare upload";
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

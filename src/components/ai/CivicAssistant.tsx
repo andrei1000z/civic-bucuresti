@@ -129,7 +129,11 @@ export function CivicAssistant() {
 
   useEffect(() => {
     if (open) {
-      setTimeout(() => inputRef.current?.focus(), 200);
+      // rAF guarantees the input is mounted before we focus; no race
+      // with the panel-open transition, and no 200ms window where the
+      // user's first keypress vanishes.
+      const raf = requestAnimationFrame(() => inputRef.current?.focus());
+      return () => cancelAnimationFrame(raf);
     }
   }, [open]);
 
@@ -358,6 +362,7 @@ export function CivicAssistant() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Întreabă orice despre București..."
+                aria-label="Mesaj pentru asistentul Civia"
                 disabled={streaming}
                 className="flex-1 h-10 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50"
               />

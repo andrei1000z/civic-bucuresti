@@ -51,8 +51,12 @@ export async function POST(req: Request) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: "Input invalid" }, { status: 400 });
     }
-    // Log real error server-side, return generic message to client
-    console.error("[ai-classify]", e);
+    // Dev-only log; in prod Sentry picks it up via the instrumentation
+    // runtime. Keeping console.error here would flood Vercel logs with
+    // expected Groq rate-limit noise.
+    if (process.env.NODE_ENV !== "production") {
+      console.error("[ai-classify]", e);
+    }
     return NextResponse.json({ error: "AI temporar indisponibil" }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { sanitizeText } from "@/lib/sanitize";
 import { getHideName, setHideName } from "@/lib/privacy/hidden-users";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,14 @@ export async function PUT(req: Request) {
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
+
+  const rl = await rateLimitAsync(`profile-put:${user.id}`, { limit: 30, windowMs: 60_000 });
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Prea multe modificări. Încearcă peste un minut." },
+      { status: 429 }
+    );
+  }
 
   try {
     const body = await req.json();

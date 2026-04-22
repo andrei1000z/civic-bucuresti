@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,17 @@ export async function DELETE() {
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
+
+  // This is irreversible — an attacker who steals a session shouldn't
+  // be able to spam the endpoint; a legit user can only trigger it
+  // through a confirm dialog anyway, so 3/hour is generous.
+  const rl = await rateLimitAsync(`profile-delete:${user.id}`, { limit: 3, windowMs: 60 * 60_000 });
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Prea multe încercări de ștergere. Încearcă mai târziu." },
+      { status: 429 }
+    );
+  }
 
   const admin = createSupabaseAdmin();
 

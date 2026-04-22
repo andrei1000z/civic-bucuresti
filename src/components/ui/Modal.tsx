@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface ModalProps {
@@ -12,17 +12,69 @@ interface ModalProps {
   className?: string;
 }
 
+// Tab-focusable elements inside the modal. Used to build the ring the
+// focus-trap rotates through.
+const FOCUSABLE =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function Modal({ open, onClose, title, children, size = "md", className }: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!open) return;
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+
+    // Remember who had focus so we can restore it on close. Screen-reader
+    // users rely on this to land back in the surrounding page instead of
+    // on <body>.
+    previouslyFocusedRef.current = (document.activeElement as HTMLElement) ?? null;
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      // Focus trap — cycle Tab / Shift+Tab between first and last
+      // focusable element inside the dialog so keyboard users can't
+      // drift back to controls behind the overlay.
+      if (e.key === "Tab" && dialogRef.current) {
+        const nodes = Array.from(
+          dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE),
+        ).filter((el) => !el.hasAttribute("aria-hidden"));
+        if (nodes.length === 0) {
+          e.preventDefault();
+          dialogRef.current.focus();
+          return;
+        }
+        const first = nodes[0];
+        const last = nodes[nodes.length - 1];
+        if (!first || !last) return;
+        const active = document.activeElement as HTMLElement | null;
+        if (e.shiftKey && (active === first || !dialogRef.current.contains(active))) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && active === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
-    document.addEventListener("keydown", handleEsc);
+
+    document.addEventListener("keydown", handleKey);
     document.body.style.overflow = "hidden";
+
+    // Give focus to the first focusable element (usually the close
+    // button) on the next frame so the dialog is mounted before we try.
+    const raf = requestAnimationFrame(() => {
+      const first = dialogRef.current?.querySelector<HTMLElement>(FOCUSABLE);
+      (first ?? dialogRef.current)?.focus();
+    });
+
     return () => {
-      document.removeEventListener("keydown", handleEsc);
+      document.removeEventListener("keydown", handleKey);
       document.body.style.overflow = "";
+      cancelAnimationFrame(raf);
+      previouslyFocusedRef.current?.focus?.();
     };
   }, [open, onClose]);
 
@@ -38,10 +90,16 @@ export function Modal({ open, onClose, title, children, size = "md", className }
     <div
       className="fixed inset-0 z-[100] flex items-start md:items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto"
       onClick={onClose}
+      role="presentation"
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title ?? undefined}
+        tabIndex={-1}
         className={cn(
-          "w-full bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-xl)] my-8",
+          "w-full bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-xl)] my-8 outline-none",
           "border border-[var(--color-border)]",
           sizeClass,
           className
