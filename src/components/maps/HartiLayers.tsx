@@ -6,6 +6,7 @@ import { NationalAqiLayer } from "./NationalAqiLayer";
 import dynamic from "next/dynamic";
 
 const DynamicRoadsLayer = dynamic(() => import("./DynamicRoadsLayer").then(m => ({ default: m.DynamicRoadsLayer })), { ssr: false });
+const DynamicPedestrianLayer = dynamic(() => import("./DynamicPedestrianLayer").then(m => ({ default: m.DynamicPedestrianLayer })), { ssr: false });
 import { METRO_COLORS } from "@/lib/constants";
 import type { PathOptions } from "leaflet";
 import type { Feature } from "geojson";
@@ -62,18 +63,10 @@ function metroStationStyle(): PathOptions {
   } as PathOptions;
 }
 
-const pedestrianAccessStyle: PathOptions = {
-  color: "#059669", // green — pedestrian friendly
-  weight: 2.5,
-  opacity: 0.75,
-};
-
-const pedestrianRestrictedStyle: PathOptions = {
-  color: "#DC2626", // red — restricted/private
-  weight: 2.5,
-  opacity: 0.65,
-  dashArray: "4 4",
-};
+// pedestrianAccessStyle / pedestrianRestrictedStyle removed — the old
+// 23 MB pietonal-romania.json + 255 kB pietonal-neaccesibil.json are no
+// longer loaded. Footway styling now lives in DynamicPedestrianLayer
+// which serves Overpass results on the current viewport.
 
 const autoAccessStyle: PathOptions = {
   color: "#2563EB", // blue — driveable city street
@@ -119,17 +112,8 @@ function metroStationPopup(feature: Feature): string {
   return `<div><b>${p.name ?? "Stație metrou"}</b><br/><span style="font-size:11px;color:#64748b">${p.operator ?? "Metrorex"}</span></div>`;
 }
 
-function pedestrianPopup(feature: Feature): string {
-  const p = feature.properties ?? {};
-  const name = p.name ?? "Zonă pietonală";
-  const type = p.highway === "pedestrian" ? "stradă pietonală" : p.highway === "footway" ? "trotuar" : "cale";
-  return `<div><b>${name}</b><br/><span style="font-size:11px;color:#64748b">${type}</span></div>`;
-}
-
-function pedestrianRestrictedPopup(feature: Feature): string {
-  const p = feature.properties ?? {};
-  return `<div><b>${p.name ?? "Acces restricționat"}</b><br/><span style="font-size:11px;color:#64748b">privat / interzis pietonilor</span></div>`;
-}
+// pedestrianPopup + pedestrianRestrictedPopup moved into
+// DynamicPedestrianLayer where the rendering now happens.
 
 function autoPopup(feature: Feature): string {
   const p = feature.properties ?? {};
@@ -174,15 +158,16 @@ export default function HartiLayers(props: HartiLayersProps) {
   }
 
   if (activeTab === "pejos") {
+    // Parks stay static — 2 MB, covers every leisure=park in RO in one
+    // shot. Footways + pedestrian streets are now served by Overpass
+    // on the current viewport (DynamicPedestrianLayer) — the old
+    // pietonal-romania.json was 23 MB and destroyed mobile first-load.
     return (
       <>
         {showParcuri && (
           <GeoJsonLayer key="parks" url="/geojson/parcuri-romania.json" style={parkStyle} popupFormatter={parkPopup} />
         )}
-        {showPietonal && (
-          <GeoJsonLayer key="ped-ok" url="/geojson/pietonal-romania.json" style={pedestrianAccessStyle} popupFormatter={pedestrianPopup} />
-        )}
-        <GeoJsonLayer key="ped-no" url="/geojson/pietonal-neaccesibil.json" style={pedestrianRestrictedStyle} popupFormatter={pedestrianRestrictedPopup} />
+        {showPietonal && <DynamicPedestrianLayer />}
       </>
     );
   }

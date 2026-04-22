@@ -178,10 +178,15 @@ export function HartiMap({
           {activeTab === "pejos" && (
             <div>
               <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Trasee pedestre
+                Trasee pedestre{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
               </h3>
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                Zone pietonale, parcuri și trotuare — date reale OpenStreetMap.
+                {scopeName
+                  ? `Parcuri, trotuare și zone pietonale din ${scopeName}.`
+                  : "Parcuri din toată România + trotuare/zone pietonale încărcate live din OpenStreetMap pe zona vizibilă."}
+              </p>
+              <p className="text-xs text-[var(--color-text-muted)] mb-4 p-2 rounded-[6px] bg-[var(--color-surface-2)]">
+                🔍 Zoom la nivelul orașului pentru a vedea trotuarele — se încarcă automat din OpenStreetMap.
               </p>
               <div className="space-y-3 mb-5">
                 <Toggle
