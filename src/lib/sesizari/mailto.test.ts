@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildFormalText } from "./mailto";
+import { buildFormalText, buildEmailPayload } from "./mailto";
 
 const BASE = {
   tip: "parcare",
@@ -78,5 +78,60 @@ Altcineva
     expect(out).toContain("locuiesc în Strada Novaci 12, Sector 5.");
     expect(out).toContain("În ultima perioadă am observat");
     expect(out).not.toMatch(/Sector 5,?\s*Sector 6/);
+  });
+});
+
+describe("buildEmailPayload — parcare legal template", () => {
+  it("uses the OUG 195/2002 template + plate-in-subject when parking context is supplied", () => {
+    const p = buildEmailPayload({
+      tip: "parcare",
+      titlu: "Parcare pe trotuar",
+      locatie: "Strada Matei Voievod 10, Sector 2",
+      sector: "S2",
+      lat: 44.441,
+      lng: 26.123,
+      descriere: "Mașină parcată pe trotuar de o săptămână.",
+      author_name: "Eduard Andrei Mușat",
+      author_address: "Strada Novaci 12, Sector 5",
+      imagini: ["https://x/a.jpg", "https://x/b.jpg"],
+      parking: { plate: "B 123 ABC", jurisdiction: "trotuar" },
+    });
+    expect(p.subject).toMatch(/B 123 ABC/);
+    expect(p.body).toMatch(/OUG 195\/2002/);
+    expect(p.body).toMatch(/art\. 39 din OUG 195\/2002/);
+    expect(p.body).toMatch(/B 123 ABC/);
+    // Bold markers must be stripped from the plain-text mail body.
+    expect(p.body).not.toMatch(/\[\[BOLD]]/);
+  });
+
+  it("picks Brigada Rutieră as primary when jurisdiction=banda", () => {
+    const p = buildEmailPayload({
+      tip: "parcare",
+      titlu: "Parcare pe bandă",
+      locatie: "Bd Magheru",
+      sector: "S1",
+      descriere: "x",
+      author_name: "A",
+      author_address: "B",
+      parking: { plate: "B 1 AAA", jurisdiction: "banda" },
+    });
+    expect(p.to[0]).toBe("bpr@b.politiaromana.ro");
+  });
+
+  it("applies Sector 5 override — strips dead S5 mailboxes, keeps PL București", () => {
+    const p = buildEmailPayload({
+      tip: "parcare",
+      titlu: "Parcare pe trotuar S5",
+      locatie: "Calea 13 Septembrie 120, Sector 5",
+      sector: "S5",
+      descriere: "x",
+      author_name: "A",
+      author_address: "B",
+      parking: { plate: "B 42 ABC", jurisdiction: "trotuar" },
+    });
+    expect(p.to).toContain("primarie@sector5.ro");
+    expect(p.to).not.toContain("sesizari@sector5.ro");
+    expect(p.to).not.toContain("office@politialocalasector5.ro");
+    expect(p.to).toContain("office@plmb.ro");
   });
 });

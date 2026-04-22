@@ -19,6 +19,9 @@ import { detectSectorFromCoords } from "@/lib/geo/sector-from-coords";
 // the neutral "Mă numesc X, locuiesc în Y" opening instead of Subsemnatul(a).
 import { cn } from "@/lib/utils";
 import { PhotoUploader } from "./PhotoUploader";
+import { ParkingProofUploader } from "./ParkingProofUploader";
+import { ParkingHotspotModal } from "./ParkingHotspotModal";
+import { PARKING_JURISDICTION_OPTIONS, type ParkingJurisdiction } from "@/lib/sesizari/parking";
 import { VoiceInput } from "./VoiceInput";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { EmailChoicePanel } from "./EmailChoicePanel";
@@ -96,6 +99,17 @@ export function SesizareForm() {
   const [detectedCounty, setDetectedCounty] = useState<string | null>(county?.id ?? null);
   const [detectedCountyName, setDetectedCountyName] = useState<string | null>(county?.name ?? null);
   const [detectedLocality, setDetectedLocality] = useState<string | null>(null);
+
+  // Parcare-specific state. Only used (and only rendered) when
+  // data.tip === "parcare". Living in the main form so the AI-classifier
+  // flip from "trotuar" → "parcare" doesn't wipe anything the user
+  // already typed if they then flip it back.
+  const [parkingSlots, setParkingSlots] = useState<{
+    plate: string | null; vehicle: string | null; context: string | null;
+  }>({ plate: null, vehicle: null, context: null });
+  const [parkingPlateText, setParkingPlateText] = useState("");
+  const [parkingJurisdiction, setParkingJurisdiction] = useState<ParkingJurisdiction | "">("");
+  const [hotspotShown, setHotspotShown] = useState(false);
 
   const update = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setData((d) => ({ ...d, [key]: value }));
@@ -491,12 +505,21 @@ export function SesizareForm() {
   // Auto-generate titlu from descriere if empty
   const effectiveTitlu = data.titlu || (data.descriere ? data.descriere.slice(0, 80).trim() : "");
 
+  // Parking flow has extra hard requirements: both mandatory photo
+  // slots filled + a plate number + a jurisdiction. Relaxing any of
+  // these lets the email go out with holes the police will use to
+  // dismiss the complaint, which defeats the whole point.
+  const parkingValid =
+    data.tip !== "parcare" ||
+    (!!parkingSlots.plate && !!parkingSlots.vehicle && parkingPlateText.trim().length >= 5 && !!parkingJurisdiction);
+
   const canSubmit =
     data.nume.length >= 2 &&
     data.tip &&
     effectiveTitlu.length >= 3 &&
     data.locatie.length >= 3 &&
     data.descriere.length >= 10 &&
+    parkingValid &&
     !submitting;
 
   const handleSubmit = async () => {
@@ -506,6 +529,12 @@ export function SesizareForm() {
       if (!data.tip) missing.push("Tip problemă");
       if (data.descriere.length < 10) missing.push("Descrierea problemei (min 10 caractere)");
       if (data.locatie.length < 3) missing.push("Locația problemei");
+      if (data.tip === "parcare") {
+        if (!parkingSlots.plate) missing.push("Poza numărului de înmatriculare");
+        if (!parkingSlots.vehicle) missing.push("Poza mașinii fără șofer");
+        if (parkingPlateText.trim().length < 5) missing.push("Numărul de înmatriculare");
+        if (!parkingJurisdiction) missing.push("Ce blochează vehiculul");
+      }
       setError(missing.length > 0 ? `Completează: ${missing.join(", ")}` : "Completează toate câmpurile obligatorii");
       return;
     }
@@ -517,6 +546,30 @@ export function SesizareForm() {
     // Auto-detect sector from coords — only for București, null elsewhere
     const isInBucharest = lat >= 44.33 && lat <= 44.55 && lng >= 25.97 && lng <= 26.25;
     const sector = isInBucharest ? (data.sector || detectSectorFromCoords(lat, lng) || "S3") : null;
+
+    // For parking sesizări the legal template is the canonical body —
+    // persist that as formal_text so co-signers + admin views render the
+    // same text that actually went to the police, not whatever the
+    // generic AI prompt produced. The template itself is deterministic
+    // and lives in buildFormalText() when tip="parcare" + parking set.
+    const formalTextForDb =
+      data.tip === "parcare" && parkingPlateText && parkingJurisdiction
+        ? buildFormalText({
+            tip: data.tip,
+            titlu: effectiveTitlu,
+            locatie: data.locatie,
+            sector,
+            lat,
+            lng,
+            descriere: data.descriere,
+            formal_text: null,
+            author_name: data.nume,
+            author_email: data.email || null,
+            author_address: data.adresa || null,
+            imagini,
+            parking: { plate: parkingPlateText, jurisdiction: parkingJurisdiction },
+          })
+        : data.formal_text || null;
 
     try {
       const res = await fetch("/api/sesizari", {
@@ -532,7 +585,7 @@ export function SesizareForm() {
           lat,
           lng,
           descriere: data.descriere.trim(),
-          formal_text: data.formal_text || null,
+          formal_text: formalTextForDb,
           imagini,
           publica: data.publica,
           _honey: honey,
@@ -565,7 +618,13 @@ export function SesizareForm() {
   };
 
   const tipInfo = SESIZARE_TIPURI.find((t) => t.value === data.tip);
-  const recipients = data.tip ? getAuthoritiesFor(data.tip, data.sector, detectedCounty, data.locatie) : null;
+  const parkingCtx =
+    data.tip === "parcare" && parkingJurisdiction
+      ? { jurisdiction: parkingJurisdiction }
+      : undefined;
+  const recipients = data.tip
+    ? getAuthoritiesFor(data.tip, data.sector, detectedCounty, data.locatie, parkingCtx)
+    : null;
 
   const LUNI_RO = ["ianuarie","februarie","martie","aprilie","mai","iunie","iulie","august","septembrie","octombrie","noiembrie","decembrie"];
   const now = new Date();
@@ -581,18 +640,24 @@ export function SesizareForm() {
   // Route through buildFormalText so the AI-generated text gets the same
   // identity/date/photo-URL rewriter as the final Gmail body. Otherwise
   // preview shows something different than what actually gets sent.
-  const previewText = data.formal_text
+  const previewText = (data.tip === "parcare" && parkingPlateText && parkingJurisdiction) || data.formal_text
     ? buildFormalText({
         tip: data.tip,
         titlu: effectiveTitlu,
         locatie: data.locatie,
         sector: data.sector,
+        lat: data.lat,
+        lng: data.lng,
         descriere: data.descriere,
         formal_text: data.formal_text,
         author_name: data.nume,
         author_email: data.email || null,
         author_address: data.adresa || null,
         imagini,
+        parking:
+          data.tip === "parcare"
+            ? { plate: parkingPlateText, jurisdiction: parkingJurisdiction || null }
+            : undefined,
       })
     : `Bună ziua,
 
@@ -616,10 +681,14 @@ ${today}`;
 
   const mailtoLink = () => {
     if (!recipients) return "#";
-    const subject = `Sesizare — ${tipInfo?.label ?? "problemă"} — ${data.locatie}`;
+    let subject = `Sesizare — ${tipInfo?.label ?? "problemă"} — ${data.locatie}`;
+    if (data.tip === "parcare" && parkingPlateText) {
+      subject = `Sesizare parcare neregulamentară — ${parkingPlateText} — ${data.locatie}`;
+    }
     const to = recipients.primary.map((a) => a.email).join(",");
     const cc = recipients.cc.length > 0 ? `&cc=${recipients.cc.map((a) => a.email).join(",")}` : "";
-    return `mailto:${to}?subject=${encodeURIComponent(subject)}${cc}&body=${encodeURIComponent(previewText)}`;
+    const body = previewText.replace(/\[\[BOLD]]([^[]+?)\[\[\/BOLD]]/g, "$1");
+    return `mailto:${to}?subject=${encodeURIComponent(subject)}${cc}&body=${encodeURIComponent(body)}`;
   };
 
   const copyText = () => {
@@ -635,6 +704,8 @@ ${today}`;
       titlu: effectiveTitlu,
       locatie: data.locatie,
       sector: data.sector,
+      lat: data.lat,
+      lng: data.lng,
       descriere: data.descriere,
       formal_text: data.formal_text || null,
       author_name: data.nume,
@@ -642,18 +713,41 @@ ${today}`;
       author_address: data.adresa || null,
       imagini,
       code: submitted.code,
+      parking:
+        data.tip === "parcare"
+          ? { plate: parkingPlateText, jurisdiction: parkingJurisdiction || null }
+          : undefined,
     };
+    const showHotspot =
+      data.tip === "parcare" && !hotspotShown && data.lat != null && data.lng != null;
     return (
-      <SuccessScreen
-        code={submitted.code}
-        emailInput={emailInput}
-        imaginiCount={imagini.length}
-        onAnother={() => {
-          setSubmitted(null);
-          setData((d) => ({ ...INITIAL, nume: d.nume, adresa: d.adresa, email: d.email }));
-          setImagini([]);
-        }}
-      />
+      <>
+        <SuccessScreen
+          code={submitted.code}
+          emailInput={emailInput}
+          imaginiCount={imagini.length}
+          onAnother={() => {
+            setSubmitted(null);
+            setData((d) => ({ ...INITIAL, nume: d.nume, adresa: d.adresa, email: d.email }));
+            setImagini([]);
+            setParkingSlots({ plate: null, vehicle: null, context: null });
+            setParkingPlateText("");
+            setParkingJurisdiction("");
+            setHotspotShown(false);
+          }}
+        />
+        {showHotspot && data.lat != null && data.lng != null && (
+          <ParkingHotspotModal
+            lat={data.lat}
+            lng={data.lng}
+            excludeCode={submitted.code}
+            authorName={data.nume}
+            authorAddress={data.adresa}
+            locatie={data.locatie}
+            onClose={() => setHotspotShown(true)}
+          />
+        )}
+      </>
     );
   }
 
@@ -893,21 +987,71 @@ ${today}`;
           )}
         </Field>
 
-        <Field label="Fotografii (max 5)">
-          <PhotoUploader urls={imagini} onChange={setImagini} max={5} />
-          <p className="text-xs text-[var(--color-text-muted)] mt-2">
-            Atașează poze clare, cu rezoluție mare și lumină bună. Ideal: o poză apropiată cu problema + o poză de context mai largă cu un reper vizibil (stâlp, clădire, număr casă). Fotografiază din mai multe unghiuri. Cu cât mai multe poze relevante, cu atât mai bine.
-          </p>
-          {imagini.length > 0 && (
-            <div className="mt-2 flex items-start gap-2 p-3 rounded-[8px] bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-300">
-              <span className="shrink-0 mt-0.5">⚠️</span>
-              <p>
-                <strong>Atașează pozele și la emailul trimis către autorități</strong> —
-                pozele de aici sunt salvate pe platformă, dar trebuie adăugate manual în email.
-              </p>
-            </div>
-          )}
-        </Field>
+        {data.tip === "parcare" ? (
+          <>
+            <Field label="Dovadă fotografică (3 sloturi)" required>
+              <ParkingProofUploader
+                value={parkingSlots}
+                onChange={(v) => {
+                  setParkingSlots(v);
+                  // Sync into the generic `imagini` array so the rest of
+                  // the form (preview, DB insert, email body) keeps
+                  // working without branches.
+                  const urls = [v.plate, v.vehicle, v.context].filter(
+                    (u): u is string => !!u,
+                  );
+                  setImagini(urls);
+                }}
+                plateText={parkingPlateText}
+                onPlateTextChange={setParkingPlateText}
+              />
+            </Field>
+
+            <Field label="Ce blochează vehiculul?" required>
+              <div className="grid gap-2">
+                {PARKING_JURISDICTION_OPTIONS.map((o) => (
+                  <label
+                    key={o.value}
+                    className={cn(
+                      "flex gap-3 p-3 rounded-[8px] border cursor-pointer transition-colors",
+                      parkingJurisdiction === o.value
+                        ? "border-[var(--color-primary)] bg-[var(--color-primary-soft)]"
+                        : "border-[var(--color-border)] hover:border-[var(--color-primary)]/50 bg-[var(--color-surface)]",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="parking-jurisdiction"
+                      checked={parkingJurisdiction === o.value}
+                      onChange={() => setParkingJurisdiction(o.value)}
+                      className="mt-0.5 accent-[var(--color-primary)]"
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{o.label}</p>
+                      <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{o.hint}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </Field>
+          </>
+        ) : (
+          <Field label="Fotografii (max 5)">
+            <PhotoUploader urls={imagini} onChange={setImagini} max={5} />
+            <p className="text-xs text-[var(--color-text-muted)] mt-2">
+              Atașează poze clare, cu rezoluție mare și lumină bună. Ideal: o poză apropiată cu problema + o poză de context mai largă cu un reper vizibil (stâlp, clădire, număr casă). Fotografiază din mai multe unghiuri. Cu cât mai multe poze relevante, cu atât mai bine.
+            </p>
+            {imagini.length > 0 && (
+              <div className="mt-2 flex items-start gap-2 p-3 rounded-[8px] bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-300">
+                <span className="shrink-0 mt-0.5">⚠️</span>
+                <p>
+                  <strong>Atașează pozele și la emailul trimis către autorități</strong> —
+                  pozele de aici sunt salvate pe platformă, dar trebuie adăugate manual în email.
+                </p>
+              </div>
+            )}
+          </Field>
+        )}
 
         <label className="flex items-center gap-3 p-4 bg-[var(--color-surface-2)] rounded-[12px] cursor-pointer">
           <input

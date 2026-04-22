@@ -1,0 +1,184 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { AlertTriangle, Shield, X, ExternalLink } from "lucide-react";
+import { buildBolarziRequest } from "@/lib/sesizari/parking";
+
+interface HotspotData {
+  count: number;
+  codes: string[];
+  sample: Array<{ code: string; titlu: string; locatie: string }>;
+  threshold: number;
+  isHotspot: boolean;
+}
+
+interface ParkingHotspotModalProps {
+  lat: number;
+  lng: number;
+  excludeCode?: string | null;
+  authorName: string;
+  authorAddress: string;
+  locatie: string;
+  onClose: () => void;
+}
+
+const ASPMB_EMAIL = "office@aspmb.ro";
+
+export function ParkingHotspotModal({
+  lat,
+  lng,
+  excludeCode,
+  authorName,
+  authorAddress,
+  locatie,
+  onClose,
+}: ParkingHotspotModalProps) {
+  const [data, setData] = useState<HotspotData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    const params = new URLSearchParams({
+      lat: String(lat),
+      lng: String(lng),
+    });
+    if (excludeCode) params.set("exclude", excludeCode);
+    fetch(`/api/sesizari/parking-hotspot?${params}`, { signal: ctrl.signal })
+      .then(async (r) => {
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error ?? "Eroare");
+        setData(j.data as HotspotData);
+      })
+      .catch((e: unknown) => {
+        if ((e as { name?: string })?.name === "AbortError") return;
+        setError(e instanceof Error ? e.message : "Eroare");
+      })
+      .finally(() => setLoading(false));
+    return () => ctrl.abort();
+  }, [lat, lng, excludeCode]);
+
+  // Escape key closes the modal. Body scroll lock mirrors other modals.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  // Only surface the modal if we actually have a hotspot. Loading/empty
+  // states render nothing — the user's submit-success flow isn't
+  // interrupted by noise.
+  if (loading) return null;
+  if (error) return null;
+  if (!data?.isHotspot) return null;
+
+  const bolarziBody = buildBolarziRequest({
+    authorName,
+    authorAddress,
+    locatie,
+    lat,
+    lng,
+    priorReportCount: data.count,
+    priorReportCodes: data.codes,
+  });
+  const subject = `Cerere montare stâlpișori anti-parcare — ${locatie}`;
+  const mailto = `mailto:${ASPMB_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bolarziBody)}`;
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Zonă cu parcări recurente"
+        className="w-full max-w-xl my-8 bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-xl)] border border-[var(--color-border)] outline-none"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3 px-6 py-4 border-b border-[var(--color-border)]">
+          <div className="flex items-start gap-3">
+            <div className="shrink-0 w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-600 flex items-center justify-center">
+              <AlertTriangle size={18} />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold">Zonă cu probleme recurente</h2>
+              <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                Am detectat {data.count} sesizări de parcare ilegală la mai puțin de 50m de locația ta.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-full hover:bg-[var(--color-surface-2)] transition-colors"
+            aria-label="Închide"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <p className="text-sm">
+            Sancționarea individuală nu rezolvă problema când se repetă. Vrei să trimitem o cerere oficială către <strong>Administrația Străzilor București</strong> pentru montarea de stâlpișori de protecție (bolarzi)?
+          </p>
+
+          {data.sample.length > 0 && (
+            <div className="rounded-[10px] bg-[var(--color-surface-2)] border border-[var(--color-border)] p-3 space-y-2">
+              <p className="text-xs font-semibold text-[var(--color-text-muted)]">
+                Sesizări anterioare în această zonă ({data.count} în total):
+              </p>
+              <ul className="text-xs space-y-1.5">
+                {data.sample.map((s) => (
+                  <li key={s.code}>
+                    <Link
+                      href={`/sesizari/${s.code}`}
+                      className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline"
+                      target="_blank"
+                    >
+                      <span className="font-mono font-semibold">{s.code}</span>
+                      <ExternalLink size={10} />
+                    </Link>
+                    <span className="ml-2 text-[var(--color-text-muted)]">{s.titlu}</span>
+                  </li>
+                ))}
+              </ul>
+              {data.count > data.sample.length && (
+                <p className="text-[11px] text-[var(--color-text-muted)]">
+                  ... și încă {data.count - data.sample.length} sesizări.
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="rounded-[10px] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 p-3 text-xs text-blue-900 dark:text-blue-300">
+            <p>
+              <strong>Cum funcționează:</strong> Cererea generată citează codurile sesizărilor anterioare drept dovadă a problemei sistemice — un argument mult mai puternic decât o cerere individuală.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2 pt-2">
+            <a
+              href={mailto}
+              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors flex-1"
+            >
+              <Shield size={15} />
+              Da, trimite cererea către ASPMB
+            </a>
+            <button
+              onClick={onClose}
+              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors"
+            >
+              Nu, mulțumesc
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

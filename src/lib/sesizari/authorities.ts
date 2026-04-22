@@ -1,6 +1,7 @@
 // Real emails of Bucharest authorities — verified public contacts
 
 import { detectSectorFromText } from "./sector-detect";
+import type { ParkingJurisdiction } from "./parking";
 
 export interface Authority {
   id: string;
@@ -52,6 +53,16 @@ export interface ResolvedRecipients {
 }
 
 /**
+ * Parking-specific routing context. Passed in on the "parcare" branch so
+ * the dispatcher can pick between Poliția Locală (trotuar/trecere) and
+ * Brigada Rutieră (bandă/intersecție), and apply the Sector 5 email
+ * override (their other inboxes return NXDOMAIN).
+ */
+export interface ParkingRoutingContext {
+  jurisdiction?: ParkingJurisdiction | null;
+}
+
+/**
  * Returns the list of real authorities to contact based on problem type + sector + county.
  * For București: uses sector-specific authorities.
  * For other counties: uses county contacts from autoritati-contact.ts.
@@ -61,6 +72,7 @@ export function getAuthoritiesFor(
   sector: string | null,
   countyCode?: string | null,
   locationText?: string | null,
+  parking?: ParkingRoutingContext,
 ): ResolvedRecipients {
   // If not București, route to county authorities
   if (countyCode && countyCode !== "B") {
@@ -115,12 +127,54 @@ export function getAuthoritiesFor(
       addCc(AUTH.pmbDispecerat);
       break;
 
-    case "parcare":
-      if (sectorPolitie) addTo(sectorPolitie);
-      addTo(AUTH.politiaLocalaBuc);
-      if (sectorPrimarie) addTo(sectorPrimarie);
-      addCc(AUTH.pmb);
+    case "parcare": {
+      // Jurisdiction split — the user told us whether the car blocks a
+      // sidewalk/zebra ("trotuar") or a traffic lane / tram line
+      // ("banda"). Poliția Locală handles the former, Brigada Rutieră
+      // the latter. If no jurisdiction is set (legacy reports), we keep
+      // the original fan-out.
+      if (parking?.jurisdiction === "banda") {
+        addTo(AUTH.brigadaRutiera);
+        addTo(AUTH.politiaLocalaBuc);
+        if (sectorPrimarie) addCc(sectorPrimarie);
+        addCc(AUTH.pmb);
+      } else {
+        if (sectorPolitie) addTo(sectorPolitie);
+        addTo(AUTH.politiaLocalaBuc);
+        if (sectorPrimarie) addTo(sectorPrimarie);
+        addCc(AUTH.pmb);
+      }
+
+      // Sector 5 exception: Poliția Locală S5 + sesizari@sector5.ro +
+      // other sector inboxes have been unreachable (NXDOMAIN / bounce
+      // loops). The one address known to actually deliver is
+      // primarie@sector5.ro — force it as the sole primary recipient so
+      // the email doesn't silently die in an SMTP dead-letter queue.
+      if (resolvedSector === "S5") {
+        const S5_FORCED: Authority = {
+          id: "primarie-s5-forced",
+          name: "Primăria Sector 5",
+          email: "primarie@sector5.ro",
+        };
+        // Drop every other S5 / local-police / local-primărie address
+        // from primary AND cc — keep non-S5 destinations (Brigada
+        // Rutieră, PMB) because those actually work.
+        const isS5Address = (a: Authority) =>
+          a.email.endsWith("@sector5.ro") ||
+          a.email === POLITIA_LOCALA_SECTOR.S5?.email ||
+          a.email === PRIMARII_SECTOR.S5?.email;
+        for (let i = primary.length - 1; i >= 0; i--) {
+          const a = primary[i];
+          if (a && isS5Address(a)) primary.splice(i, 1);
+        }
+        for (let i = cc.length - 1; i >= 0; i--) {
+          const c = cc[i];
+          if (c && isS5Address(c)) cc.splice(i, 1);
+        }
+        primary.unshift(S5_FORCED);
+      }
       break;
+    }
 
     case "stalpisori":
       // User pref: all 6 destinatari în TO (nu în CC) — sesizarea

@@ -1,11 +1,14 @@
 import { SESIZARE_TIPURI } from "@/lib/constants";
 import { getAuthoritiesFor, type ResolvedRecipients } from "./authorities";
+import { buildParkingLegalText, type ParkingJurisdiction } from "./parking";
 
 export interface MailtoInput {
   tip: string;
   titlu: string;
   locatie: string;
   sector?: string | null;
+  lat?: number | null;
+  lng?: number | null;
   descriere: string;
   formal_text?: string | null;
   author_name: string;
@@ -13,6 +16,11 @@ export interface MailtoInput {
   author_address?: string | null;
   imagini?: string[];
   code?: string;
+  /** Parking-specific legal metadata. Only used when tip === "parcare". */
+  parking?: {
+    plate?: string | null;
+    jurisdiction?: ParkingJurisdiction | null;
+  };
 }
 
 export interface EmailPayload {
@@ -130,6 +138,33 @@ export function buildFormalText(input: MailtoInput): string {
       ? `\n\nAnexez ${numarFoto} ${numarFoto === 1 ? "fotografie" : "fotografii"}.\n`
       : "";
 
+  // Parking: skip the generic AI template and use the legally-tuned
+  // version the user specified — structured body citing OUG 195/2002 +
+  // art. 39, plate number highlighted, jurisdiction-aware opener.
+  // Required inputs: plate + jurisdiction. If either is missing we fall
+  // through to the generic path so the form still produces *something*.
+  if (input.tip === "parcare" && input.parking?.plate && input.parking.jurisdiction) {
+    const recipients = getAuthoritiesFor(
+      input.tip,
+      input.sector ?? null,
+      null,
+      input.locatie,
+      { jurisdiction: input.parking.jurisdiction },
+    );
+    const authorityName = recipients.primary[0]?.name ?? "Autoritatea competentă";
+    return buildParkingLegalText({
+      authorityName,
+      authorName: input.author_name || "[NUMELE]",
+      authorAddress: input.author_address || "[ADRESA]",
+      plate: input.parking.plate,
+      jurisdiction: input.parking.jurisdiction,
+      locatie: input.locatie,
+      lat: input.lat ?? null,
+      lng: input.lng ?? null,
+      photoCount: numarFoto,
+    });
+  }
+
   if (input.formal_text) {
     const rewritten = rewriteFormalText(input.formal_text, input);
     // Append the photo-count line (no URLs!) if we have photos.
@@ -166,10 +201,24 @@ ${today}`;
 }
 
 export function buildEmailPayload(input: MailtoInput): EmailPayload {
-  const recipients = getAuthoritiesFor(input.tip, input.sector ?? null, null, input.locatie);
+  const recipients = getAuthoritiesFor(
+    input.tip,
+    input.sector ?? null,
+    null,
+    input.locatie,
+    input.parking ? { jurisdiction: input.parking.jurisdiction ?? null } : undefined,
+  );
   const tipLabel = SESIZARE_TIPURI.find((t) => t.value === input.tip)?.label ?? "";
-  const subject = `Sesizare ${tipLabel} — ${input.locatie}`;
-  const body = buildFormalText(input);
+  let subject = `Sesizare ${tipLabel} — ${input.locatie}`;
+  if (input.tip === "parcare" && input.parking?.plate) {
+    // Police mailrooms search inbox by plate number when triaging
+    // parking complaints — putting it in the subject shaves days off
+    // the response time.
+    subject = `Sesizare parcare neregulamentară — ${input.parking.plate} — ${input.locatie}`;
+  }
+  // Plain-text body: strip the bold markers the parking template uses.
+  // Mail clients receiving text/plain can't render bold anyway.
+  const body = buildFormalText(input).replace(/\[\[BOLD]]([^[]+?)\[\[\/BOLD]]/g, "$1");
   return {
     to: recipients.primary.map((a) => a.email),
     cc: recipients.cc.map((a) => a.email),
@@ -221,6 +270,17 @@ export function buildYahooLink(input: MailtoInput): string {
   return `https://compose.mail.yahoo.com/?${params.toString()}`;
 }
 
-export function getRecipientsLabel(tip: string, sector?: string | null, locationText?: string | null): string {
-  return getAuthoritiesFor(tip, sector ?? null, null, locationText ?? null).label;
+export function getRecipientsLabel(
+  tip: string,
+  sector?: string | null,
+  locationText?: string | null,
+  parking?: { jurisdiction?: ParkingJurisdiction | null },
+): string {
+  return getAuthoritiesFor(
+    tip,
+    sector ?? null,
+    null,
+    locationText ?? null,
+    parking ? { jurisdiction: parking.jurisdiction ?? null } : undefined,
+  ).label;
 }
