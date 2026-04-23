@@ -129,4 +129,49 @@ describe("getAuthoritiesFor — county routing (non-București)", () => {
     const ccEmails = r.cc.map((a) => a.email);
     expect(ccEmails).toContain("prefectura@prefecturatimis.ro");
   });
+
+  it("zgomot in a county routes to PL county + IPJ in CC", () => {
+    const r = getAuthoritiesFor("zgomot", null, "CJ", "Str. Horea, Cluj-Napoca");
+    const emails = r.primary.map((a) => a.email);
+    expect(emails).toContain("politialocala@primariaclujnapoca.ro");
+  });
+
+  it("graffiti in a county routes to PL (not IPJ)", () => {
+    const r = getAuthoritiesFor("graffiti", null, "IS", "Str. Lascăr Catargi, Iași");
+    const emails = r.primary.map((a) => a.email);
+    expect(emails).toContain("contact@politialocala-iasi.ro");
+  });
+
+  it("Primăria ALWAYS appears in TO (never just PL alone)", () => {
+    const r = getAuthoritiesFor("parcare", null, "BV", "Str. Republicii, Brașov");
+    const emails = r.primary.map((a) => a.email);
+    // Both PL and primărie should be in TO for parcare-type tips
+    expect(emails).toContain("info@brasovcity.ro"); // primăria
+    expect(emails).toContain("contact@polcombv.ro"); // PL
+  });
+
+  it("handles tip 'altele' with a valid county fallback", () => {
+    const r = getAuthoritiesFor("altele", null, "SB", "Piața Mare, Sibiu");
+    // Should route to primăria Sibiu
+    expect(r.primary.map((a) => a.email)).toContain("primarie@sibiu.ro");
+    // Prefectura Sibiu in CC
+    expect(r.cc.map((a) => a.email)).toContain("prefectura@prefecturasibiu.ro");
+  });
+
+  it("diacritics in location text still match the city correctly", () => {
+    // Medias with diacritic "ș"
+    const r = getAuthoritiesFor("groapa", null, "SB", "Str. Piața Ferdinand, Mediaș");
+    const emails = r.primary.map((a) => a.email);
+    expect(emails).toContain("contact@primariamedias.ro");
+  });
+
+  it("does not route to a different county's city when countyCode disagrees", () => {
+    // Location mentions "Roman" but county is CJ (wrong combo)
+    const r = getAuthoritiesFor("groapa", null, "CJ", "Str. Ștefan cel Mare, Roman");
+    // Should NOT route to Roman's primărie (NT) — countyHint prevents it
+    const emails = r.primary.map((a) => a.email);
+    expect(emails).not.toContain("primaria@primariaroman.ro");
+    // Should fall back to Cluj-Napoca capital
+    expect(emails).toContain("registratura@primariaclujnapoca.ro");
+  });
 });
