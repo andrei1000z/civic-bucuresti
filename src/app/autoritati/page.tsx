@@ -3,11 +3,12 @@ import { ALL_COUNTIES } from "@/data/counties";
 import {
   PRIMARII,
   POLITIA_LOCALA_JUDET,
+  ORASE_IMPORTANTE,
   getCityCount,
   getPolitiaLocalaCount,
 } from "@/data/autoritati-contact";
 import { SITE_URL } from "@/lib/constants";
-import { AutoritatiSearch } from "./AutoritatiSearch";
+import { AutoritatiSearch, type Row } from "./AutoritatiSearch";
 
 export const metadata: Metadata = {
   title: "Autorități publice în România — Civia",
@@ -28,11 +29,11 @@ export default function AutoritatiIndexPage() {
   const plCount = getPolitiaLocalaCount();
 
   // Build flat searchable list of all records (counties + cities)
-  const rows = counties.map((c) => {
+  const countyRows: Row[] = counties.map((c) => {
     const p = PRIMARII[c.id];
     const pl = POLITIA_LOCALA_JUDET[c.id];
     return {
-      kind: "judet" as const,
+      kind: "judet",
       id: c.id,
       slug: c.slug,
       name: c.name,
@@ -44,6 +45,26 @@ export default function AutoritatiIndexPage() {
       href: `/${c.slug}/autoritati`,
     };
   });
+
+  // Non-capital cities — searchable independently
+  const cityRows: Row[] = Object.entries(ORASE_IMPORTANTE).map(([slug, city]) => {
+    const county = ALL_COUNTIES.find((c) => c.id === city.countyCode);
+    return {
+      kind: "oras",
+      id: slug,
+      slug,
+      name: city.name,
+      countyName: county?.name ?? city.countyCode,
+      ...(city.email ? { primarieEmail: city.email } : {}),
+      ...(city.phone ? { primariePhone: city.phone } : {}),
+      ...(city.politieLocala?.email ? { plEmail: city.politieLocala.email } : {}),
+      ...(city.politieLocala?.phone ? { plPhone: city.politieLocala.phone } : {}),
+      href: county ? `/${county.slug}/autoritati#${slug}` : `/autoritati`,
+    };
+  });
+
+  // Judete first (primary surface), cities after
+  const rows: Row[] = [...countyRows, ...cityRows];
 
   // schema.org Dataset — helps Google surface this as a data catalog
   const jsonLd = {

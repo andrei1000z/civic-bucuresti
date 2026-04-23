@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Search, Phone, Mail, ExternalLink, X } from "lucide-react";
 
 export interface Row {
-  kind: "judet";
+  kind: "judet" | "oras";
   id: string;
   slug: string;
   name: string;
@@ -75,16 +75,32 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
               key={row.id}
               className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:border-[var(--color-primary)]/50 transition-colors"
             >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-[family-name:var(--font-sora)] font-semibold text-base">
-                  {row.name}
-                </h3>
-                <span
-                  className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-muted)] bg-[var(--color-bg)] px-2 py-0.5 rounded"
-                  aria-label={`Cod județ ${row.id}`}
-                >
-                  {row.id}
-                </span>
+              <div className="flex items-start justify-between mb-3 gap-2">
+                <div className="min-w-0">
+                  <h3 className="font-[family-name:var(--font-sora)] font-semibold text-base truncate">
+                    {row.name}
+                  </h3>
+                  {row.kind === "oras" && (
+                    <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
+                      oraș · {row.countyName}
+                    </p>
+                  )}
+                </div>
+                {row.kind === "judet" ? (
+                  <span
+                    className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-muted)] bg-[var(--color-bg)] px-2 py-0.5 rounded shrink-0"
+                    aria-label={`Cod județ ${row.id}`}
+                  >
+                    {row.id}
+                  </span>
+                ) : (
+                  <span
+                    className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-2 py-0.5 rounded shrink-0"
+                    aria-label="Oraș"
+                  >
+                    oraș
+                  </span>
+                )}
               </div>
 
               {/* Primărie contact */}
