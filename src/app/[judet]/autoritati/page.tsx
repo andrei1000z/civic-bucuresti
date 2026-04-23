@@ -238,13 +238,16 @@ export default async function AutoritatiPage({
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
             {orasImportante.map((oras) => (
               <div
+                id={oras.slug}
                 key={oras.slug}
-                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4"
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 scroll-mt-24 target:ring-2 target:ring-[var(--color-primary)]"
               >
                 <h3 className="font-[family-name:var(--font-sora)] font-semibold text-base mb-1">
                   {oras.name}
                 </h3>
-                <p className="text-xs text-[var(--color-text-muted)] mb-3">Primărie + Poliție Locală</p>
+                <p className="text-xs text-[var(--color-text-muted)] mb-3">
+                  Primărie{oras.politieLocala ? " + Poliție Locală" : ""}
+                </p>
                 <ContactLinks
                   contact={{
                     phone: oras.phone,
@@ -253,6 +256,14 @@ export default async function AutoritatiPage({
                     address: oras.address,
                   }}
                 />
+                {oras.politieLocala && (
+                  <div className="mt-3 pt-3 border-t border-[var(--color-border)]">
+                    <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-muted)] mb-1">
+                      Poliția Locală
+                    </p>
+                    <ContactLinks contact={oras.politieLocala} />
+                  </div>
+                )}
               </div>
             ))}
           </div>
