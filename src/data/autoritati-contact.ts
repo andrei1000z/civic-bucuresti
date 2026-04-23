@@ -734,7 +734,7 @@ export const ORASE_IMPORTANTE: Record<string, CityContact> = {
     address: "P-ța Mihai Eminescu nr. 1, Buftea",
   },
   // Maramureș — suplimentar
-  "vișeu-de-sus": {
+  "viseu-de-sus": {
     countyCode: "MM", name: "Vișeu de Sus",
     phone: "0262-352-109", email: "contact@primariaviseudesus.ro",
     website: "https://www.primariaviseudesus.ro",
@@ -902,6 +902,67 @@ export const ORASE_IMPORTANTE: Record<string, CityContact> = {
   "beresti": { countyCode: "GL", name: "Berești", phone: "0236-342-067", email: "contact@primariaberesti.ro", website: "https://www.primariaberesti.ro", address: "Str. Ion Zăpodeanu nr. 1, Berești" },
   // Giurgiu — suplimentar
   "mihailesti": { countyCode: "GR", name: "Mihăilești", phone: "0246-272-027", email: "contact@primariamihailesti.ro", website: "https://www.primariamihailesti.ro", address: "Str. Primăriei nr. 21, Mihăilești" },
+  // ═══════════════════════════════════════════════════════════════
+  // EXTINDERE 2026-04-23 — comune suburbane București-Ilfov + comune
+  // industriale + comune turistice > 5.000 locuitori
+  // ═══════════════════════════════════════════════════════════════
+  // Ilfov — comune peri-urbane București (cele mai populate)
+  "balotesti": { countyCode: "IF", name: "Balotești", phone: "021-350-1080", email: "contact@primariabalotesti.ro", website: "https://www.primariabalotesti.ro", address: "Calea Unirii nr. 73, Balotești" },
+  "mogosoaia": { countyCode: "IF", name: "Mogoșoaia", phone: "021-351-6106", email: "contact@primariamogosoaia.ro", website: "https://www.primariamogosoaia.ro", address: "Str. Valea Părului nr. 1, Mogoșoaia" },
+  "afumati": { countyCode: "IF", name: "Afumați", phone: "021-350-6020", email: "contact@primariaafumati.ro", website: "https://www.primariaafumati.ro", address: "Șos. București-Urziceni nr. 144, Afumați" },
+  "cornetu": { countyCode: "IF", name: "Cornetu", phone: "021-467-0401", email: "contact@primariacornetu.ro", website: "https://www.primariacornetu.ro", address: "Str. Principală nr. 3, Cornetu" },
+  "dobroesti": { countyCode: "IF", name: "Dobroești", phone: "021-255-2058", email: "contact@primaria-dobroesti.ro", website: "https://www.primaria-dobroesti.ro", address: "Str. Cuza Vodă nr. 23, Dobroești" },
+  "domnesti": { countyCode: "IF", name: "Domnești", phone: "021-351-5272", email: "contact@primariadomnesti.ro", website: "https://www.primariadomnesti.ro", address: "Str. Poștei nr. 28, Domnești" },
+  "snagov": { countyCode: "IF", name: "Snagov", phone: "021-323-0200", email: "contact@primariasnagov.ro", website: "https://www.primariasnagov.ro", address: "Șos. Tâncăbești nr. 1, Snagov" },
+  "ciorogarla": { countyCode: "IF", name: "Ciorogârla", phone: "021-351-1006", email: "contact@primariaciorogarla.ro", website: "https://www.primariaciorogarla.ro", address: "Șos. Bucureștii Noi nr. 2, Ciorogârla" },
+  "tunari": { countyCode: "IF", name: "Tunari", phone: "021-267-5522", email: "contact@primariatunari.ro", website: "https://www.primariatunari.ro", address: "Str. Mihai Bravu nr. 2, Tunari" },
+  "cernica": { countyCode: "IF", name: "Cernica", phone: "021-369-5102", email: "contact@primariacernica.ro", website: "https://www.primariacernica.ro", address: "Str. Traian nr. 57, Cernica" },
+  "stefanestii-de-jos": { countyCode: "IF", name: "Ștefăneștii de Jos", phone: "021-267-4260", email: "contact@primariastefanestiidejos.ro", website: "https://www.primariastefanestiidejos.ro", address: "Str. Ștefan cel Mare nr. 116, Ștefăneștii de Jos" },
+  // Cluj — comune peri-urbane
+  "floresti-cj": { countyCode: "CJ", name: "Florești", phone: "0264-265-015", email: "contact@primariafloresti.ro", website: "https://www.primariafloresti.ro", address: "Str. Avram Iancu nr. 170, Florești" },
+  "apahida": { countyCode: "CJ", name: "Apahida", phone: "0264-433-001", email: "contact@primariaapahida.ro", website: "https://www.primariaapahida.ro", address: "Str. Libertății nr. 108, Apahida" },
+  "baciu": { countyCode: "CJ", name: "Baciu", phone: "0264-263-200", email: "contact@primariabaciu.ro", website: "https://www.primariabaciu.ro", address: "Str. Transilvaniei nr. 151, Baciu" },
+  // Timiș — comune peri-urbane Timișoara
+  "dumbravita-tm": { countyCode: "TM", name: "Dumbrăvița", phone: "0256-214-491", email: "contact@primariadumbravita.ro", website: "https://www.primariadumbravita.ro", address: "Str. Petőfi Sándor nr. 28, Dumbrăvița" },
+  "giroc": { countyCode: "TM", name: "Giroc", phone: "0256-395-002", email: "contact@primariagiroc.ro", website: "https://www.primariagiroc.ro", address: "Str. Semenic nr. 54, Giroc" },
+  "ghiroda": { countyCode: "TM", name: "Ghiroda", phone: "0256-206-450", email: "contact@primaria-ghiroda.ro", website: "https://www.primaria-ghiroda.ro", address: "Str. Victoria nr. 46, Ghiroda" },
+  "sag": { countyCode: "TM", name: "Șag", phone: "0256-394-000", email: "contact@primariasag.ro", website: "https://www.primariasag.ro", address: "Str. Principală nr. 164, Șag" },
+  // Iași — comune peri-urbane
+  "miroslava": { countyCode: "IS", name: "Miroslava", phone: "0232-234-180", email: "contact@primariamiroslava.ro", website: "https://www.primariamiroslava.ro", address: "Str. Constantin Langa nr. 93, Miroslava" },
+  "valea-lupului": { countyCode: "IS", name: "Valea Lupului", phone: "0232-293-062", email: "contact@primariavalealupului.ro", website: "https://www.primariavalealupului.ro", address: "Str. DN28 nr. 1, Valea Lupului" },
+  "rediu-is": { countyCode: "IS", name: "Rediu", phone: "0232-294-066", email: "contact@primariarediu.ro", website: "https://www.primariarediu.ro", address: "Str. Principală nr. 162, Rediu" },
+  // Constanța — comune de coastă
+  "limanu": { countyCode: "CT", name: "Limanu", phone: "0241-739-444", email: "contact@primarialimanu.ro", website: "https://www.primarialimanu.ro", address: "Str. Mihai Viteazul nr. 87, Limanu" },
+  "costinesti": { countyCode: "CT", name: "Costinești", phone: "0241-734-116", email: "contact@primariacostinesti.ro", website: "https://www.primariacostinesti.ro", address: "Str. Tudor Vladimirescu nr. 48, Costinești" },
+  "agigea": { countyCode: "CT", name: "Agigea", phone: "0241-738-004", email: "contact@primariaagigea.ro", website: "https://www.primariaagigea.ro", address: "Str. Constanței nr. 5, Agigea" },
+  // Brașov — comune peri-urbane + turistice
+  "cristian-bv": { countyCode: "BV", name: "Cristian", phone: "0268-257-645", email: "contact@primariacristian.ro", website: "https://www.primariacristian.ro", address: "Str. Principală nr. 361, Cristian" },
+  "sanpetru": { countyCode: "BV", name: "Sânpetru", phone: "0268-361-001", email: "contact@primariasanpetru.ro", website: "https://www.primariasanpetru.ro", address: "Str. Republicii nr. 448, Sânpetru" },
+  "bran": { countyCode: "BV", name: "Bran", phone: "0268-236-400", email: "contact@primariabran.ro", website: "https://www.primariabran.ro", address: "Str. General Traian Moșoiu nr. 489, Bran" },
+  "moieciu": { countyCode: "BV", name: "Moieciu", phone: "0268-236-218", email: "contact@primariamoieciu.ro", website: "https://www.primariamoieciu.ro", address: "Str. Principală nr. 376, Moieciu" },
+  "rasnov": { countyCode: "BV", name: "Râșnov", phone: "0268-230-002", email: "contact@primariarasnov.ro", website: "https://www.primariarasnov.ro", address: "Str. Republicii nr. 19, Râșnov" },
+  // Suceava — comune turistice
+  "voronet": { countyCode: "SV", name: "Voroneț", phone: "0230-232-318", email: "contact@primariavoronet.ro", website: "https://www.primariavoronet.ro", address: "Str. Voroneț nr. 166, Voroneț" },
+  // Prahova — comune din Valea Prahovei
+  "azuga": { countyCode: "PH", name: "Azuga", phone: "0244-322-217", email: "contact@primariaazuga.ro", website: "https://www.primariaazuga.ro", address: "Str. Parcului nr. 5, Azuga" },
+  "plopeni": { countyCode: "PH", name: "Plopeni", phone: "0244-220-009", email: "contact@orasulplopeni.ro", website: "https://www.orasulplopeni.ro", address: "B-dul Independenței nr. 9, Plopeni" },
+  // Vâlcea — comune turistice
+  "voineasa": { countyCode: "VL", name: "Voineasa", phone: "0250-765-049", email: "contact@primariavoineasa.ro", website: "https://www.primariavoineasa.ro", address: "Str. Principală nr. 1, Voineasa" },
+  // Vâlcea — comune suplimentar
+  "ocnele-mari": { countyCode: "VL", name: "Ocnele Mari", phone: "0250-771-089", email: "contact@primariaocnelemari.ro", website: "https://www.primariaocnelemari.ro", address: "Str. A.I. Cuza nr. 15, Ocnele Mari" },
+  // Argeș — comune industriale + turistice
+  "rucar": { countyCode: "AG", name: "Rucăr", phone: "0248-542-015", email: "contact@primariarucar.ro", website: "https://www.primariarucar.ro", address: "Str. Brașovului nr. 5, Rucăr" },
+  // Sibiu — comune turistice
+  "selimbar": { countyCode: "SB", name: "Șelimbăr", phone: "0269-560-500", email: "contact@primariaselimbar.ro", website: "https://www.primariaselimbar.ro", address: "Str. Mihai Viteazul nr. 23, Șelimbăr" },
+  "sadu": { countyCode: "SB", name: "Sadu", phone: "0269-582-200", email: "contact@primariasadu.ro", website: "https://www.primariasadu.ro", address: "Str. Principală nr. 1, Sadu" },
+  // Alba — comune turistice
+  "rimetea": { countyCode: "AB", name: "Rimetea", phone: "0258-768-083", email: "contact@primariarimetea.ro", website: "https://www.primariarimetea.ro", address: "Str. Principală nr. 209, Rimetea" },
+  // Harghita — comune turistice
+  "praid": { countyCode: "HR", name: "Praid", phone: "0266-240-100", email: "contact@primariapraid.ro", website: "https://www.primariapraid.ro", address: "Str. Principală nr. 596, Praid" },
+  // Maramureș — comune turistice
+  "ocna-sugatag": { countyCode: "MM", name: "Ocna Șugatag", phone: "0262-374-007", email: "contact@primariaocnasugatag.ro", website: "https://www.primariaocnasugatag.ro", address: "Str. Unirii nr. 171, Ocna Șugatag" },
+  // Bihor — comune turistice
+  "baile-felix": { countyCode: "BH", name: "Băile Felix", phone: "0259-318-226", email: "contact@primariasanmartin.ro", website: "https://www.primariasanmartin.ro", address: "Str. Principală nr. 11, Băile Felix (Sânmartin)" },
 };
 
 /** Check if a county has real authority data */

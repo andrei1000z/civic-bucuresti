@@ -58,8 +58,40 @@ describe("autoritati-contact — structural integrity", () => {
     }
   });
 
-  it("ORASE_IMPORTANTE has at least 40 cities", () => {
-    expect(Object.keys(ORASE_IMPORTANTE).length).toBeGreaterThanOrEqual(40);
+  it("ORASE_IMPORTANTE has at least 150 cities (major expansion in 2026-04)", () => {
+    expect(Object.keys(ORASE_IMPORTANTE).length).toBeGreaterThanOrEqual(150);
+  });
+
+  it("ORASE_IMPORTANTE — slugs are ASCII-only lowercase with hyphens", () => {
+    for (const slug of Object.keys(ORASE_IMPORTANTE)) {
+      expect(slug).toMatch(/^[a-z0-9-]+$/);
+    }
+  });
+
+  it("ORASE_IMPORTANTE — no duplicate slugs or name clashes per county", () => {
+    const seenByCounty = new Map<string, Set<string>>();
+    for (const city of Object.values(ORASE_IMPORTANTE)) {
+      const byCounty = seenByCounty.get(city.countyCode) ?? new Set<string>();
+      const normalized = city.name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+      expect(
+        byCounty.has(normalized),
+        `duplicate city name "${city.name}" in county ${city.countyCode}`,
+      ).toBe(false);
+      byCounty.add(normalized);
+      seenByCounty.set(city.countyCode, byCounty);
+    }
+  });
+
+  it("ORASE_IMPORTANTE — all phones follow Romanian landline format", () => {
+    for (const [slug, city] of Object.entries(ORASE_IMPORTANTE)) {
+      if (city.phone) {
+        // Accept: 0256-... or 0256-123-456 or 031-... etc.
+        expect(
+          /^0[0-9]{2,3}-[0-9]{3}-?[0-9]*$/.test(city.phone),
+          `${slug} phone "${city.phone}" doesn't match 0XXX-XXX-XXX pattern`,
+        ).toBe(true);
+      }
+    }
   });
 });
 
