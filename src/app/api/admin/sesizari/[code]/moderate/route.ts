@@ -84,11 +84,13 @@ export async function POST(
     await sendEmail({
       to: recipient,
       subject: approved
-        ? `Sesizarea ${sesizare.code} a fost aprobată · Civia`
+        ? `✓ Sesizarea ${sesizare.code} a fost aprobată · Civia`
         : `Sesizarea ${sesizare.code} a fost respinsă · Civia`,
       html: emailTemplate({
         title: approved ? "Sesizare aprobată" : "Sesizare respinsă",
         preheader: sesizare.titlu,
+        kicker: approved ? "MODERARE · APROBAT" : "MODERARE · RESPINS",
+        icon: approved ? "✅" : "⚠️",
         body,
         ctaText: approved ? "Vezi sesizarea" : "Urmărește codul",
         ctaUrl: approved ? sesizareUrl : trackUrl,

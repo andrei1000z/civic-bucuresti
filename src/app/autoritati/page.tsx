@@ -28,18 +28,22 @@ export default function AutoritatiIndexPage() {
   const plCount = getPolitiaLocalaCount();
 
   // Build flat searchable list of all records (counties + cities)
-  const rows = [
-    ...counties.map((c) => ({
+  const rows = counties.map((c) => {
+    const p = PRIMARII[c.id];
+    const pl = POLITIA_LOCALA_JUDET[c.id];
+    return {
       kind: "judet" as const,
       id: c.id,
       slug: c.slug,
       name: c.name,
       countyName: c.name,
-      hasPrimarie: Boolean(PRIMARII[c.id]?.email),
-      hasPl: Boolean(POLITIA_LOCALA_JUDET[c.id]?.email),
+      ...(p?.email ? { primarieEmail: p.email } : {}),
+      ...(p?.phone ? { primariePhone: p.phone } : {}),
+      ...(pl?.email ? { plEmail: pl.email } : {}),
+      ...(pl?.phone ? { plPhone: pl.phone } : {}),
       href: `/${c.slug}/autoritati`,
-    })),
-  ];
+    };
+  });
 
   // schema.org Dataset — helps Google surface this as a data catalog
   const jsonLd = {
