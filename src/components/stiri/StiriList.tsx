@@ -298,8 +298,8 @@ export function StiriList() {
                     {stire.title}
                   </h3>
                   <p className="text-sm text-[var(--color-text-muted)] line-clamp-2 mb-4">{stire.excerpt}</p>
-                  <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)] pt-3 border-t border-[var(--color-border)]">
-                    <span className="truncate">{stire.author ?? "Redacție"}</span>
+                  <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)] pt-3 border-t border-[var(--color-border)] gap-2 min-w-0">
+                    <span className="truncate min-w-0 flex-1">{stire.author ?? "Redacție"}</span>
                     <span className="shrink-0 ml-2">
                       {timeAgo(stire.published_at)}
                     </span>

@@ -33,11 +33,11 @@ export function SimilarSesizari({ sesizari }: Props) {
                   <p className="text-sm font-medium line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
                     {s.titlu}
                   </p>
-                  <div className="flex items-center gap-2 mt-1 text-xs text-[var(--color-text-muted)]">
-                    <MapPin size={11} />
-                    <span className="truncate">{s.author_name}</span>
-                    <span>·</span>
-                    <span>{timeAgo(s.created_at)}</span>
+                  <div className="flex items-center gap-2 mt-1 text-xs text-[var(--color-text-muted)] min-w-0">
+                    <MapPin size={11} className="shrink-0" />
+                    <span className="truncate flex-1 min-w-0">{s.author_name}</span>
+                    <span className="shrink-0">·</span>
+                    <span className="shrink-0 whitespace-nowrap">{timeAgo(s.created_at)}</span>
                   </div>
                   <span className="inline-block mt-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
                     {STATUS_LABELS[s.status] ?? s.status}
