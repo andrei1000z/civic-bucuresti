@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, TrendingUp, Wind, Newspaper } from "lucide-react";
+import { ArrowRight, TrendingUp, Wind, Building2 } from "lucide-react";
 import { SITE_NAME } from "@/lib/constants";
 import { CountyPicker } from "./CountyPicker";
 import { LiveStatsBar } from "@/components/home/LiveStatsBar";
 import { TopVotedWidget } from "@/components/home/TopVotedWidget";
 import { LiveWeatherAqi } from "@/components/home/LiveWeatherAqi";
+import { ALL_COUNTIES } from "@/data/counties";
+import {
+  PRIMARII,
+  POLITIA_LOCALA_JUDET,
+  getCityCount,
+} from "@/data/autoritati-contact";
 
 export const revalidate = 300;
 
@@ -17,6 +23,11 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
+  const totalJudete = ALL_COUNTIES.length;
+  const totalPrimarii = Object.keys(PRIMARII).length;
+  const totalPL = Object.keys(POLITIA_LOCALA_JUDET).length;
+  const totalOrase = getCityCount();
+
   return (
     <>
       {/* HERO */}
@@ -122,6 +133,41 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* COVERAGE / AUTORITATI */}
+      <section className="py-14 md:py-16 bg-[var(--color-surface)] border-y border-[var(--color-border)]">
+        <div className="container-narrow">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] text-xs font-semibold mb-4">
+                <Building2 size={12} /> Autorități publice
+              </p>
+              <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-3">
+                {totalPrimarii} primării, {totalPL} Poliții Locale,{" "}
+                {totalOrase} orașe — toate acoperite
+              </h2>
+              <p className="text-[var(--color-text-muted)] mb-5 leading-relaxed">
+                Nu mai cauți pe Google „cum contactez primăria din Turda" — Civia
+                știe. Avem un catalog verificat cu emailuri, telefoane și
+                adrese pentru toate autoritățile civice, de la București la
+                cel mai mic oraș județean.
+              </p>
+              <Link
+                href="/autoritati"
+                className="inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+              >
+                Vezi catalogul de autorități <ArrowRight size={16} />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <CoverageStat value={totalJudete} label="Județe" />
+              <CoverageStat value={totalPrimarii} label="Primării" />
+              <CoverageStat value={totalPL} label="Poliție Locală" />
+              <CoverageStat value={totalOrase} label="Orașe mari" />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* HOW IT WORKS */}
       <section className="py-16 md:py-20">
         <div className="container-narrow">
@@ -166,5 +212,18 @@ export default function HomePage() {
         </div>
       </section>
     </>
+  );
+}
+
+function CoverageStat({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[12px] p-5 text-center">
+      <div className="text-3xl md:text-4xl font-bold text-[var(--color-primary)] font-[family-name:var(--font-sora)]">
+        {value}
+      </div>
+      <div className="text-xs text-[var(--color-text-muted)] mt-1 uppercase tracking-wide">
+        {label}
+      </div>
+    </div>
   );
 }
