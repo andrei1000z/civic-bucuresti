@@ -118,7 +118,32 @@ export default function AutoritatiIndexPage() {
 
       <AutoritatiSearch rows={rows} />
 
-      <section className="mt-12 bg-[var(--color-primary-soft)] rounded-[12px] p-6">
+      <section className="mt-12 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+        <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2">
+          Locuiești într-o comună sau sat?
+        </h2>
+        <p className="text-sm text-[var(--color-text-muted)] mb-3 leading-relaxed">
+          România are peste 2.800 de comune și 13.000 de sate — nu le avem încă
+          pe toate în catalog. Dacă nu găsești primăria ta aici, trimite sesizarea
+          la <strong>Primăria reședinței de județ + Prefectură</strong>. Conform{" "}
+          <strong>OG 27/2002</strong>, instituțiile publice sunt obligate să o
+          redirecționeze la primăria ta în maxim 5 zile.
+        </p>
+        <p className="text-sm text-[var(--color-text-muted)]">
+          Știi contactul corect al primăriei tale? Contribuie pe{" "}
+          <a
+            href="https://github.com/andrei1000z/civic-bucuresti/issues/new?labels=autoritati&title=Adaug%C4%83+contact+prim%C4%83rie"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--color-primary)] hover:underline font-medium"
+          >
+            GitHub
+          </a>{" "}
+          — îl adăugăm în 24h.
+        </p>
+      </section>
+
+      <section className="mt-6 bg-[var(--color-primary-soft)] rounded-[12px] p-6">
         <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2">
           Ai observat un email greșit?
         </h2>
