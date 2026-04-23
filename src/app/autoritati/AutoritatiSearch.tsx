@@ -27,15 +27,24 @@ function normalize(s: string): string {
 
 export function AutoritatiSearch({ rows }: { rows: Row[] }) {
   const [query, setQuery] = useState("");
+  const [kindFilter, setKindFilter] = useState<"all" | "judet" | "oras">("all");
+
+  // Build unique county list for the type filter label counts
+  const counts = useMemo(() => {
+    const j = rows.filter((r) => r.kind === "judet").length;
+    const o = rows.filter((r) => r.kind === "oras").length;
+    return { judet: j, oras: o, all: rows.length };
+  }, [rows]);
 
   const filtered = useMemo(() => {
     const q = normalize(query);
-    if (!q) return rows;
     return rows.filter((r) => {
+      if (kindFilter !== "all" && r.kind !== kindFilter) return false;
+      if (!q) return true;
       const hay = normalize(`${r.name} ${r.countyName} ${r.id}`);
       return hay.includes(q);
     });
-  }, [query, rows]);
+  }, [query, rows, kindFilter]);
 
   return (
     <div>
@@ -62,6 +71,32 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
             <X size={14} />
           </button>
         )}
+      </div>
+
+      {/* Type filter — Toate / Județe / Orașe */}
+      <div
+        role="tablist"
+        aria-label="Filtrează după tip"
+        className="inline-flex items-center gap-1 mb-5 p-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[10px]"
+      >
+        <FilterTab
+          active={kindFilter === "all"}
+          onClick={() => setKindFilter("all")}
+          label="Toate"
+          count={counts.all}
+        />
+        <FilterTab
+          active={kindFilter === "judet"}
+          onClick={() => setKindFilter("judet")}
+          label="Județe"
+          count={counts.judet}
+        />
+        <FilterTab
+          active={kindFilter === "oras"}
+          onClick={() => setKindFilter("oras")}
+          label="Orașe"
+          count={counts.oras}
+        />
       </div>
 
       {filtered.length === 0 ? (
@@ -176,5 +211,33 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
         {filtered.length} {filtered.length === 1 ? "rezultat" : "rezultate"}
       </p>
     </div>
+  );
+}
+
+function FilterTab({
+  active,
+  onClick,
+  label,
+  count,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  count: number;
+}) {
+  return (
+    <button
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className={`px-3 h-8 rounded-[8px] text-xs font-medium transition-colors ${
+        active
+          ? "bg-[var(--color-surface)] text-[var(--color-primary)] shadow-sm"
+          : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+      }`}
+    >
+      {label}
+      <span className="ml-1.5 text-[10px] opacity-70">{count}</span>
+    </button>
   );
 }

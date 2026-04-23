@@ -176,7 +176,7 @@ export function SesizariPublice() {
       {view === "map" && filtered.length > 0 ? (
         <SesizariMap limit={50} height="600px" zoom={12} />
       ) : loading && rows.length === 0 ? (
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-4 min-w-0">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 animate-pulse">
               <div className="flex gap-2 mb-3">
@@ -233,7 +233,7 @@ export function SesizariPublice() {
         })()
       ) : (
         <>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-4 min-w-0">
           {filtered.map((s) => {
             const tipLabel = SESIZARE_TIPURI.find((t) => t.value === s.tip)?.label ?? s.tip;
             const tipIcon = SESIZARE_TIPURI.find((t) => t.value === s.tip)?.icon ?? "📝";
@@ -241,10 +241,10 @@ export function SesizariPublice() {
               <Link
                 key={s.id}
                 href={`/sesizari/${s.code}`}
-                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-primary)]/30 transition-all"
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-primary)]/30 transition-all overflow-hidden min-w-0"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-start justify-between mb-3 gap-2 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
                     <Badge bgColor={STATUS_COLORS[s.status]} color="white">
                       {STATUS_LABELS[s.status]}
                     </Badge>
@@ -258,18 +258,18 @@ export function SesizariPublice() {
                       </span>
                     )}
                   </div>
-                  <span className="text-xs text-[var(--color-text-muted)] shrink-0">
+                  <span className="text-xs text-[var(--color-text-muted)] shrink-0 whitespace-nowrap">
                     {timeAgo(s.created_at)}
                   </span>
                 </div>
-                <h3 className="font-semibold mb-1 line-clamp-2">{s.titlu}</h3>
-                <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] mb-2">
-                  <MapPin size={12} />
-                  <span className="truncate">{s.locatie}</span>
-                  <span>·</span>
-                  <span>{s.sector}</span>
+                <h3 className="font-semibold mb-1 line-clamp-2 break-words">{s.titlu}</h3>
+                <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] mb-2 min-w-0">
+                  <MapPin size={12} className="shrink-0" />
+                  <span className="truncate flex-1 min-w-0">{s.locatie}</span>
+                  <span className="shrink-0">·</span>
+                  <span className="shrink-0">{s.sector}</span>
                 </div>
-                <p className="text-sm text-[var(--color-text)] mb-3 line-clamp-2">
+                <p className="text-sm text-[var(--color-text)] mb-3 line-clamp-2 break-words">
                   {s.formal_text ? stripForPreview(s.formal_text) : s.descriere}
                 </p>
                 {(s.imagini.length > 0 || s.resolved_photo_url) && (
@@ -298,11 +298,11 @@ export function SesizariPublice() {
                     )}
                   </div>
                 )}
-                <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)]">
-                  <span className="text-xs text-[var(--color-text-muted)] truncate">
+                <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)] gap-2 min-w-0">
+                  <span className="text-xs text-[var(--color-text-muted)] truncate min-w-0 flex-1">
                     de {s.author_name} · {s.code}
                   </span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <span className="flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
                       <ThumbsUp size={13} />
                       <span className="font-medium">{s.upvotes}</span>

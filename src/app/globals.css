@@ -109,6 +109,14 @@ body {
 /* Smooth scroll for anchor links */
 html { scroll-behavior: smooth; }
 
+/* Mobile safety net — prevent horizontal overflow from forcing
+   the viewport to zoom out (effectively rendering pages as
+   "desktop view" on phones). Uses `clip` instead of `hidden`
+   so position:sticky still works. Individual pages can opt out
+   with overflow-x: visible if they truly need horizontal scroll
+   (none currently do). Reported via reddit feedback 2026-04. */
+html, body { overflow-x: clip; }
+
 /* Safe area for notched devices */
 body {
   padding-left: env(safe-area-inset-left);
