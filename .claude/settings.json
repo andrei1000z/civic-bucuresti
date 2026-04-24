@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/Andrei/civic-bucuresti/src/app -type f -name \"*.tsx\" -exec wc -l {} \\\\;)",
+      "Bash(awk '$1 > 500 {print}')"
+    ]
+  }
+}

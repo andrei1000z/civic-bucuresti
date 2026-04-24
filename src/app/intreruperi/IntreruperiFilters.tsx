@@ -295,20 +295,77 @@ export function IntreruperiFilters({ items }: { items: Interruption[] }) {
       ) : view === "map" ? (
         <IntreruperiMap items={filtered} />
       ) : (
-        <div className="grid md:grid-cols-2 gap-4">
-          {filtered.map((i) => {
-            const dist =
-              me && i.lat != null && i.lng != null
-                ? distanceKm(me, [i.lat, i.lng])
-                : null;
-            return <InterruptionCard key={i.id} item={i} distanceKm={dist} />;
-          })}
-        </div>
+        <GroupedList items={filtered} me={me} />
       )}
 
       <p className="text-center text-xs text-[var(--color-text-muted)] mt-6">
         {filtered.length} {filtered.length === 1 ? "întrerupere" : "întreruperi"}
       </p>
+    </div>
+  );
+}
+
+function groupByDay(
+  items: Interruption[],
+): Array<{ label: string; items: Interruption[] }> {
+  const buckets = new Map<string, Interruption[]>();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  for (const item of items) {
+    const start = new Date(item.startAt);
+    start.setHours(0, 0, 0, 0);
+    const days = Math.round((start.getTime() - today.getTime()) / 86_400_000);
+    let key: string;
+    if (days < 0) key = "Deja în curs";
+    else if (days === 0) key = "Astăzi";
+    else if (days === 1) key = "Mâine";
+    else if (days < 7)
+      key = start.toLocaleDateString("ro-RO", { weekday: "long", day: "numeric", month: "short" });
+    else
+      key = start.toLocaleDateString("ro-RO", { day: "numeric", month: "long" });
+
+    const arr = buckets.get(key) ?? [];
+    arr.push(item);
+    buckets.set(key, arr);
+  }
+  return Array.from(buckets.entries()).map(([label, items]) => ({ label, items }));
+}
+
+function GroupedList({
+  items,
+  me,
+}: {
+  items: Interruption[];
+  me: [number, number] | null;
+}) {
+  const groups = useMemo(() => groupByDay(items), [items]);
+  return (
+    <div className="space-y-6">
+      {groups.map((g) => (
+        <section key={g.label}>
+          <h3 className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)] mb-3 flex items-center gap-2">
+            <span
+              className={
+                g.label === "Astăzi" || g.label === "Deja în curs"
+                  ? "inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse"
+                  : "inline-block w-2 h-2 rounded-full bg-[var(--color-primary)]"
+              }
+              aria-hidden="true"
+            />
+            {g.label} <span className="opacity-60 normal-case">· {g.items.length}</span>
+          </h3>
+          <div className="grid md:grid-cols-2 gap-4">
+            {g.items.map((i) => {
+              const dist =
+                me && i.lat != null && i.lng != null
+                  ? distanceKm(me, [i.lat, i.lng])
+                  : null;
+              return <InterruptionCard key={i.id} item={i} distanceKm={dist} />;
+            })}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }

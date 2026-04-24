@@ -1,0 +1,33 @@
+import Link from "next/link";
+import { ArrowLeft, AlertTriangle } from "lucide-react";
+
+export default function NotFound() {
+  return (
+    <div className="container-narrow py-20 text-center">
+      <div className="text-6xl mb-4">🕵️</div>
+      <h1 className="font-[family-name:var(--font-sora)] text-3xl font-bold mb-3">
+        Întrerupere negăsită
+      </h1>
+      <p className="text-base text-[var(--color-text-muted)] mb-8 max-w-md mx-auto">
+        Entry-ul nu mai există în catalog — poate s-a finalizat sau a fost șters
+        de operator. Vezi lista curentă actualizată.
+      </p>
+      <div className="flex flex-wrap justify-center gap-3">
+        <Link
+          href="/intreruperi"
+          className="inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+        >
+          <ArrowLeft size={16} /> Toate întreruperile
+        </Link>
+        <a
+          href="https://github.com/andrei1000z/civic-bucuresti/issues"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors"
+        >
+          <AlertTriangle size={14} /> Raportează problemă
+        </a>
+      </div>
+    </div>
+  );
+}
