@@ -2,30 +2,36 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Plus, X, FileText, AlertTriangle, Building2, Wind } from "lucide-react";
 import { useCountyOptional } from "@/lib/county-context";
 import { ALL_COUNTIES } from "@/data/counties";
 
 /**
- * Floating action button that pins a "Fă sesizare" shortcut to the bottom
- * of the mobile viewport on every page except the form itself. Appears
- * only after a short scroll so it doesn't overlap the hero CTA on
- * landing. Uses county context so the button lands on the right flow.
+ * Floating speed-dial — butonul primar „+" pe mobile. La apăsare se deschide
+ * un mini-menu cu cele mai accesate acțiuni:
+ *   — Fă sesizare (target principal)
+ *   — Întreruperi
+ *   — Autorități
+ *   — Aer live
+ *
+ * La un nou click pe „+" (acum „✕") se închide. Apasă în afară → close
+ * automat. Apare doar după scroll ca să nu acopere hero-ul.
  */
 export function MobileFab() {
   const pathname = usePathname();
   const county = useCountyOptional();
   const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   const pathSlug = pathname.match(/^\/([a-z]{1,2})(?:\/|$)/)?.[1] ?? null;
   const validated = pathSlug && ALL_COUNTIES.some((c) => c.slug === pathSlug) ? pathSlug : null;
   const countySlug = county?.slug ?? validated;
-  const target = countySlug ? `/${countySlug}/sesizari` : "/sesizari";
+  const sesizariTarget = countySlug ? `/${countySlug}/sesizari` : "/sesizari";
+  const intreruperiTarget = countySlug ? `/${countySlug}/intreruperi` : "/intreruperi";
+  const aerTarget = countySlug ? `/${countySlug}/aer` : "/aer";
 
-  // Hide on the form itself + admin/auth/cont pages to avoid CTA
-  // duplication. Also hide on /urmareste (user who's looking up a
-  // code isn't in "make another sesizare" mindset yet).
   const hidden =
     /\/sesizari\/?$/.test(pathname) ||
     pathname === "/urmareste" ||
@@ -33,6 +39,12 @@ export function MobileFab() {
     pathname.startsWith("/auth") ||
     pathname.startsWith("/cont");
 
+  // Close menu on route change
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Scroll threshold for visibility
   useEffect(() => {
     if (typeof window === "undefined") return;
     const onScroll = () => setVisible(window.scrollY > 120);
@@ -41,26 +53,96 @@ export function MobileFab() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close on outside click / tap
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent | TouchEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", onClick);
+    return () => document.removeEventListener("pointerdown", onClick);
+  }, [open]);
+
   if (hidden) return null;
 
   return (
-    <Link
-      href={target}
-      aria-label="Trimite o sesizare"
-      title="Trimite o sesizare formală la primărie"
-      className={`lg:hidden fixed right-4 z-40 inline-flex items-center gap-2 h-12 px-5 rounded-full bg-[var(--color-primary)] text-white font-semibold shadow-[var(--shadow-xl)] transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-primary)]/40 ${
-        visible
-          ? "translate-y-0 opacity-100"
-          : "translate-y-20 opacity-0 pointer-events-none"
-      }`}
-      // Anchored above the iOS home indicator + any bottom-bar chrome
-      // by using safe-area-inset. Previously bottom-20 (5rem) was
-      // calibrated for most devices but overlapped the bottom nav on
-      // older iOS Safari and got clipped on iPhone 14+ devices.
+    <div
+      ref={wrapRef}
+      className="lg:hidden fixed right-4 z-40"
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 5rem)" }}
     >
-      <Plus size={18} strokeWidth={2.5} aria-hidden="true" />
-      Fă sesizare
+      {/* Action items — stack vertically, animate up when open */}
+      <div
+        className={`absolute right-0 bottom-full mb-3 flex flex-col items-end gap-2 transition-all duration-200 ${
+          open
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 translate-y-2 pointer-events-none"
+        }`}
+      >
+        <SpeedDialLink
+          href={sesizariTarget}
+          icon={<FileText size={16} />}
+          label="Fă sesizare"
+          bg="bg-[var(--color-primary)]"
+        />
+        <SpeedDialLink
+          href={intreruperiTarget}
+          icon={<AlertTriangle size={16} />}
+          label="Întreruperi"
+          bg="bg-orange-500"
+        />
+        <SpeedDialLink
+          href="/autoritati"
+          icon={<Building2 size={16} />}
+          label="Autorități"
+          bg="bg-slate-700"
+        />
+        <SpeedDialLink
+          href={aerTarget}
+          icon={<Wind size={16} />}
+          label="Aer live"
+          bg="bg-sky-600"
+        />
+      </div>
+
+      {/* Primary button: + / ✕ */}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label={open ? "Închide meniul" : "Deschide meniul de acțiuni"}
+        aria-expanded={open}
+        className={`inline-flex items-center justify-center w-14 h-14 rounded-full bg-[var(--color-primary)] text-white font-semibold shadow-[var(--shadow-xl)] transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-primary)]/40 ${
+          visible
+            ? "translate-y-0 opacity-100"
+            : "translate-y-20 opacity-0 pointer-events-none"
+        } ${open ? "rotate-45" : ""}`}
+      >
+        {open ? <X size={22} strokeWidth={2.5} /> : <Plus size={22} strokeWidth={2.5} />}
+      </button>
+    </div>
+  );
+}
+
+function SpeedDialLink({
+  href,
+  icon,
+  label,
+  bg,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  bg: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex items-center gap-2 h-11 pl-3 pr-4 rounded-full text-white font-medium text-sm shadow-lg ${bg} hover:brightness-110 transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-white/40`}
+    >
+      <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+        {icon}
+      </span>
+      {label}
     </Link>
   );
 }
