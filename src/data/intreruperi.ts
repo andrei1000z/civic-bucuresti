@@ -580,6 +580,60 @@ export function toIcsVEvent(item: Interruption): string {
     .join("\r\n");
 }
 
+/**
+ * Google Calendar direct-add URL — deschide Google Calendar pre-completat
+ * cu toate detaliile. User-ul apasă „Save" în GCal și gata.
+ *
+ * Format: https://calendar.google.com/calendar/render?action=TEMPLATE&...
+ */
+export function toGoogleCalendarUrl(item: Interruption): string {
+  const fmt = (iso: string) =>
+    new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const title = `${TYPE_ICONS[item.type]} ${TYPE_LABELS[item.type]} — ${item.reason.slice(0, 80)}`;
+  const details = [
+    item.excerpt ?? "",
+    "",
+    `Provider: ${item.provider}`,
+    `Adrese: ${item.addresses.join(", ")}`,
+    item.affectedPopulation
+      ? `Populație afectată: ~${item.affectedPopulation.toLocaleString("ro-RO")}`
+      : "",
+    "",
+    item.sourceEntryUrl ? `PDF oficial: ${item.sourceEntryUrl}` : "",
+    item.sourceUrl ? `Lista provider: ${item.sourceUrl}` : "",
+    "",
+    `Civia: https://civia.ro/intreruperi/${item.id}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const location = item.addresses.slice(0, 3).join(", ");
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: title,
+    dates: `${fmt(item.startAt)}/${fmt(item.endAt)}`,
+    details,
+    location,
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+/**
+ * Outlook.com calendar add URL.
+ */
+export function toOutlookCalendarUrl(item: Interruption): string {
+  const title = `${TYPE_ICONS[item.type]} ${TYPE_LABELS[item.type]} — ${item.reason.slice(0, 80)}`;
+  const params = new URLSearchParams({
+    path: "/calendar/action/compose",
+    rru: "addevent",
+    subject: title,
+    startdt: item.startAt,
+    enddt: item.endAt,
+    body: `${item.excerpt ?? ""}\n\nProvider: ${item.provider}\nAdrese: ${item.addresses.join(", ")}\n\nhttps://civia.ro/intreruperi/${item.id}`,
+    location: item.addresses.slice(0, 3).join(", "),
+  });
+  return `https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`;
+}
+
 export function toIcsCalendar(items: Interruption[]): string {
   return [
     "BEGIN:VCALENDAR",

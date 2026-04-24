@@ -13,6 +13,7 @@ export const dynamic = "force-dynamic";
 const ADMIN_TABS = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/sesizari", label: "Sesizări" },
+  { href: "/admin/intreruperi", label: "Întreruperi" },
   { href: "/admin/analytics", label: "Analytics" },
 ] as const;
 

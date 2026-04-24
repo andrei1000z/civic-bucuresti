@@ -15,6 +15,7 @@ import {
 } from "@/data/intreruperi";
 import { SITE_URL } from "@/lib/constants";
 import { IntreruperiFilters } from "./IntreruperiFilters";
+import { SubmitForm } from "./SubmitForm";
 
 export const metadata: Metadata = {
   title: "Întreruperi programate — apă, caldură, gaz, curent, lucrări stradă",
@@ -144,6 +145,23 @@ export default function IntreruperiPage() {
       ) : (
         <IntreruperiFilters items={all} />
       )}
+
+      {/* User submission — cineva care știe ceva despre întreruperi poate raporta */}
+      <section className="mt-12 border-t-2 border-dashed border-[var(--color-border)] pt-10">
+        <div className="text-center mb-6 max-w-2xl mx-auto">
+          <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-2">
+            Știi o întrerupere pe care nu o vezi aici?
+          </h2>
+          <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+            Anunțurile afișate în bloc, avizele din vecini, lucrările pe care
+            le vezi pe stradă — raportează-le aici. Moderarea durează câteva
+            ore, apoi apar în catalog pentru toți.
+          </p>
+        </div>
+        <div className="max-w-xl mx-auto">
+          <SubmitForm />
+        </div>
+      </section>
 
       {/* Subscribe bar — ICS + RSS + API */}
       <section className="mt-10 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">

@@ -176,7 +176,10 @@ export default function IntreruperiMap({ items }: { items: Interruption[] }) {
         <MapContainer
           center={center}
           zoom={zoom}
-          scrollWheelZoom={false}
+          scrollWheelZoom={true}
+          touchZoom={true}
+          doubleClickZoom={true}
+          zoomControl={true}
           style={{ width: "100%", height: "100%" }}
         >
           <TileLayer

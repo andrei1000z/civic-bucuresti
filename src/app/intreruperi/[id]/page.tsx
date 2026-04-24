@@ -7,7 +7,6 @@ import {
   Clock,
   Users,
   ExternalLink,
-  Calendar,
   Building2,
 } from "lucide-react";
 import {
@@ -22,6 +21,7 @@ import {
 import { SITE_URL } from "@/lib/constants";
 import { ShareButton } from "./ShareButton";
 import { MapClient } from "./MapClient";
+import { CalendarMenu } from "./CalendarMenu";
 
 export async function generateMetadata({
   params,
@@ -279,12 +279,7 @@ export default async function InterruptionDetail({
               Acțiuni
             </p>
             <div className="flex flex-col gap-2">
-              <a
-                href={`/api/intreruperi/${item.id}/ics`}
-                className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
-              >
-                <Calendar size={14} /> Adaugă în calendar
-              </a>
+              <CalendarMenu item={item} />
               <ShareButton
                 id={item.id}
                 title={`${TYPE_ICONS[item.type]} ${TYPE_LABELS[item.type]} — ${item.addresses[0] ?? ""}`}
