@@ -489,14 +489,55 @@ export const INTRERUPERI: Interruption[] = [
   },
 ];
 
+// ─── SCRAPED DATA ─────────────────────────────────────────────────────────────
+// Populat automat la fiecare 6h de scripts/scrape-intreruperi.mjs
+// (rulat de Claude routine trig_01RABuszPxBCWRabFkWavJqu).
+// Sursă: api.pmb.ro — deep links la PDF-urile oficiale PMB.
+import scrapedData from "./intreruperi-scraped.json" assert { type: "json" };
+
+interface ScrapedShape {
+  updated_at: string;
+  source: string;
+  count: number;
+  items: Array<Omit<Interruption, "lat" | "lng">>;
+}
+
+const SCRAPED = scrapedData as ScrapedShape;
+const SCRAPED_ITEMS: Interruption[] = SCRAPED.items.map((it) => ({
+  ...it,
+  type: it.type as InterruptionType,
+  status: it.status as InterruptionStatus,
+}));
+
+export const INTRERUPERI_LAST_SCRAPED = SCRAPED.updated_at;
+export const INTRERUPERI_SCRAPED_COUNT = SCRAPED.count;
+
+// Merge seed static cu date scrape-uite. Dacă un entry scrape-uit are
+// același externalId ca unul static, scrape-uitul câștigă (date mai
+// proaspete).
+const _MERGED: Interruption[] = [
+  ...INTRERUPERI,
+  ...SCRAPED_ITEMS.filter(
+    (s) => !INTRERUPERI.some((local) => local.externalId === s.externalId),
+  ),
+];
+
+// Override — de aici în jos, helper-ele folosesc catalogul merge-uit.
+// Păstrăm INTRERUPERI ca export original (seed-ul static — pentru teste)
+// dar expunem și getAllInterruptions() pentru consumatori.
+
+export function getAllInterruptions(): Interruption[] {
+  return _MERGED;
+}
+
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
 export function getInterruptionsForCounty(countyCode: string): Interruption[] {
-  return INTRERUPERI.filter((i) => i.county.toUpperCase() === countyCode.toUpperCase());
+  return _MERGED.filter((i) => i.county.toUpperCase() === countyCode.toUpperCase());
 }
 
 export function getInterruptionById(id: string): Interruption | null {
-  return INTRERUPERI.find((i) => i.id === id) ?? null;
+  return _MERGED.find((i) => i.id === id) ?? null;
 }
 
 /** ICS (iCalendar) export pentru un entry — compatibil Google Cal/Apple Cal/Outlook. */
@@ -559,7 +600,7 @@ export function toIcsCalendar(items: Interruption[]): string {
  */
 export function getActiveInterruptions(): Interruption[] {
   const now = Date.now();
-  return [...INTRERUPERI]
+  return [..._MERGED]
     .filter((i) => {
       if (i.status === "anulat") return false;
       if (i.status === "finalizat") return false;

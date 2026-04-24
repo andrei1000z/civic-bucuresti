@@ -10,6 +10,7 @@
     "fetch-osm": "tsx scripts/fetch-osm-bucharest.ts",
     "fetch-stiri": "tsx scripts/fetch-stiri.ts",
     "migrate": "tsx scripts/migrate.ts",
+    "scrape:intreruperi": "node scripts/scrape-intreruperi.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "npm run lint && npx tsc --noEmit && npm test"
