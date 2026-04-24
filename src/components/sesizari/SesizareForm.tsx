@@ -456,22 +456,26 @@ export function SesizareForm() {
     let lastAccuracy = Infinity;
     let hasAnyPosition = false;
     let geocodeCount = 0;
-    const target = 10;
+    let done = false;
+    const target = 15; // 15m e suficient pentru sesizare urbană (era 10m — rareori atins în oraș)
     setGpsAccuracy(null);
 
-    // Reverse geocode — can be called multiple times as precision improves.
-    // Each call gets a 5s timeout so a slow Nominatim doesn't stall the
-    // "detectare GPS..." spinner forever.
-    const doReverseGeocode = async (lat: number, lng: number, acc: number) => {
+    // Reverse geocode — rulează cât de devreme posibil la acuratețe grosieră
+    // (500-2000m → doar city level) și se rafinează când vine fix mai precis.
+    // Abort signal pe request curent când sosește un fix mai bun → nu rămâne
+    // un geocode „în urmă" care să suprascrie adresa proaspătă.
+    let currentGeocodeCtrl: AbortController | null = null;
+    const doReverseGeocode = async (lat: number, lng: number) => {
+      if (currentGeocodeCtrl) currentGeocodeCtrl.abort();
       geocodeCount++;
       const thisCall = geocodeCount;
       const ctrl = new AbortController();
+      currentGeocodeCtrl = ctrl;
       const tid = setTimeout(() => ctrl.abort(), 5_000);
       try {
         const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`, { signal: ctrl.signal });
         const json = await res.json();
         if (json.data && thisCall === geocodeCount) {
-          // Use shortAddress (clean format) or fall back to full address
           const addr = json.data.shortAddress || json.data.address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
           setData((d) => ({
             ...d,
@@ -483,46 +487,72 @@ export function SesizareForm() {
           if (json.data.locality) setDetectedLocality(json.data.locality);
         }
       } catch {
-        // Keep coordinates as fallback
         setData((d) => ({ ...d, locatie: d.locatie || `${lat.toFixed(5)}, ${lng.toFixed(5)}` }));
       } finally {
         clearTimeout(tid);
       }
     };
 
+    const stop = () => {
+      if (done) return;
+      done = true;
+      navigator.geolocation.clearWatch(watchId);
+      setGeoLoading(false);
+    };
+
+    const handleFix = (pos: GeolocationPosition, fromCache = false) => {
+      if (done) return;
+      hasAnyPosition = true;
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const acc = pos.coords.accuracy;
+
+      // Ignoră fix-uri identice / mai slabe decât ce avem deja
+      if (acc >= lastAccuracy) return;
+      lastAccuracy = acc;
+
+      setData((d) => ({ ...d, lat, lng }));
+      setGpsAccuracy(acc);
+
+      // Afișează coordonatele imediat ca feedback vizual (user vede că s-a
+      // prins ceva), geocodul le înlocuiește cu adresa reală când vine
+      if (geocodeCount === 0) {
+        setData((d) => ({
+          ...d,
+          locatie: `${lat.toFixed(5)}, ${lng.toFixed(5)} (se detectează adresa…)`,
+        }));
+      }
+
+      // Trigger reverse geocode pe trei praguri de acuratețe
+      // — ~2000m (city level, vine primul, sub 500ms)
+      // — ~100m (stradă, dacă vine)
+      // — ≤target (număr clar, dacă vine)
+      // Fiecare apel îl anulează pe cel anterior ca să nu dăm înapoi.
+      if (acc < 2000 && geocodeCount === 0) doReverseGeocode(lat, lng);
+      else if (acc < 100 && geocodeCount === 1) doReverseGeocode(lat, lng);
+      else if (acc <= target && geocodeCount <= 2) doReverseGeocode(lat, lng);
+
+      // Fix-ul din cache (maximumAge>0) e instant dar aproximativ — lasă
+      // watchPosition să continue să rafineze. Oprim doar la fix nativ
+      // sub prag.
+      if (!fromCache && acc <= target) stop();
+    };
+
+    // 1. INSTANT: getCurrentPosition cu maximumAge=60000 → întoarce fix-ul
+    //    cached dacă browserul are unul recent (< 1min). În multe cazuri
+    //    acesta vine sub 50ms și populăm harta instant.
+    navigator.geolocation.getCurrentPosition(
+      (pos) => handleFix(pos, true),
+      () => { /* ignoră — watchPosition va încerca oricum */ },
+      { enableHighAccuracy: false, timeout: 2000, maximumAge: 60000 },
+    );
+
+    // 2. ÎN PARALEL: watchPosition cu high accuracy → rafinare fresh
     const watchId = navigator.geolocation.watchPosition(
-      (pos) => {
-        hasAnyPosition = true;
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const acc = pos.coords.accuracy;
-
-        // Only update if more precise
-        if (acc < lastAccuracy) {
-          lastAccuracy = acc;
-          setData((d) => ({ ...d, lat, lng }));
-          setGpsAccuracy(acc);
-
-          // Instant: show coordinates while waiting for geocode
-          if (geocodeCount === 0) {
-            setData((d) => ({ ...d, locatie: `Coordonate: ${lat.toFixed(5)}, ${lng.toFixed(5)} (se detectează adresa...)` }));
-          }
-
-          // Geocode at different accuracy thresholds for progressive refinement
-          if (acc < 500 && geocodeCount === 0) doReverseGeocode(lat, lng, acc);
-          if (acc < 50 && geocodeCount === 1) doReverseGeocode(lat, lng, acc);
-          if (acc <= target && geocodeCount <= 2) doReverseGeocode(lat, lng, acc);
-
-          // Reached target — stop
-          if (acc <= target) {
-            navigator.geolocation.clearWatch(watchId);
-            setGeoLoading(false);
-          }
-        }
-      },
+      (pos) => handleFix(pos, false),
       (err) => {
-        navigator.geolocation.clearWatch(watchId);
-        setGeoLoading(false);
+        if (done) return;
+        stop();
         if (!hasAnyPosition) {
           if (err.code === 1) {
             setError("Permisiune refuzată — activează locația din setările browserului.");
@@ -535,27 +565,54 @@ export function SesizareForm() {
       },
       {
         enableHighAccuracy: true,
-        timeout: 30000, // 30s max
+        timeout: 10_000,
         maximumAge: 0,
-      }
+      },
     );
 
-    // Safety: stop watching after 30s even if target not reached
+    // Safety net: după 8s lăsăm ce avem (majoritatea fix-urilor bune sosesc
+    // în 2-5s; sub 8s user-ul devine nerăbdător).
     setTimeout(() => {
-      navigator.geolocation.clearWatch(watchId);
-      if (hasAnyPosition) setGeoLoading(false);
-    }, 30000);
-
-    // Safety: after 12s, stop watching even if we haven't hit target accuracy
-    // (user doesn't want to wait forever; we use whatever best fix we got)
-    setTimeout(() => {
-      navigator.geolocation.clearWatch(watchId);
-      setGeoLoading(false);
-      if (!hasAnyPosition) {
+      if (done) return;
+      if (hasAnyPosition) {
+        // Avem un fix, îl acceptăm chiar dacă nu e sub 15m.
+        stop();
+      } else {
+        stop();
         setError("Timeout — nu am putut obține locația. Introdu-o manual.");
       }
-    }, 12000);
+    }, 8_000);
   };
+
+  // Prefetch permission status — când form-ul se montează, dacă user-ul
+  // a acordat deja permisiunea în sesiuni anterioare (Permissions API
+  // returnează "granted"), tragem un fix cached în background ca să fie
+  // gata când apasă butonul GPS. Zero cost dacă permisiunea e „denied"
+  // sau „prompt" (nu declanșează popup-ul de permisiuni).
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    const nav = navigator as Navigator & {
+      permissions?: { query: (q: { name: PermissionName }) => Promise<PermissionStatus> };
+    };
+    if (!nav.permissions?.query) return;
+    let cancelled = false;
+    nav.permissions
+      .query({ name: "geolocation" as PermissionName })
+      .then((status) => {
+        if (cancelled || status.state !== "granted") return;
+        // Browser cache-uiește fix-ul → apelul de mai jos e gratuit și
+        // populează cache-ul navigatorului pentru click-ul pe GPS.
+        navigator.geolocation.getCurrentPosition(
+          () => { /* warm */ },
+          () => { /* ignore */ },
+          { enableHighAccuracy: false, timeout: 3000, maximumAge: 300_000 },
+        );
+      })
+      .catch(() => { /* ignore */ });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Auto-generate titlu from descriere if empty
   const effectiveTitlu = data.titlu || (data.descriere ? data.descriere.slice(0, 80).trim() : "");
@@ -1051,12 +1108,18 @@ ${today}`;
               type="button"
               onClick={getLocation}
               disabled={geoLoading}
-              className="shrink-0 h-11 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors flex items-center gap-2 text-sm disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              className="shrink-0 h-11 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors flex items-center gap-2 text-sm disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               aria-label={geoLoading ? "Se detectează locația" : "Folosește GPS-ul pentru a prinde locația actuală"}
               title="Folosește GPS-ul pentru a prinde locația actuală"
             >
               {geoLoading ? <Loader2 size={16} className="animate-spin" /> : <Locate size={16} />}
-              <span className="hidden sm:inline">{geoLoading ? "Se detectează..." : "GPS"}</span>
+              <span className="hidden sm:inline tabular-nums">
+                {geoLoading
+                  ? gpsAccuracy != null
+                    ? `±${Math.round(gpsAccuracy)}m…`
+                    : "Detectez…"
+                  : "GPS"}
+              </span>
             </button>
           </div>
           {data.lat && data.lng && (
