@@ -326,12 +326,218 @@ export const INTRERUPERI: Interruption[] = [
     excerpt:
       "Apă oprită 8h în Mamaia Nord — pregătire sezon estival.",
   },
+  // ─── EXTINDERI 2026-04-24 ──────────────────────────────────────────
+  {
+    id: "tm-drumul-taberei",
+    type: "caldura",
+    status: "programat",
+    provider: "Termoenergetica",
+    sourceUrl: "https://www.termoenergetica.ro/lista-avarii",
+    reason: "Înlocuire conductă distribuție secundară — cvartal Drumul Taberei 34",
+    addresses: [
+      "Drumul Taberei (între Str. Râul Doamnei și Str. Brașov)",
+      "Str. Brașov",
+      "Str. Răzoare",
+    ],
+    lat: 44.4253,
+    lng: 26.0383,
+    county: "B",
+    locality: "București",
+    sector: "S6",
+    startAt: iso(2, 8),
+    endAt: iso(3, 20),
+    affectedPopulation: 12500,
+    excerpt:
+      "Caldură întreruptă 36h pe Drumul Taberei cvartal 34 — înlocuire conductă.",
+  },
+  {
+    id: "apa-nova-floreasca",
+    type: "apa",
+    status: "programat",
+    provider: "Apa Nova București",
+    sourceUrl: "https://www.apanovabucuresti.ro/intreruperi",
+    reason: "Test presiune rețea Ø600mm — artera Floreasca",
+    addresses: [
+      "Calea Floreasca (între Piața Floreasca și B-dul Aerogării)",
+      "Str. Glinka",
+    ],
+    lat: 44.4645,
+    lng: 26.1072,
+    county: "B",
+    locality: "București",
+    sector: "S1",
+    startAt: iso(4, 23),
+    endAt: iso(5, 7),
+    affectedPopulation: 3800,
+    excerpt: "Apă oprită 8h noaptea pe Floreasca — test presiune.",
+  },
+  {
+    id: "pmb-bd-unirii-semafoare",
+    type: "lucrari-strazi",
+    status: "programat",
+    provider: "ASPMB",
+    sourceUrl: "https://www.pmb.ro/anunturi-lucrari",
+    reason: "Modernizare intersecție — semafoare + marcaje",
+    addresses: ["B-dul Unirii (intersecția cu Str. Nerva Traian)"],
+    lat: 44.4270,
+    lng: 26.1171,
+    county: "B",
+    locality: "București",
+    sector: "S3",
+    startAt: iso(5),
+    endAt: iso(9, 20),
+    affectedPopulation: 0,
+    excerpt: "Trafic restricționat 5 zile la intersecția Unirii/Nerva Traian.",
+  },
+  {
+    id: "distrigaz-cotroceni",
+    type: "gaz",
+    status: "programat",
+    provider: "Distrigaz Sud Rețele",
+    sourceUrl: "https://distrigazsud-retele.ro/avarii",
+    reason: "Verificare anuală branșamente — Cotroceni",
+    addresses: ["Str. Dr. Lister", "Str. Dr. Carol Davila", "B-dul Eroilor Sanitari"],
+    lat: 44.4357,
+    lng: 26.0654,
+    county: "B",
+    locality: "București",
+    sector: "S5",
+    startAt: iso(6, 8),
+    endAt: iso(6, 16),
+    affectedPopulation: 2600,
+    excerpt: "Gaz oprit 8h în Cotroceni — verificare branșamente.",
+  },
+  {
+    id: "edistr-titan",
+    type: "electricitate",
+    status: "programat",
+    provider: "E-Distribuție Muntenia",
+    sourceUrl: "https://sesizari.edistributie.com/harta-avarii",
+    reason: "Înlocuire stâlpi LEA 20kV — Titan",
+    addresses: ["B-dul 1 Decembrie 1918", "Str. Liviu Rebreanu", "Str. Câmpia Libertății"],
+    lat: 44.4183,
+    lng: 26.1638,
+    county: "B",
+    locality: "București",
+    sector: "S3",
+    startAt: iso(8, 9),
+    endAt: iso(8, 16),
+    affectedPopulation: 8400,
+    excerpt: "Curent oprit 7h în Titan — înlocuire stâlpi.",
+  },
+  {
+    id: "apa-nova-aviatorilor",
+    type: "apa",
+    status: "in-desfasurare",
+    provider: "Apa Nova București",
+    sourceUrl: "https://www.apanovabucuresti.ro/intreruperi",
+    reason: "Avarie conductă — intervenție urgentă",
+    addresses: ["B-dul Aviatorilor (nr. 60-82)", "Str. Londra"],
+    lat: 44.4615,
+    lng: 26.0867,
+    county: "B",
+    locality: "București",
+    sector: "S1",
+    startAt: iso(0, 4),
+    endAt: iso(0, 14),
+    affectedPopulation: 1200,
+    excerpt: "🚨 Avarie — apă oprită pe Aviatorilor, intervenție până la 14:00.",
+  },
+  {
+    id: "cs-cluj-floresti",
+    type: "lucrari-strazi",
+    status: "programat",
+    provider: "Primăria Florești",
+    reason: "Reparare carosabil — Str. Avram Iancu",
+    addresses: ["Str. Avram Iancu (Florești, între nr. 30 și 180)"],
+    lat: 46.7405,
+    lng: 23.4910,
+    county: "CJ",
+    locality: "Florești",
+    startAt: iso(10),
+    endAt: iso(20, 18),
+    excerpt: "Reparare carosabil 10 zile pe Avram Iancu, Florești.",
+  },
+  {
+    id: "raja-constanta-ct",
+    type: "apa",
+    status: "programat",
+    provider: "RAJA Constanța",
+    reason: "Înlocuire vane rețea — Tomis Nord",
+    addresses: ["B-dul Tomis (nr. 280-340)", "Str. Soveja"],
+    lat: 44.1920,
+    lng: 28.6395,
+    county: "CT",
+    locality: "Constanța",
+    startAt: iso(3, 9),
+    endAt: iso(3, 17),
+    affectedPopulation: 4200,
+    excerpt: "Apă oprită 8h în Tomis Nord — înlocuire vane.",
+  },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
 export function getInterruptionsForCounty(countyCode: string): Interruption[] {
   return INTRERUPERI.filter((i) => i.county.toUpperCase() === countyCode.toUpperCase());
+}
+
+export function getInterruptionById(id: string): Interruption | null {
+  return INTRERUPERI.find((i) => i.id === id) ?? null;
+}
+
+/** ICS (iCalendar) export pentru un entry — compatibil Google Cal/Apple Cal/Outlook. */
+export function toIcsVEvent(item: Interruption): string {
+  const esc = (s: string) =>
+    s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  const fmt = (iso: string) =>
+    new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const summary = `${TYPE_ICONS[item.type]} ${TYPE_LABELS[item.type]} — ${item.reason}`;
+  const description = [
+    item.excerpt ?? "",
+    "",
+    `Provider: ${item.provider}`,
+    `Status: ${STATUS_LABELS[item.status]}`,
+    `Adrese: ${item.addresses.join("; ")}`,
+    item.sourceUrl ? `Sursa: ${item.sourceUrl}` : "",
+    item.affectedPopulation
+      ? `Populație afectată: ~${item.affectedPopulation.toLocaleString("ro-RO")}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\\n");
+  const location = item.addresses.slice(0, 3).join(", ");
+  const now = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  return [
+    "BEGIN:VEVENT",
+    `UID:${item.id}@civia.ro`,
+    `DTSTAMP:${now}`,
+    `DTSTART:${fmt(item.startAt)}`,
+    `DTEND:${fmt(item.endAt)}`,
+    `SUMMARY:${esc(summary)}`,
+    `DESCRIPTION:${esc(description)}`,
+    `LOCATION:${esc(location)}`,
+    item.lat != null && item.lng != null ? `GEO:${item.lat};${item.lng}` : "",
+    `URL:https://civia.ro/intreruperi/${item.id}`,
+    `STATUS:${item.status === "anulat" ? "CANCELLED" : "CONFIRMED"}`,
+    "END:VEVENT",
+  ]
+    .filter(Boolean)
+    .join("\r\n");
+}
+
+export function toIcsCalendar(items: Interruption[]): string {
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Civia//Intreruperi//RO",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "X-WR-CALNAME:Întreruperi Civia",
+    "X-WR-TIMEZONE:Europe/Bucharest",
+    ...items.map(toIcsVEvent),
+    "END:VCALENDAR",
+  ].join("\r\n");
 }
 
 /**

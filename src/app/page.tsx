@@ -6,6 +6,7 @@ import { CountyPicker } from "./CountyPicker";
 import { LiveStatsBar } from "@/components/home/LiveStatsBar";
 import { TopVotedWidget } from "@/components/home/TopVotedWidget";
 import { LiveWeatherAqi } from "@/components/home/LiveWeatherAqi";
+import { IntreruperiWidget } from "@/components/home/IntreruperiWidget";
 import { ALL_COUNTIES } from "@/data/counties";
 import {
   PRIMARII,
@@ -132,6 +133,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* INTRERUPERI WIDGET */}
+      <IntreruperiWidget />
 
       {/* COVERAGE / AUTORITATI */}
       <section className="py-14 md:py-16 bg-[var(--color-surface)] border-y border-[var(--color-border)]">

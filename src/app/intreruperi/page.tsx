@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AlertTriangle, Calendar, MapPin, ExternalLink } from "lucide-react";
+import {
+  AlertTriangle,
+  Calendar,
+  MapPin,
+  ExternalLink,
+  Rss,
+  Download,
+} from "lucide-react";
 import {
   getActiveInterruptions,
   TYPE_ICONS,
@@ -104,7 +111,47 @@ export default function IntreruperiPage() {
         <IntreruperiFilters items={all} />
       )}
 
-      <section className="mt-12 bg-[var(--color-primary-soft)] rounded-[12px] p-6">
+      {/* Subscribe bar — ICS + RSS + API */}
+      <section className="mt-10 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+        <h2 className="font-semibold mb-3 flex items-center gap-2">
+          <Calendar size={16} /> Rămâi la curent automat
+        </h2>
+        <p className="text-sm text-[var(--color-text-muted)] mb-4 leading-relaxed">
+          Nu mai verifica manual. Subscribe la calendar sau RSS — actualizate
+          la 30 minute.
+        </p>
+        <div className="grid sm:grid-cols-3 gap-3">
+          <a
+            href="/api/intreruperi/ics"
+            download="civia-intreruperi.ics"
+            className="inline-flex items-center gap-2 h-11 px-4 rounded-[8px] bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors justify-center"
+          >
+            <Download size={14} /> Calendar (ICS)
+          </a>
+          <a
+            href="/intreruperi/rss"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 h-11 px-4 rounded-[8px] bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 transition-colors justify-center"
+          >
+            <Rss size={14} /> Flux RSS
+          </a>
+          <a
+            href="/api/intreruperi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 h-11 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-bg)] transition-colors justify-center"
+          >
+            <ExternalLink size={14} /> JSON API
+          </a>
+        </div>
+        <p className="text-xs text-[var(--color-text-muted)] mt-3 leading-relaxed">
+          <strong>Subscribe în Google Calendar:</strong> Add calendar → From URL
+          → <code className="text-[11px]">https://civia.ro/api/intreruperi/ics</code>
+        </p>
+      </section>
+
+      <section className="mt-6 bg-[var(--color-primary-soft)] rounded-[12px] p-6">
         <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2 flex items-center gap-2">
           <MapPin size={18} /> Surse oficiale
         </h2>
