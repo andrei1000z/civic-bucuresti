@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ThumbsUp, MessageSquare, MapPin, Filter, Image as ImgIcon, Loader2, Map as MapIconLucide, List } from "lucide-react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { ThumbsUp, MessageSquare, MapPin, Filter, Image as ImgIcon, Loader2, Map as MapIconLucide, List, Link as LinkIcon, Check } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ShareButton } from "./ShareButton";
 
@@ -23,14 +24,50 @@ const PAGE_SIZE = 20;
 
 export function SesizariPublice() {
   const county = useCountyOptional();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [rows, setRows] = useState<SesizareFeedRow[]>([]);
-  const [filterTip, setFilterTip] = useState<string>("toate");
-  const [filterStatus, setFilterStatus] = useState<string>("toate");
-  const [filterSector, setFilterSector] = useState<string>("toate");
-  const [sort, setSort] = useState<SortKey>("recent");
-  const [view, setView] = useState<ViewMode>("list");
+  // Read initial filter state from URL — so shared links carry filters
+  const [filterTip, setFilterTip] = useState<string>(
+    () => searchParams.get("tip") || "toate",
+  );
+  const [filterStatus, setFilterStatus] = useState<string>(
+    () => searchParams.get("status") || "toate",
+  );
+  const [filterSector, setFilterSector] = useState<string>(
+    () => searchParams.get("sector") || "toate",
+  );
+  const [sort, setSort] = useState<SortKey>(
+    () => (searchParams.get("sort") === "votate" ? "votate" : "recent"),
+  );
+  const [view, setView] = useState<ViewMode>(
+    () => (searchParams.get("view") === "map" ? "map" : "list"),
+  );
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // Push filter state into URL (replace, no history pollution)
+  // — so a copy-paste of current URL preserves exact view.
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filterTip !== "toate") params.set("tip", filterTip);
+    if (filterStatus !== "toate") params.set("status", filterStatus);
+    if (filterSector !== "toate") params.set("sector", filterSector);
+    if (sort !== "recent") params.set("sort", sort);
+    if (view !== "list") params.set("view", view);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [filterTip, filterStatus, filterSector, sort, view, router, pathname]);
+
+  const copyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* ignore */ }
+  };
 
   // "loading" is derived: true when last-fetched key differs from current filter key
   const fetchKey = `${filterTip}|${filterStatus}|${filterSector}|${sort}|${county?.id ?? "all"}`;
@@ -150,26 +187,36 @@ export function SesizariPublice() {
             <option value="votate">Cele mai votate</option>
           </select>
         </div>
-        <div className="mt-3 flex items-center justify-between text-xs">
+        <div className="mt-3 flex flex-wrap items-center justify-between text-xs gap-2">
           <span className="text-[var(--color-text-muted)]">
             {filtered.length} sesizări găsite · 🔴 live
           </span>
-          {(() => {
-            const params = new URLSearchParams();
-            if (filterTip !== "toate") params.set("tip", filterTip);
-            if (filterStatus !== "toate") params.set("status", filterStatus);
-            if (filterSector !== "toate") params.set("sector", filterSector);
-            const exportUrl = `/api/sesizari/export?${params.toString()}`;
-            return (
-              <a
-                href={exportUrl}
-                className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium"
-                title="Descarcă CSV cu filtrul curent"
-              >
-                📥 Export CSV
-              </a>
-            );
-          })()}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={copyUrl}
+              className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium"
+              title="Copiază link cu filtrul curent"
+            >
+              {copied ? <Check size={11} /> : <LinkIcon size={11} />}
+              {copied ? "Link copiat" : "Copiază link"}
+            </button>
+            {(() => {
+              const params = new URLSearchParams();
+              if (filterTip !== "toate") params.set("tip", filterTip);
+              if (filterStatus !== "toate") params.set("status", filterStatus);
+              if (filterSector !== "toate") params.set("sector", filterSector);
+              const exportUrl = `/api/sesizari/export?${params.toString()}`;
+              return (
+                <a
+                  href={exportUrl}
+                  className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium"
+                  title="Descarcă CSV cu filtrul curent"
+                >
+                  📥 Export CSV
+                </a>
+              );
+            })()}
+          </div>
         </div>
       </div>
 
