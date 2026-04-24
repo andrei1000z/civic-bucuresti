@@ -33,6 +33,10 @@ const inter = Inter({
   variable: "--font-inter",
   display: "swap",
   weight: ["400", "500", "600", "700"],
+  // adjustFontFallback reduce layout shift când font-ul custom se încarcă —
+  // Next ajustează metricile font-ului fallback să fie aproape identice.
+  adjustFontFallback: true,
+  preload: true,
 });
 
 const sora = Sora({
@@ -40,6 +44,8 @@ const sora = Sora({
   variable: "--font-sora",
   display: "swap",
   weight: ["500", "600", "700", "800"],
+  adjustFontFallback: true,
+  preload: true,
 });
 
 export const metadata: Metadata = {

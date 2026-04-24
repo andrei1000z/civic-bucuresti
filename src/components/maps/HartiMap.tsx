@@ -19,8 +19,32 @@ const METRO_INFO = [
 const LeafletMap = dynamic(() => import("./LeafletMap"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full bg-[var(--color-surface-2)] animate-pulse flex items-center justify-center">
-      <p className="text-[var(--color-text-muted)]">Se încarcă harta...</p>
+    // Skeleton mai explicit — rage clicks pe `body` apăreau când user-ul
+    // clickea pe zona goală a hărții, așteptând să se încarce. Acum vede
+    // clar o hartă stilizată (grid SVG) + spinner + mesaj cu tip de
+    // progres. Blocks clicks on body via absolute cover.
+    <div className="relative w-full h-full bg-[var(--color-surface-2)] overflow-hidden rounded-[12px]">
+      <svg
+        className="absolute inset-0 w-full h-full opacity-30"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <pattern id="gridMap" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#gridMap)" className="text-slate-400" />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
+        <div className="w-10 h-10 rounded-full border-4 border-[var(--color-primary)] border-t-transparent animate-spin" />
+        <p className="text-sm font-medium text-[var(--color-text)]">
+          Se încarcă harta...
+        </p>
+        <p className="text-[11px] text-[var(--color-text-muted)]">
+          Primul request durează mai mult (tiles OpenStreetMap)
+        </p>
+      </div>
     </div>
   ),
 });

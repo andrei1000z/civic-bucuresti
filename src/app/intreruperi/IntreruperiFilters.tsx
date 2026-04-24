@@ -28,8 +28,23 @@ import {
 const IntreruperiMap = dynamic(() => import("./IntreruperiMap"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[500px] bg-[var(--color-surface-2)] animate-pulse rounded-[12px] flex items-center justify-center">
-      <p className="text-[var(--color-text-muted)] text-sm">Se încarcă harta...</p>
+    <div className="relative w-full h-[500px] md:h-[600px] bg-[var(--color-surface-2)] overflow-hidden rounded-[12px]">
+      <svg
+        className="absolute inset-0 w-full h-full opacity-30"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <pattern id="gridIntr" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#gridIntr)" className="text-slate-400" />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+        <div className="w-10 h-10 rounded-full border-4 border-[var(--color-primary)] border-t-transparent animate-spin" />
+        <p className="text-sm font-medium">Se încarcă harta...</p>
+      </div>
     </div>
   ),
 });
