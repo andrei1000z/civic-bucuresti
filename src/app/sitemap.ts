@@ -3,6 +3,7 @@ import { SITE_URL } from "@/lib/constants";
 import { ALL_COUNTIES } from "@/data/counties";
 import { ghiduri } from "@/data/ghiduri";
 import { evenimente } from "@/data/evenimente";
+import { getAllInterruptions } from "@/data/intreruperi";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
 export const revalidate = 3600; // hourly
@@ -85,6 +86,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
+  // Intreruperi detail pages — toate entry-urile (seed + scrape-uite)
+  const intreruperiRoutes: MetadataRoute.Sitemap = getAllInterruptions().map((i) => ({
+    url: `${base}/intreruperi/${i.id}`,
+    lastModified: new Date(i.endAt) > now ? now : new Date(i.endAt),
+    changeFrequency: "daily" as const,
+    priority: 0.6,
+  }));
+
   // Dynamic sesizari + stiri (both pulled in parallel)
   let sesizariRoutes: MetadataRoute.Sitemap = [];
   let stiriRoutes: MetadataRoute.Sitemap = [];
@@ -135,6 +144,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...legacyRoutes,
     ...ghiduriRoutes,
     ...evenimenteRoutes,
+    ...intreruperiRoutes,
     ...sesizariRoutes,
     ...stiriRoutes,
   ];
