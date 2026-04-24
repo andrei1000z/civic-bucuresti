@@ -149,6 +149,7 @@ export function SesizareForm() {
   const DRAFT_KEY = "civic_sesizare_draft";
   const [draftRestoredAt, setDraftRestoredAt] = useState<string | null>(null);
   const [draftDismissed, setDraftDismissed] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
 
   // Restore draft on mount (once) — only offer if it's < 7 days old and
   // the current form is empty (user didn't start typing over it).
@@ -221,6 +222,7 @@ export function SesizareForm() {
             parkingObservedAt,
           }),
         );
+        setDraftSavedAt(Date.now());
       } catch { /* quota exceeded — silent */ }
     }, 4000);
     return () => clearTimeout(timer);
@@ -1284,6 +1286,17 @@ ${today}`;
           {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
           {submitting ? "Se generează textul și se salvează..." : "Trimite sesizarea la autorități"}
         </button>
+
+        {draftSavedAt && !submitting && !submitted && (
+          <p className="text-[10px] text-center text-[var(--color-text-muted)] mt-2 flex items-center justify-center gap-1">
+            <span
+              className="w-1.5 h-1.5 rounded-full bg-emerald-500"
+              aria-hidden="true"
+            />
+            Formularul se salvează automat — dacă închizi pagina, îl găsești la
+            revenire
+          </p>
+        )}
       </div>
 
       {/* Preview */}
