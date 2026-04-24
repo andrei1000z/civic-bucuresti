@@ -946,6 +946,42 @@ ${today}`;
           </div>
         )}
 
+        {/* Quick tip picker at top — analytics arată că 7 users au abandonat
+            înainte să aleagă tipul (step "before-tip"). Îl punem vizibil de
+            la început ca onboarding vizual: icon-urile spun rapid ce se poate
+            face, chiar și fără să citească formularul. Click = set tip +
+            scroll la descriere. */}
+        {!data.tip && (
+          <div className="mb-2 p-4 rounded-[12px] border border-[var(--color-primary)]/20 bg-[var(--color-primary-soft)]/40">
+            <p className="text-xs font-semibold text-[var(--color-primary)] mb-3 uppercase tracking-wider">
+              Ce fel de problemă raportezi?
+            </p>
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+              {SESIZARE_TIPURI.slice(0, 8).map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => {
+                    update("tip", t.value);
+                    setTipDetectedByAI(false);
+                    trackFunnelStep("sesizare-create", "tip-selected", { tip: t.value });
+                  }}
+                  className="group flex flex-col items-center gap-1 p-2 rounded-[8px] hover:bg-[var(--color-surface)] border border-transparent hover:border-[var(--color-primary)]/40 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                  title={t.label}
+                >
+                  <span className="text-2xl" aria-hidden="true">{t.icon}</span>
+                  <span className="text-[10px] text-center leading-tight text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] line-clamp-2">
+                    {t.label.split(" ").slice(0, 2).join(" ")}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] text-[var(--color-text-muted)] mt-3 text-center">
+              Sau continuă să scrii — AI-ul detectează tipul automat din descriere.
+            </p>
+          </div>
+        )}
+
         <Field label="Numele tău complet" required>
           <input
             type="text"

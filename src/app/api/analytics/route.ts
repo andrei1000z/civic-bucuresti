@@ -118,6 +118,16 @@ async function handleTrack(req: NextRequest, body: Record<string, unknown>) {
     pipe.hincrby(KEY.total, `color_${colorScheme}`, 1);
     pipe.hincrby(KEY.total, `conn_${connection}`, 1);
 
+    // Scriu și în hash-urile separate (viewports, colorSchemes, connections,
+    // orientations) ca să fie consumabile direct de dashboard + pull scripts.
+    // Bug istoric: datele erau doar în KEY.total ca prefix, dashboardul
+    // citea hash-urile separate și găsea gol.
+    pipe.hincrby(KEY.viewports, viewport, 1);
+    pipe.hincrby(KEY.colorSchemes, colorScheme, 1);
+    pipe.hincrby(KEY.connections, connection, 1);
+    const orientation = sanitizeKey(body.orientation, 10) || "unknown";
+    pipe.hincrby(KEY.orientations, orientation, 1);
+
     pipe.hincrby(KEY.routes, pathname, 1);
     pipe.hincrby(KEY.referrers, referrer, 1);
     pipe.hincrby(KEY.countries, country, 1);
