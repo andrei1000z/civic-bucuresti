@@ -10,7 +10,7 @@ export const revalidate = 3600; // hourly
 const COUNTY_PAGES = [
   "", "/sesizari", "/aer", "/harti", "/statistici", "/stiri", "/ghiduri",
   "/autoritati", "/bilete", "/evenimente", "/istoric", "/cum-functioneaza",
-  "/impact",
+  "/impact", "/intreruperi",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

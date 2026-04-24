@@ -26,6 +26,10 @@ const REDIRECT_EXACT = new Set([
   "/aer",
 ]);
 
+// NOTĂ: /intreruperi NU e în REDIRECT_EXACT — e pagină națională agregată
+// ca /autoritati. Versiunea per-județ există ca /{slug}/intreruperi și
+// e accesibilă separat, dar bara de URL /intreruperi arată toate județele.
+
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
