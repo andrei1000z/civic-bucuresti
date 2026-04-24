@@ -576,6 +576,7 @@ export function SesizareForm() {
 
   const canSubmit =
     data.nume.length >= 2 &&
+    data.adresa.trim().length >= 3 &&
     data.tip &&
     effectiveTitlu.length >= 3 &&
     data.locatie.length >= 3 &&
@@ -588,6 +589,7 @@ export function SesizareForm() {
     if (!canSubmit) {
       const missing: string[] = [];
       if (data.nume.length < 2) missing.push("Numele tău");
+      if (data.adresa.trim().length < 3) missing.push("Adresa ta de domiciliu");
       if (!data.tip) missing.push("Tip problemă");
       if (data.descriere.length < 10) missing.push("Descrierea problemei (min 10 caractere)");
       if (data.locatie.length < 3) missing.push("Locația problemei");
@@ -897,16 +899,19 @@ ${today}`;
           />
         </Field>
 
-        <Field label="Adresa ta de domiciliu">
+        <Field label="Adresa ta de domiciliu" required>
           <input
             type="text"
             autoComplete="street-address"
             value={data.adresa}
             onChange={(e) => update("adresa", e.target.value)}
             onBlur={() => { if (data.adresa) update("adresa", formatAddress(data.adresa)); }}
-            placeholder="Str. Exemplu nr. 12, Sector 3, București"
+            placeholder="Strada, număr (ex: Str. Matei Voievod nr. 12)"
             className={inputClass}
           />
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+            Apare în scrisoarea formală către autoritate — cer prin lege să știe cine face sesizarea.
+          </p>
         </Field>
 
         <Field label="Email de contact (opțional)">
@@ -928,12 +933,9 @@ ${today}`;
             <textarea
               value={data.descriere}
               onChange={(e) => update("descriere", e.target.value.slice(0, 2000))}
-              rows={mode === "complet" ? 6 : 4}
-              placeholder={mode === "complet"
-                ? "Scrie liber, în limbaj normal. Cu cât mai concret, cu atât primești răspuns mai rapid: dimensiuni aproximative (2m adâncime, 50m trotuar), între ce intersecții, pe ce bandă, dacă afectează o trecere de pietoni sau școală. AI-ul va pune asta în formă oficială."
-                : "Scrie în 2-3 propoziții ce ai văzut. AI-ul generează textul formal cu temei legal."
-              }
-              className={cn(inputClass, "resize-none py-3 pr-12")}
+              rows={mode === "complet" ? 7 : 5}
+              placeholder="Scrie liber, în limbaj normal. Ex: „Groapa adâncă pe trotuar lângă blocul H12, strada Matei Voievod."
+              className={cn(inputClass, "resize-y min-h-[120px] py-3 pr-12")}
             />
             <div className="absolute top-2 right-2">
               <VoiceInput
@@ -948,23 +950,13 @@ ${today}`;
               />
             </div>
           </div>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">
-            {data.descriere.length}/2000 · minim 10 caractere
+          <p className="text-xs text-[var(--color-text-muted)] mt-1 leading-relaxed">
+            <strong>Cu cât mai concret, cu atât primești răspuns mai rapid.</strong>{" "}
+            Dă dimensiuni aproximative, intersecția / nr. stâlp / reper, dacă e
+            pe trotuar sau carosabil. AI-ul pune textul în formă oficială după.{" "}
+            <span className="whitespace-nowrap">{data.descriere.length}/2000 · minim 10</span>
           </p>
         </Field>
-
-        <button
-          type="button"
-          onClick={() => handleAIImprove({ withPhotos: imagini.length > 0 })}
-          disabled={aiLoading || data.descriere.length < 10}
-          className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-purple-500"
-          title={imagini.length > 0 ? "AI citește descrierea + vede pozele și rescrie textul oficial" : "AI rescrie descrierea ta în limbaj oficial cu temei legal"}
-        >
-          {aiLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-          {aiLoading
-            ? (imagini.length > 0 ? "AI analizează pozele..." : "AI rescrie textul...")
-            : (imagini.length > 0 ? "Rescrie cu AI — citește și pozele" : "Rescrie cu AI în limbaj oficial")}
-        </button>
 
         <Field label="Tip problemă" required>
           <div className="flex items-center gap-2">
@@ -979,7 +971,7 @@ ${today}`;
               }}
               className={cn(inputClass, "flex-1")}
             >
-              <option value="">Alege tipul...</option>
+              <option value="">Alege tipul... (se completează automat din descriere)</option>
               {SESIZARE_TIPURI.map((t) => (
                 <option key={t.value} value={t.value}>
                   {t.icon} {t.label}
@@ -1174,6 +1166,28 @@ ${today}`;
               </div>
             )}
           </Field>
+        )}
+
+        {/* AI polish button — plasat după fotografii ca să aibă tot contextul
+            (tip + descriere + poze) la momentul click-ului. */}
+        <button
+          type="button"
+          onClick={() => handleAIImprove({ withPhotos: imagini.length > 0 })}
+          disabled={aiLoading || data.descriere.length < 10}
+          className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[10px] bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[var(--shadow-md)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-purple-500"
+          title={imagini.length > 0 ? "AI citește descrierea + vede pozele și rescrie textul oficial" : "AI rescrie descrierea ta în limbaj oficial cu temei legal"}
+        >
+          {aiLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+          {aiLoading
+            ? (imagini.length > 0 ? "AI analizează pozele..." : "AI rescrie textul...")
+            : data.formal_text
+              ? (imagini.length > 0 ? "Re-rescrie cu AI — include pozele" : "Re-rescrie textul cu AI")
+              : (imagini.length > 0 ? "Rescrie cu AI — citește și pozele" : "Rescrie cu AI în limbaj oficial")}
+        </button>
+        {data.formal_text && !aiLoading && (
+          <p className="text-xs text-[var(--color-text-muted)] text-center -mt-1">
+            <Sparkles size={11} className="inline text-purple-500" /> AI a rescris textul — apare în emailul final și pe pagina publică.
+          </p>
         )}
 
         <label className="flex items-center gap-3 p-4 bg-[var(--color-surface-2)] rounded-[12px] cursor-pointer">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, X, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PhotoUploaderProps {
@@ -45,7 +45,6 @@ async function compressImage(file: File): Promise<File> {
   });
 }
 
-// XHR upload that reports real transfer progress.
 function uploadWithProgress(
   fd: FormData,
   onProgress: (pct: number) => void,
@@ -66,43 +65,93 @@ function uploadWithProgress(
   });
 }
 
+// Pending item: a locally previewed photo that hasn't finished uploading
+// yet. We show it in the grid immediately so the form doesn't feel like
+// it's frozen while Supabase chew on the file.
+interface Pending {
+  id: string;
+  objectUrl: string;
+  progress: number; // 0-100
+  error?: string;
+}
+
 export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [processing, setProcessing] = useState(false);
+  const [pending, setPending] = useState<Pending[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const uploadFiles = useCallback(async (files: File[]) => {
-    const toUpload = files.slice(0, max - urls.length);
-    if (toUpload.length === 0) return;
-    setUploading(true);
-    setError(null);
-    setProgress(0);
-    setProcessing(true);
-    try {
-      const compressed = await Promise.all(toUpload.map(compressImage));
-      for (const f of compressed) {
-        if (f.size > MAX_BYTES) throw new Error(`"${f.name}" e prea mare (max 5MB).`);
+  // Revoke any leftover object URLs when the component unmounts — otherwise
+  // the blobs leak in memory until full page refresh.
+  useEffect(() => {
+    return () => {
+      pending.forEach((p) => URL.revokeObjectURL(p.objectUrl));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: only clean up on unmount
+  }, []);
+
+  const uploadFiles = useCallback(
+    async (files: File[]) => {
+      const remaining = max - urls.length - pending.length;
+      const toUpload = files.slice(0, Math.max(0, remaining));
+      if (toUpload.length === 0) return;
+
+      setError(null);
+
+      // ─── Show local previews IMMEDIATELY ────────────────────────
+      // The preview grid fills in under 1ms; Supabase can take its time.
+      const pendingItems: Pending[] = toUpload.map((f) => ({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        objectUrl: URL.createObjectURL(f),
+        progress: 0,
+      }));
+      setPending((prev) => [...prev, ...pendingItems]);
+
+      try {
+        // Compress in parallel, then upload. Compression is deliberately
+        // done in-browser so Supabase only sees <=1.5MB JPEGs.
+        const compressed = await Promise.all(toUpload.map(compressImage));
+        for (const f of compressed) {
+          if (f.size > MAX_BYTES) {
+            throw new Error(`"${f.name}" e prea mare (max 5MB).`);
+          }
+        }
+
+        const fd = new FormData();
+        compressed.forEach((f) => fd.append("files", f));
+
+        const res = await uploadWithProgress(fd, (pct) => {
+          // Map overall upload progress to each pending item (rough but OK
+          // since they all go in the same request body).
+          setPending((prev) =>
+            prev.map((p) =>
+              pendingItems.find((pi) => pi.id === p.id) ? { ...p, progress: pct } : p,
+            ),
+          );
+        });
+
+        const json = res.body as { error?: string; data?: { urls?: string[] } };
+        if (!res.ok) throw new Error(json?.error || `Eroare server (${res.status}).`);
+        const uploaded = json?.data?.urls ?? [];
+
+        // Commit: swap previews for real URLs + free the object URLs
+        onChange([...urls, ...uploaded]);
+        pendingItems.forEach((p) => URL.revokeObjectURL(p.objectUrl));
+        setPending((prev) =>
+          prev.filter((p) => !pendingItems.find((pi) => pi.id === p.id)),
+        );
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Eroare la upload";
+        setError(msg);
+        pendingItems.forEach((p) => URL.revokeObjectURL(p.objectUrl));
+        setPending((prev) =>
+          prev.filter((p) => !pendingItems.find((pi) => pi.id === p.id)),
+        );
       }
-      setProcessing(false);
-      const fd = new FormData();
-      compressed.forEach((f) => fd.append("files", f));
-      const res = await uploadWithProgress(fd, setProgress);
-      const json = res.body as { error?: string; data?: { urls?: string[] } };
-      if (!res.ok) throw new Error(json?.error || `Eroare server (${res.status}).`);
-      const uploaded = json?.data?.urls ?? [];
-      onChange([...urls, ...uploaded]);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Eroare la upload");
-    } finally {
-      setUploading(false);
-      setProgress(0);
-      setProcessing(false);
-    }
-  }, [urls, max, onChange]);
+    },
+    [urls, pending.length, max, onChange],
+  );
 
   const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -110,7 +159,6 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
     e.target.value = "";
   };
 
-  // Drag & drop
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragging(false);
@@ -118,27 +166,29 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
     if (files.length > 0) uploadFiles(files);
   };
 
-  // Paste
-  const handlePaste = useCallback((e: ClipboardEvent) => {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-    const files: File[] = [];
-    for (const item of Array.from(items)) {
-      if (item.type.startsWith("image/")) {
-        const f = item.getAsFile();
-        if (f) files.push(f);
+  const handlePaste = useCallback(
+    (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      const files: File[] = [];
+      for (const item of Array.from(items)) {
+        if (item.type.startsWith("image/")) {
+          const f = item.getAsFile();
+          if (f) files.push(f);
+        }
       }
-    }
-    if (files.length > 0) {
-      e.preventDefault();
-      uploadFiles(files);
-    }
-  }, [uploadFiles]);
+      if (files.length > 0) {
+        e.preventDefault();
+        uploadFiles(files);
+      }
+    },
+    [uploadFiles],
+  );
 
-  // Listen for paste on the upload zone
   const zoneRef = useRef<HTMLDivElement>(null);
 
-  const canAdd = urls.length < max;
+  const totalCount = urls.length + pending.length;
+  const canAdd = totalCount < max;
 
   return (
     <div
@@ -159,29 +209,10 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
               : "border-[var(--color-border)] hover:border-[var(--color-primary)]"
           } text-sm text-[var(--color-text-muted)]`}
         >
-          {uploading ? (
-            <div className="flex flex-col items-center gap-2 w-full px-6">
-              <div className="flex items-center gap-2">
-                <Loader2 size={16} className="animate-spin" />
-                <span className="text-xs tabular-nums">
-                  {processing ? "Se procesează imaginea..." : `Se încarcă... ${progress}%`}
-                </span>
-              </div>
-              {!processing && (
-                <div className="w-full h-1.5 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[var(--color-primary)] transition-all"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              )}
-            </div>
-          ) : (
-            <>
-              <Upload size={18} />
-              <span>Încarcă, trage sau lipește poze ({urls.length}/{max})</span>
-            </>
-          )}
+          <Upload size={18} />
+          <span>
+            Încarcă, trage sau lipește poze ({totalCount}/{max})
+          </span>
           <input
             ref={inputRef}
             type="file"
@@ -189,18 +220,17 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
             multiple
             className="hidden"
             onChange={handleFiles}
-            disabled={uploading}
           />
         </div>
       )}
 
       {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
 
-      {urls.length > 0 && (
+      {(urls.length > 0 || pending.length > 0) && (
         <div className="grid grid-cols-5 gap-2 mt-3">
           {urls.map((url, i) => (
             <div
-              key={i}
+              key={url}
               className="aspect-square rounded-[8px] bg-[var(--color-surface-2)] relative overflow-hidden group cursor-pointer"
               onClick={() => setLightbox(i)}
             >
@@ -216,10 +246,34 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
               </button>
             </div>
           ))}
+          {pending.map((p) => (
+            <div
+              key={p.id}
+              className="aspect-square rounded-[8px] bg-[var(--color-surface-2)] relative overflow-hidden"
+              aria-live="polite"
+              aria-label={`Se încarcă (${p.progress}%)`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={p.objectUrl}
+                alt="Se încarcă..."
+                className="w-full h-full object-cover opacity-70"
+              />
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 text-white gap-1.5">
+                <Loader2 size={16} className="animate-spin" />
+                <span className="text-[10px] font-semibold tabular-nums">{p.progress}%</span>
+              </div>
+              <div className="absolute bottom-0 inset-x-0 h-1 bg-black/30">
+                <div
+                  className="h-full bg-[var(--color-primary)] transition-all"
+                  style={{ width: `${p.progress}%` }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Lightbox */}
       {lightbox !== null && (
         <div
           className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center"
