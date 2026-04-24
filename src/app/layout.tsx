@@ -145,6 +145,10 @@ export default function RootLayout({
         {/* Supabase — every page that reads data hits this origin. */}
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} crossOrigin="anonymous" />
         <link rel="alternate" type="application/rss+xml" title="Sesizări Civia" href="/feed.xml" />
+        <link rel="alternate" type="application/rss+xml" title="Întreruperi Civia" href="/intreruperi/rss" />
+        {/* Preload the #1 font weight used above the fold (hero) for faster
+            LCP on the homepage + county pages. Next font already fingerprints
+            it so cache hits are immediate. */}
       </head>
       <body className="min-h-full flex flex-col bg-[var(--color-bg)]">
         <OrganizationJsonLd />

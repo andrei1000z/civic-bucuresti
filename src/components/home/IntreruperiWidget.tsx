@@ -50,6 +50,7 @@ export function IntreruperiWidget() {
             <Link
               key={i.id}
               href={`/intreruperi/${i.id}`}
+              prefetch
               className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-primary)]/30 transition-all min-w-0"
               style={{
                 borderLeftWidth: "4px",
