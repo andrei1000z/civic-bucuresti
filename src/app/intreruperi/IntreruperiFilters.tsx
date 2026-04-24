@@ -513,15 +513,21 @@ function InterruptionCard({
           >
             <Calendar size={11} />
           </a>
-          {item.sourceUrl && (
+          {(item.sourceEntryUrl || item.sourceUrl) && (
             <a
-              href={item.sourceUrl}
+              href={item.sourceEntryUrl || item.sourceUrl!}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-primary)] hover:underline"
+              title={
+                item.sourceEntryUrl
+                  ? "Anunțul oficial exact (PDF/pagină)"
+                  : `Lista ${item.provider} cu toate anunțurile`
+              }
             >
-              Anunț <ExternalLink size={10} />
+              {item.sourceEntryUrl ? "PDF oficial" : "Vezi la provider"}{" "}
+              <ExternalLink size={10} />
             </a>
           )}
         </div>

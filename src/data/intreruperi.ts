@@ -34,8 +34,21 @@ export interface Interruption {
   status: InterruptionStatus;
   /** Compania sau instituția (ex: "Apa Nova", "Termoenergetica", "PMB"). */
   provider: string;
-  /** Link către pagina providerului (sau anunțul public original). */
+  /** Lista de anunțuri a providerului (pagina de unde s-a făcut scrape-ul). */
   sourceUrl?: string;
+  /**
+   * Deep link EXACT la anunțul specific (PDF oficial, pagină HTML cu detalii
+   * pentru această întrerupere). Preferată când există — UI afișează
+   * „Anunț oficial" în loc de „Lista de anunțuri".
+   *
+   * Exemple de format real:
+   *   - "https://apanovabucuresti.ro/content/uploads/intreruperi/2026-05-01-victoriei.pdf"
+   *   - "https://www.termoenergetica.ro/wp-content/uploads/2026/05/avizare-magistrala-2.pdf"
+   *   - "https://www.pmb.ro/images/Anunturi/Lucrari/2026/HCGMB_45_magheru.pdf"
+   */
+  sourceEntryUrl?: string;
+  /** Titlul exact al anunțului oficial (din tag-ul H1 sau metadata PDF). */
+  sourceEntryTitle?: string;
   /** Motivul (ex: „Lucrări de reabilitare magistrala 2"). */
   reason: string;
   /** Lista de adrese / străzi afectate. */

@@ -240,16 +240,38 @@ export default async function InterruptionDetail({
               <Building2 size={12} /> Provider
             </p>
             <p className="font-medium mb-3">{item.provider}</p>
-            {item.sourceUrl && (
-              <a
-                href={item.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-[var(--color-primary)] hover:underline font-medium"
-              >
-                <ExternalLink size={11} /> Anunț oficial
-              </a>
-            )}
+            <div className="flex flex-col gap-2">
+              {item.sourceEntryUrl && (
+                <a
+                  href={item.sourceEntryUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-[var(--color-primary)] hover:underline font-medium"
+                  title={item.sourceEntryTitle}
+                >
+                  <ExternalLink size={11} />
+                  {item.sourceEntryUrl.toLowerCase().endsWith(".pdf")
+                    ? "PDF oficial"
+                    : "Anunț oficial"}
+                </a>
+              )}
+              {item.sourceUrl && item.sourceUrl !== item.sourceEntryUrl && (
+                <a
+                  href={item.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:underline"
+                  title={`Lista ${item.provider} cu toate anunțurile active`}
+                >
+                  <ExternalLink size={10} /> Toate anunțurile providerului
+                </a>
+              )}
+              {!item.sourceEntryUrl && !item.sourceUrl && (
+                <span className="text-[11px] text-[var(--color-text-muted)] italic">
+                  Linkul direct la anunț urmează să fie adăugat.
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
