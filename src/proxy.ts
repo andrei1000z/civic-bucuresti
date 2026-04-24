@@ -41,16 +41,32 @@ export default function proxy(request: NextRequest) {
   if (pathname === "/") {
     const url = request.nextUrl;
     if (url.searchParams.has("switch") || url.searchParams.has("home")) {
-      return NextResponse.next();
+      const res = NextResponse.next();
+      // Homepage picker — no caching (varies by cookie presence)
+      res.headers.set("Cache-Control", "private, no-store");
+      res.headers.set("Vary", "Cookie");
+      return res;
     }
     const saved = request.cookies.get(COOKIE_NAME)?.value?.toLowerCase();
     if (saved && COUNTY_SLUGS.has(saved)) {
       const target = new URL(`/${saved}`, url);
       // Preserve UTM / other query params on the redirect
       for (const [k, v] of url.searchParams) target.searchParams.set(k, v);
-      return NextResponse.redirect(target, 307);
+      const res = NextResponse.redirect(target, 307);
+      // CRITICAL: `Vary: Cookie` + `Cache-Control: private, no-store`
+      // pentru a preveni edge cache poisoning. Fără ele, Vercel/Cloudflare
+      // pot cache-ui răspunsul 307 pentru un user și-l servesc și
+      // altora — rezultatul e că toți ajung pe județul ultimului user
+      // (raportat de user 2026-04: „ma baga mereu pe Constanța deși
+      // eu am selectat București").
+      res.headers.set("Cache-Control", "private, no-store");
+      res.headers.set("Vary", "Cookie");
+      return res;
     }
-    return NextResponse.next();
+    const res = NextResponse.next();
+    res.headers.set("Cache-Control", "private, no-store");
+    res.headers.set("Vary", "Cookie");
+    return res;
   }
 
   // ─── County-scoped path shortcuts ───────────────────────────────
@@ -61,7 +77,12 @@ export default function proxy(request: NextRequest) {
 
   const url = request.nextUrl.clone();
   url.pathname = `/${county}${pathname}`;
-  return NextResponse.redirect(url, 308);
+  // 307 (nu 308) — redirect-ul depinde de cookie (temporar, per-user), nu
+  // permanent. 308 poate fi cache-uit agresiv de browsere ca relație fixă.
+  const res = NextResponse.redirect(url, 307);
+  res.headers.set("Cache-Control", "private, no-store");
+  res.headers.set("Vary", "Cookie");
+  return res;
 }
 
 export const config = {
