@@ -70,6 +70,34 @@ export default function HomePage() {
                 Explorează după județ
               </Link>
             </div>
+
+            {/* Quick actions pills */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-6 text-xs">
+              <Link
+                href="/intreruperi"
+                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-white/5 text-white/80 border border-white/10 hover:bg-white/15 hover:text-white transition-colors"
+              >
+                🚧 Întreruperi apă/caldură
+              </Link>
+              <Link
+                href="/autoritati"
+                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-white/5 text-white/80 border border-white/10 hover:bg-white/15 hover:text-white transition-colors"
+              >
+                🏢 Contacte autorități
+              </Link>
+              <Link
+                href="/urmareste"
+                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-white/5 text-white/80 border border-white/10 hover:bg-white/15 hover:text-white transition-colors"
+              >
+                🔍 Urmărește codul
+              </Link>
+              <Link
+                href="/aer"
+                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-white/5 text-white/80 border border-white/10 hover:bg-white/15 hover:text-white transition-colors"
+              >
+                🌬️ Aer live
+              </Link>
+            </div>
           </div>
         </div>
 
