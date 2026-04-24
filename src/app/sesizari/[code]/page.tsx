@@ -226,6 +226,48 @@ export default async function SesizareDetailPage({
             <p className="text-sm leading-relaxed whitespace-pre-wrap">{sesizare.descriere}</p>
           </section>
 
+          {/* Official response from authority — when admin pastes
+              the email reply from the primărie/PMB/etc. Treated as a
+              first-class section (featured above AI formal text) since
+              it's the authoritative answer. */}
+          {sesizare.official_response && (
+            <section
+              className={`border rounded-[12px] p-6 mb-6 ${
+                sesizare.status === "respins"
+                  ? "bg-slate-50 dark:bg-slate-900/20 border-slate-300 dark:border-slate-700"
+                  : sesizare.status === "amanata"
+                  ? "bg-orange-50 dark:bg-orange-950/20 border-orange-300 dark:border-orange-900/50"
+                  : "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-900/50"
+              }`}
+            >
+              <h2 className="font-semibold mb-2 flex items-center gap-2">
+                <span className="text-lg">
+                  {sesizare.status === "respins"
+                    ? "⛔"
+                    : sesizare.status === "amanata"
+                    ? "🕒"
+                    : "✅"}
+                </span>
+                Răspunsul autorității
+              </h2>
+              <p className="text-xs text-[var(--color-text-muted)] mb-3">
+                Status:{" "}
+                <strong>
+                  {STATUS_LABELS[sesizare.status] ?? sesizare.status}
+                </strong>
+                {sesizare.official_response_at && (
+                  <>
+                    {" · "}
+                    {formatDate(sesizare.official_response_at)}
+                  </>
+                )}
+              </p>
+              <blockquote className="text-sm leading-relaxed whitespace-pre-wrap border-l-2 border-current pl-4 opacity-90">
+                {sesizare.official_response}
+              </blockquote>
+            </section>
+          )}
+
           {/* Formal text — address stripped for privacy */}
           {sesizare.formal_text && (
             <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">

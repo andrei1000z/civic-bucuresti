@@ -30,6 +30,10 @@ export interface SesizareRow {
   resolved_at: string | null;
   resolved_by_author: boolean;
   resolved_photo_url: string | null;
+  /** Textul răspunsului oficial al autorității (introdus de admin). */
+  official_response: string | null;
+  /** Timestamp-ul înregistrării răspunsului oficial. */
+  official_response_at: string | null;
   county: string | null;
   locality: string | null;
   created_at: string;

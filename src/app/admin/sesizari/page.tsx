@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CheckCircle2, XCircle, Eye, Loader2, MapPin, Sparkles, X as CloseX, ArrowRight } from "lucide-react";
+import { CheckCircle2, XCircle, Eye, Loader2, MapPin, Sparkles, X as CloseX, ArrowRight, Clock, Edit3 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
 import { timeAgo } from "@/lib/utils";
@@ -33,6 +33,8 @@ interface PolishDiff {
   aiError: string | null;
 }
 
+type StatusValue = "nou" | "in-lucru" | "rezolvat" | "respins" | "amanata";
+
 export default function AdminSesizariPage() {
   const { toast } = useToast();
   const [rows, setRows] = useState<SesizareRow[]>([]);
@@ -40,6 +42,13 @@ export default function AdminSesizariPage() {
   const [acting, setActing] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
   const [polishDiff, setPolishDiff] = useState<PolishDiff | null>(null);
+  const [statusEdit, setStatusEdit] = useState<{
+    code: string;
+    titlu: string;
+    currentStatus: string;
+    status: StatusValue;
+    response: string;
+  } | null>(null);
 
   useEffect(() => {
     fetch("/api/sesizari?limit=200")
@@ -115,6 +124,33 @@ export default function AdminSesizariPage() {
       toast(`Polished ${code}`, "success");
     } catch (e) {
       toast(e instanceof Error ? e.message : "Eroare polish", "error");
+    } finally {
+      setActing(null);
+    }
+  };
+
+  const submitStatus = async () => {
+    if (!statusEdit) return;
+    const { code, status, response } = statusEdit;
+    setActing(`status-${code}`);
+    try {
+      const res = await fetch(`/api/admin/sesizari/${code}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status,
+          ...(response.trim() ? { official_response: response.trim() } : {}),
+        }),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || "Eroare");
+      setRows((prev) =>
+        prev.map((r) => (r.code === code ? { ...r, status } : r)),
+      );
+      toast(`Status actualizat: ${STATUS_LABELS[status] ?? status}`, "success");
+      setStatusEdit(null);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Eroare", "error");
     } finally {
       setActing(null);
     }
@@ -245,6 +281,111 @@ export default function AdminSesizariPage() {
         </div>
       )}
 
+      {statusEdit && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-start md:items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setStatusEdit(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] shadow-[var(--shadow-xl)] overflow-hidden my-8"
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
+              <div className="flex items-center gap-2 min-w-0">
+                <Edit3 size={18} className="text-[var(--color-primary)] shrink-0" />
+                <h3 className="font-semibold truncate">
+                  Schimbă status — {statusEdit.code}
+                </h3>
+              </div>
+              <button
+                onClick={() => setStatusEdit(null)}
+                className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)] shrink-0"
+                aria-label="Închide"
+              >
+                <CloseX size={16} />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
+                  Sesizare
+                </p>
+                <p className="text-sm font-medium line-clamp-2">{statusEdit.titlu}</p>
+                <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                  Status actual: <strong>{STATUS_LABELS[statusEdit.currentStatus] ?? statusEdit.currentStatus}</strong>
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="status-select" className="block text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                  Noul status
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                  {(["nou", "in-lucru", "amanata", "rezolvat", "respins"] as const).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setStatusEdit((p) => (p ? { ...p, status: s } : p))}
+                      className={`h-10 px-2 rounded-[8px] text-xs font-medium border transition-all ${
+                        statusEdit.status === s
+                          ? "text-white border-transparent"
+                          : "bg-[var(--color-surface-2)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-primary)]/40"
+                      }`}
+                      style={
+                        statusEdit.status === s
+                          ? { backgroundColor: STATUS_COLORS[s] }
+                          : undefined
+                      }
+                    >
+                      {s === "amanata" && <Clock size={10} className="inline mr-1" />}
+                      {STATUS_LABELS[s]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="official-response" className="block text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                  Răspunsul oficial al autorității <span className="opacity-60 normal-case">(opțional — copiază din email)</span>
+                </label>
+                <textarea
+                  id="official-response"
+                  value={statusEdit.response}
+                  onChange={(e) =>
+                    setStatusEdit((p) => (p ? { ...p, response: e.target.value } : p))
+                  }
+                  placeholder="Bună ziua, Vă mulțumim pentru sesizare..."
+                  rows={7}
+                  className="w-full px-3 py-2 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                />
+                <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
+                  Dacă e completat, se afișează public pe pagina sesizării
+                  + se trimite autorului prin email.
+                </p>
+              </div>
+            </div>
+            <div className="px-5 py-4 border-t border-[var(--color-border)] flex items-center justify-end gap-2 bg-[var(--color-bg)]">
+              <button
+                onClick={() => setStatusEdit(null)}
+                className="h-9 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
+              >
+                Anulează
+              </button>
+              <button
+                onClick={submitStatus}
+                disabled={acting === `status-${statusEdit.code}`}
+                className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors inline-flex items-center gap-1.5"
+              >
+                {acting === `status-${statusEdit.code}` ? (
+                  <><Loader2 size={12} className="animate-spin" /> Salvez...</>
+                ) : (
+                  <>Salvează <ArrowRight size={12} /></>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-2 mb-6">
         {(["all", "pending", "approved", "rejected"] as const).map((f) => (
           <button
@@ -327,6 +468,21 @@ export default function AdminSesizariPage() {
                     title="Rescrie cu AI + re-geocode"
                   >
                     {acting === `polish-${s.code}` ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                  </button>
+                  <button
+                    onClick={() =>
+                      setStatusEdit({
+                        code: s.code,
+                        titlu: s.titlu,
+                        currentStatus: s.status,
+                        status: (s.status as StatusValue) ?? "nou",
+                        response: "",
+                      })
+                    }
+                    className="w-9 h-9 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center hover:border-[var(--color-primary)]/40 transition-colors"
+                    title="Schimbă status + paste răspuns autoritate"
+                  >
+                    <Edit3 size={14} />
                   </button>
                   {s.moderation_status !== "approved" && (
                     <button

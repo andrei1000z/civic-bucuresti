@@ -121,6 +121,10 @@ export const STATUS_COLORS: Record<string, string> = {
   "in-lucru": "#F59E0B",
   rezolvat: "#059669",
   respins: "#6B7280",
+  // Amânat — portocaliu-burnt, distinct de „în lucru" (galben activ).
+  // Folosit când autoritatea răspunde „vom analiza în cadrul unui proiect
+  // mai amplu" — nici rezolvat, nici respins.
+  amanata: "#C2410C",
 };
 
 export const STATUS_LABELS: Record<string, string> = {
@@ -128,6 +132,7 @@ export const STATUS_LABELS: Record<string, string> = {
   "in-lucru": "În lucru",
   rezolvat: "Rezolvat",
   respins: "Respins",
+  amanata: "Amânat",
 };
 
 export const SOURCE_COLORS: Record<string, string> = {
