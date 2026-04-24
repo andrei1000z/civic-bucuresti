@@ -7,7 +7,6 @@ import {
   TYPE_LABELS,
 } from "@/data/intreruperi";
 
-export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "Întrerupere programată — Civia";
