@@ -43,6 +43,7 @@ export function Footer() {
               <li><Link href="/calendar-civic" className={linkCls}>Calendar civic</Link></li>
               <li><Link href="/judete" className={linkCls}>Toate cele 42 de județe</Link></li>
               <li><Link href="/autoritati" className={linkCls}>Autorități publice — contacte</Link></li>
+              <li><Link href="/intreruperi" className={linkCls}>Întreruperi apă/caldură/curent</Link></li>
               <li><Link href="/compara" className={linkCls}>Compară două județe</Link></li>
             </ul>
             <h4 className="font-semibold mt-5 mb-3 text-[var(--color-text)] text-sm">

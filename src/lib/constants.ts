@@ -45,6 +45,7 @@ export const NAV_MORE = [
   { href: "/calendar-civic", label: "Calendar civic", icon: "📅" },
   { href: "/judete", label: "Toate județele", icon: "🗺️" },
   { href: "/autoritati", label: "Autorități publice — contacte", icon: "🏢" },
+  { href: "/intreruperi", label: "Întreruperi apă, caldură, curent", icon: "🚧" },
   { href: "/compara", label: "Compară două județe", icon: "⚖️" },
   { href: "/impact", label: "Impact Civia — ce s-a rezolvat", icon: "📊" },
   { href: "/bilete", label: "Bilete și abonamente transport", icon: "🎫", countyOnly: true },

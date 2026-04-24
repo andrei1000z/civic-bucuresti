@@ -39,6 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/sanatate`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/compara`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/autoritati`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/intreruperi`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
   ];
 
   // Per-county pages: 42 counties × 8 pages = 336 URLs
