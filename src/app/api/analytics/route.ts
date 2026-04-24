@@ -221,6 +221,17 @@ async function handleTrack(req: NextRequest, body: Record<string, unknown>) {
     return NextResponse.json({ ok: true });
   }
 
+  // 404 tracking — path + referrer separat, ca să vedem broken links
+  if (eventType === "404") {
+    const path = sanitizeKey(body.pathname, 120) || "/";
+    const ref = sanitizeKey(body.referrer, 100) || "direct";
+    pipe.hincrby(KEY.notFoundPaths, path, 1);
+    pipe.hincrby(KEY.notFoundReferrers, ref, 1);
+    pipe.hincrby(KEY.eventsTotal, "404", 1);
+    await pipe.exec();
+    return NextResponse.json({ ok: true });
+  }
+
   if (eventType === "js-error") {
     const err = sanitizeKey(body.error, 200);
     const path = sanitizeKey(body.pathname, 120);

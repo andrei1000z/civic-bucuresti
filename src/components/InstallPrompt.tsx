@@ -48,13 +48,25 @@ export function InstallPrompt() {
   const install = async () => {
     if (!deferredPrompt) return;
     await deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
+    const choice = await deferredPrompt.userChoice;
+    // Track outcome separately for conversion analytics
+    if (typeof window !== "undefined") {
+      import("@/components/analytics/CiviaTracker").then(({ trackCustomEvent }) => {
+        trackCustomEvent(
+          choice.outcome === "accepted" ? "pwa-install-accepted" : "pwa-install-dismissed",
+        );
+      }).catch(() => { /* ignore */ });
+    }
     setDeferredPrompt(null);
     setVisible(false);
   };
 
   const dismiss = () => {
     localStorage.setItem(DISMISS_KEY, Date.now().toString());
+    // Track that user actively dismissed (vs. just ignored)
+    import("@/components/analytics/CiviaTracker").then(({ trackCustomEvent }) => {
+      trackCustomEvent("pwa-install-dismissed-before-show");
+    }).catch(() => { /* ignore */ });
     setVisible(false);
   };
 

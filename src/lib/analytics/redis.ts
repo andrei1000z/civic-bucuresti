@@ -90,6 +90,12 @@ export const KEY = {
 
   // PWA install funnel
   pwaEvents: "civia:analytics:pwa-events",
+
+  // 404 paths — path-level breakdown pentru broken links / URL-uri
+  // învechite / typo-uri / bots. Plus referrer-urile de unde vin
+  // (ajută să identificăm broken links pe site-uri externe).
+  notFoundPaths: "civia:analytics:404-paths",
+  notFoundReferrers: "civia:analytics:404-referrers",
 } as const;
 
 export const TTL = {
