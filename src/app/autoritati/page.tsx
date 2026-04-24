@@ -17,8 +17,22 @@ export const metadata: Metadata = {
   alternates: { canonical: "/autoritati" },
   openGraph: {
     title: "Autorități publice — Civia",
-    description: "Contacte verificate: primării + Poliția Locală, toate județele + orașe importante.",
+    description: "Contacte verificate: primării + Poliția Locală, toate județele + 298 localități.",
+    type: "website",
+    locale: "ro_RO",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Autorități publice — 298 primării verificate",
+    description: "Catalog național cu emailuri + telefoane. Trimite sesizarea la adresa corectă.",
+  },
+  keywords: [
+    "primării România",
+    "Poliția Locală",
+    "prefecturi",
+    "contacte autorități",
+    "email primărie",
+  ],
 };
 
 export default function AutoritatiIndexPage() {

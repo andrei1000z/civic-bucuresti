@@ -20,12 +20,38 @@ export const metadata: Metadata = {
   title: "Întreruperi programate — apă, caldură, gaz, curent, lucrări stradă",
   description:
     "Află din timp când se taie apa, caldura, gazul sau curentul în orașul tău + lucrările de stradă în desfășurare. Catalogate din surse oficiale (Apa Nova, Termoenergetica, Distrigaz, E-Distribuție, PMB).",
-  alternates: { canonical: "/intreruperi" },
+  alternates: {
+    canonical: "/intreruperi",
+    types: {
+      "application/rss+xml": [
+        { url: "/intreruperi/rss", title: "Întreruperi Civia RSS" },
+      ],
+      "text/calendar": [
+        { url: "/api/intreruperi/ics", title: "Calendar iCalendar" },
+      ],
+    },
+  },
   openGraph: {
     title: "Întreruperi programate — Civia",
     description:
       "Nu mai afla din baie că „s-a oprit iar apa”. Vezi în avans toate întreruperile programate + lucrările la stradă.",
+    type: "website",
+    locale: "ro_RO",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Întreruperi programate — Civia",
+    description: "Apă, caldură, gaz, curent + lucrări de stradă. Subscribe RSS sau iCal.",
+  },
+  keywords: [
+    "întreruperi apă",
+    "întreruperi caldură",
+    "lucrări stradă București",
+    "Apa Nova",
+    "Termoenergetica",
+    "avarie apă",
+    "programare lucrări",
+  ],
 };
 
 export const revalidate = 1800; // 30 min — seed static deocamdată, scraper vine în v2
