@@ -125,13 +125,21 @@ export default function IntreruperiPage() {
           <Calendar
             size={40}
             className="mx-auto mb-3 text-[var(--color-text-muted)]"
+            aria-hidden="true"
           />
           <h2 className="font-semibold text-lg mb-1">
             Nicio întrerupere în catalog momentan
           </h2>
-          <p className="text-sm text-[var(--color-text-muted)]">
-            Reîncarcă în câteva ore — catalogul se actualizează periodic.
+          <p className="text-sm text-[var(--color-text-muted)] mb-4">
+            Catalogul se actualizează automat la 6 ore. Vino din nou mai
+            târziu sau verifică direct la sursa oficială.
           </p>
+          <Link
+            href="/sesizari"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+          >
+            Raportează o problemă pe care ai văzut-o →
+          </Link>
         </div>
       ) : (
         <IntreruperiFilters items={all} />

@@ -117,6 +117,20 @@ html { scroll-behavior: smooth; }
    (none currently do). Reported via reddit feedback 2026-04. */
 html, body { overflow-x: clip; }
 
+/* Respect user's motion preference — pentru user-ii cu
+   vestibular sensitivity sau care dezactivează animații din
+   OS. Transitions + animations se reduc drastic. Nu disable
+   complet (ar strica focus indicators și altele), doar
+   scurtează la 0.01ms ca să arate instant. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Safe area for notched devices */
 body {
   padding-left: env(safe-area-inset-left);
