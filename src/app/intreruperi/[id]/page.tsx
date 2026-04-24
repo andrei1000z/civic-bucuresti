@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import dynamic from "next/dynamic";
 import {
   ArrowLeft,
   MapPin,
@@ -9,7 +8,6 @@ import {
   Users,
   ExternalLink,
   Calendar,
-  Share2,
   Building2,
 } from "lucide-react";
 import {
@@ -23,11 +21,7 @@ import {
 } from "@/data/intreruperi";
 import { SITE_URL } from "@/lib/constants";
 import { ShareButton } from "./ShareButton";
-
-const EvenimentMap = dynamic(
-  () => import("@/components/maps/EvenimentMap").then((m) => m.EvenimentMap),
-  { ssr: false },
-);
+import { MapClient } from "./MapClient";
 
 export async function generateMetadata({
   params,
@@ -228,7 +222,7 @@ export default async function InterruptionDetail({
           {item.lat != null && item.lng != null && (
             <section className="mb-6">
               <h2 className="font-semibold mb-3">Locația pe hartă</h2>
-              <EvenimentMap
+              <MapClient
                 coords={[item.lat, item.lng]}
                 label={item.reason}
                 color={TYPE_COLORS[item.type]}
