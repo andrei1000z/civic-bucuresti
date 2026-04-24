@@ -65,17 +65,25 @@ export function Navbar() {
         )}
       >
         <div className="container-narrow flex items-center justify-between h-16">
-          <Link href={countySlug ? `/${countySlug}` : "/"} className="flex items-center gap-2 shrink-0">
-            <div className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 flex items-center justify-center text-white">
-              <MapPin size={18} strokeWidth={2.5} />
-            </div>
-            <span className="font-[family-name:var(--font-sora)] font-bold text-lg text-[var(--color-text)]">
-              {SITE_NAME}
-            </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link href={countySlug ? `/${countySlug}` : "/"} className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 flex items-center justify-center text-white">
+                <MapPin size={18} strokeWidth={2.5} />
+              </div>
+              <span className="font-[family-name:var(--font-sora)] font-bold text-lg text-[var(--color-text)]">
+                {SITE_NAME}
+              </span>
+            </Link>
             {countyName && (
-              <span className="text-xs text-[var(--color-text-muted)] font-medium">· {countyName}</span>
+              <Link
+                href="/judete"
+                title="Schimbă județul"
+                className="text-xs text-[var(--color-text-muted)] font-medium hover:text-[var(--color-primary)] transition-colors"
+              >
+                · {countyName}
+              </Link>
             )}
-          </Link>
+          </div>
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-1">

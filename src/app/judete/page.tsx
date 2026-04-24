@@ -1,35 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MapPin, Users, Building2, ArrowRight } from "lucide-react";
+import { MapPin, ArrowRight } from "lucide-react";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { JudeteGrid } from "./JudeteGrid";
 
 export const metadata: Metadata = {
-  title: "Județele României — Civia",
-  description: "Alege județul tău pentru a depune sesizări, vedea autorități locale și statistici civice. Toate cele 42 de entități administrative ale României.",
+  title: "Alege sau schimbă județul — Civia",
+  description: "Civia reține preferința ta de județ la următoarea vizită. Pe această pagină poți schimba oricând județul salvat sau șterge preferința.",
   alternates: { canonical: "/judete" },
 };
 
 export const revalidate = 86400; // 24h
-
-interface County {
-  id: string;
-  name: string;
-  center_lat: number | null;
-  center_lng: number | null;
-}
-
-async function getCounties(): Promise<County[]> {
-  try {
-    const admin = createSupabaseAdmin();
-    const { data } = await admin
-      .from("counties")
-      .select("id, name, center_lat, center_lng")
-      .order("name", { ascending: true });
-    return (data ?? []) as County[];
-  } catch {
-    return [];
-  }
-}
 
 async function getCountyStats(): Promise<Record<string, number>> {
   try {
@@ -67,8 +48,7 @@ async function getAuthorityCount(): Promise<Record<string, number>> {
 }
 
 export default async function JudetePage() {
-  const [counties, sesizariStats, authStats] = await Promise.all([
-    getCounties(),
+  const [sesizariStats, authStats] = await Promise.all([
     getCountyStats(),
     getAuthorityCount(),
   ]);
@@ -81,57 +61,25 @@ export default async function JudetePage() {
           <MapPin size={14} /> 42 JUDEȚE
         </div>
         <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
-          Alege județul tău
+          Alege sau schimbă județul
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-2xl">
-          Selectează județul pentru a vedea autoritățile locale, a depune sesizări și a urmări rezolvarea problemelor din comunitatea ta.
+          Civia reține județul tău la următoarea vizită și te duce direct acolo.
+          De aici îl poți schimba oricând — click pe alt județ ca să-l
+          salvezi în loc.
         </p>
       </div>
 
-      {/* Grid de județe */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-        {counties.map((county) => {
-          const sesizari = sesizariStats[county.id] ?? 0;
-          const authorities = authStats[county.id] ?? 0;
-          return (
-            <Link
-              key={county.id}
-              href={`/judete/${county.id.toLowerCase()}`}
-              className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-2 py-0.5 rounded">
-                  {county.id}
-                </span>
-                <ArrowRight size={12} className="text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <p className="font-semibold text-sm mb-2 group-hover:text-[var(--color-primary)] transition-colors">
-                {county.name}
-              </p>
-              <div className="flex items-center gap-3 text-[10px] text-[var(--color-text-muted)]">
-                {sesizari > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Users size={10} /> {sesizari}
-                  </span>
-                )}
-                {authorities > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Building2 size={10} /> {authorities}
-                  </span>
-                )}
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+      <JudeteGrid sesizariStats={sesizariStats} authStats={authStats} />
 
       {/* CTA */}
       <div className="mt-12 bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 rounded-[12px] p-8 text-white text-center">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-3">
-          Nu găsești ce cauți?
+          Nu-ți găsești județul?
         </h2>
         <p className="text-white/80 mb-6 max-w-lg mx-auto">
-          Folosește sesizarea directă — detectăm automat județul și autoritățile din locația ta GPS.
+          Folosește sesizarea directă — detectăm automat județul și
+          autoritățile din locația ta GPS.
         </p>
         <Link
           href="/sesizari"

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Navigation, Loader2 } from "lucide-react";
+import { Search, Navigation, Loader2, Check, ArrowRight } from "lucide-react";
 import { ALL_COUNTIES, getCountyById } from "@/data/counties";
 
 /**
@@ -30,6 +30,21 @@ export function CountyPicker() {
   const [query, setQuery] = useState("");
   const [detecting, setDetecting] = useState(false);
   const [gpsError, setGpsError] = useState<string | null>(null);
+  const [savedSlug, setSavedSlug] = useState<string | null>(null);
+
+  // Read the saved county on mount — if present, the user is on the
+  // homepage by explicit `?switch=1` (middleware would have redirected
+  // them otherwise). Show a banner so they know which one they're
+  // replacing + a shortcut to bail out and keep the current saved one.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = localStorage.getItem("civia_county");
+    if (raw) setSavedSlug(raw.toLowerCase());
+  }, []);
+
+  const savedCounty = savedSlug
+    ? ALL_COUNTIES.find((c) => c.slug === savedSlug)
+    : null;
 
   const filtered = query.length >= 1
     ? ALL_COUNTIES.filter(
@@ -110,6 +125,26 @@ export function CountyPicker() {
   return (
     <section className="py-10">
       <div className="container-narrow">
+        {savedCounty && (
+          <div className="max-w-xl mx-auto mb-6 flex flex-wrap items-center gap-3 bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[12px] px-4 py-3">
+            <div className="flex items-center gap-2 text-sm min-w-0">
+              <Check size={16} className="text-[var(--color-primary)] shrink-0" />
+              <span className="truncate">
+                Județ salvat:{" "}
+                <strong className="text-[var(--color-primary)]">
+                  {savedCounty.name}
+                </strong>
+              </span>
+            </div>
+            <Link
+              href={`/${savedCounty.slug}`}
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] transition-colors ml-auto"
+            >
+              Mergi la {savedCounty.name} <ArrowRight size={12} />
+            </Link>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto mb-8">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
