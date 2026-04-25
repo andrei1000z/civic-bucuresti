@@ -132,7 +132,13 @@ export function FeedbackList({ rows: initial }: { rows: Row[] }) {
               <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--color-text-muted)] mb-4">
                 {r.email && (
                   <a
-                    href={`mailto:${r.email}?subject=Re: Feedback Civia (${r.id.slice(0, 8)})&body=Salut,%0D%0A%0D%0A`}
+                    href={`mailto:${r.email}?subject=${encodeURIComponent(
+                      `Re: Feedback Civia (${r.id.slice(0, 8)})`,
+                    )}&body=${encodeURIComponent(
+                      `Salut,\n\nMulțumim pentru mesajul tău:\n\n> ${r.text
+                        .split("\n")
+                        .join("\n> ")}\n\n---\nRăspuns:\n\n`,
+                    )}`}
                     className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium"
                   >
                     <Mail size={12} /> {r.email}

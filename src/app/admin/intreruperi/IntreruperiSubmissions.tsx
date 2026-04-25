@@ -134,7 +134,13 @@ export function IntreruperiSubmissions({ rows: initial }: { rows: Row[] }) {
                 )}
                 {r.email && (
                   <a
-                    href={`mailto:${r.email}`}
+                    href={`mailto:${r.email}?subject=${encodeURIComponent(
+                      `Re: Întrerupere raportată Civia (${r.id.slice(0, 8)})`,
+                    )}&body=${encodeURIComponent(
+                      `Salut,\n\nMulțumim că ai raportat întreruperea:\n\n> ${r.text
+                        .split("\n")
+                        .join("\n> ")}\n\n---\nDespre situație:\n\n`,
+                    )}`}
                     className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline"
                   >
                     <Mail size={12} /> {r.email}
