@@ -84,6 +84,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
     <>
       <div ref={ref} className="relative inline-block" data-no-print>
         <button
+          type="button"
           onClick={async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -95,7 +96,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
             setOpen(!open);
           }}
           className={cn(
-            "inline-flex items-center gap-1 rounded-[8px] text-xs font-medium transition-colors",
+            "inline-flex items-center gap-1 rounded-[8px] text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
             px,
             "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)]"
           )}
@@ -103,7 +104,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
           aria-haspopup="menu"
           aria-expanded={open}
         >
-          <Share2 size={iconSize} />
+          <Share2 size={iconSize} aria-hidden="true" />
           <span>Distribuie</span>
         </button>
 
@@ -153,17 +154,21 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
             </a>
             <div className="border-t border-[var(--color-border)]" />
             <button
+              type="button"
+              role="menuitem"
               onClick={() => { copyLink(); setOpen(false); }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors text-left focus:outline-none focus-visible:bg-[var(--color-surface-2)]"
             >
-              {copied ? <Check size={16} className="text-emerald-600" /> : <Link2 size={16} />}
+              {copied ? <Check size={16} className="text-emerald-600" aria-hidden="true" /> : <Link2 size={16} aria-hidden="true" />}
               <span>{copied ? "Copiat!" : "Copiază link + titlu"}</span>
             </button>
             <button
+              type="button"
+              role="menuitem"
               onClick={() => { setQrOpen(true); setOpen(false); }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors text-left focus:outline-none focus-visible:bg-[var(--color-surface-2)]"
             >
-              <QrCode size={16} />
+              <QrCode size={16} aria-hidden="true" />
               <span>QR code</span>
             </button>
           </div>
@@ -172,20 +177,25 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
 
       {qrOpen && (
         <div
-          className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
           onClick={() => setQrOpen(false)}
+          role="presentation"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-[12px] p-6 max-w-sm shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="qr-modal-title"
+            className="bg-white rounded-[12px] p-6 max-w-sm shadow-2xl animate-modal-pop"
           >
-            <h3 className="font-semibold text-lg mb-3 text-slate-900 text-center">Scanează codul</h3>
+            <h3 id="qr-modal-title" className="font-semibold text-lg mb-3 text-slate-900 text-center">Scanează codul</h3>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qrUrl} alt="QR code" className="mx-auto" width={300} height={300} />
-            <p className="text-xs text-center text-slate-600 mt-3 truncate">{url}</p>
+            <img src={qrUrl} alt={`Cod QR pentru ${url}`} className="mx-auto" width={300} height={300} />
+            <p className="text-xs text-center text-slate-600 mt-3 truncate" title={url}>{url}</p>
             <button
+              type="button"
               onClick={() => setQrOpen(false)}
-              className="mt-4 w-full h-10 rounded-[8px] bg-slate-900 text-white text-sm font-medium"
+              className="mt-4 w-full h-10 rounded-[8px] bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
             >
               Închide
             </button>

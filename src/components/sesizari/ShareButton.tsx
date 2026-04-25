@@ -37,17 +37,19 @@ export function ShareButton({ code, size = "sm" }: { code: string; size?: "sm" |
 
   return (
     <button
+      type="button"
       onClick={handleShare}
+      aria-live="polite"
       className={cn(
-        "inline-flex items-center gap-1 rounded-[8px] text-xs font-medium transition-colors",
+        "inline-flex items-center gap-1 rounded-[8px] text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
         px,
         copied
           ? "bg-emerald-500 text-white"
           : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)]"
       )}
-      aria-label="Distribuie"
+      aria-label={copied ? "Link copiat în clipboard" : "Distribuie sesizarea"}
     >
-      {copied ? <Check size={iconSize} /> : <Share2 size={iconSize} />}
+      {copied ? <Check size={iconSize} aria-hidden="true" /> : <Share2 size={iconSize} aria-hidden="true" />}
       <span>{copied ? "Copiat" : "Share"}</span>
     </button>
   );
