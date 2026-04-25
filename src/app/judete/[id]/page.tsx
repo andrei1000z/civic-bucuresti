@@ -129,15 +129,11 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
           {grouped.size === 0 ? (
             <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-8 text-center">
               <Building2 size={32} className="mx-auto mb-3 text-[var(--color-text-muted)]" />
-              <p className="text-[var(--color-text-muted)] mb-4">
+              <p className="text-[var(--color-text-muted)]">
                 Încă nu avem autorități înregistrate pentru acest județ.
+                Datele se completează manual și vor apărea în următoarele
+                update-uri.
               </p>
-              <Link
-                href="https://github.com/andrei1000z/civic-bucuresti/issues"
-                className="inline-flex items-center gap-2 text-sm text-[var(--color-primary)] hover:underline"
-              >
-                Ajută-ne să completăm baza de date <ArrowRight size={14} />
-              </Link>
             </div>
           ) : (
             <div className="space-y-4">
@@ -229,19 +225,6 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
             </div>
           )}
 
-          {/* CTA contribuie */}
-          <div className="mt-6 bg-[var(--color-surface-2)] rounded-[12px] p-5">
-            <h3 className="font-semibold text-sm mb-2">Cunoști emailuri de primării?</h3>
-            <p className="text-xs text-[var(--color-text-muted)] mb-3">
-              Ajută-ne să completăm baza de date cu emailuri oficiale ale primăriilor din {county.name}.
-            </p>
-            <Link
-              href="https://github.com/andrei1000z/civic-bucuresti/issues"
-              className="inline-flex items-center gap-2 text-xs text-[var(--color-primary)] font-medium hover:underline"
-            >
-              Contribuie cu date <ArrowRight size={12} />
-            </Link>
-          </div>
         </aside>
       </div>
     </div>

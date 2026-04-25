@@ -3,7 +3,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Bike, Footprints, Bus, BarChart3, Car, Layers, ChevronLeft, Locate, Loader2 } from "lucide-react";
+import { Bike, Footprints, Bus, BarChart3, Car, Layers, ChevronLeft, Locate, Loader2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { METRO_COLORS } from "@/lib/constants";
 
@@ -51,7 +51,7 @@ const LeafletMap = dynamic(() => import("./LeafletMap"), {
 
 const HartiLayers = dynamic(() => import("./HartiLayers"), { ssr: false });
 
-type Tab = "bicicleta" | "pejos" | "auto" | "transport" | "statistici";
+type Tab = "bicicleta" | "pejos" | "auto" | "transport" | "statistici" | "intreruperi";
 
 const tabs = [
   { id: "bicicleta" as const, label: "Cu bicicleta", icon: Bike, href: "/harti/bicicleta" },
@@ -59,6 +59,7 @@ const tabs = [
   { id: "auto" as const, label: "Cu mașina", icon: Car, href: "/harti/cumasina" },
   { id: "transport" as const, label: "Transport public", icon: Bus, href: "/harti/transport" },
   { id: "statistici" as const, label: "Calitatea aerului", icon: BarChart3, href: "/aer" },
+  { id: "intreruperi" as const, label: "Întreruperi", icon: AlertTriangle, href: "/intreruperi" },
 ];
 
 export function HartiMap({
@@ -367,7 +368,9 @@ export function HartiMap({
       <div className="flex-1 relative">
         <LeafletMap center={center} zoom={zoom} scrollWheelZoom flyToTarget={flyTarget} tileStyle={mapStyle}>
           <HartiLayers
-            activeTab={activeTab}
+            // „intreruperi" e tab navigation only (Link spre /intreruperi),
+            // nu un layer real → cast la unul existent pentru type safety
+            activeTab={activeTab === "intreruperi" ? "bicicleta" : activeTab}
             showDedicate={showDedicate}
             showMarcate={showMarcate}
             showRecomandate={showRecomandate}

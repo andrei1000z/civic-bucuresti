@@ -255,15 +255,8 @@ export default function IntreruperiPage() {
         </ul>
         <p className="text-xs text-[var(--color-text-muted)] mt-4">
           Vrei să adăugăm mai multe surse (Apavital Iași, RAJA, Aquatim, Colterm,
-          etc.)?{" "}
-          <Link
-            href="https://github.com/andrei1000z/civic-bucuresti/issues"
-            target="_blank"
-            className="text-[var(--color-primary)] hover:underline"
-          >
-            Deschide issue
-          </Link>
-          .
+          etc.)? Folosește formularul „Știi o întrerupere?" de mai sus să ne
+          spui despre operatorul tău local — îl adăugăm la următorul update.
         </p>
       </section>
     </div>

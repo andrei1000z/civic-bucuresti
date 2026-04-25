@@ -125,21 +125,12 @@ export default async function JudetIntreruperiPage({
         <h2 className="font-semibold mb-2 flex items-center gap-2 text-amber-900 dark:text-amber-300">
           <AlertTriangle size={16} /> Lipsește ceva?
         </h2>
-        <p className="text-sm text-amber-800 dark:text-amber-300 mb-3">
+        <p className="text-sm text-amber-800 dark:text-amber-300">
           Catalogul pentru {county.name} poate fi incomplet dacă nu avem
-          încă un scraper pentru operatorul tău local. Vrei să adăugăm o
-          sursă nouă?
+          încă un scraper pentru operatorul tău local. Folosește
+          formularul „Știi o întrerupere?" de pe pagina națională să ne
+          spui despre operatorul tău — îl adăugăm la următorul update.
         </p>
-        <a
-          href={`https://github.com/andrei1000z/civic-bucuresti/issues/new?title=${encodeURIComponent(
-            `Adaugă sursă întreruperi pentru ${county.name}`,
-          )}&labels=intreruperi`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-sm text-amber-900 dark:text-amber-300 hover:underline font-medium"
-        >
-          <ExternalLink size={12} /> Deschide issue pe GitHub
-        </a>
       </section>
     </div>
   );

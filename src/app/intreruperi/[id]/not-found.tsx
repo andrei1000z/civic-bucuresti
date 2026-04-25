@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, AlertTriangle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
@@ -19,14 +19,6 @@ export default function NotFound() {
         >
           <ArrowLeft size={16} /> Toate întreruperile
         </Link>
-        <a
-          href="https://github.com/andrei1000z/civic-bucuresti/issues"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors"
-        >
-          <AlertTriangle size={14} /> Raportează problemă
-        </a>
       </div>
     </div>
   );

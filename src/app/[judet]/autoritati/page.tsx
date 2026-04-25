@@ -274,8 +274,7 @@ export default async function AutoritatiPage({
         <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[12px] p-4 text-sm mb-6">
           <p className="text-amber-800 dark:text-amber-300">
             <strong>Notă:</strong> Datele de contact (emailuri, telefoane, site-uri web) ale autorităților sunt în curs de colectare.
-            Momentan afișăm informații generale.{" "}
-Dacă cunoști datele de contact ale instituțiilor din {county.name}, deschide un issue pe <a href="https://github.com/andrei1000z/civic-bucuresti/issues" target="_blank" rel="noopener noreferrer" className="underline font-medium">GitHub</a>.
+            Momentan afișăm informații generale.
           </p>
         </div>
       )}

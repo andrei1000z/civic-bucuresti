@@ -36,35 +36,28 @@ export const NAV_LINKS = [
 // Bilete, Istoric, Administrația are county-specific (local transport, local
 // mayoral history, local administration) — they make no sense without a
 // county to scope them to.
+// NAV_MORE — golit drastic la cererea user-ului 2026-04. Itemele
+// removate (impact, autoritati, calendar-civic, cum-functioneaza,
+// compara, aer, intreruperi, date publice) erau redundante:
+//   - Impact e accesibil din /sesizari deja
+//   - Autorități contacte se afișează automat la sesizare după ce pui
+//     adresa (resolver-ul găsește autoritatea competentă)
+//   - Aerul + Întreruperile sunt acum pe /harti ca tab-uri
+//   - Date publice (buget/sănătate/educație/siguranță) sunt link-uri
+//     interne; user-ii ajung la ele din statistici/sesizari
+//
+// Rămân doar item-urile pur county-specific care n-au alt loc bun:
+//   - Bilete (transport public local)
+//   - Istoric primari (per-județ)
 export const NAV_MORE = [
-  // Ordered by real click-through from analytics: aer > calendar > judete >
-  // compară > impact. The county-only slots land at the bottom of their
-  // own list, not mixed into the national view.
-  //
-  // `nationalOnly: true` = linkul NU se prefixează cu /{countySlug} nici
-  // când user-ul e într-un județ. Asta e pentru paginile care au sens
-  // doar ca vedere națională (catalog complet, comparare, selecție
-  // județ). Fără acest flag, Navbar-ul ar duce /b/judete, /cj/autoritati
-  // etc. — urls fake care n-au sens.
-  { href: "/aer", label: "Calitatea aerului — live", icon: "🌬️" },
-  { href: "/cum-functioneaza", label: "Cum funcționează administrația", icon: "🏛️", nationalOnly: true },
-  { href: "/calendar-civic", label: "Calendar civic", icon: "📅", nationalOnly: true },
-  { href: "/judete", label: "Toate județele", icon: "🗺️", nationalOnly: true },
-  { href: "/autoritati", label: "Autorități publice — contacte", icon: "🏢", nationalOnly: true },
-  { href: "/intreruperi", label: "Întreruperi apă, caldură, curent", icon: "🚧" },
-  { href: "/compara", label: "Compară două județe", icon: "⚖️", nationalOnly: true },
-  { href: "/impact", label: "Impact Civia — ce s-a rezolvat", icon: "📊" },
   { href: "/bilete", label: "Bilete și abonamente transport", icon: "🎫", countyOnly: true },
   { href: "/istoric", label: "Istoricul primarilor", icon: "📜", countyOnly: true },
 ] as const;
 
-// Date publice — separate submenu for transparency dashboards
-export const NAV_DATE_PUBLICE = [
-  { href: "/buget", label: "Bugetul țării — unde merg banii", icon: "💰" },
-  { href: "/sanatate", label: "Sănătate publică", icon: "❤️" },
-  { href: "/educatie", label: "Educație și BAC", icon: "🎓" },
-  { href: "/siguranta", label: "Siguranță și criminalitate", icon: "🛡️" },
-] as const;
+// Date publice eliminate din nav — accesibile direct via URL sau din
+// /statistici (county-scoped). Lista rămâne ca export gol pentru
+// compatibilitate cu codul care le importa.
+export const NAV_DATE_PUBLICE: Array<{ href: string; label: string; icon: string }> = [];
 
 export const GHID_DROPDOWN = [
   // Ordered by urgency / usefulness: sesizări (the core action) first,
