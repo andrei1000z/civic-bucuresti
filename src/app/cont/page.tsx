@@ -138,15 +138,16 @@ export default function ContPage() {
 
   if (loadError) {
     return (
-      <div className="container-narrow py-20 max-w-md text-center">
-        <AlertTriangle size={32} className="mx-auto mb-4 text-red-500" />
+      <div role="alert" className="container-narrow py-20 max-w-md text-center">
+        <AlertTriangle size={32} className="mx-auto mb-4 text-red-500" aria-hidden="true" />
         <h1 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-2">
           Nu s-a putut încărca contul
         </h1>
         <p className="text-[var(--color-text-muted)] mb-6">{loadError}</p>
         <button
+          type="button"
           onClick={loadData}
-          className="inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
+          className="inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
           Încearcă din nou
         </button>
@@ -174,7 +175,7 @@ export default function ContPage() {
           }}
           className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         >
-          <LogOut size={14} />
+          <LogOut size={14} aria-hidden="true" />
           Deconectare
         </button>
       </div>
@@ -305,7 +306,7 @@ export default function ContPage() {
             </div>
 
             {saveError && (
-              <div className="mt-3 p-2.5 rounded-[8px] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-xs text-red-700 dark:text-red-300">
+              <div role="alert" className="mt-3 p-2.5 rounded-[8px] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-xs text-red-700 dark:text-red-300">
                 {saveError}
               </div>
             )}
@@ -316,11 +317,11 @@ export default function ContPage() {
               className="mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
               {saving ? (
-                <Loader2 size={14} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin" aria-hidden="true" />
               ) : saved ? (
-                <CheckCircle2 size={14} />
+                <CheckCircle2 size={14} aria-hidden="true" />
               ) : (
-                <Save size={14} />
+                <Save size={14} aria-hidden="true" />
               )}
               {saving ? "Se salvează..." : saved ? "Salvat!" : "Salvează modificările"}
             </button>
@@ -349,9 +350,9 @@ export default function ContPage() {
             </h2>
             <Link
               href="/sesizari"
-              className="inline-flex items-center gap-2 h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)]"
+              className="inline-flex items-center gap-2 h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
-              <Plus size={14} />
+              <Plus size={14} aria-hidden="true" />
               Sesizare nouă
             </Link>
           </div>
@@ -368,13 +369,16 @@ export default function ContPage() {
             </div>
           ) : sesizari.length === 0 ? (
             <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-10 text-center">
-              <User size={32} className="mx-auto text-[var(--color-text-muted)] mb-3" />
-              <p className="text-[var(--color-text-muted)] mb-4">Nu ai încă nicio sesizare.</p>
+              <User size={32} className="mx-auto text-[var(--color-text-muted)] mb-3" aria-hidden="true" />
+              <p className="text-[var(--color-text-muted)] mb-2 font-medium">Nu ai încă nicio sesizare</p>
+              <p className="text-xs text-[var(--color-text-muted)] mb-4 max-w-md mx-auto">
+                Sesizările apar aici după ce le depui — primești cod de urmărire și emailul ajunge automat la primărie.
+              </p>
               <Link
                 href="/sesizari"
-                className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium"
+                className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
               >
-                Depune prima sesizare →
+                Depune prima sesizare <span aria-hidden="true">→</span>
               </Link>
             </div>
           ) : (
@@ -385,7 +389,7 @@ export default function ContPage() {
                   <Link
                     key={s.id}
                     href={`/sesizari/${s.code}`}
-                    className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all"
+                    className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
                   >
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <Badge bgColor={STATUS_COLORS[s.status] ?? "#64748b"} color="white">
@@ -396,16 +400,16 @@ export default function ContPage() {
                       {!s.publica && (
                         <Badge variant="warning" className="text-[10px]">Privat</Badge>
                       )}
-                      <span className="text-[10px] font-mono text-[var(--color-text-muted)] ml-auto">
+                      <span className="text-[10px] font-mono text-[var(--color-text-muted)] ml-auto" aria-label={`Cod sesizare ${s.code}`}>
                         {s.code}
                       </span>
                     </div>
                     <h3 className="font-semibold mb-1 line-clamp-1">{s.titlu}</h3>
                     <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-2">
                       <span>{s.locatie}</span>
-                      <span>·</span>
+                      <span aria-hidden="true">·</span>
                       <span>{formatDate(s.created_at)}</span>
-                      <ExternalLink size={10} className="ml-auto" />
+                      <ExternalLink size={10} className="ml-auto" aria-hidden="true" />
                     </p>
                   </Link>
                 );
@@ -459,15 +463,16 @@ export default function ContPage() {
             <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-5 relative">
               {!deleting && (
                 <button
+                  type="button"
                   onClick={() => setDeleteModal(false)}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center"
-                  aria-label="Închide"
+                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  aria-label="Închide modalul de ștergere cont"
                 >
-                  <X size={16} />
+                  <X size={16} aria-hidden="true" />
                 </button>
               )}
               <div className="flex items-start gap-3">
-                <AlertTriangle size={28} className="shrink-0 mt-1" />
+                <AlertTriangle size={28} className="shrink-0 mt-1" aria-hidden="true" />
                 <div>
                   <h3 id="delete-modal-title" className="font-[family-name:var(--font-sora)] text-xl font-bold">
                     Șterge contul definitiv
@@ -533,7 +538,7 @@ export default function ContPage() {
                   disabled={deleting || deleteConfirmText.trim().toUpperCase() !== "ȘTERGE"}
                   className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-red-500"
                 >
-                  {deleting ? <Loader2 size={14} className="animate-spin" /> : null}
+                  {deleting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : null}
                   Da, șterge definitiv
                 </button>
               </div>
