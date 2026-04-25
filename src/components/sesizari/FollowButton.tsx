@@ -53,6 +53,7 @@ export function FollowButton({ code, initialFollowing, initialCount }: Props) {
 
   return (
     <button
+      type="button"
       onClick={toggle}
       disabled={loading}
       className={cn(
@@ -62,18 +63,26 @@ export function FollowButton({ code, initialFollowing, initialCount }: Props) {
           : "bg-[var(--color-surface-2)] text-[var(--color-text)] hover:bg-[var(--color-border)]"
       )}
       aria-pressed={following}
+      aria-label={
+        following
+          ? `Oprește urmărirea (${count} ${count === 1 ? "persoană urmărește" : "persoane urmăresc"})`
+          : `Urmărește sesizarea — primești email la schimbări de status${count > 0 ? ` (${count} ${count === 1 ? "persoană urmărește deja" : "persoane urmăresc deja"})` : ""}`
+      }
       title={following ? "Oprește urmărirea" : "Primește email la schimbări de status"}
     >
       {loading ? (
-        <Loader2 size={14} className="animate-spin" />
+        <Loader2 size={14} className="animate-spin" aria-hidden="true" />
       ) : following ? (
-        <BookmarkCheck size={14} />
+        <BookmarkCheck size={14} aria-hidden="true" />
       ) : (
-        <Bookmark size={14} />
+        <Bookmark size={14} aria-hidden="true" />
       )}
       <span>{following ? "Urmărești" : "Urmărește"}</span>
       {count > 0 && (
-        <span className={cn("text-xs", following ? "text-white/80" : "text-[var(--color-text-muted)]")}>
+        <span
+          className={cn("text-xs tabular-nums", following ? "text-white/80" : "text-[var(--color-text-muted)]")}
+          aria-hidden="true"
+        >
           · {count}
         </span>
       )}

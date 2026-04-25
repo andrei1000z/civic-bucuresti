@@ -80,36 +80,40 @@ export function VoteButtons({
       )}
     >
       <button
+        type="button"
         onClick={() => handleVote(1)}
         disabled={loading}
+        aria-pressed={userVote === 1}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 transition-colors font-medium",
+          "inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 transition-colors font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
           userVote === 1
             ? "bg-emerald-500 text-white"
             : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)]",
           textClass
         )}
-        aria-label="Mă afectează și pe mine — votează pozitiv"
+        aria-label={`Mă afectează și pe mine — votează pozitiv (${upvotes} ${upvotes === 1 ? "vot" : "voturi"})`}
         title="Mă afectează și pe mine — votează pozitiv"
       >
-        <ThumbsUp size={iconSize} />
-        {upvotes}
+        <ThumbsUp size={iconSize} aria-hidden="true" />
+        <span className="tabular-nums">{upvotes}</span>
       </button>
       <button
+        type="button"
         onClick={() => handleVote(-1)}
         disabled={loading}
+        aria-pressed={userVote === -1}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 transition-colors font-medium",
+          "inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 transition-colors font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
           userVote === -1
             ? "bg-red-500 text-white"
             : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)]",
           textClass
         )}
-        aria-label="Nu cred că e o problemă reală — votează negativ"
+        aria-label={`Nu cred că e o problemă reală — votează negativ (${downvotes} ${downvotes === 1 ? "vot" : "voturi"})`}
         title="Nu cred că e o problemă reală — votează negativ"
       >
-        <ThumbsDown size={iconSize} />
-        {downvotes}
+        <ThumbsDown size={iconSize} aria-hidden="true" />
+        <span className="tabular-nums">{downvotes}</span>
       </button>
     </div>
   );
