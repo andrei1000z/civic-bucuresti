@@ -78,6 +78,8 @@ export function MobileFab() {
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 translate-y-2 pointer-events-none"
         }`}
+        role="menu"
+        aria-hidden={!open}
       >
         <SpeedDialLink
           href={sesizariTarget}
@@ -109,15 +111,17 @@ export function MobileFab() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        aria-label={open ? "Închide meniul" : "Deschide meniul de acțiuni"}
+        aria-label={open ? "Închide meniul de acțiuni rapide" : "Deschide meniul de acțiuni rapide"}
         aria-expanded={open}
+        aria-haspopup="menu"
+        tabIndex={visible ? 0 : -1}
         className={`inline-flex items-center justify-center w-14 h-14 rounded-full bg-[var(--color-primary)] text-white font-semibold shadow-[var(--shadow-xl)] transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-primary)]/40 ${
           visible
             ? "translate-y-0 opacity-100"
             : "translate-y-20 opacity-0 pointer-events-none"
         } ${open ? "rotate-45" : ""}`}
       >
-        {open ? <X size={22} strokeWidth={2.5} /> : <Plus size={22} strokeWidth={2.5} />}
+        {open ? <X size={22} strokeWidth={2.5} aria-hidden="true" /> : <Plus size={22} strokeWidth={2.5} aria-hidden="true" />}
       </button>
     </div>
   );
@@ -137,9 +141,10 @@ function SpeedDialLink({
   return (
     <Link
       href={href}
+      role="menuitem"
       className={`inline-flex items-center gap-2 h-11 pl-3 pr-4 rounded-full text-white font-medium text-sm shadow-lg ${bg} hover:brightness-110 transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-white/40`}
     >
-      <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+      <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0" aria-hidden="true">
         {icon}
       </span>
       {label}

@@ -55,10 +55,10 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
   };
 
   return (
-    <section>
-      <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4 flex items-center gap-2">
-        <MessageSquare size={18} />
-        Comentarii ({comments.length})
+    <section aria-labelledby="comments-heading">
+      <h3 id="comments-heading" className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4 flex items-center gap-2">
+        <MessageSquare size={18} aria-hidden="true" />
+        Comentarii (<span className="tabular-nums">{comments.length}</span>)
       </h3>
 
       {/* Compose */}
@@ -68,37 +68,40 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
       >
         {user ? (
           <>
+            <label htmlFor="comment-body" className="sr-only">Comentariul tău</label>
             <textarea
+              id="comment-body"
               value={body}
               onChange={(e) => setBody(e.target.value.slice(0, 2000))}
               rows={3}
               placeholder="Scrie un comentariu..."
+              aria-describedby="comment-count"
               className="w-full p-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               disabled={posting}
             />
             <div className="flex items-center justify-between mt-2">
-              <span className="text-xs text-[var(--color-text-muted)]">
+              <span id="comment-count" className="text-xs text-[var(--color-text-muted)] tabular-nums">
                 {body.length}/2000
               </span>
               <button
                 type="submit"
                 disabled={!body.trim() || posting}
-                className="inline-flex items-center gap-2 h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center gap-2 h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
                 aria-busy={posting}
               >
-                {posting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                {posting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Send size={14} aria-hidden="true" />}
                 {posting ? "Se trimite..." : "Trimite"}
               </button>
             </div>
-            {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
+            {error && <p role="alert" className="text-xs text-red-500 mt-2">{error}</p>}
           </>
         ) : (
           <button
             type="button"
             onClick={openAuthModal}
-            className="w-full py-3 text-sm text-center text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] rounded-[8px] transition-colors"
+            className="w-full py-3 text-sm text-center text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] rounded-[8px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
-            Autentifică-te ca să comentezi →
+            Autentifică-te ca să comentezi <span aria-hidden="true">→</span>
           </button>
         )}
       </form>
