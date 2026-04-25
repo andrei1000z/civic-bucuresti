@@ -91,35 +91,36 @@ export function ParkingHotspotModal({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
+      className="fixed inset-0 z-[9999] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto animate-fade-in"
       onClick={onClose}
       role="presentation"
     >
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Zonă cu parcări recurente"
-        className="w-full max-w-xl my-8 bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-xl)] border border-[var(--color-border)] outline-none"
+        aria-labelledby="hotspot-title"
+        className="w-full max-w-xl my-8 bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-xl)] border border-[var(--color-border)] outline-none animate-modal-pop"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3 px-6 py-4 border-b border-[var(--color-border)]">
           <div className="flex items-start gap-3">
-            <div className="shrink-0 w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-600 flex items-center justify-center">
+            <div className="shrink-0 w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-600 flex items-center justify-center" aria-hidden="true">
               <AlertTriangle size={18} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold">Zonă cu probleme recurente</h2>
+              <h2 id="hotspot-title" className="text-lg font-semibold">Zonă cu probleme recurente</h2>
               <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-                Am detectat {data.count} sesizări de parcare ilegală la mai puțin de 50m de locația ta.
+                Am detectat <strong className="tabular-nums">{data.count}</strong> {data.count === 1 ? "sesizare" : "sesizări"} de parcare ilegală la mai puțin de 50m de locația ta.
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-[var(--color-surface-2)] transition-colors"
-            aria-label="Închide"
+            className="p-1.5 rounded-full hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            aria-label="Închide modalul"
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
@@ -138,11 +139,13 @@ export function ParkingHotspotModal({
                   <li key={s.code}>
                     <Link
                       href={`/sesizari/${s.code}`}
-                      className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline"
+                      className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
                       target="_blank"
+                      rel="noopener noreferrer"
                     >
                       <span className="font-mono font-semibold">{s.code}</span>
-                      <ExternalLink size={10} />
+                      <ExternalLink size={10} aria-hidden="true" />
+                      <span className="sr-only">(deschide în tab nou)</span>
                     </Link>
                     <span className="ml-2 text-[var(--color-text-muted)]">{s.titlu}</span>
                   </li>
@@ -150,7 +153,7 @@ export function ParkingHotspotModal({
               </ul>
               {data.count > data.sample.length && (
                 <p className="text-[11px] text-[var(--color-text-muted)]">
-                  ... și încă {data.count - data.sample.length} sesizări.
+                  ... și încă <span className="tabular-nums">{data.count - data.sample.length}</span> {data.count - data.sample.length === 1 ? "sesizare" : "sesizări"}.
                 </p>
               )}
             </div>
@@ -165,14 +168,15 @@ export function ParkingHotspotModal({
           <div className="flex flex-col sm:flex-row gap-2 pt-2">
             <a
               href={mailto}
-              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors flex-1"
+              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors flex-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
-              <Shield size={15} />
+              <Shield size={15} aria-hidden="true" />
               Da, trimite cererea către ASPMB
             </a>
             <button
+              type="button"
               onClick={onClose}
-              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors"
+              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
               Nu, mulțumesc
             </button>
