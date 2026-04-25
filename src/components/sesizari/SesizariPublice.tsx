@@ -289,7 +289,8 @@ export function SesizariPublice() {
               <Link
                 key={s.id}
                 href={`/sesizari/${s.code}`}
-                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-primary)]/30 transition-all overflow-hidden min-w-0"
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-primary)]/30 transition-all overflow-hidden min-w-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+                aria-label={`${s.titlu} — ${STATUS_LABELS[s.status]}, ${s.upvotes} ${s.upvotes === 1 ? "vot" : "voturi"}, ${timeAgo(s.created_at)}`}
               >
                 <div className="flex items-start justify-between mb-3 gap-2 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -297,24 +298,30 @@ export function SesizariPublice() {
                       {STATUS_LABELS[s.status]}
                     </Badge>
                     <Badge variant="neutral">
-                      <span className="mr-1">{tipIcon}</span>
+                      <span className="mr-1" aria-hidden="true">{tipIcon}</span>
                       {tipLabel}
                     </Badge>
                     {s.formal_text && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 text-[10px] font-medium">
-                        ✨ AI
+                      <span
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 text-[10px] font-medium"
+                        title="Text rescris cu AI în limbaj formal"
+                      >
+                        <span aria-hidden="true">✨</span> AI
                       </span>
                     )}
                   </div>
-                  <span className="text-xs text-[var(--color-text-muted)] shrink-0 whitespace-nowrap">
+                  <time
+                    dateTime={s.created_at}
+                    className="text-xs text-[var(--color-text-muted)] shrink-0 whitespace-nowrap"
+                  >
                     {timeAgo(s.created_at)}
-                  </span>
+                  </time>
                 </div>
                 <h3 className="font-semibold mb-1 line-clamp-2 break-words">{s.titlu}</h3>
                 <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] mb-2 min-w-0">
-                  <MapPin size={12} className="shrink-0" />
+                  <MapPin size={12} className="shrink-0" aria-hidden="true" />
                   <span className="truncate flex-1 min-w-0">{s.locatie}</span>
-                  <span className="shrink-0">·</span>
+                  <span className="shrink-0" aria-hidden="true">·</span>
                   <span className="shrink-0">{s.sector}</span>
                 </div>
                 <p className="text-sm text-[var(--color-text)] mb-3 line-clamp-2 break-words">
@@ -348,16 +355,22 @@ export function SesizariPublice() {
                 )}
                 <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)] gap-2 min-w-0">
                   <span className="text-xs text-[var(--color-text-muted)] truncate min-w-0 flex-1">
-                    de {s.author_name} · {s.code}
+                    de {s.author_name} <span aria-hidden="true">·</span> <span className="font-mono" aria-label={`cod ${s.code}`}>{s.code}</span>
                   </span>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
-                      <ThumbsUp size={13} />
-                      <span className="font-medium">{s.upvotes}</span>
+                    <span
+                      className="flex items-center gap-1 text-xs text-[var(--color-text-muted)]"
+                      aria-label={`${s.upvotes} ${s.upvotes === 1 ? "vot" : "voturi"}`}
+                    >
+                      <ThumbsUp size={13} aria-hidden="true" />
+                      <span className="font-medium tabular-nums">{s.upvotes}</span>
                     </span>
-                    <span className="flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
-                      <MessageSquare size={13} />
-                      <span className="font-medium">{s.nr_comentarii}</span>
+                    <span
+                      className="flex items-center gap-1 text-xs text-[var(--color-text-muted)]"
+                      aria-label={`${s.nr_comentarii} ${s.nr_comentarii === 1 ? "comentariu" : "comentarii"}`}
+                    >
+                      <MessageSquare size={13} aria-hidden="true" />
+                      <span className="font-medium tabular-nums">{s.nr_comentarii}</span>
                     </span>
                     <ShareButton code={s.code} size="sm" />
                   </div>

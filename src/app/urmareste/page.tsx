@@ -14,9 +14,9 @@ export default function UrmarestePage() {
     <div className="container-narrow py-12 md:py-16">
       <Link
         href="/sesizari"
-        className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"
+        className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
       >
-        <ChevronLeft size={16} /> Înapoi la formularul de sesizări
+        <ChevronLeft size={16} aria-hidden="true" /> Înapoi la formularul de sesizări
       </Link>
 
       <div className="mb-8">
