@@ -36,14 +36,15 @@ export default function GhiduriPage() {
       </section>
 
       {/* Grid */}
-      <section className="py-16">
+      <section className="py-16" aria-label="Listă ghiduri civice">
         <div className="container-narrow">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {ghiduri.map((ghid) => (
               <Link
                 key={ghid.id}
                 href={`/ghiduri/${ghid.slug}`}
-                className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] transition-all"
+                className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+                aria-label={`${ghid.titlu} — ${dificultateMap[ghid.dificultate].label}, ${ghid.timpCitire} minute citire, ${ghid.capitole} capitole`}
               >
                 <div className={`relative h-48 bg-gradient-to-br ${ghid.gradient} overflow-hidden`}>
                   {ghid.image && (
@@ -51,7 +52,7 @@ export default function GhiduriPage() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={`/images/ghiduri/${ghid.image}.webp`}
-                        alt={ghid.titlu}
+                        alt=""
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
                       />
@@ -59,7 +60,7 @@ export default function GhiduriPage() {
                     </>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-7xl relative z-10 drop-shadow-2xl group-hover:scale-110 transition-transform duration-300">
+                    <span className="text-7xl relative z-10 drop-shadow-2xl group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
                       {ghid.icon}
                     </span>
                   </div>
@@ -70,8 +71,8 @@ export default function GhiduriPage() {
                       {dificultateMap[ghid.dificultate].label}
                     </Badge>
                     <span className="flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
-                      <Clock size={12} />
-                      {ghid.timpCitire} min
+                      <Clock size={12} aria-hidden="true" />
+                      <span className="tabular-nums">{ghid.timpCitire}</span> min
                     </span>
                   </div>
                   <h3 className="font-[family-name:var(--font-sora)] font-semibold text-xl mb-2 group-hover:text-[var(--color-primary)] transition-colors">
@@ -82,12 +83,12 @@ export default function GhiduriPage() {
                   </p>
                   <div className="flex items-center justify-between pt-4 border-t border-[var(--color-border)]">
                     <span className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
-                      <BookOpen size={14} />
-                      {ghid.capitole} capitole
+                      <BookOpen size={14} aria-hidden="true" />
+                      <span className="tabular-nums">{ghid.capitole}</span> {ghid.capitole === 1 ? "capitol" : "capitole"}
                     </span>
                     <span className="flex items-center gap-1 text-sm font-medium text-[var(--color-primary)] group-hover:gap-2 transition-all">
                       Citește
-                      <ArrowRight size={14} />
+                      <ArrowRight size={14} aria-hidden="true" />
                     </span>
                   </div>
                 </div>
