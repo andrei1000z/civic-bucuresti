@@ -141,7 +141,7 @@ export default function StatisticiPage() {
       {/* Accidents per capita */}
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 mb-12">
         <h2 className="font-[family-name:var(--font-sora)] font-bold text-base mb-4 flex items-center gap-2">
-          <Car size={18} className="text-red-500" aria-hidden="true" /> Top 10 — accidente la 100&nbsp;000 locuitori
+          <Car size={18} className="text-red-500" aria-hidden="true" /> Top 10 — accidente la 100.000 locuitori
         </h2>
         <div className="grid sm:grid-cols-2 gap-2">
           {topByAccidents.map((c, i) => (
