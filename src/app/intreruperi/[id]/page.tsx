@@ -40,7 +40,20 @@ export async function generateMetadata({
       title,
       description: item.excerpt ?? item.reason,
       type: "article",
+      locale: "ro_RO",
     },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: item.excerpt ?? item.reason,
+    },
+    keywords: [
+      TYPE_LABELS[item.type],
+      item.provider,
+      item.locality ?? "",
+      item.county === "B" ? "București" : item.county,
+      ...item.addresses.slice(0, 3),
+    ].filter(Boolean),
   };
 }
 
