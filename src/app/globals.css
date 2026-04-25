@@ -477,6 +477,24 @@ kbd {
 }
 
 /* ───────────────────────────────────────────────────────────────
+   Form input hover state — îmbunătățește affordance-ul, border-ul
+   se închide ușor pe hover. Aplicat global pe input/select/textarea
+   care au border-ul ca variabilă (cele cu border explicit Tailwind).
+   Excludem input[type=checkbox|radio|range|color|file] care au
+   chrome propriu și ar arăta inconsistent.
+   ─────────────────────────────────────────────────────────────── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+select,
+textarea {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]):hover:not(:focus):not(:disabled),
+select:hover:not(:focus):not(:disabled),
+textarea:hover:not(:focus):not(:disabled) {
+  border-color: var(--color-text-muted);
+}
+
+/* ───────────────────────────────────────────────────────────────
    Card hover utility — opt-in subtle lift + shadow upgrade pe carduri
    clickabile/linkable. Folosește transform + box-shadow în loc de
    margin-top ca să nu re-flow-eze layout-ul. Disabled în reduced-motion.

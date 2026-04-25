@@ -254,8 +254,14 @@ export function CommandPalette() {
             className="flex-1 bg-transparent text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:outline-none text-sm"
           />
           {loading && <Loader2 size={14} className="animate-spin text-[var(--color-primary)]" />}
-          <button onClick={() => setOpen(false)} className="w-7 h-7 rounded-[6px] bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)] transition-colors">
-            <X size={12} className="text-[var(--color-text-muted)]" />
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Închide căutarea"
+            title="Închide (Esc)"
+            className="w-7 h-7 rounded-[6px] bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          >
+            <X size={12} className="text-[var(--color-text-muted)]" aria-hidden="true" />
           </button>
         </div>
 
