@@ -115,26 +115,29 @@ export function KeyboardShortcuts() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
       onClick={() => setOpen(false)}
+      role="presentation"
     >
       <div
         role="dialog"
-        aria-label="Scurtături tastatură"
+        aria-modal="true"
+        aria-labelledby="kbd-shortcuts-title"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] shadow-[var(--shadow-xl)] overflow-hidden"
+        className="w-full max-w-md bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] shadow-[var(--shadow-xl)] overflow-hidden animate-modal-pop"
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
           <div className="flex items-center gap-2">
-            <Keyboard size={18} className="text-[var(--color-primary)]" />
-            <h3 className="font-semibold">Scurtături tastatură</h3>
+            <Keyboard size={18} className="text-[var(--color-primary)]" aria-hidden="true" />
+            <h3 id="kbd-shortcuts-title" className="font-semibold">Scurtături tastatură</h3>
           </div>
           <button
+            type="button"
             onClick={() => setOpen(false)}
-            className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)]"
-            aria-label="Închide"
+            className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            aria-label="Închide panoul de scurtături"
           >
-            <X size={16} />
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
         <ul className="py-2">
