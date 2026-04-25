@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { Menu, X, ChevronDown, AlertCircle, MapPin, Search } from "lucide-react";
-import { NAV_LINKS, NAV_MORE, NAV_DATE_PUBLICE, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
+import { NAV_LINKS, NAV_MORE, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -216,6 +216,7 @@ export function Navbar() {
               </div>
             )}
             <button
+              type="button"
               onClick={() => {
                 document.dispatchEvent(new CustomEvent("open-command-palette"));
               }}
@@ -236,6 +237,7 @@ export function Navbar() {
               Fă sesizare
             </Link>
             <button
+              type="button"
               onClick={() => setMobileOpen(true)}
               className="lg:hidden w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]"
               aria-label="Deschide meniul"
@@ -263,6 +265,7 @@ export function Navbar() {
             <span className="font-[family-name:var(--font-sora)] font-bold text-lg">{SITE_NAME}</span>
           </Link>
           <button
+            type="button"
             onClick={() => setMobileOpen(false)}
             className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] flex items-center justify-center"
             aria-label="Închide meniul"
@@ -331,8 +334,9 @@ export function Navbar() {
             </Link>
             {countySlug && (
               <Link
-                href="/"
-                className="flex items-center justify-center gap-2 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] text-sm font-medium text-[var(--color-text-muted)]"
+                href="/judete"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-2 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
               >
                 Schimbă județul
               </Link>

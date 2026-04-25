@@ -13,8 +13,8 @@ export function Card({ children, hover, accentColor, className, ...props }: Card
       className={cn(
         "relative bg-[var(--color-surface)] rounded-[var(--radius-card)] p-4 sm:p-5",
         "border border-[var(--color-border)] shadow-[var(--shadow-soft)]",
-        "transition-all duration-200",
-        hover && "hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] hover:border-[var(--color-primary)]/30",
+        "transition-[transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        hover && "hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)] hover:border-[var(--color-primary)]/40 active:translate-y-0 active:shadow-[var(--shadow-soft)] active:duration-75",
         accentColor && "border-l-4",
         className
       )}

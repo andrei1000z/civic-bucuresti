@@ -195,14 +195,16 @@ h1, h2, h3, h4, h5, h6 {
   50% { transform: translateY(-8px); }
 }
 .animate-float {
-  animation: float 4s ease-in-out infinite;
+  animation: float 4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
-/* Fade in up */
+/* Fade in up — folosește cubic-bezier(0.16, 1, 0.3, 1) ("ease-out-expo")
+   pentru o curbă de easing mai premium decât ease-out standard:
+   start rapid, ease-out lung. Folosit pe carduri, toasts, modale. */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -210,7 +212,12 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 .animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out forwards;
+  animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Snappy fade-in pentru toasts (mai scurt — 250ms) */
+.animate-toast-in {
+  animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Leaflet fixes for dark mode */
@@ -467,4 +474,61 @@ h1, h2, h3, h4, h5, h6 {
 kbd {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.85em;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Card hover utility — opt-in subtle lift + shadow upgrade pe carduri
+   clickabile/linkable. Folosește transform + box-shadow în loc de
+   margin-top ca să nu re-flow-eze layout-ul. Disabled în reduced-motion.
+   Aplicat pe cardurile mari (sesizari, județe, articole).
+   ─────────────────────────────────────────────────────────────── */
+.card-hover {
+  transition:
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.18s ease;
+  will-change: transform;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+.card-hover:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-soft);
+  transition-duration: 0.08s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-hover,
+  .card-hover:hover,
+  .card-hover:active {
+    transform: none;
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Skeleton shimmer — alternativă opt-in la animate-pulse pentru
+   loading-uri hero/big-image. Scan diagonal cu gradient subtle în
+   loc de fade simplu. Aplicat doar pe blocuri mari peste 60px.
+   ─────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-2) 0%,
+    var(--color-border) 50%,
+    var(--color-surface-2) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+    background: var(--color-surface-2);
+  }
 }
