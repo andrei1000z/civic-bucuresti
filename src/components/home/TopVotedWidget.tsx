@@ -42,7 +42,7 @@ export function TopVotedWidget() {
         <div className="flex items-end justify-between mb-8">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400 text-xs font-semibold mb-2">
-              <TrendingUp size={12} />
+              <TrendingUp size={12} aria-hidden="true" />
               PRESIUNE PUBLICĂ
             </div>
             <h2 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold mb-1">
@@ -54,9 +54,9 @@ export function TopVotedWidget() {
           </div>
           <Link
             href="/sesizari"
-            className="hidden md:flex items-center gap-2 text-sm font-medium text-[var(--color-primary)] hover:gap-3 transition-all"
+            className="hidden md:flex items-center gap-2 text-sm font-medium text-[var(--color-primary)] hover:gap-3 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
           >
-            Toate sesizările <ArrowRight size={16} />
+            Toate sesizările <ArrowRight size={16} aria-hidden="true" />
           </Link>
         </div>
 
@@ -85,31 +85,32 @@ export function TopVotedWidget() {
               <Link
                 key={s.id}
                 href={`/sesizari/${s.code}`}
-                className="flex items-center gap-4 p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all group"
+                className="flex items-center gap-4 p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+                aria-label={`#${i + 1}: ${s.titlu}, ${s.voturi_net} voturi, ${s.nr_comentarii} ${s.nr_comentarii === 1 ? "comentariu" : "comentarii"}`}
               >
-                <div className="shrink-0 w-12 h-12 rounded-[12px] bg-gradient-to-br from-red-500 to-orange-600 text-white flex flex-col items-center justify-center">
+                <div className="shrink-0 w-12 h-12 rounded-[12px] bg-gradient-to-br from-red-500 to-orange-600 text-white flex flex-col items-center justify-center" aria-hidden="true">
                   <ThumbsUp size={14} strokeWidth={2.5} />
-                  <span className="text-xs font-bold leading-none mt-0.5">{s.voturi_net}</span>
+                  <span className="text-xs font-bold leading-none mt-0.5 tabular-nums">{s.voturi_net}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="text-xs font-bold text-[var(--color-text-muted)]">#{i + 1}</span>
+                    <span className="text-xs font-bold text-[var(--color-text-muted)] tabular-nums">#{i + 1}</span>
                     <Badge bgColor={STATUS_COLORS[s.status]} color="white">
                       {STATUS_LABELS[s.status]}
                     </Badge>
                     <Badge variant="neutral" className="text-[10px]">
-                      {tipIcon} {s.sector}
+                      <span aria-hidden="true">{tipIcon}</span> {s.sector}
                     </Badge>
                   </div>
                   <h3 className="font-semibold text-sm md:text-base truncate group-hover:text-[var(--color-primary)]">
                     {s.titlu}
                   </h3>
                   <p className="text-xs text-[var(--color-text-muted)] truncate flex items-center gap-1 mt-0.5">
-                    <MapPin size={11} />
-                    {s.locatie} · {s.nr_comentarii} comentarii
+                    <MapPin size={11} aria-hidden="true" />
+                    {s.locatie} · {s.nr_comentarii} {s.nr_comentarii === 1 ? "comentariu" : "comentarii"}
                   </p>
                 </div>
-                <ArrowRight size={18} className="shrink-0 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 transition-all" />
+                <ArrowRight size={18} className="shrink-0 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 transition-all" aria-hidden="true" />
               </Link>
             );
           })}

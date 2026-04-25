@@ -39,9 +39,9 @@ export function IntreruperiWidget() {
           </h2>
           <Link
             href="/intreruperi"
-            className="text-sm text-[var(--color-primary)] hover:underline inline-flex items-center gap-1 shrink-0"
+            className="text-sm text-[var(--color-primary)] hover:underline inline-flex items-center gap-1 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
           >
-            Toate <ArrowRight size={14} />
+            Toate <ArrowRight size={14} aria-hidden="true" />
           </Link>
         </div>
 
@@ -77,7 +77,7 @@ export function IntreruperiWidget() {
                     color: i.status === "in-desfasurare" ? "#F59E0B" : "#3B82F6",
                   }}
                 >
-                  <Clock size={9} />
+                  <Clock size={9} aria-hidden="true" />
                   {i.status === "in-desfasurare" ? "acum" : relativeTime(i.startAt)}
                 </span>
               </div>
