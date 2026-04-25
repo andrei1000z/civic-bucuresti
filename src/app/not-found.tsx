@@ -15,7 +15,7 @@ export default function NotFound() {
     <div className="container-narrow py-16 md:py-24 max-w-lg text-center">
       <NotFoundTracker />
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center">
-        <SearchX size={36} className="text-[var(--color-text-muted)]" />
+        <SearchX size={36} className="text-[var(--color-text-muted)]" aria-hidden="true" />
       </div>
       <h1 className="font-[family-name:var(--font-sora)] text-5xl font-bold mb-2">404</h1>
       <p className="text-lg text-[var(--color-text-muted)] mb-2">
@@ -30,7 +30,7 @@ export default function NotFound() {
           href="/"
           className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
-          <Home size={16} />
+          <Home size={16} aria-hidden="true" />
           Înapoi la pagina principală
         </Link>
         <NotFoundSearchButton />
@@ -47,7 +47,7 @@ export default function NotFound() {
                 href={link.href}
                 className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
               >
-                <Icon size={14} />
+                <Icon size={14} aria-hidden="true" />
                 {link.label}
               </Link>
             );
