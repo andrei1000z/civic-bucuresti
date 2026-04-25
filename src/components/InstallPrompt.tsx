@@ -85,12 +85,14 @@ export function InstallPrompt() {
           </p>
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={install}
               className="h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
               Adaugă pe ecran
             </button>
             <button
+              type="button"
               onClick={dismiss}
               className="h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] text-xs font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
@@ -99,6 +101,7 @@ export function InstallPrompt() {
           </div>
         </div>
         <button
+          type="button"
           onClick={dismiss}
           className="shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text)] -mt-1 -mr-1 p-1"
           aria-label="Închide"

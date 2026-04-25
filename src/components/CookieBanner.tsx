@@ -57,12 +57,14 @@ export function CookieBanner() {
           </p>
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={accept}
               className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
               Bine, continuă
             </button>
             <button
+              type="button"
               onClick={dismiss}
               className="h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] text-xs font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
@@ -71,6 +73,7 @@ export function CookieBanner() {
           </div>
         </div>
         <button
+          type="button"
           onClick={dismiss}
           className="w-9 h-9 -mt-1 -mr-1 rounded-full hover:bg-[var(--color-surface-2)] flex items-center justify-center shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           aria-label="Închide banner cookies"
