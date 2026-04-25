@@ -1074,13 +1074,13 @@ ${today}`;
               ))}
             </select>
             {tipDetecting && (
-              <span className="text-xs text-[var(--color-text-muted)] inline-flex items-center gap-1">
-                <Loader2 size={12} className="animate-spin" /> AI
+              <span className="text-xs text-[var(--color-text-muted)] inline-flex items-center gap-1" role="status">
+                <Loader2 size={12} className="animate-spin" aria-hidden="true" /> AI detectează tipul…
               </span>
             )}
             {tipDetectedByAI && !tipDetecting && (
-              <span className="text-xs text-purple-600 dark:text-purple-400 font-medium inline-flex items-center gap-1">
-                <Sparkles size={12} /> AI
+              <span className="text-xs text-purple-600 dark:text-purple-400 font-medium inline-flex items-center gap-1" title="Detectat automat cu AI din descriere">
+                <Sparkles size={12} aria-hidden="true" /> AI
               </span>
             )}
           </div>
@@ -1094,7 +1094,7 @@ ${today}`;
         {recipients && (
           <div className="rounded-[8px] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 p-3 text-xs">
             <p className="font-semibold text-blue-900 dark:text-blue-300 mb-2 flex items-center gap-1">
-              <Mail size={12} /> Emailul tău va ajunge la {recipients.primary.length + recipients.cc.length} destinatari oficiali:
+              <Mail size={12} aria-hidden="true" /> Emailul tău va ajunge la {recipients.primary.length + recipients.cc.length} destinatari oficiali:
             </p>
             <ul className="space-y-1">
               {recipients.primary.map((a) => (
@@ -1150,7 +1150,7 @@ ${today}`;
               aria-label={geoLoading ? "Se detectează locația" : "Folosește GPS-ul pentru a prinde locația actuală"}
               title="Folosește GPS-ul pentru a prinde locația actuală"
             >
-              {geoLoading ? <Loader2 size={16} className="animate-spin" /> : <Locate size={16} />}
+              {geoLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Locate size={16} aria-hidden="true" />}
               <span className="hidden sm:inline tabular-nums">
                 {geoLoading
                   ? gpsAccuracy != null
@@ -1278,7 +1278,7 @@ ${today}`;
           className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[10px] bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[var(--shadow-md)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-purple-500"
           title={imagini.length > 0 ? "AI citește descrierea + vede pozele și rescrie textul oficial" : "AI rescrie descrierea ta în limbaj oficial cu temei legal"}
         >
-          {aiLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+          {aiLoading ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <Sparkles size={18} aria-hidden="true" />}
           {aiLoading
             ? (imagini.length > 0 ? "AI analizează pozele..." : "AI rescrie textul...")
             : data.formal_text
@@ -1287,7 +1287,7 @@ ${today}`;
         </button>
         {data.formal_text && !aiLoading && (
           <p className="text-xs text-[var(--color-text-muted)] text-center -mt-1">
-            <Sparkles size={11} className="inline text-purple-500" /> AI a rescris textul — apare în emailul final și pe pagina publică.
+            <Sparkles size={11} className="inline text-purple-500" aria-hidden="true" /> AI a rescris textul — apare în emailul final și pe pagina publică.
           </p>
         )}
 
@@ -1307,8 +1307,8 @@ ${today}`;
         </label>
 
         {error && (
-          <div className="p-3 rounded-[8px] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-sm text-red-700 dark:text-red-300 flex items-start gap-2">
-            <AlertCircle size={16} className="shrink-0 mt-0.5" />
+          <div role="alert" className="p-3 rounded-[8px] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-sm text-red-700 dark:text-red-300 flex items-start gap-2">
+            <AlertCircle size={16} className="shrink-0 mt-0.5" aria-hidden="true" />
             <span>{error}</span>
           </div>
         )}
@@ -1319,7 +1319,7 @@ ${today}`;
           onClick={handleSubmit}
           className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
-          {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+          {submitting ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Send size={16} aria-hidden="true" />}
           {submitting ? "Se generează textul și se salvează..." : "Trimite sesizarea la autorități"}
         </button>
 
@@ -1357,19 +1357,21 @@ ${today}`;
             <a
               href={mailtoLink()}
               className={cn(
-                "flex items-center justify-center gap-2 h-10 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors",
+                "flex items-center justify-center gap-2 h-10 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
                 !recipients && "opacity-40 pointer-events-none"
               )}
+              aria-disabled={!recipients}
             >
-              <Mail size={14} />
+              <Mail size={14} aria-hidden="true" />
               Email
             </a>
             <button
               type="button"
               onClick={copyText}
-              className="flex items-center justify-center gap-2 h-10 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
+              className="flex items-center justify-center gap-2 h-10 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              aria-live="polite"
             >
-              <Copy size={14} />
+              <Copy size={14} aria-hidden="true" />
               {copied ? "Copiat!" : "Copiază"}
             </button>
           </div>
