@@ -171,17 +171,18 @@ export default function AdminSesizariPage() {
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
               <div className="flex items-center gap-2">
-                <Sparkles size={18} className="text-purple-500" />
+                <Sparkles size={18} className="text-purple-500" aria-hidden="true" />
                 <h3 className="font-semibold">
-                  Polish aplicat pe {polishDiff.code}
+                  Polish aplicat pe <span className="font-mono">{polishDiff.code}</span>
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setPolishDiff(null)}
-                className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)]"
-                aria-label="Închide"
+                className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                aria-label="Închide diff-ul de polish"
               >
-                <CloseX size={16} />
+                <CloseX size={16} aria-hidden="true" />
               </button>
             </div>
             <div className="p-5 space-y-4 text-sm">
@@ -266,13 +267,15 @@ export default function AdminSesizariPage() {
               <Link
                 href={`/sesizari/${polishDiff.code}`}
                 target="_blank"
-                className="inline-flex items-center gap-1 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               >
-                <Eye size={12} /> Deschide sesizarea
+                <Eye size={12} aria-hidden="true" /> Deschide sesizarea
               </Link>
               <button
+                type="button"
                 onClick={() => setPolishDiff(null)}
-                className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] transition-colors"
+                className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
               >
                 OK, am văzut
               </button>
@@ -292,17 +295,18 @@ export default function AdminSesizariPage() {
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
               <div className="flex items-center gap-2 min-w-0">
-                <Edit3 size={18} className="text-[var(--color-primary)] shrink-0" />
+                <Edit3 size={18} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
                 <h3 className="font-semibold truncate">
-                  Schimbă status — {statusEdit.code}
+                  Schimbă status — <span className="font-mono">{statusEdit.code}</span>
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setStatusEdit(null)}
-                className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)] shrink-0"
-                aria-label="Închide"
+                className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)] shrink-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                aria-label="Închide modalul de schimbare status"
               >
-                <CloseX size={16} />
+                <CloseX size={16} aria-hidden="true" />
               </button>
             </div>
             <div className="p-5 space-y-4">
@@ -320,12 +324,15 @@ export default function AdminSesizariPage() {
                 <label htmlFor="status-select" className="block text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
                   Noul status
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2" role="radiogroup" aria-label="Selectează noul status">
                   {(["nou", "in-lucru", "amanata", "rezolvat", "respins"] as const).map((s) => (
                     <button
                       key={s}
+                      type="button"
+                      role="radio"
+                      aria-checked={statusEdit.status === s}
                       onClick={() => setStatusEdit((p) => (p ? { ...p, status: s } : p))}
-                      className={`h-10 px-2 rounded-[8px] text-xs font-medium border transition-all ${
+                      className={`h-10 px-2 rounded-[8px] text-xs font-medium border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 ${
                         statusEdit.status === s
                           ? "text-white border-transparent"
                           : "bg-[var(--color-surface-2)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-primary)]/40"
@@ -336,7 +343,7 @@ export default function AdminSesizariPage() {
                           : undefined
                       }
                     >
-                      {s === "amanata" && <Clock size={10} className="inline mr-1" />}
+                      {s === "amanata" && <Clock size={10} className="inline mr-1" aria-hidden="true" />}
                       {STATUS_LABELS[s]}
                     </button>
                   ))}
@@ -365,20 +372,22 @@ export default function AdminSesizariPage() {
             </div>
             <div className="px-5 py-4 border-t border-[var(--color-border)] flex items-center justify-end gap-2 bg-[var(--color-bg)]">
               <button
+                type="button"
                 onClick={() => setStatusEdit(null)}
-                className="h-9 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
+                className="h-9 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               >
                 Anulează
               </button>
               <button
+                type="button"
                 onClick={submitStatus}
                 disabled={acting === `status-${statusEdit.code}`}
-                className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors inline-flex items-center gap-1.5"
+                className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors inline-flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
               >
                 {acting === `status-${statusEdit.code}` ? (
-                  <><Loader2 size={12} className="animate-spin" /> Salvez...</>
+                  <><Loader2 size={12} className="animate-spin" aria-hidden="true" /> Salvez...</>
                 ) : (
-                  <>Salvează <ArrowRight size={12} /></>
+                  <>Salvează <ArrowRight size={12} aria-hidden="true" /></>
                 )}
               </button>
             </div>
@@ -386,12 +395,14 @@ export default function AdminSesizariPage() {
         </div>
       )}
 
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-2 mb-6 flex-wrap" role="group" aria-label="Filtrează sesizări">
         {(["all", "pending", "approved", "rejected"] as const).map((f) => (
           <button
             key={f}
+            type="button"
             onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            aria-pressed={filter === f}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
               filter === f
                 ? "bg-[var(--color-primary)] text-white"
                 : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)]"

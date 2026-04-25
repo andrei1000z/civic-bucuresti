@@ -31,8 +31,8 @@ export default async function AdminDashboard() {
           const Icon = card.icon;
           const inner = (
             <>
-              <Icon size={20} style={{ color: card.color }} className="mb-2" />
-              <p className="text-3xl font-bold" style={{ color: card.color }}>{card.value}</p>
+              <Icon size={20} style={{ color: card.color }} className="mb-2" aria-hidden="true" />
+              <p className="text-3xl font-bold tabular-nums" style={{ color: card.color }}>{card.value.toLocaleString("ro-RO")}</p>
               <p className="text-xs text-[var(--color-text-muted)] mt-1">{card.label}</p>
             </>
           );
@@ -64,19 +64,21 @@ export default async function AdminDashboard() {
         <div className="grid md:grid-cols-2 gap-3">
           <Link
             href="/admin/sesizari"
-            className="flex items-center gap-3 p-4 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors"
+            className="flex items-center gap-3 p-4 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
-            <Shield size={20} className="text-amber-500" />
+            <Shield size={20} className="text-amber-500" aria-hidden="true" />
             <div>
               <p className="font-medium text-sm">Moderează sesizările noi</p>
-              <p className="text-xs text-[var(--color-text-muted)]">{pending.count ?? 0} așteaptă aprobare sau respingere</p>
+              <p className="text-xs text-[var(--color-text-muted)]">
+                <span className="tabular-nums">{(pending.count ?? 0).toLocaleString("ro-RO")}</span> așteaptă aprobare sau respingere
+              </p>
             </div>
           </Link>
           <Link
             href="/admin/analytics"
-            className="flex items-center gap-3 p-4 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors"
+            className="flex items-center gap-3 p-4 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
-            <BarChart3 size={20} className="text-blue-500" />
+            <BarChart3 size={20} className="text-blue-500" aria-hidden="true" />
             <div>
               <p className="font-medium text-sm">Analytics în timp real</p>
               <p className="text-xs text-[var(--color-text-muted)]">Trafic, dispozitive, țări, erori, performanță</p>
@@ -85,9 +87,9 @@ export default async function AdminDashboard() {
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a
             href="/api/stiri/fetch"
-            className="flex items-center gap-3 p-4 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors"
+            className="flex items-center gap-3 p-4 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
-            <Newspaper size={20} className="text-emerald-500" />
+            <Newspaper size={20} className="text-emerald-500" aria-hidden="true" />
             <div>
               <p className="font-medium text-sm">Reîncarcă feed-urile RSS</p>
               <p className="text-xs text-[var(--color-text-muted)]">Forțează un fetch imediat al tuturor surselor</p>

@@ -60,12 +60,14 @@ export function IntreruperiSubmissions({ rows: initial }: { rows: Row[] }) {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-2 mb-6">
+      <div className="flex flex-wrap items-center gap-2 mb-6" role="group" aria-label="Filtrează submisii">
         {(["all", "pending", "published", "rejected"] as const).map((f) => (
           <button
             key={f}
+            type="button"
             onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            aria-pressed={filter === f}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
               filter === f
                 ? "bg-[var(--color-primary)] text-white"
                 : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)]"
@@ -78,7 +80,7 @@ export function IntreruperiSubmissions({ rows: initial }: { rows: Row[] }) {
               : f === "published"
               ? "Publicate"
               : "Respinse"}
-            <span className="ml-1 opacity-70">({counts[f]})</span>
+            <span className="ml-1 opacity-70 tabular-nums">({counts[f]})</span>
           </button>
         ))}
       </div>
@@ -109,11 +111,12 @@ export function IntreruperiSubmissions({ rows: initial }: { rows: Row[] }) {
                   </span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => navigator.clipboard.writeText(r.text)}
-                  aria-label="Copiază textul"
-                  className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
+                  aria-label="Copiază textul submisiei"
+                  className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1 -m-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 >
-                  <Copy size={14} />
+                  <Copy size={14} aria-hidden="true" />
                 </button>
               </header>
 
@@ -129,7 +132,7 @@ export function IntreruperiSubmissions({ rows: initial }: { rows: Row[] }) {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline"
                   >
-                    <ImgIcon size={12} /> Vezi poza
+                    <ImgIcon size={12} aria-hidden="true" /> Vezi poza
                   </a>
                 )}
                 {r.email && (
@@ -143,7 +146,7 @@ export function IntreruperiSubmissions({ rows: initial }: { rows: Row[] }) {
                     )}`}
                     className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline"
                   >
-                    <Mail size={12} /> {r.email}
+                    <Mail size={12} aria-hidden="true" /> {r.email}
                   </a>
                 )}
                 <span className="font-mono text-[10px] opacity-60">
@@ -152,27 +155,30 @@ export function IntreruperiSubmissions({ rows: initial }: { rows: Row[] }) {
               </div>
 
               {r.status === "pending" && (
-                <div className="flex items-center gap-2 pt-3 border-t border-[var(--color-border)]">
+                <div className="flex items-center gap-2 pt-3 border-t border-[var(--color-border)] flex-wrap">
                   <button
+                    type="button"
                     onClick={() => updateStatus(r.id, "published")}
                     disabled={acting === r.id}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-emerald-500 text-white text-xs font-medium hover:bg-emerald-600 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-emerald-500 text-white text-xs font-medium hover:bg-emerald-600 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
                   >
-                    <Check size={13} /> Publică
+                    <Check size={13} aria-hidden="true" /> Publică
                   </button>
                   <button
+                    type="button"
                     onClick={() => updateStatus(r.id, "rejected")}
                     disabled={acting === r.id}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-red-500 text-white text-xs font-medium hover:bg-red-600 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-red-500 text-white text-xs font-medium hover:bg-red-600 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                   >
-                    <X size={13} /> Respinge
+                    <X size={13} aria-hidden="true" /> Respinge
                   </button>
                   <button
+                    type="button"
                     onClick={() => updateStatus(r.id, "duplicate")}
                     disabled={acting === r.id}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   >
-                    <AlertCircle size={13} /> Duplicat
+                    <AlertCircle size={13} aria-hidden="true" /> Duplicat
                   </button>
                 </div>
               )}

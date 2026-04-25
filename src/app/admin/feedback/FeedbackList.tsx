@@ -69,19 +69,21 @@ export function FeedbackList({ rows: initial }: { rows: Row[] }) {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-2 mb-6">
+      <div className="flex flex-wrap items-center gap-2 mb-6" role="group" aria-label="Filtrează mesaje">
         {(["all", "pending", "replied", "archived", "spam"] as const).map((f) => (
           <button
             key={f}
+            type="button"
             onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            aria-pressed={filter === f}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
               filter === f
                 ? "bg-[var(--color-primary)] text-white"
                 : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)]"
             }`}
           >
             {f === "all" ? "Toate" : f === "pending" ? "Nerăspuns" : f === "replied" ? "Răspuns" : f === "archived" ? "Arhivate" : "Spam"}
-            <span className="ml-1 opacity-70">({counts[f]})</span>
+            <span className="ml-1 opacity-70 tabular-nums">({counts[f]})</span>
           </button>
         ))}
       </div>
@@ -117,11 +119,12 @@ export function FeedbackList({ rows: initial }: { rows: Row[] }) {
                   </span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => navigator.clipboard.writeText(r.text)}
-                  aria-label="Copiază textul"
-                  className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
+                  aria-label="Copiază textul mesajului"
+                  className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1 -m-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 >
-                  <Copy size={14} />
+                  <Copy size={14} aria-hidden="true" />
                 </button>
               </header>
 
@@ -141,7 +144,7 @@ export function FeedbackList({ rows: initial }: { rows: Row[] }) {
                     )}`}
                     className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium"
                   >
-                    <Mail size={12} /> {r.email}
+                    <Mail size={12} aria-hidden="true" /> {r.email}
                   </a>
                 )}
                 {r.page_path && (
@@ -151,7 +154,7 @@ export function FeedbackList({ rows: initial }: { rows: Row[] }) {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 hover:text-[var(--color-primary)]"
                   >
-                    <ExternalLink size={11} /> {r.page_path}
+                    <ExternalLink size={11} aria-hidden="true" /> {r.page_path}
                   </a>
                 )}
                 <span className="font-mono text-[10px] opacity-60">
@@ -162,25 +165,28 @@ export function FeedbackList({ rows: initial }: { rows: Row[] }) {
               {r.status === "pending" && (
                 <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-[var(--color-border)]">
                   <button
+                    type="button"
                     onClick={() => updateStatus(r.id, "replied")}
                     disabled={acting === r.id}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-emerald-500 text-white text-xs font-medium hover:bg-emerald-600 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-emerald-500 text-white text-xs font-medium hover:bg-emerald-600 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
                   >
-                    <Check size={13} /> Marchează răspuns
+                    <Check size={13} aria-hidden="true" /> Marchează răspuns
                   </button>
                   <button
+                    type="button"
                     onClick={() => updateStatus(r.id, "archived")}
                     disabled={acting === r.id}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   >
-                    <Archive size={13} /> Arhivează
+                    <Archive size={13} aria-hidden="true" /> Arhivează
                   </button>
                   <button
+                    type="button"
                     onClick={() => updateStatus(r.id, "spam")}
                     disabled={acting === r.id}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-red-500 text-white text-xs font-medium hover:bg-red-600 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-red-500 text-white text-xs font-medium hover:bg-red-600 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                   >
-                    <AlertCircle size={13} /> Spam
+                    <AlertCircle size={13} aria-hidden="true" /> Spam
                   </button>
                 </div>
               )}
