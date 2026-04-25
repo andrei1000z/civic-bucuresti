@@ -276,10 +276,11 @@ export function CommandPalette() {
                   return (
                     <button
                       key={link.url}
+                      type="button"
                       onClick={() => handleSelect(link.url)}
-                      className="flex flex-col items-center gap-1.5 p-3 rounded-[10px] hover:bg-[var(--color-surface-2)] transition-colors"
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-[10px] hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     >
-                      <Icon size={18} className={link.color} />
+                      <Icon size={18} className={link.color} aria-hidden="true" />
                       <span className="text-xs font-medium">{link.label}</span>
                     </button>
                   );
@@ -296,15 +297,17 @@ export function CommandPalette() {
                     return (
                       <li key={`${r.type}-${r.url}-${i}`}>
                         <button
+                          type="button"
                           onClick={() => handleSelect(r.url)}
                           onMouseEnter={() => { setActiveIdx(i); prefetchResult(r.url); }}
                           onFocus={() => prefetchResult(r.url)}
+                          aria-current={i === activeIdx}
                           className={cn(
-                            "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors",
+                            "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors focus:outline-none",
                             i === activeIdx ? "bg-[var(--color-primary-soft)]" : "hover:bg-[var(--color-surface-2)]"
                           )}
                         >
-                          <div className={cn("w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0", i === activeIdx ? "bg-[var(--color-primary)]/10" : "bg-[var(--color-surface-2)]")}>
+                          <div className={cn("w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0", i === activeIdx ? "bg-[var(--color-primary)]/10" : "bg-[var(--color-surface-2)]")} aria-hidden="true">
                             <Icon size={14} className={TYPE_COLOR[r.type]} />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -313,7 +316,7 @@ export function CommandPalette() {
                               {TYPE_LABEL[r.type]}{r.meta ? ` · ${r.meta}` : ""}
                             </p>
                           </div>
-                          {i === activeIdx && <ArrowRight size={12} className="text-[var(--color-primary)] shrink-0" />}
+                          {i === activeIdx && <ArrowRight size={12} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />}
                         </button>
                       </li>
                     );
@@ -334,25 +337,26 @@ export function CommandPalette() {
                   {aiAnswer ? (
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+                        <div className="w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center" aria-hidden="true">
                           <Sparkles size={10} className="text-violet-500" />
                         </div>
                         <p className="text-[10px] font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wider">Răspuns AI</p>
-                        {aiLoading && <Loader2 size={10} className="animate-spin text-violet-500" />}
+                        {aiLoading && <Loader2 size={10} className="animate-spin text-violet-500" aria-hidden="true" />}
                       </div>
                       <p className="text-sm text-[var(--color-text)] leading-relaxed whitespace-pre-wrap">{aiAnswer}</p>
                     </div>
                   ) : aiLoading ? (
-                    <div className="flex items-center gap-2 p-4">
-                      <Loader2 size={14} className="animate-spin text-violet-500" />
+                    <div className="flex items-center gap-2 p-4" role="status">
+                      <Loader2 size={14} className="animate-spin text-violet-500" aria-hidden="true" />
                       <p className="text-xs text-[var(--color-text-muted)]">AI generează răspunsul...</p>
                     </div>
                   ) : (
                     <button
+                      type="button"
                       onClick={askAI}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-inset"
                     >
-                      <div className="w-8 h-8 rounded-[8px] bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-[8px] bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0" aria-hidden="true">
                         <Sparkles size={14} className="text-violet-500" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -361,7 +365,7 @@ export function CommandPalette() {
                           {results.length > 0 ? "Shift+Enter" : "Enter"} pentru răspuns AI
                         </p>
                       </div>
-                      <Sparkles size={12} className="text-violet-400 shrink-0" />
+                      <Sparkles size={12} className="text-violet-400 shrink-0" aria-hidden="true" />
                     </button>
                   )}
                 </div>

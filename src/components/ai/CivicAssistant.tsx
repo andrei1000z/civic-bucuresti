@@ -227,59 +227,75 @@ export function CivicAssistant() {
     <>
       {/* Launcher button */}
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          "fixed bottom-6 right-6 z-40 rounded-full shadow-[var(--shadow-xl)] transition-all",
+          "fixed bottom-6 right-6 z-40 rounded-full shadow-[var(--shadow-xl)] transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-primary)]/40",
           "bg-gradient-to-br from-[var(--color-primary)] to-indigo-800 text-white",
           "hover:scale-105 active:scale-95",
           open ? "w-12 h-12" : "w-14 h-14"
         )}
-        aria-label={open ? "Închide asistent" : "Deschide asistent civic"}
+        aria-label={open ? "Închide asistentul civic" : "Deschide asistentul civic AI"}
+        aria-expanded={open}
+        aria-haspopup="dialog"
       >
-        {open ? <X size={20} className="m-auto" /> : <Sparkles size={22} className="m-auto" />}
+        {open ? <X size={20} className="m-auto" aria-hidden="true" /> : <Sparkles size={22} className="m-auto" aria-hidden="true" />}
       </button>
 
       {/* Chat window */}
       {open && (
-        <div className="fixed inset-x-3 bottom-24 sm:inset-x-auto sm:right-6 z-40 sm:w-[400px] h-[calc(100dvh-7rem)] sm:h-[600px] max-h-[calc(100dvh-7rem)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] shadow-[var(--shadow-xl)] flex flex-col overflow-hidden animate-fade-in-up">
+        <div
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby="civic-assistant-title"
+          className="fixed inset-x-3 bottom-24 sm:inset-x-auto sm:right-6 z-40 sm:w-[400px] h-[calc(100dvh-7rem)] sm:h-[600px] max-h-[calc(100dvh-7rem)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] shadow-[var(--shadow-xl)] flex flex-col overflow-hidden animate-fade-in-up"
+        >
           {/* Header */}
           <header className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)] to-indigo-700 text-white">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center" aria-hidden="true">
                 <MessageCircle size={16} />
               </div>
               <div>
-                <p className="font-semibold text-sm leading-tight">Asistent Civic</p>
+                <p id="civic-assistant-title" className="font-semibold text-sm leading-tight">Asistent Civic</p>
                 <p className="text-[10px] text-white/70 leading-tight">powered by Groq AI</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
               <button
+                type="button"
                 onClick={() => {
                   setMessages([INITIAL_MESSAGE]);
                   if (typeof window !== "undefined") sessionStorage.removeItem(CHAT_STORAGE_KEY);
                 }}
-                className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center"
+                className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 aria-label="Resetează conversația"
                 title="Resetează"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                   <path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.74 3.08L3 8" />
                   <path d="M3 3v5h5" />
                 </svg>
               </button>
               <button
+                type="button"
                 onClick={() => setOpen(false)}
-                className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center"
-                aria-label="Închide"
+                className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                aria-label="Închide asistentul"
               >
-                <X size={16} />
+                <X size={16} aria-hidden="true" />
               </button>
             </div>
           </header>
 
           {/* Messages */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div
+            ref={scrollRef}
+            className="flex-1 overflow-y-auto p-4 space-y-4"
+            role="log"
+            aria-live="polite"
+            aria-label="Conversație asistent civic"
+          >
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -296,11 +312,12 @@ export function CivicAssistant() {
                       : "bg-[var(--color-surface-2)] text-[var(--color-text)] rounded-bl-sm"
                   )}
                 >
+                  <span className="sr-only">{msg.role === "user" ? "Tu: " : "Asistent: "}</span>
                   {msg.content || (streaming && i === messages.length - 1 ? (
-                    <span className="inline-flex gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDelay: "0ms" }} />
-                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDelay: "150ms" }} />
-                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <span className="inline-flex gap-1" aria-label="Asistentul scrie">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDelay: "0ms" }} aria-hidden="true" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDelay: "150ms" }} aria-hidden="true" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDelay: "300ms" }} aria-hidden="true" />
                     </span>
                   ) : null)}
                 </div>
@@ -318,11 +335,12 @@ export function CivicAssistant() {
                     {QUICK_ACTIONS.map((a) => (
                       <button
                         key={a.label}
+                        type="button"
                         onClick={() => sendMessage(a.prompt)}
-                        className="text-left text-xs px-2.5 py-2 rounded-[8px] bg-gradient-to-br from-[var(--color-primary-soft)] to-transparent hover:from-[var(--color-primary-soft)] hover:to-[var(--color-primary-soft)]/50 border border-[var(--color-primary)]/20 transition-all"
+                        className="text-left text-xs px-2.5 py-2 rounded-[8px] bg-gradient-to-br from-[var(--color-primary-soft)] to-transparent hover:from-[var(--color-primary-soft)] hover:to-[var(--color-primary-soft)]/50 border border-[var(--color-primary)]/20 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                         title={a.prompt.slice(0, 100) + "…"}
                       >
-                        <div className="text-base mb-0.5">{a.emoji}</div>
+                        <div className="text-base mb-0.5" aria-hidden="true">{a.emoji}</div>
                         <div className="font-medium leading-tight">{a.label}</div>
                       </button>
                     ))}
@@ -336,8 +354,9 @@ export function CivicAssistant() {
                   {SUGGESTED_QUESTIONS.map((q) => (
                     <button
                       key={q}
+                      type="button"
                       onClick={() => sendMessage(q)}
-                      className="w-full text-left text-xs px-3 py-2 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] border border-[var(--color-border)] transition-colors"
+                      className="w-full text-left text-xs px-3 py-2 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] border border-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     >
                       {q}
                     </button>
@@ -369,10 +388,10 @@ export function CivicAssistant() {
               <button
                 type="submit"
                 disabled={!input.trim() || streaming}
-                className="w-10 h-10 rounded-[8px] bg-[var(--color-primary)] text-white flex items-center justify-center hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                aria-label="Trimite"
+                className="w-10 h-10 rounded-[8px] bg-[var(--color-primary)] text-white flex items-center justify-center hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+                aria-label="Trimite mesajul"
               >
-                <Send size={16} />
+                <Send size={16} aria-hidden="true" />
               </button>
             </div>
             <p className="text-[10px] text-[var(--color-text-muted)] mt-2 text-center">
