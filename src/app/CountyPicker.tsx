@@ -128,7 +128,7 @@ export function CountyPicker() {
         {savedCounty && (
           <div className="max-w-xl mx-auto mb-6 flex flex-wrap items-center gap-3 bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[12px] px-4 py-3">
             <div className="flex items-center gap-2 text-sm min-w-0">
-              <Check size={16} className="text-[var(--color-primary)] shrink-0" />
+              <Check size={16} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
               <span className="truncate">
                 Județ salvat:{" "}
                 <strong className="text-[var(--color-primary)]">
@@ -138,39 +138,41 @@ export function CountyPicker() {
             </div>
             <Link
               href={`/${savedCounty.slug}`}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] transition-colors ml-auto"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] transition-colors ml-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
-              Mergi la {savedCounty.name} <ArrowRight size={12} />
+              Mergi la {savedCounty.name} <ArrowRight size={12} aria-hidden="true" />
             </Link>
           </div>
         )}
 
         <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto mb-8">
           <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none" aria-hidden="true" />
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Caută județul tău..."
+              aria-label="Caută județul"
               className="w-full h-12 pl-10 pr-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             />
           </div>
           <button
+            type="button"
             onClick={handleGPS}
             disabled={detecting}
-            className="h-12 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 inline-flex items-center gap-2 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+            className="h-12 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 inline-flex items-center gap-2 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)] transition-colors"
           >
             {detecting ? (
-              <><Loader2 size={16} className="animate-spin" /> Se detectează...</>
+              <><Loader2 size={16} className="animate-spin" aria-hidden="true" /> Se detectează...</>
             ) : (
-              <><Navigation size={16} /> Detectează automat</>
+              <><Navigation size={16} aria-hidden="true" /> Detectează automat</>
             )}
           </button>
         </div>
 
         {gpsError && (
-          <p className="text-center text-sm text-amber-600 dark:text-amber-400 mb-4">
+          <p role="alert" className="text-center text-sm text-amber-600 dark:text-amber-400 mb-4">
             {gpsError}
           </p>
         )}
@@ -197,9 +199,18 @@ export function CountyPicker() {
         </div>
 
         {filtered.length === 0 && query && (
-          <p className="text-center text-[var(--color-text-muted)] py-8">
-            Niciun județ găsit pentru &ldquo;{query}&rdquo;
-          </p>
+          <div className="text-center py-8">
+            <p className="text-[var(--color-text-muted)] mb-2">
+              Niciun județ găsit pentru &ldquo;{query}&rdquo;
+            </p>
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="text-xs text-[var(--color-primary)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded px-1"
+            >
+              Șterge căutarea și vezi toate
+            </button>
+          </div>
         )}
       </div>
     </section>
