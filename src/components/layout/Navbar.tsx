@@ -180,7 +180,13 @@ export function Navbar() {
                 {NAV_MORE.filter((l) => !("countyOnly" in l && l.countyOnly) || countySlug).map((link) => (
                   <Link
                     key={link.href}
-                    href={countySlug ? `/${countySlug}${link.href}` : link.href}
+                    href={
+                      "nationalOnly" in link && link.nationalOnly
+                        ? link.href
+                        : countySlug
+                        ? `/${countySlug}${link.href}`
+                        : link.href
+                    }
                     onClick={() => setMoreDropdown(false)}
                     className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]"
                   >
@@ -297,7 +303,13 @@ export function Navbar() {
             {NAV_MORE.filter((l) => !("countyOnly" in l && l.countyOnly) || countySlug).map((link) => (
               <Link
                 key={link.href}
-                href={countySlug ? `/${countySlug}${link.href}` : link.href}
+                href={
+                  "nationalOnly" in link && link.nationalOnly
+                    ? link.href
+                    : countySlug
+                    ? `/${countySlug}${link.href}`
+                    : link.href
+                }
                 onClick={() => setMobileOpen(false)}
                 className="block px-4 py-2 rounded-[var(--radius-button)] text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               >

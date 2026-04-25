@@ -40,13 +40,19 @@ export const NAV_MORE = [
   // Ordered by real click-through from analytics: aer > calendar > judete >
   // compară > impact. The county-only slots land at the bottom of their
   // own list, not mixed into the national view.
+  //
+  // `nationalOnly: true` = linkul NU se prefixează cu /{countySlug} nici
+  // când user-ul e într-un județ. Asta e pentru paginile care au sens
+  // doar ca vedere națională (catalog complet, comparare, selecție
+  // județ). Fără acest flag, Navbar-ul ar duce /b/judete, /cj/autoritati
+  // etc. — urls fake care n-au sens.
   { href: "/aer", label: "Calitatea aerului — live", icon: "🌬️" },
-  { href: "/cum-functioneaza", label: "Cum funcționează administrația", icon: "🏛️" },
-  { href: "/calendar-civic", label: "Calendar civic", icon: "📅" },
-  { href: "/judete", label: "Toate județele", icon: "🗺️" },
-  { href: "/autoritati", label: "Autorități publice — contacte", icon: "🏢" },
+  { href: "/cum-functioneaza", label: "Cum funcționează administrația", icon: "🏛️", nationalOnly: true },
+  { href: "/calendar-civic", label: "Calendar civic", icon: "📅", nationalOnly: true },
+  { href: "/judete", label: "Toate județele", icon: "🗺️", nationalOnly: true },
+  { href: "/autoritati", label: "Autorități publice — contacte", icon: "🏢", nationalOnly: true },
   { href: "/intreruperi", label: "Întreruperi apă, caldură, curent", icon: "🚧" },
-  { href: "/compara", label: "Compară două județe", icon: "⚖️" },
+  { href: "/compara", label: "Compară două județe", icon: "⚖️", nationalOnly: true },
   { href: "/impact", label: "Impact Civia — ce s-a rezolvat", icon: "📊" },
   { href: "/bilete", label: "Bilete și abonamente transport", icon: "🎫", countyOnly: true },
   { href: "/istoric", label: "Istoricul primarilor", icon: "📜", countyOnly: true },
