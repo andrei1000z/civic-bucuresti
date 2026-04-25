@@ -122,7 +122,7 @@ export function VoiceInput({
         } ${className ?? ""}`}
         title={listening ? "Înregistrează... apasă pentru stop" : "Dictează în română (clic pentru start)"}
       >
-        {listening ? <MicOff size={14} /> : <Mic size={14} />}
+        {listening ? <MicOff size={14} aria-hidden="true" /> : <Mic size={14} aria-hidden="true" />}
       </button>
       {error && (
         <p className="text-[10px] text-red-500 max-w-[180px] text-right" role="alert">

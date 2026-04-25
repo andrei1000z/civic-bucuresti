@@ -113,37 +113,43 @@ export function SignSesizareButton({
   return (
     <>
       <button
+        type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          "inline-flex items-center gap-2 rounded-[8px] font-medium transition-colors",
+          "inline-flex items-center gap-2 rounded-[8px] font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2",
           variant === "primary"
             ? "h-11 px-5 text-sm bg-[var(--color-secondary)] text-white hover:brightness-110 shadow-md"
             : "h-9 px-3 text-xs bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)]"
         )}
         title="Trimiți același email la autorități, cu numele tău — dă mai multă greutate sesizării"
       >
-        <UserPlus size={variant === "primary" ? 16 : 13} />
+        <UserPlus size={variant === "primary" ? 16 : 13} aria-hidden="true" />
         {variant === "primary" ? "Co-semnez și trimit și eu" : "Co-semnează"}
       </button>
 
       {open && (
         <div
-          className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-start md:items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-start md:items-center justify-center p-4 overflow-y-auto animate-fade-in"
           onClick={handleClose}
+          role="presentation"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-[var(--color-surface)] rounded-[12px] shadow-[var(--shadow-xl)] my-8 overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sign-modal-title"
+            className="w-full max-w-lg bg-[var(--color-surface)] rounded-[12px] shadow-[var(--shadow-xl)] my-8 overflow-hidden animate-modal-pop"
           >
             <header className="bg-gradient-to-r from-[var(--color-secondary)] to-emerald-700 text-white p-5 relative">
               <button
                 type="button"
                 onClick={handleClose}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                aria-label="Închide modalul de co-semnare"
               >
-                <X size={16} />
+                <X size={16} aria-hidden="true" />
               </button>
-              <h3 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-1">
+              <h3 id="sign-modal-title" className="font-[family-name:var(--font-sora)] text-xl font-bold mb-1">
                 {step === "form" ? "Co-semnează această sesizare" : "Alege cum trimiți emailul"}
               </h3>
               <p className="text-sm text-white/85">
@@ -211,13 +217,13 @@ export function SignSesizareButton({
                   className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
                 >
                   Pregătește emailul
-                  <ArrowRight size={16} />
+                  <ArrowRight size={16} aria-hidden="true" />
                 </button>
               </form>
             ) : (
               <div className="p-5 space-y-4">
                 <div className="flex items-start gap-2 p-3 rounded-[8px] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900">
-                  <AlertCircle size={14} className="text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                  <AlertCircle size={14} className="text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" aria-hidden="true" />
                   <p className="text-xs text-blue-900 dark:text-blue-300">
                     Se deschide un tab nou cu emailul deja completat — destinatari, subiect, corp. Citește pentru verificare și apeși <strong>Trimite</strong>.
                   </p>
@@ -226,9 +232,9 @@ export function SignSesizareButton({
                 <button
                   type="button"
                   onClick={() => setStep("form")}
-                  className="w-full h-9 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded-[8px]"
+                  className="w-full h-9 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded-[8px] transition-colors"
                 >
-                  ← Înapoi la datele tale
+                  <span aria-hidden="true">←</span> Înapoi la datele tale
                 </button>
               </div>
             )}
