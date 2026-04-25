@@ -83,9 +83,6 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: ["/opengraph-image"],
   },
-  other: {
-    "theme-color": "#1C4ED8",
-  },
   keywords: [
     "sesizări România",
     "hărți civice",
@@ -112,8 +109,10 @@ export const metadata: Metadata = {
 
 export const viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0F172A" },
+    // Trebuie să se potrivească cu --color-bg din globals.css ca să nu apară
+    // o linie de discontinuitate între chrome-ul browser-ului și body.
+    { media: "(prefers-color-scheme: light)", color: "#FAFAFA" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
   ],
   // viewport-fit=cover extends content into iOS safe areas (notch,
   // home indicator). Combined with env(safe-area-inset-*) in layout
