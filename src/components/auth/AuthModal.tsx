@@ -91,6 +91,7 @@ export function AuthModal() {
             Nu vezi emailul? Verifică folderul Spam/Promotions.
           </p>
           <button
+            type="button"
             onClick={handleClose}
             className="h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
@@ -172,7 +173,7 @@ export function AuthModal() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="nume@exemplu.ro"
-                className="w-full h-11 pl-9 pr-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                className="w-full h-11 pl-9 pr-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 disabled={status === "sending" || oauthLoading !== null}
               />
             </div>

@@ -34,7 +34,7 @@ export function BackToTop() {
       aria-hidden={!visible}
       tabIndex={visible ? 0 : -1}
     >
-      <ArrowUp size={18} />
+      <ArrowUp size={18} aria-hidden="true" />
     </button>
   );
 }

@@ -128,7 +128,7 @@ export function AlertBanner() {
   return (
     <div className={`${style.bg} ${style.text} sticky top-0 z-[60] shadow-md`}>
       <div className="container-narrow flex items-center gap-3 py-2.5">
-        <Icon size={18} className="shrink-0" />
+        <Icon size={18} className="shrink-0" aria-hidden="true" />
         {alert.link ? (
           <Link href={alert.link} className="flex-1 min-w-0 hover:opacity-90 transition-opacity">
             {body}
@@ -143,7 +143,7 @@ export function AlertBanner() {
           aria-label="Închide această alertă"
           title="Închide alerta"
         >
-          <X size={16} />
+          <X size={16} aria-hidden="true" />
         </button>
       </div>
     </div>
