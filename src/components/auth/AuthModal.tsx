@@ -78,9 +78,9 @@ export function AuthModal() {
   return (
     <Modal open={isAuthModalOpen} onClose={handleClose} title="Intră în contul tău Civia">
       {status === "sent" ? (
-        <div className="text-center py-4">
+        <div role="status" className="text-center py-4">
           <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-            <CheckCircle2 size={28} className="text-emerald-600 dark:text-emerald-400" />
+            <CheckCircle2 size={28} className="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
           </div>
           <h3 className="font-semibold text-lg mb-2">Verifică-ți emailul</h3>
           <p className="text-sm text-[var(--color-text-muted)] mb-4">
@@ -114,12 +114,13 @@ export function AuthModal() {
                     type="button"
                     onClick={() => handleOAuth("google")}
                     disabled={oauthLoading !== null || status === "sending"}
-                    className="w-full h-11 rounded-[8px] bg-white dark:bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] dark:hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50 flex items-center justify-center gap-3"
+                    aria-busy={oauthLoading === "google"}
+                    className="w-full h-11 rounded-[8px] bg-white dark:bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] dark:hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50 flex items-center justify-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   >
                     {oauthLoading === "google" ? (
-                      <Loader2 size={16} className="animate-spin" />
+                      <Loader2 size={16} className="animate-spin" aria-hidden="true" />
                     ) : (
-                      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4" />
                         <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853" />
                         <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05" />
@@ -134,12 +135,13 @@ export function AuthModal() {
                     type="button"
                     onClick={() => handleOAuth("apple")}
                     disabled={oauthLoading !== null || status === "sending"}
-                    className="w-full h-11 rounded-[8px] bg-black dark:bg-white text-white dark:text-black text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-3"
+                    aria-busy={oauthLoading === "apple"}
+                    className="w-full h-11 rounded-[8px] bg-black dark:bg-white text-white dark:text-black text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   >
                     {oauthLoading === "apple" ? (
-                      <Loader2 size={16} className="animate-spin" />
+                      <Loader2 size={16} className="animate-spin" aria-hidden="true" />
                     ) : (
-                      <svg width="16" height="18" viewBox="0 0 16 18" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                      <svg width="16" height="18" viewBox="0 0 16 18" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true">
                         <path d="M11.624 9.296c-.02-2.07 1.69-3.06 1.767-3.108-.963-1.41-2.461-1.6-2.994-1.623-1.274-.128-2.487.75-3.135.75-.647 0-1.647-.731-2.71-.712-1.395.02-2.685.811-3.402 2.057-1.45 2.514-.37 6.238 1.045 8.28.692 1 1.516 2.125 2.596 2.086 1.043-.042 1.436-.676 2.696-.676 1.26 0 1.615.676 2.718.654 1.123-.02 1.834-1.017 2.52-2.022.793-1.16 1.12-2.285 1.138-2.343-.024-.01-2.186-.838-2.21-3.32zM9.555 3.195c.574-.696.96-1.663.854-2.625-.827.034-1.825.55-2.418 1.246-.532.615-.998 1.598-.871 2.544.92.072 1.86-.468 2.435-1.165z" />
                       </svg>
                     )}
@@ -163,7 +165,8 @@ export function AuthModal() {
             <div className="relative mb-4">
               <Mail
                 size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none"
+                aria-hidden="true"
               />
               <input
                 id="auth-email"
@@ -178,7 +181,7 @@ export function AuthModal() {
               />
             </div>
             {errorMsg && (
-              <p className="text-sm text-red-600 dark:text-red-400 mb-3">{errorMsg}</p>
+              <p role="alert" className="text-sm text-red-600 dark:text-red-400 mb-3">{errorMsg}</p>
             )}
             <button
               type="submit"
