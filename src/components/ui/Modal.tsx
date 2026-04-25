@@ -88,7 +88,7 @@ export function Modal({ open, onClose, title, children, size = "md", className }
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start md:items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-start md:items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto animate-fade-in"
       onClick={onClose}
       role="presentation"
     >
@@ -99,7 +99,7 @@ export function Modal({ open, onClose, title, children, size = "md", className }
         aria-label={title ?? undefined}
         tabIndex={-1}
         className={cn(
-          "w-full bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-xl)] my-8 outline-none",
+          "w-full bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-xl)] my-8 outline-none animate-modal-pop",
           "border border-[var(--color-border)]",
           sizeClass,
           className
@@ -110,11 +110,12 @@ export function Modal({ open, onClose, title, children, size = "md", className }
           <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
             <h2 className="text-xl font-semibold text-[var(--color-text)]">{title}</h2>
             <button
+              type="button"
               onClick={onClose}
-              className="p-1.5 rounded-full hover:bg-[var(--color-surface-2)] transition-colors"
+              className="p-1.5 rounded-full hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               aria-label="Închide"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
