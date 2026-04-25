@@ -108,16 +108,16 @@ export default async function CountyHomePage({
               <div className="flex flex-wrap gap-3">
                 <Link
                   href={`/${judet}/harti`}
-                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 transition-colors backdrop-blur-sm"
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 transition-colors backdrop-blur-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
-                  <MapIcon size={18} />
+                  <MapIcon size={18} aria-hidden="true" />
                   Explorează harta
                 </Link>
                 <Link
                   href={`/${judet}/sesizari`}
-                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-700"
                 >
-                  <AlertCircle size={18} />
+                  <AlertCircle size={18} aria-hidden="true" />
                   Fă o sesizare
                 </Link>
               </div>
@@ -154,8 +154,11 @@ export default async function CountyHomePage({
           </div>
         </div>
 
-        {/* Bottom ticker */}
-        <div className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
+        {/* Bottom ticker — visual only, sr-only summary mai jos */}
+        <div
+          className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden"
+          aria-hidden="true"
+        >
           <div className="flex animate-ticker whitespace-nowrap py-3 text-xs text-emerald-200/80 gap-8">
             {[
               `📊 AQI: ${stats.aqiMediu} — ${stats.aqiQuality}`,
@@ -175,6 +178,13 @@ export default async function CountyHomePage({
               </span>
             ))}
           </div>
+        </div>
+        {/* Sr-only summary — un singur set, fără duplicări pentru ticker animation */}
+        <div className="sr-only">
+          Statistici {county.name}: AQI mediu {stats.aqiMediu}, {stats.aqiQuality}.
+          {stats.sesizariTotal.toLocaleString("ro-RO")} sesizări estimate, din care {Math.round((stats.sesizariRezolvate / Math.max(stats.sesizariTotal, 1)) * 100)}% rezolvate.
+          {stats.accidenteTotal.toLocaleString("ro-RO")} accidente rutiere în 2023.
+          Primar: {stats.primarName} ({stats.primarPartid}). Transport public: {stats.transportPublicOperator}.
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[var(--color-bg)] to-transparent pointer-events-none" />
