@@ -3,7 +3,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { getCountyBySlug, ALL_COUNTIES } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
-import { TrendingUp, TrendingDown, Minus, Users, MapPin, Building2, TreePine, Wind, Car, Award } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Users, MapPin, Building2, TreePine, Wind, Car } from "lucide-react";
 import { SITE_URL } from "@/lib/constants";
 
 const ChartLoading = () => (
@@ -16,10 +16,6 @@ const AccidenteLunareCountyChart = dynamic(
 );
 const SesizariTipuriCountyChart = dynamic(
   () => import("@/components/charts/CountyCharts").then((m) => ({ default: m.SesizariTipuriCountyChart })),
-  { loading: ChartLoading }
-);
-const GenericBarChart = dynamic(
-  () => import("@/components/charts/CountyCharts").then((m) => ({ default: m.GenericBarChart })),
   { loading: ChartLoading }
 );
 

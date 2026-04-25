@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ShieldAlert, TrendingDown, TrendingUp, Minus, ExternalLink } from "lucide-react";
+import { ShieldAlert, ExternalLink } from "lucide-react";
 import { CRIMINALITATE, TOP_SIGURANTA_JUDETE, DATE_PUBLICE_SNAPSHOT } from "@/data/date-publice";
 import { ALL_COUNTIES } from "@/data/counties";
 import { Card } from "@/components/ui/Card";

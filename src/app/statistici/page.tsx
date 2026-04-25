@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BarChart3, Users, Wind, TreePine, Car, MapPin, ArrowRight } from "lucide-react";
-import { getNationalTotals, getAllCountyIds } from "@/data/statistici-judete";
+import { getNationalTotals } from "@/data/statistici-judete";
 import { ALL_COUNTIES } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
 

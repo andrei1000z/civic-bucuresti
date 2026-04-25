@@ -12,6 +12,18 @@ const eslintConfig = defineConfig([
       // Next-themes requires setMounted pattern; strict rule too aggressive
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/refs": "warn",
+      // Args/vars cu underscore prefix sunt convențional „intentionally
+      // unused" (Sentry callbacks, signature-only params, etc.). ESLint
+      // default warneste pe ele — dezactivăm warning-ul ca să fie clean.
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+        },
+      ],
     },
   },
   // Override default ignores of eslint-config-next.
