@@ -201,26 +201,27 @@ export default async function StireDetailPage({
         {/* Meta bar */}
         <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-muted)]">
           <span className="flex items-center gap-1.5">
-            <Calendar size={14} />
-            {formatDateTime(stire.published_at)}
+            <Calendar size={14} aria-hidden="true" />
+            <time dateTime={stire.published_at}>{formatDateTime(stire.published_at)}</time>
           </span>
           {stire.author && (
             <span className="flex items-center gap-1.5">
-              <User size={14} />
+              <User size={14} aria-hidden="true" />
               {stire.author}
             </span>
           )}
           <span className="flex items-center gap-1.5">
-            <Tag size={14} />
+            <Tag size={14} aria-hidden="true" />
             {categoryLabels[stire.category] ?? stire.category}
           </span>
           <a
             href={stire.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-[var(--color-primary)] hover:underline ml-auto"
+            className="flex items-center gap-1.5 text-[var(--color-primary)] hover:underline ml-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
+            aria-label={`Citește articolul original pe ${stire.source} (deschide în tab nou)`}
           >
-            <ExternalLink size={14} />
+            <ExternalLink size={14} aria-hidden="true" />
             {stire.source}
           </a>
         </div>
@@ -231,7 +232,7 @@ export default async function StireDetailPage({
           {/* AI Synthesis */}
           <div className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200 dark:border-violet-800/40 rounded-[12px] p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center" aria-hidden="true">
                 <Sparkles size={14} className="text-white" />
               </div>
               <div>
@@ -294,9 +295,10 @@ export default async function StireDetailPage({
               href={stire.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 w-full justify-center h-10 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+              className="inline-flex items-center gap-2 w-full justify-center h-10 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              aria-label={`Citește articolul complet pe ${stire.source} (deschide în tab nou)`}
             >
-              <ExternalLink size={14} />
+              <ExternalLink size={14} aria-hidden="true" />
               Articolul complet
             </a>
           </div>

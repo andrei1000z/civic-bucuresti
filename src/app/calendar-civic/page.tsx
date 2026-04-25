@@ -45,7 +45,7 @@ function EventCard({ event }: { event: CalendarEvent }) {
     <Card hover accentColor={meta.color} className="h-full">
       <div className="flex items-start justify-between gap-3 mb-2">
         <Badge style={{ backgroundColor: `${meta.color}22`, color: meta.color }}>
-          {meta.icon} {meta.label}
+          <span aria-hidden="true">{meta.icon}</span> {meta.label}
         </Badge>
         <span className="text-xs text-[var(--color-text-muted)] shrink-0 tabular-nums">
           {relativeDays(event.date)}
@@ -53,14 +53,16 @@ function EventCard({ event }: { event: CalendarEvent }) {
       </div>
       <h3 className="font-bold mb-1">{event.title}</h3>
       <div className="text-xs text-[var(--color-text-muted)] mb-2 flex items-center gap-1">
-        <CalendarDays size={12} />
-        {formatDate(event.date)}
-        {event.endDate && ` – ${formatDate(event.endDate)}`}
+        <CalendarDays size={12} aria-hidden="true" />
+        <time dateTime={event.date}>{formatDate(event.date)}</time>
+        {event.endDate && (
+          <> <span aria-hidden="true">–</span> <time dateTime={event.endDate}>{formatDate(event.endDate)}</time></>
+        )}
       </div>
       <p className="text-sm text-[var(--color-text-muted)] mb-3">{event.description}</p>
       {event.location && (
         <div className="text-xs text-[var(--color-text-muted)] flex items-center gap-1 mb-2">
-          <MapPin size={12} /> {event.location}
+          <MapPin size={12} aria-hidden="true" /> {event.location}
         </div>
       )}
       {event.url && (
@@ -68,9 +70,10 @@ function EventCard({ event }: { event: CalendarEvent }) {
           href={event.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline mt-2"
+          className="inline-flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline mt-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
+          aria-label={`Detalii despre „${event.title}" (deschide în tab nou)`}
         >
-          Detalii <ExternalLink size={12} />
+          Detalii <ExternalLink size={12} aria-hidden="true" />
         </a>
       )}
     </Card>
@@ -107,7 +110,7 @@ export default function CalendarCivicPage() {
       />
       <Badge className="mb-4">Calendar civic</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
-        <CalendarDays size={40} className="text-[var(--color-primary)]" />
+        <CalendarDays size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
         Date care contează pentru tine
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
