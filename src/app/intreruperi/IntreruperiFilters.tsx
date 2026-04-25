@@ -330,7 +330,11 @@ export function IntreruperiFilters({ items }: { items: Interruption[] }) {
         <GroupedList items={filtered} me={me} />
       )}
 
-      <p className="text-center text-xs text-[var(--color-text-muted)] mt-6">
+      <p
+        className="text-center text-xs text-[var(--color-text-muted)] mt-6"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         {filtered.length} {filtered.length === 1 ? "întrerupere" : "întreruperi"}
       </p>
     </div>

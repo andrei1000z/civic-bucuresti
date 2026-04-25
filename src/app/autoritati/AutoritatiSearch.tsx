@@ -222,7 +222,11 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
         </div>
       )}
 
-      <p className="text-center text-xs text-[var(--color-text-muted)] mt-6">
+      <p
+        className="text-center text-xs text-[var(--color-text-muted)] mt-6"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         {filtered.length} {filtered.length === 1 ? "rezultat" : "rezultate"}
       </p>
     </div>
