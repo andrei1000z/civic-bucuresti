@@ -24,7 +24,7 @@ interface SensorCommunityEntry {
 
 export async function fetchSensorCommunity(): Promise<UnifiedSensor[]> {
   const res = await fetch(API_URL, {
-    headers: { "User-Agent": "civia.ro/1.0 (contact@civia.ro)" },
+    headers: { "User-Agent": "civia.ro/1.0 (https://civia.ro)" },
     next: { revalidate: 300 },
   });
   if (!res.ok) throw new Error(`Sensor.Community ${res.status}`);

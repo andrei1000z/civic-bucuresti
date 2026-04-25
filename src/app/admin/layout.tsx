@@ -14,6 +14,7 @@ const ADMIN_TABS = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/sesizari", label: "Sesizări" },
   { href: "/admin/intreruperi", label: "Întreruperi" },
+  { href: "/admin/feedback", label: "Feedback" },
   { href: "/admin/analytics", label: "Analytics" },
 ] as const;
 

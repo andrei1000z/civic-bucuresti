@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { FeedbackForm } from "@/components/FeedbackForm";
 
 export const metadata: Metadata = {
   title: "Politica de confidențialitate",
@@ -90,12 +91,14 @@ export default function ConfidentialitatePage() {
 
         <h2>Contact</h2>
         <p>
-          Pentru întrebări sau solicitări GDPR, scrie la{" "}
-          <a href="mailto:contact@civia.ro" className="text-[var(--color-primary)]">
-            contact@civia.ro
-          </a>
-          .
+          Pentru întrebări sau solicitări GDPR, folosește formularul de mai jos.
+          Răspundem la cele cu email opțional în 24-48h.
         </p>
+        <FeedbackForm
+          defaultTopic="gdpr"
+          placeholder={`Ex: „Vreau să-mi văd/șterg datele personale", „Cerere de portabilitate", „Retrag consimțământul cookie-uri".`}
+          successTitle="Solicitare GDPR primită"
+        />
       </article>
     </div>
   );
