@@ -72,23 +72,23 @@ export default function StatisticiPage() {
       {/* National totals */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 text-center">
-          <Car size={24} className="mx-auto mb-2 text-red-500" />
-          <p className="text-2xl md:text-3xl font-bold text-red-600">{totals.accidenteTotal.toLocaleString("ro-RO")}</p>
+          <Car size={24} className="mx-auto mb-2 text-red-500" aria-hidden="true" />
+          <p className="text-2xl md:text-3xl font-bold text-red-600 tabular-nums">{totals.accidenteTotal.toLocaleString("ro-RO")}</p>
           <p className="text-xs text-[var(--color-text-muted)]">Accidente rutiere 2023</p>
         </div>
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 text-center">
-          <Users size={24} className="mx-auto mb-2 text-red-500" />
-          <p className="text-2xl md:text-3xl font-bold text-red-600">{totals.accidenteDecedati.toLocaleString("ro-RO")}</p>
+          <Users size={24} className="mx-auto mb-2 text-red-500" aria-hidden="true" />
+          <p className="text-2xl md:text-3xl font-bold text-red-600 tabular-nums">{totals.accidenteDecedati.toLocaleString("ro-RO")}</p>
           <p className="text-xs text-[var(--color-text-muted)]">Persoane decedate</p>
         </div>
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 text-center">
-          <BarChart3 size={24} className="mx-auto mb-2 text-blue-500" />
-          <p className="text-2xl md:text-3xl font-bold text-blue-600">{totals.sesizariTotal.toLocaleString("ro-RO")}</p>
+          <BarChart3 size={24} className="mx-auto mb-2 text-blue-500" aria-hidden="true" />
+          <p className="text-2xl md:text-3xl font-bold text-blue-600 tabular-nums">{totals.sesizariTotal.toLocaleString("ro-RO")}</p>
           <p className="text-xs text-[var(--color-text-muted)]">Sesizări estimate</p>
         </div>
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 text-center">
-          <MapPin size={24} className="mx-auto mb-2 text-amber-500" />
-          <p className="text-2xl md:text-3xl font-bold text-amber-600">42</p>
+          <MapPin size={24} className="mx-auto mb-2 text-amber-500" aria-hidden="true" />
+          <p className="text-2xl md:text-3xl font-bold text-amber-600 tabular-nums">42</p>
           <p className="text-xs text-[var(--color-text-muted)]">Județe acoperite</p>
         </div>
       </div>
@@ -98,7 +98,7 @@ export default function StatisticiPage() {
         {/* By population */}
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
           <h2 className="font-[family-name:var(--font-sora)] font-bold text-base mb-4 flex items-center gap-2">
-            <Users size={18} className="text-blue-500" /> Top 10 — populație
+            <Users size={18} className="text-blue-500" aria-hidden="true" /> Top 10 — populație
           </h2>
           <div className="space-y-2">
             {topByPop.map((c, i) => (
@@ -117,7 +117,7 @@ export default function StatisticiPage() {
         {/* By AQI (most polluted) */}
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
           <h2 className="font-[family-name:var(--font-sora)] font-bold text-base mb-4 flex items-center gap-2">
-            <Wind size={18} className="text-amber-500" /> Top 10 — AQI cel mai ridicat
+            <Wind size={18} className="text-amber-500" aria-hidden="true" /> Top 10 — AQI cel mai ridicat
           </h2>
           <div className="space-y-2">
             {topByAqi.map((c, i) => (
@@ -141,7 +141,7 @@ export default function StatisticiPage() {
       {/* Accidents per capita */}
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 mb-12">
         <h2 className="font-[family-name:var(--font-sora)] font-bold text-base mb-4 flex items-center gap-2">
-          <Car size={18} className="text-red-500" /> Top 10 — accidente la 100.000 locuitori
+          <Car size={18} className="text-red-500" aria-hidden="true" /> Top 10 — accidente la 100&nbsp;000 locuitori
         </h2>
         <div className="grid sm:grid-cols-2 gap-2">
           {topByAccidents.map((c, i) => (
