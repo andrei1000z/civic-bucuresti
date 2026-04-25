@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { Star, AlertTriangle, CheckCircle2, Users, X, ChevronDown, Filter, GitCompare } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
-import { cn } from "@/lib/utils";
+import { cn, formatDecimal } from "@/lib/utils";
 import type { Primar } from "@/types";
 
 interface Props {
@@ -14,11 +14,12 @@ function Rating({ value }: { value: number }) {
   const full = Math.floor(value);
   const hasHalf = value - full >= 0.5;
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-0.5" aria-label={`Notă ${formatDecimal(value, 1)} din 5`}>
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}
           size={14}
+          aria-hidden="true"
           className={
             i <= full
               ? "fill-amber-400 text-amber-400"
@@ -28,7 +29,7 @@ function Rating({ value }: { value: number }) {
           }
         />
       ))}
-      <span className="text-xs text-[var(--color-text-muted)] ml-1">{value.toFixed(1)}</span>
+      <span className="text-xs text-[var(--color-text-muted)] ml-1 tabular-nums" aria-hidden="true">{formatDecimal(value, 1)}</span>
     </div>
   );
 }
@@ -254,8 +255,20 @@ export function IstoricInteractive({ primari }: Props) {
       </div>
 
       {filtered.length === 0 && (
-        <div className="text-center py-10 text-[var(--color-text-muted)] text-sm">
-          Niciun primar nu corespunde filtrelor.
+        <div className="text-center py-10">
+          <p className="text-[var(--color-text-muted)] text-sm mb-3">
+            Niciun primar nu corespunde combinației de filtre selectate.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setFilterPartid("toate");
+              setFilterDecada("toate");
+            }}
+            className="inline-flex items-center gap-2 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          >
+            Resetează filtrele
+          </button>
         </div>
       )}
 
