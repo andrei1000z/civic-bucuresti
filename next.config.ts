@@ -20,6 +20,14 @@ if (
 }
 
 const nextConfig: NextConfig = {
+  // În producție, eliminăm console.log-urile (dar păstrăm warn/error
+  // pentru Sentry). Reduce bundle + previne PII leaking accidental.
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? { exclude: ["warn", "error"] }
+        : false,
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },
