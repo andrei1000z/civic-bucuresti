@@ -757,7 +757,7 @@ export const ORASE_IMPORTANTE: Record<string, CityContact> = {
   // ═══════════════════════════════════════════════════════════════
   // EXTINDERE 2026-04-23 — orașe mijlocii și turistice
   // Fiecare entry are website oficial + email pattern-based pe domeniul
-  // corect. Unele pot fi învechite — raportăm + corectăm via GitHub.
+  // corect. Unele pot fi învechite — raportăm prin formularul de feedback.
   // ═══════════════════════════════════════════════════════════════
   // Prahova — zona industrială + coridorul Văii Prahovei
   "mizil": { countyCode: "PH", name: "Mizil", phone: "0244-250-027", email: "contact@primariamizil.ro", website: "https://www.primariamizil.ro", address: "B-dul Unirii nr. 14, Mizil" },
