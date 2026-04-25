@@ -61,7 +61,7 @@ export default function HomePage() {
                 href="/sesizari"
                 className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-700"
               >
-                Trimite o sesizare acum <ArrowRight size={18} />
+                Trimite o sesizare acum <ArrowRight size={18} aria-hidden="true" />
               </Link>
               <Link
                 href="/#county-picker"
@@ -133,21 +133,21 @@ export default function HomePage() {
             <div className="lg:col-span-2">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold flex items-center gap-2">
-                  <TrendingUp size={22} className="text-[var(--color-primary)]" />
+                  <TrendingUp size={22} className="text-[var(--color-primary)]" aria-hidden="true" />
                   Ce semnalează cetățenii acum
                 </h2>
                 <Link
                   href="/sesizari-publice"
                   className="text-sm text-[var(--color-primary)] hover:underline inline-flex items-center gap-1"
                 >
-                  Vezi toate <ArrowRight size={14} />
+                  Vezi toate <ArrowRight size={14} aria-hidden="true" />
                 </Link>
               </div>
               <TopVotedWidget />
             </div>
             <div>
               <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold flex items-center gap-2 mb-5">
-                <Wind size={22} className="text-[var(--color-primary)]" />
+                <Wind size={22} className="text-[var(--color-primary)]" aria-hidden="true" />
                 Aerul respirat acum
               </h2>
               <LiveWeatherAqi />
@@ -155,7 +155,7 @@ export default function HomePage() {
                 href="/aer"
                 className="mt-3 text-sm text-[var(--color-primary)] hover:underline inline-flex items-center gap-1"
               >
-                Harta live a calității aerului <ArrowRight size={14} />
+                Harta live a calității aerului <ArrowRight size={14} aria-hidden="true" />
               </Link>
             </div>
           </div>
@@ -171,7 +171,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
               <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] text-xs font-semibold mb-4">
-                <Building2 size={12} /> Autorități publice
+                <Building2 size={12} aria-hidden="true" /> Autorități publice
               </p>
               <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-3">
                 {totalPrimarii} primării, {totalPL} Poliții Locale,{" "}
@@ -187,7 +187,7 @@ export default function HomePage() {
                 href="/autoritati"
                 className="inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
               >
-                Vezi catalogul de autorități <ArrowRight size={16} />
+                Vezi catalogul de autorități <ArrowRight size={16} aria-hidden="true" />
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-3">

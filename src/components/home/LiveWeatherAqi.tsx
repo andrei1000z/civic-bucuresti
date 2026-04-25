@@ -87,29 +87,39 @@ export function LiveWeatherAqi() {
   }
 
   const wi = weatherIcon(weather?.code ?? null);
+  const ariaLabel = [
+    weather && `${weather.temp} grade Celsius, ${wi.label}`,
+    aqi && `indicele calității aerului ${aqi.aqi}, ${aqi.quality}`,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return (
-    <div className="inline-flex items-center gap-1 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-full px-3 py-1.5 text-xs font-medium">
+    <div
+      className="inline-flex items-center gap-1 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-full px-3 py-1.5 text-xs font-medium"
+      aria-label={ariaLabel || undefined}
+      role="status"
+    >
       {weather && (
         <>
-          <span className="text-base leading-none" title={wi.label}>{wi.emoji}</span>
-          <span className="font-bold text-[var(--color-text)]">{weather.temp}°</span>
+          <span className="text-base leading-none" title={wi.label} aria-hidden="true">{wi.emoji}</span>
+          <span className="font-bold text-[var(--color-text)]" aria-hidden="true">{weather.temp}°</span>
           {weather.feels_like !== weather.temp && (
-            <span className="text-[10px] text-[var(--color-text-muted)]">
+            <span className="text-[10px] text-[var(--color-text-muted)]" aria-hidden="true">
               resimțit {weather.feels_like}°
             </span>
           )}
         </>
       )}
-      {weather && aqi && <span className="text-[var(--color-border)]">·</span>}
+      {weather && aqi && <span className="text-[var(--color-border)]" aria-hidden="true">·</span>}
       {aqi && (
         <>
           <span
             className="w-1.5 h-1.5 rounded-full"
             style={{ backgroundColor: aqiColor(aqi.aqi) }}
-            aria-hidden
+            aria-hidden="true"
           />
-          <span className="text-[var(--color-text)]">AQI {aqi.aqi}</span>
+          <span className="text-[var(--color-text)]" aria-hidden="true">AQI {aqi.aqi}</span>
         </>
       )}
     </div>
@@ -154,23 +164,27 @@ export function LiveWeatherCard() {
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-[var(--color-surface-2)] rounded-[8px] p-3">
           <div className="flex items-center gap-2 text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-1">
-            <Thermometer size={12} /> Temperatura
+            <Thermometer size={12} aria-hidden="true" /> Temperatura
           </div>
-          <p className="text-2xl font-bold flex items-baseline gap-1">
-            {weather ? <>{weather.temp}°<span className="text-sm font-normal text-[var(--color-text-muted)]">C</span></> : "—"}
+          <p className="text-2xl font-bold flex items-baseline gap-1" aria-label={weather ? `${weather.temp} grade Celsius` : "Temperatura indisponibilă"}>
+            {weather ? <>{weather.temp}°<span className="text-sm font-normal text-[var(--color-text-muted)]" aria-hidden="true">C</span></> : "—"}
           </p>
           {weather && (
             <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
-              {wi.emoji} {wi.label} · resimțit {weather.feels_like}°
+              <span aria-hidden="true">{wi.emoji}</span> {wi.label} · resimțit {weather.feels_like}°
             </p>
           )}
         </div>
         <div className="bg-[var(--color-surface-2)] rounded-[8px] p-3">
           <div className="flex items-center gap-2 text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-1">
-            <Wind size={12} /> Calitate aer
+            <Wind size={12} aria-hidden="true" /> Calitate aer
           </div>
-          <p className="text-2xl font-bold flex items-baseline gap-1" style={{ color: aqi ? aqiColor(aqi.aqi) : undefined }}>
-            {aqi ? <>{aqi.aqi}<span className="text-sm font-normal text-[var(--color-text-muted)]">AQI</span></> : "—"}
+          <p
+            className="text-2xl font-bold flex items-baseline gap-1"
+            style={{ color: aqi ? aqiColor(aqi.aqi) : undefined }}
+            aria-label={aqi ? `Indicele calității aerului ${aqi.aqi}, ${aqi.quality}` : "AQI indisponibil"}
+          >
+            {aqi ? <>{aqi.aqi}<span className="text-sm font-normal text-[var(--color-text-muted)]" aria-hidden="true">AQI</span></> : "—"}
           </p>
           {aqi && (
             <p className="text-[10px] text-[var(--color-text-muted)] mt-1">{aqi.quality}</p>
@@ -179,17 +193,19 @@ export function LiveWeatherCard() {
         {weather?.humidity != null && (
           <div className="bg-[var(--color-surface-2)] rounded-[8px] p-3">
             <div className="flex items-center gap-2 text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-1">
-              <Droplets size={12} /> Umiditate
+              <Droplets size={12} aria-hidden="true" /> Umiditate
             </div>
-            <p className="text-xl font-bold">{weather.humidity}%</p>
+            <p className="text-xl font-bold" aria-label={`Umiditate ${weather.humidity} la sută`}>{weather.humidity}%</p>
           </div>
         )}
         {weather?.wind != null && (
           <div className="bg-[var(--color-surface-2)] rounded-[8px] p-3">
             <div className="flex items-center gap-2 text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-1">
-              <WindIcon size={12} /> Vânt
+              <WindIcon size={12} aria-hidden="true" /> Vânt
             </div>
-            <p className="text-xl font-bold">{weather.wind} <span className="text-xs font-normal text-[var(--color-text-muted)]">km/h</span></p>
+            <p className="text-xl font-bold" aria-label={`Viteza vântului ${weather.wind} kilometri pe oră`}>
+              {weather.wind} <span className="text-xs font-normal text-[var(--color-text-muted)]" aria-hidden="true">km/h</span>
+            </p>
           </div>
         )}
       </div>

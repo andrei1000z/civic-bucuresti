@@ -56,9 +56,12 @@ export function LiveStatsBar() {
       ];
 
   return (
-    <section className="bg-[var(--color-surface)] border-b border-[var(--color-border)] overflow-hidden">
+    <section
+      aria-label="Statistici live Civia"
+      className="bg-[var(--color-surface)] border-b border-[var(--color-border)] overflow-hidden"
+    >
       <div className="relative">
-        <div className="flex animate-ticker whitespace-nowrap">
+        <div className="flex animate-ticker whitespace-nowrap" aria-hidden="true">
           {[...stats, ...stats].map((stat, i) => {
             const Icon = stat.icon;
             return (
@@ -66,11 +69,20 @@ export function LiveStatsBar() {
                 key={i}
                 className="flex items-center gap-2 px-6 py-3 text-sm shrink-0 border-r border-[var(--color-border)]"
               >
-                <Icon size={16} className={stat.color} />
+                <Icon size={16} className={stat.color} aria-hidden="true" />
                 <span className="text-[var(--color-text)]">{stat.text}</span>
               </div>
             );
           })}
+        </div>
+        {/* Screen-reader friendly version — un singur summary, fără ticker repetat */}
+        <div className="sr-only">
+          {stats.map((s, i) => (
+            <span key={i}>
+              {s.text}
+              {i < stats.length - 1 ? ". " : ""}
+            </span>
+          ))}
         </div>
       </div>
     </section>
