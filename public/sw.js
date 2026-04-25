@@ -3,7 +3,7 @@
 
 // Bump CACHE_VERSION whenever this list changes so the new SW
 // drops old caches on activate and picks up the new precache set.
-const CACHE_VERSION = "v4";
+const CACHE_VERSION = "v5";
 const STATIC_CACHE = `civia-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `civia-runtime-${CACHE_VERSION}`;
 
@@ -44,6 +44,8 @@ const STATIC_ASSETS = [
   "/dezvoltatori",
   "/judete",
   "/evenimente",
+  "/intreruperi",
+  "/autoritati",
 ];
 
 self.addEventListener("install", (event) => {

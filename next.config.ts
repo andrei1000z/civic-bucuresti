@@ -39,6 +39,12 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.hotnews.ro" },
       { protocol: "https", hostname: "*.digi24.ro" },
     ],
+    // Format AVIF prima dată (~50% mai mic decât JPEG la aceeași calitate),
+    // fallback automat la WebP, apoi JPEG. Next.js servește formatul cel mai
+    // potrivit pe baza Accept header-ului browserului.
+    formats: ["image/avif", "image/webp"],
+    // Cache-ul imaginilor optimizate la edge — 30 zile (default e 60s).
+    minimumCacheTTL: 2592000,
   },
   async headers() {
     const csp = [
