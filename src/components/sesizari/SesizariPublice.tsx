@@ -257,6 +257,7 @@ export function SesizariPublice() {
               <div className="flex flex-wrap justify-center gap-3">
                 {hasActiveFilter && (
                   <button
+                    type="button"
                     onClick={() => {
                       setFilterTip("toate");
                       setFilterStatus("toate");
@@ -265,7 +266,7 @@ export function SesizariPublice() {
                     }}
                     className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   >
-                    🔄 Resetează filtrele
+                    <span aria-hidden="true">🔄</span> Resetează filtrele
                   </button>
                 )}
                 <Link

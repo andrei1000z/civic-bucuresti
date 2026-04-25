@@ -52,11 +52,13 @@ export function EvenimenteFilter({ evenimente }: { evenimente: Eveniment[] }) {
   return (
     <>
       {/* Category filter */}
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-2 mb-8" role="group" aria-label="Filtrează după categorie">
         <button
+          type="button"
           onClick={() => setCategory("toate")}
+          aria-pressed={category === "toate"}
           className={cn(
-            "px-4 py-2 rounded-[20px] text-xs font-medium transition-all",
+            "px-4 py-2 rounded-[20px] text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
             category === "toate"
               ? "bg-[var(--color-primary)] text-white"
               : "bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-surface-2)]"
@@ -71,15 +73,17 @@ export function EvenimenteFilter({ evenimente }: { evenimente: Eveniment[] }) {
           return (
             <button
               key={cat}
+              type="button"
               onClick={() => setCategory(cat)}
+              aria-pressed={category === cat}
               className={cn(
-                "px-4 py-2 rounded-[20px] text-xs font-medium transition-all inline-flex items-center gap-1.5",
+                "px-4 py-2 rounded-[20px] text-xs font-medium transition-all inline-flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
                 category === cat
                   ? "bg-[var(--color-primary)] text-white"
                   : "bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-surface-2)]"
               )}
             >
-              <Icon size={12} />
+              <Icon size={12} aria-hidden="true" />
               {categoryLabels[cat]} ({count})
             </button>
           );
@@ -136,10 +140,10 @@ export function EvenimenteFilter({ evenimente }: { evenimente: Eveniment[] }) {
                   {ev.descriere}
                 </p>
                 <div className="flex flex-wrap gap-3 text-xs text-[var(--color-text-muted)] pt-3 border-t border-[var(--color-border)]">
-                  {ev.victime !== undefined && ev.victime > 0 && <span>{ev.victime} victime</span>}
-                  {ev.evacuati !== undefined && ev.evacuati > 0 && <span>{ev.evacuati} evacuați</span>}
+                  {ev.victime !== undefined && ev.victime > 0 && <span>{ev.victime} {ev.victime === 1 ? "victimă" : "victime"}</span>}
+                  {ev.evacuati !== undefined && ev.evacuati > 0 && <span>{ev.evacuati} {ev.evacuati === 1 ? "evacuat" : "evacuați"}</span>}
                   <span className="ml-auto flex items-center gap-1 text-[var(--color-primary)] font-medium">
-                    Detalii <ArrowRight size={12} />
+                    Detalii <ArrowRight size={12} aria-hidden="true" />
                   </span>
                 </div>
               </div>
@@ -149,9 +153,18 @@ export function EvenimenteFilter({ evenimente }: { evenimente: Eveniment[] }) {
       </div>
 
       {filtered.length === 0 && (
-        <p className="text-center text-[var(--color-text-muted)] py-12">
-          Niciun eveniment în această categorie.
-        </p>
+        <div className="text-center py-12">
+          <p className="text-[var(--color-text-muted)] mb-3">
+            Niciun eveniment în categoria „{categoryLabels[category as EvenimentCategory] ?? "selectată"}".
+          </p>
+          <button
+            type="button"
+            onClick={() => setCategory("toate")}
+            className="inline-flex items-center gap-2 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          >
+            Vezi toate evenimentele
+          </button>
+        </div>
       )}
     </>
   );
