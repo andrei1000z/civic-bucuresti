@@ -68,7 +68,7 @@ export function Navbar() {
           <div className="flex items-center gap-2 shrink-0">
             <Link href={countySlug ? `/${countySlug}` : "/"} className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 flex items-center justify-center text-white">
-                <MapPin size={18} strokeWidth={2.5} />
+                <MapPin size={18} strokeWidth={2.5} aria-hidden="true" />
               </div>
               <span className="font-[family-name:var(--font-sora)] font-bold text-lg text-[var(--color-text)]">
                 {SITE_NAME}
@@ -260,7 +260,7 @@ export function Navbar() {
         <div className="container-narrow flex items-center justify-between h-16 border-b border-[var(--color-border)]">
           <Link href="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
             <div className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 flex items-center justify-center text-white">
-              <MapPin size={18} strokeWidth={2.5} />
+              <MapPin size={18} strokeWidth={2.5} aria-hidden="true" />
             </div>
             <span className="font-[family-name:var(--font-sora)] font-bold text-lg">{SITE_NAME}</span>
           </Link>

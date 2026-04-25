@@ -275,13 +275,19 @@ export function NotificationBell() {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        type="button"
         onClick={handleOpen}
         className="relative w-9 h-9 inline-flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors"
-        aria-label="Notificări"
+        aria-label={unread > 0 ? `Notificări (${unread} necitite)` : "Notificări"}
+        aria-expanded={open}
+        aria-haspopup="menu"
       >
-        <Bell size={18} />
+        <Bell size={18} aria-hidden="true" />
         {unread > 0 && (
-          <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+          <span
+            className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center"
+            aria-hidden="true"
+          >
             {unread > 9 ? "9+" : unread}
           </span>
         )}
@@ -295,6 +301,7 @@ export function NotificationBell() {
             <div className="text-sm font-semibold">Ce s-a mișcat</div>
             {notifs.length > 0 && (
               <button
+                type="button"
                 onClick={clearAll}
                 className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded px-1"
               >

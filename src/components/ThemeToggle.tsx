@@ -12,7 +12,12 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <button className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)]" aria-label="Theme toggle" />
+      <button
+        type="button"
+        className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)]"
+        aria-label="Schimbă tema"
+        disabled
+      />
     );
   }
 
@@ -21,11 +26,13 @@ export function ThemeToggle() {
 
   return (
     <button
+      type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className="relative w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] transition-all flex items-center justify-center text-[var(--color-text)]"
       aria-label={isDark ? "Activează modul luminos" : "Activează modul întunecat"}
+      title={isDark ? "Mod luminos" : "Mod întunecat"}
     >
-      {isDark ? <Sun size={18} /> : <Moon size={18} />}
+      {isDark ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
     </button>
   );
 }

@@ -27,11 +27,12 @@ export function UserMenu() {
   if (!user) {
     return (
       <button
+        type="button"
         onClick={openAuthModal}
         className="hidden sm:inline-flex items-center gap-1.5 h-10 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
         aria-label="Autentificare"
       >
-        <LogIn size={15} />
+        <LogIn size={15} aria-hidden="true" />
         Login
       </button>
     );
@@ -42,9 +43,12 @@ export function UserMenu() {
   return (
     <div className="relative" ref={ref}>
       <button
+        type="button"
         onClick={() => setOpen(!open)}
-        className="w-10 h-10 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center font-semibold text-sm hover:brightness-110 transition-all"
-        aria-label="Meniu utilizator"
+        className="w-10 h-10 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center font-semibold text-sm hover:brightness-110 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+        aria-label={`Meniu utilizator (${user.email})`}
+        aria-expanded={open}
+        aria-haspopup="menu"
       >
         {initial}
       </button>
@@ -63,13 +67,14 @@ export function UserMenu() {
             Contul tău
           </Link>
           <button
+            type="button"
             onClick={() => {
               setOpen(false);
               signOut();
             }}
-            className="w-full px-4 py-2.5 text-left text-sm hover:bg-[var(--color-surface-2)] flex items-center gap-2 text-red-600 dark:text-red-400 transition-colors"
+            className="w-full px-4 py-2.5 text-left text-sm hover:bg-[var(--color-surface-2)] flex items-center gap-2 text-red-600 dark:text-red-400 transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)]"
           >
-            <LogOut size={14} />
+            <LogOut size={14} aria-hidden="true" />
             Deconectare
           </button>
         </div>
