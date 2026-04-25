@@ -80,17 +80,18 @@ export function CompareCountyPicker({ counties }: { counties: CountyOption[] }) 
         href={href}
         prefetch={!sameCounty}
         aria-disabled={sameCounty}
+        aria-describedby={sameCounty ? "compare-warning" : undefined}
         tabIndex={sameCounty ? -1 : 0}
         onClick={(e) => { if (sameCounty) e.preventDefault(); }}
         className={`mt-6 inline-flex items-center justify-center gap-2 w-full h-12 rounded-[var(--radius-button)] bg-[var(--color-primary)] text-white font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)] ${
           sameCounty ? "opacity-50 pointer-events-none cursor-not-allowed" : "hover:bg-[var(--color-primary-hover)]"
         }`}
       >
-        Compară <ArrowRight size={18} />
+        Compară <ArrowRight size={18} aria-hidden="true" />
       </Link>
 
       {sameCounty && (
-        <p className="mt-2 text-xs text-[var(--color-text-muted)] text-center">
+        <p id="compare-warning" role="alert" className="mt-2 text-xs text-amber-600 dark:text-amber-400 text-center">
           Alege două județe diferite pentru comparație.
         </p>
       )}

@@ -16,11 +16,11 @@ export default function AccesibilitatePage() {
     <div className="container-narrow py-12 md:py-16">
       <Badge className="mb-4">Ghid cetățenesc</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
-        <Accessibility size={40} className="text-[var(--color-primary)]" />
+        <Accessibility size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
         Accesibilitate
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Peste 800.000 de cetățeni români au o dizabilitate oficial recunoscută. Accesibilitatea
+        Peste <strong className="tabular-nums">800.000</strong> de cetățeni români au o dizabilitate oficial recunoscută. Accesibilitatea
         nu e un bonus — e un drept garantat prin lege. Aici găsești drepturi, facilități,
         adrese utile și declarația noastră de accesibilitate.
       </p>

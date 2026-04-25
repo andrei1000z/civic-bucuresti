@@ -35,28 +35,28 @@ export default function ApiDocsPage() {
 
       <div className="grid md:grid-cols-2 gap-4 mb-12">
         <Card accentColor="#1C4ED8">
-          <Database size={24} className="text-[var(--color-primary)] mb-3" />
+          <Database size={24} className="text-[var(--color-primary)] mb-3" aria-hidden="true" />
           <h3 className="font-bold mb-1">Date actualizate</h3>
           <p className="text-sm text-[var(--color-text-muted)]">
             Sesizări noi propagate în API în &lt;1 minut. Stats actualizate la 5 min.
           </p>
         </Card>
         <Card accentColor="#10b981">
-          <Shield size={24} className="text-emerald-600 mb-3" />
+          <Shield size={24} className="text-emerald-600 mb-3" aria-hidden="true" />
           <h3 className="font-bold mb-1">Zero autentificare</h3>
           <p className="text-sm text-[var(--color-text-muted)]">
             Fără cheie API, fără înregistrare. Doar sesizări publice (cu consimțământul autorilor).
           </p>
         </Card>
         <Card accentColor="#f59e0b">
-          <Zap size={24} className="text-amber-600 mb-3" />
+          <Zap size={24} className="text-amber-600 mb-3" aria-hidden="true" />
           <h3 className="font-bold mb-1">Rate limit generos</h3>
           <p className="text-sm text-[var(--color-text-muted)]">
             120 cereri/min per IP. Dacă ai nevoie de mai mult, ne scrii.
           </p>
         </Card>
         <Card accentColor="#8b5cf6">
-          <Code size={24} className="text-violet-600 mb-3" />
+          <Code size={24} className="text-violet-600 mb-3" aria-hidden="true" />
           <h3 className="font-bold mb-1">CORS deschis</h3>
           <p className="text-sm text-[var(--color-text-muted)]">
             Fetch direct din browser. Funcționează în orice aplicație web, notebook sau script.

@@ -135,14 +135,14 @@ export default async function ImpactPage() {
       {data.avgResolutionDays !== null && (
         <Card className="mb-12 bg-gradient-to-br from-[var(--color-primary-soft)] to-transparent">
           <div className="flex items-center gap-4">
-            <Clock size={40} className="text-[var(--color-primary)] shrink-0" />
+            <Clock size={40} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
             <div>
               <div className="text-sm text-[var(--color-text-muted)]">Timp mediu de rezolvare</div>
-              <div className="text-2xl md:text-3xl font-bold">
+              <div className="text-2xl md:text-3xl font-bold tabular-nums">
                 {data.avgResolutionDays} {data.avgResolutionDays === 1 ? "zi" : "zile"}
               </div>
               <div className="text-xs text-[var(--color-text-muted)] mt-1">
-                Din depunere până la confirmarea rezolvării. Calculat din ultimele {data.rezolvate} sesizări rezolvate.
+                Din depunere până la confirmarea rezolvării. Calculat din ultimele <span className="tabular-nums">{data.rezolvate}</span> sesizări rezolvate.
               </div>
             </div>
           </div>
@@ -153,7 +153,7 @@ export default async function ImpactPage() {
       {data.byType.length > 0 && (
         <section className="mb-12">
           <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-6 flex items-center gap-2">
-            <TrendingUp size={24} className="text-[var(--color-primary)]" />
+            <TrendingUp size={24} className="text-[var(--color-primary)]" aria-hidden="true" />
             Cele mai frecvente probleme
           </h2>
           <Card>
@@ -186,7 +186,7 @@ export default async function ImpactPage() {
       {data.byCounty.length > 0 && (
         <section className="mb-12">
           <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-6 flex items-center gap-2">
-            <MapPin size={24} className="text-[var(--color-primary)]" />
+            <MapPin size={24} className="text-[var(--color-primary)]" aria-hidden="true" />
             Cele mai active județe
           </h2>
           <div className="grid gap-3 md:grid-cols-2">
@@ -202,10 +202,10 @@ export default async function ImpactPage() {
                           {countyName(c.county)}
                         </div>
                         <div className="text-xs text-[var(--color-text-muted)]">
-                          {c.count} sesizări · {c.resolved} rezolvate ({resolvedPct}%)
+                          <span className="tabular-nums">{c.count}</span> {c.count === 1 ? "sesizare" : "sesizări"} · <span className="tabular-nums">{c.resolved}</span> rezolvate ({resolvedPct}%)
                         </div>
                       </div>
-                      <ArrowRight size={18} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] group-hover:translate-x-0.5 transition-all mt-1" />
+                      <ArrowRight size={18} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] group-hover:translate-x-0.5 transition-all mt-1" aria-hidden="true" />
                     </div>
                     <div className="h-1.5 bg-[var(--color-bg)] rounded-full overflow-hidden">
                       <div
@@ -226,7 +226,7 @@ export default async function ImpactPage() {
         {data.topVoted.length > 0 && (
           <section>
             <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold mb-5 flex items-center gap-2">
-              <ThumbsUp size={22} className="text-[var(--color-primary)]" />
+              <ThumbsUp size={22} className="text-[var(--color-primary)]" aria-hidden="true" />
               Cele mai votate
             </h2>
             <div className="space-y-3">
@@ -242,8 +242,8 @@ export default async function ImpactPage() {
                       >
                         {STATUS_LABELS[s.status] ?? s.status}
                       </Badge>
-                      <div className="text-sm font-bold text-[var(--color-primary)] tabular-nums">
-                        ▲ {s.voturi_net}
+                      <div className="text-sm font-bold text-[var(--color-primary)] tabular-nums" aria-label={`${s.voturi_net} voturi pozitive nete`}>
+                        <span aria-hidden="true">▲</span> {s.voturi_net}
                       </div>
                     </div>
                     <div className="font-medium line-clamp-2">{s.titlu}</div>
@@ -260,7 +260,7 @@ export default async function ImpactPage() {
         {data.latestResolved.length > 0 && (
           <section>
             <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold mb-5 flex items-center gap-2">
-              <CheckCircle2 size={22} className="text-emerald-600" />
+              <CheckCircle2 size={22} className="text-emerald-600" aria-hidden="true" />
               Recent rezolvate
             </h2>
             <div className="space-y-3">
