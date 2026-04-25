@@ -43,11 +43,15 @@ export function CookieBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-sm z-40 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-xl)] p-4 animate-fade-in-up">
+    <div
+      role="dialog"
+      aria-labelledby="cookie-banner-title"
+      className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-sm z-40 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-xl)] p-4 animate-fade-in-up"
+    >
       <div className="flex items-start gap-3">
-        <Cookie size={20} className="text-[var(--color-primary)] mt-0.5 shrink-0" />
+        <Cookie size={20} className="text-[var(--color-primary)] mt-0.5 shrink-0" aria-hidden="true" />
         <div className="flex-1 text-sm">
-          <p className="font-semibold mb-1">Folosim doar cookies esențiale</p>
+          <p id="cookie-banner-title" className="font-semibold mb-1">Folosim doar cookies esențiale</p>
           <p className="text-xs text-[var(--color-text-muted)] mb-3">
             Strictul necesar pentru autentificare și salvarea temei (dark/light). Nu te trackăm, nu vindem date, nu avem reclame. Detalii în{" "}
             <Link href="/legal/confidentialitate" className="text-[var(--color-primary)] underline">
@@ -59,14 +63,14 @@ export function CookieBanner() {
             <button
               type="button"
               onClick={accept}
-              className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)] transition-colors"
             >
               Bine, continuă
             </button>
             <button
               type="button"
               onClick={dismiss}
-              className="h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] text-xs font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              className="h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] text-xs font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-colors"
             >
               Mai târziu
             </button>
@@ -75,10 +79,10 @@ export function CookieBanner() {
         <button
           type="button"
           onClick={dismiss}
-          className="w-9 h-9 -mt-1 -mr-1 rounded-full hover:bg-[var(--color-surface-2)] flex items-center justify-center shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          className="w-9 h-9 -mt-1 -mr-1 rounded-full hover:bg-[var(--color-surface-2)] flex items-center justify-center shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-colors"
           aria-label="Închide banner cookies"
         >
-          <X size={16} />
+          <X size={16} aria-hidden="true" />
         </button>
       </div>
     </div>

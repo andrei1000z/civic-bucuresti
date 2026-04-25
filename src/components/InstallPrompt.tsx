@@ -73,13 +73,17 @@ export function InstallPrompt() {
   if (!visible || !deferredPrompt) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-[90] animate-fade-in-up">
+    <div
+      role="dialog"
+      aria-labelledby="install-prompt-title"
+      className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-[90] animate-fade-in-up"
+    >
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-xl)] p-4 flex items-start gap-3">
         <div className="shrink-0 w-10 h-10 rounded-[8px] bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 flex items-center justify-center text-white">
-          <Download size={18} />
+          <Download size={18} aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm mb-0.5">Pune Civia pe ecranul de start</p>
+          <p id="install-prompt-title" className="font-semibold text-sm mb-0.5">Pune Civia pe ecranul de start</p>
           <p className="text-xs text-[var(--color-text-muted)] mb-3">
             Click rapid din home screen, fără bara de browser. Ghidurile civice rămân disponibile offline — util la dezastre și unde n-ai semnal.
           </p>
@@ -87,14 +91,14 @@ export function InstallPrompt() {
             <button
               type="button"
               onClick={install}
-              className="h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              className="h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)] transition-colors"
             >
               Adaugă pe ecran
             </button>
             <button
               type="button"
               onClick={dismiss}
-              className="h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] text-xs font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              className="h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] text-xs font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-colors"
             >
               Nu acum
             </button>
@@ -103,10 +107,10 @@ export function InstallPrompt() {
         <button
           type="button"
           onClick={dismiss}
-          className="shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text)] -mt-1 -mr-1 p-1"
-          aria-label="Închide"
+          className="shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text)] -mt-1 -mr-1 p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          aria-label="Închide promptul de instalare"
         >
-          <X size={14} />
+          <X size={14} aria-hidden="true" />
         </button>
       </div>
     </div>
