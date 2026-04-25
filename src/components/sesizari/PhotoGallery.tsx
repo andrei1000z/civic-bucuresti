@@ -20,6 +20,7 @@ export function PhotoGallery({ urls, title = "Foto" }: Props) {
           <div
             key={i}
             className="aspect-video rounded-[8px] bg-[var(--color-surface-2)] flex items-center justify-center"
+            aria-hidden="true"
           >
             <ImgIcon size={24} className="text-[var(--color-text-muted)]" />
           </div>
@@ -30,40 +31,49 @@ export function PhotoGallery({ urls, title = "Foto" }: Props) {
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div
+        className="grid grid-cols-2 md:grid-cols-3 gap-3"
+        role="list"
+        aria-label={`Galerie ${title.toLowerCase()} (${validUrls.length} ${validUrls.length === 1 ? "imagine" : "imagini"})`}
+      >
         {validUrls.map((url, i) => (
-          <button
+          <div
             key={i}
-            type="button"
-            onClick={() => setOpenIndex(i)}
+            role="listitem"
             className="group relative aspect-video rounded-[8px] bg-[var(--color-surface-2)] overflow-hidden hover:ring-2 hover:ring-[var(--color-primary)] transition-all"
-            aria-label={`Deschide ${title} ${i + 1}`}
           >
+            <button
+              type="button"
+              onClick={() => setOpenIndex(i)}
+              className="absolute inset-0 z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-inset"
+              aria-label={`Deschide ${title} ${i + 1} din ${validUrls.length} la mărime mare`}
+            >
+              <span className="sr-only">Mărește imaginea</span>
+            </button>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={url}
               alt={`${title} ${i + 1}`}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform pointer-events-none"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center pointer-events-none">
               <span className="text-white opacity-0 group-hover:opacity-100 text-xs font-medium bg-black/60 rounded-full px-3 py-1 transition-opacity">
                 Click pentru mărire
               </span>
             </div>
-            {/* Download button */}
+            {/* Download button — z-20 ca să fie peste butonul de mărire */}
             <a
               href={url}
               download
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-black/80 transition-all"
-              aria-label="Salvează imaginea"
+              className="absolute top-2 right-2 z-20 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-black/80 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              aria-label={`Salvează ${title} ${i + 1}`}
             >
-              <Download size={13} />
+              <Download size={13} aria-hidden="true" />
             </a>
-          </button>
+          </div>
         ))}
       </div>
 

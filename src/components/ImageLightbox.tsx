@@ -33,8 +33,11 @@ export function ImageLightbox({ urls, initialIndex = 0, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
+      className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Imagine ${index + 1} din ${urls.length}`}
     >
       <div className="absolute top-4 right-4 flex gap-2 z-10">
         <a
@@ -43,47 +46,53 @@ export function ImageLightbox({ urls, initialIndex = 0, onClose }: Props) {
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          aria-label="Salvează"
+          className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
+          aria-label="Salvează imaginea"
           title="Salvează imaginea"
         >
-          <Download size={20} />
+          <Download size={20} aria-hidden="true" />
         </a>
         <button
+          type="button"
           onClick={onClose}
-          className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
-          aria-label="Închide (Esc)"
+          className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          aria-label="Închide galeria (Esc)"
         >
-          <X size={22} />
+          <X size={22} aria-hidden="true" />
         </button>
       </div>
       {urls.length > 1 && (
         <>
           <button
+            type="button"
             onClick={(e) => { e.stopPropagation(); prev(); }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
-            aria-label="Înapoi (←)"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            aria-label={`Imaginea anterioară (săgeată stânga)`}
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={24} aria-hidden="true" />
           </button>
           <button
+            type="button"
             onClick={(e) => { e.stopPropagation(); next(); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
-            aria-label="Înainte (→)"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            aria-label={`Imaginea următoare (săgeată dreapta)`}
           >
-            <ChevronRight size={24} />
+            <ChevronRight size={24} aria-hidden="true" />
           </button>
         </>
       )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={urls[index]}
-        alt={`Imagine ${index + 1}`}
+        alt={`Imagine ${index + 1} din ${urls.length}`}
         className="max-w-full max-h-[90vh] object-contain rounded-[8px]"
         onClick={(e) => e.stopPropagation()}
       />
       {urls.length > 1 && (
-        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/10 text-white text-xs font-medium backdrop-blur">
+        <p
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/10 text-white text-xs font-medium backdrop-blur tabular-nums"
+          aria-live="polite"
+        >
           {index + 1} / {urls.length}
         </p>
       )}
