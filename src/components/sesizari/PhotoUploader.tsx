@@ -198,20 +198,22 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
       className="outline-none"
     >
       {canAdd && (
-        <div
+        <button
+          type="button"
           onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
-          className={`flex flex-col items-center justify-center gap-1.5 h-24 rounded-[8px] border-2 border-dashed cursor-pointer transition-colors ${
+          aria-label={`Încarcă poze (${totalCount} din ${max} folosite)`}
+          className={`w-full flex flex-col items-center justify-center gap-1.5 h-24 rounded-[8px] border-2 border-dashed cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 ${
             dragging
               ? "border-[var(--color-primary)] bg-[var(--color-primary-soft)]"
               : "border-[var(--color-border)] hover:border-[var(--color-primary)]"
           } text-sm text-[var(--color-text-muted)]`}
         >
-          <Upload size={18} />
+          <Upload size={18} aria-hidden="true" />
           <span>
-            Încarcă, trage sau lipește poze ({totalCount}/{max})
+            Încarcă, trage sau lipește poze (<span className="tabular-nums">{totalCount}/{max}</span>)
           </span>
           <input
             ref={inputRef}
@@ -220,29 +222,38 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
             multiple
             className="hidden"
             onChange={handleFiles}
+            aria-hidden="true"
+            tabIndex={-1}
           />
-        </div>
+        </button>
       )}
 
-      {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
+      {error && <p role="alert" className="text-xs text-red-500 mt-2">{error}</p>}
 
       {(urls.length > 0 || pending.length > 0) && (
         <div className="grid grid-cols-5 gap-2 mt-3">
           {urls.map((url, i) => (
             <div
               key={url}
-              className="aspect-square rounded-[8px] bg-[var(--color-surface-2)] relative overflow-hidden group cursor-pointer"
-              onClick={() => setLightbox(i)}
+              className="aspect-square rounded-[8px] bg-[var(--color-surface-2)] relative overflow-hidden group"
             >
+              <button
+                type="button"
+                onClick={() => setLightbox(i)}
+                aria-label={`Vezi poza ${i + 1} la mărime mare`}
+                className="absolute inset-0 z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-inset cursor-pointer"
+              >
+                <span className="sr-only">Mărește</span>
+              </button>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+              <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover pointer-events-none" loading="lazy" />
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onChange(urls.filter((_, j) => j !== i)); }}
                 aria-label={`Șterge poza ${i + 1}`}
-                className="absolute top-1 right-1 w-8 h-8 rounded-full bg-red-500/90 text-white flex items-center justify-center hover:bg-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 z-20 w-8 h-8 rounded-full bg-red-500/90 text-white flex items-center justify-center hover:bg-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100 md:focus-within:opacity-100 transition-opacity"
               >
-                <X size={16} />
+                <X size={16} aria-hidden="true" />
               </button>
             </div>
           ))}
@@ -251,19 +262,23 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
               key={p.id}
               className="aspect-square rounded-[8px] bg-[var(--color-surface-2)] relative overflow-hidden"
               aria-live="polite"
-              aria-label={`Se încarcă (${p.progress}%)`}
+              aria-label={`Se încarcă poza (${p.progress}%)`}
+              role="progressbar"
+              aria-valuenow={p.progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={p.objectUrl}
-                alt="Se încarcă..."
+                alt=""
                 className="w-full h-full object-cover opacity-70"
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 text-white gap-1.5">
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
                 <span className="text-[10px] font-semibold tabular-nums">{p.progress}%</span>
               </div>
-              <div className="absolute bottom-0 inset-x-0 h-1 bg-black/30">
+              <div className="absolute bottom-0 inset-x-0 h-1 bg-black/30" aria-hidden="true">
                 <div
                   className="h-full bg-[var(--color-primary)] transition-all"
                   style={{ width: `${p.progress}%` }}
@@ -276,43 +291,55 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
 
       {lightbox !== null && (
         <div
-          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center"
+          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center animate-fade-in"
           onClick={() => setLightbox(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Imagine ${lightbox + 1} din ${urls.length}`}
         >
           <button
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20"
+            type="button"
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             onClick={() => setLightbox(null)}
+            aria-label="Închide (Esc)"
           >
-            <X size={24} />
+            <X size={24} aria-hidden="true" />
           </button>
 
           {lightbox > 0 && (
             <button
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20"
+              type="button"
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
               onClick={(e) => { e.stopPropagation(); setLightbox(lightbox - 1); }}
+              aria-label="Imaginea anterioară"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={24} aria-hidden="true" />
             </button>
           )}
 
           {lightbox < urls.length - 1 && (
             <button
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20"
+              type="button"
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
               onClick={(e) => { e.stopPropagation(); setLightbox(lightbox + 1); }}
+              aria-label="Imaginea următoare"
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={24} aria-hidden="true" />
             </button>
           )}
 
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={urls[lightbox]}
-            alt={`Foto ${lightbox + 1}`}
+            alt={`Foto ${lightbox + 1} din ${urls.length}`}
             className="max-w-[90vw] max-h-[85vh] object-contain rounded-[8px]"
             onClick={(e) => e.stopPropagation()}
           />
 
-          <p className="absolute bottom-4 text-white/60 text-xs">
+          <p
+            className="absolute bottom-4 text-white/60 text-xs tabular-nums"
+            aria-live="polite"
+          >
             {lightbox + 1} / {urls.length}
           </p>
         </div>
