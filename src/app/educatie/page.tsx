@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
+import { formatDecimal, formatNumber } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Educația în România — BAC, licee, abandon școlar",
@@ -28,6 +29,8 @@ function countySlug(id: string): string {
 
 export default function EducatiePage() {
   const latest = BAC_STATS[BAC_STATS.length - 1]!;
+  const prev = BAC_STATS.length > 1 ? BAC_STATS[BAC_STATS.length - 2]! : null;
+  const promovTrend = prev ? latest.promovabilitate - prev.promovabilitate : 0;
 
   return (
     <div className="container-narrow py-12 md:py-16">
@@ -39,7 +42,7 @@ export default function EducatiePage() {
       />
       <Badge className="mb-4">Educație</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
-        <GraduationCap size={40} className="text-[var(--color-primary)]" />
+        <GraduationCap size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
         Școala pe care o plătim
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
@@ -48,38 +51,51 @@ export default function EducatiePage() {
 
       {/* KEY NUMBERS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <Card className="text-center">
+        <Card className="text-center" title={`Promovabilitate Bacalaureat ${latest.year}: ${formatDecimal(latest.promovabilitate, 1)}% din candidații prezenți au luat examenul`}>
           <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">
             Promovabilitate BAC {latest.year}
           </div>
           <div className="text-3xl md:text-4xl font-bold text-emerald-600">
-            {latest.promovabilitate.toFixed(1)}%
+            {formatDecimal(latest.promovabilitate, 1)}%
           </div>
+          {prev && promovTrend !== 0 && (
+            <div
+              className={`text-[10px] mt-1 ${promovTrend > 0 ? "text-emerald-600" : "text-red-600"}`}
+            >
+              <span aria-hidden="true">{promovTrend > 0 ? "▲" : "▼"}</span>{" "}
+              {formatDecimal(Math.abs(promovTrend), 1)} pp vs {prev.year}
+            </div>
+          )}
         </Card>
-        <Card className="text-center">
-          <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">Prezenți</div>
+        <Card className="text-center" title={`${formatNumber(latest.prezenti)} candidați prezenți la examen în ${latest.year}`}>
+          <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">Candidați prezenți</div>
           <div className="text-2xl md:text-3xl font-bold text-[var(--color-primary)]">
-            {(latest.prezenti / 1000).toFixed(0)}k
+            {formatDecimal(latest.prezenti / 1000, 0)} <span className="text-sm font-normal text-[var(--color-text-muted)]">mii</span>
           </div>
+          <div className="text-[10px] text-[var(--color-text-muted)] mt-1">la nivel național</div>
         </Card>
-        <Card className="text-center">
+        <Card className="text-center" title={`${formatNumber(latest.note10)} candidați au obținut media 10 în ${latest.year}`}>
           <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">Note de 10</div>
           <div className="text-2xl md:text-3xl font-bold text-amber-600">
-            {latest.note10}
+            {formatNumber(latest.note10)}
+          </div>
+          <div className="text-[10px] text-[var(--color-text-muted)] mt-1">
+            din {formatDecimal(latest.prezenti / 1000, 0)} mii prezenți
           </div>
         </Card>
-        <Card className="text-center">
+        <Card className="text-center" title={`${formatNumber(latest.note6plus)} candidați au obținut medii peste 6`}>
           <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">Medii ≥ 6</div>
           <div className="text-2xl md:text-3xl font-bold text-[var(--color-primary)]">
-            {((latest.note6plus / latest.prezenti) * 100).toFixed(0)}%
+            {formatDecimal((latest.note6plus / latest.prezenti) * 100, 0)}%
           </div>
+          <div className="text-[10px] text-[var(--color-text-muted)] mt-1">din prezenți</div>
         </Card>
       </div>
 
       {/* EVOLUTION */}
       <section className="mb-10">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-4 flex items-center gap-2">
-          <TrendingUp size={22} className="text-[var(--color-primary)]" />
+          <TrendingUp size={22} className="text-[var(--color-primary)]" aria-hidden="true" />
           Promovabilitatea BAC — evoluție
         </h2>
         <Card>
@@ -87,10 +103,10 @@ export default function EducatiePage() {
             data={BAC_STATS.map((b) => ({
               label: String(b.year),
               value: b.promovabilitate,
-              sub: `${b.note10} de 10`,
+              sub: `${formatNumber(b.note10)} candidați cu nota 10`,
               color: b.promovabilitate > 75 ? "#10B981" : b.promovabilitate > 65 ? "#F59E0B" : "#DC2626",
             }))}
-            format={(v) => `${v.toFixed(1)}%`}
+            format={(v) => `${formatDecimal(v, 1)}%`}
             max={100}
           />
         </Card>

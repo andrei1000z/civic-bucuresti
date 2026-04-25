@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
+import { formatDecimal } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Sistemul medical românesc — în cifre reale",
@@ -30,7 +31,7 @@ export default function SanatatePage() {
       />
       <Badge className="mb-4">Sănătate publică</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
-        <Heart size={40} className="text-[var(--color-primary)]" />
+        <Heart size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
         Cât trăim și cum trăim
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
@@ -39,35 +40,39 @@ export default function SanatatePage() {
 
       {/* KEY NUMBERS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <Card className="text-center">
+        <Card className="text-center" title={`Speranța medie de viață la naștere în ${latest.year}: ${formatDecimal(latest.sperantaViataAni, 1)} ani`}>
           <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">Speranță viață</div>
           <div className="text-2xl md:text-3xl font-bold text-[var(--color-primary)]">
-            {latest.sperantaViataAni.toFixed(1)} <span className="text-sm">ani</span>
+            {formatDecimal(latest.sperantaViataAni, 1)} <span className="text-sm">ani</span>
           </div>
+          <div className="text-[10px] text-[var(--color-text-muted)] mt-1">la naștere · {latest.year}</div>
         </Card>
-        <Card className="text-center">
+        <Card className="text-center" title={`${formatDecimal(latest.mortInfantilaLa1000, 1)} decese la 1000 nou-născuți în primul an de viață`}>
           <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">
-            Mort. infantilă
+            Mortalitate infantilă
           </div>
           <div className="text-2xl md:text-3xl font-bold text-red-600">
-            {latest.mortInfantilaLa1000.toFixed(1)}
-            <span className="text-sm">‰</span>
+            {formatDecimal(latest.mortInfantilaLa1000, 1)}
+            <span className="text-sm" aria-hidden="true">‰</span>
+            <span className="sr-only"> la mie</span>
           </div>
           <div className="text-[10px] text-[var(--color-text-muted)] mt-1">la 1000 nou-născuți</div>
         </Card>
-        <Card className="text-center">
-          <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">Medici / 1000</div>
+        <Card className="text-center" title={`${formatDecimal(latest.mediciLa1000Loc, 2)} medici la 1000 locuitori — sub media UE de ~3,7`}>
+          <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">Medici / 1000 loc</div>
           <div className="text-2xl md:text-3xl font-bold text-[var(--color-primary)]">
-            {latest.mediciLa1000Loc.toFixed(2)}
+            {formatDecimal(latest.mediciLa1000Loc, 2)}
           </div>
+          <div className="text-[10px] text-[var(--color-text-muted)] mt-1">media UE: ~3,7</div>
         </Card>
-        <Card className="text-center">
+        <Card className="text-center" title={`${formatDecimal(latest.cheltuialaPibProc, 1)}% din PIB cheltuit pe sănătate publică — sub media UE de ~10%`}>
           <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">
-            % din PIB (sănătate)
+            Cheltuieli sănătate
           </div>
           <div className="text-2xl md:text-3xl font-bold text-amber-600">
-            {latest.cheltuialaPibProc.toFixed(1)}%
+            {formatDecimal(latest.cheltuialaPibProc, 1)}%
           </div>
+          <div className="text-[10px] text-[var(--color-text-muted)] mt-1">din PIB · media UE ~10%</div>
         </Card>
       </div>
 
@@ -81,14 +86,15 @@ export default function SanatatePage() {
             data={SANATATE_NATIONALA.map((s) => ({
               label: String(s.year),
               value: s.sperantaViataAni,
+              sub: s.year === 2020 || s.year === 2021 ? "↓ pandemie COVID-19" : undefined,
               color: s.sperantaViataAni > 75 ? "#10B981" : "#F59E0B",
             }))}
-            format={(v) => `${v.toFixed(1)} ani`}
+            format={(v) => `${formatDecimal(v, 1)} ani`}
             max={85}
           />
         </Card>
         <p className="text-xs text-[var(--color-text-muted)] mt-2 flex items-start gap-2">
-          <TrendingDown size={14} className="text-red-600 shrink-0 mt-0.5" />
+          <TrendingDown size={14} className="text-red-600 shrink-0 mt-0.5" aria-hidden="true" />
           Scăderea din 2020-2021 se datorează pandemiei COVID-19. România a pierdut ~2 ani de
           speranță de viață la apogeu.
         </p>

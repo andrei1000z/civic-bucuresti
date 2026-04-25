@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
+import { formatDecimal } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Bugetul României — unde merg banii din taxele noastre",
@@ -34,7 +35,7 @@ export default function BugetPage() {
       />
       <Badge className="mb-4">Transparență fiscală</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
-        <Wallet size={40} className="text-[var(--color-primary)]" />
+        <Wallet size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
         Banii tăi, pe românește
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
@@ -48,7 +49,7 @@ export default function BugetPage() {
             Venituri {latest.year}
           </div>
           <div className="text-2xl md:text-3xl font-bold text-emerald-600">
-            {latest.venituri.toFixed(1)} <span className="text-sm">mld lei</span>
+            {formatDecimal(latest.venituri, 1)} <span className="text-sm">mld lei</span>
           </div>
         </Card>
         <Card className="text-center">
@@ -56,7 +57,7 @@ export default function BugetPage() {
             Cheltuieli {latest.year}
           </div>
           <div className="text-2xl md:text-3xl font-bold text-[var(--color-primary)]">
-            {latest.cheltuieli.toFixed(1)} <span className="text-sm">mld lei</span>
+            {formatDecimal(latest.cheltuieli, 1)} <span className="text-sm">mld lei</span>
           </div>
         </Card>
         <Card className="text-center">
@@ -64,10 +65,20 @@ export default function BugetPage() {
             Deficit / PIB
           </div>
           <div className="text-2xl md:text-3xl font-bold text-red-600">
-            {latest.deficitProcPib.toFixed(1)}%
+            {formatDecimal(latest.deficitProcPib, 1)}%
           </div>
-          <div className="text-[10px] text-[var(--color-text-muted)] mt-1">
-            {deficitTrend > 0 ? "▲" : "▼"} {Math.abs(deficitTrend).toFixed(1)} pp vs {prev.year}
+          <div
+            className={`text-[10px] mt-1 ${
+              deficitTrend > 0 ? "text-red-600" : "text-emerald-600"
+            }`}
+            title={
+              deficitTrend > 0
+                ? `Deficitul a crescut cu ${formatDecimal(Math.abs(deficitTrend), 1)} puncte procentuale față de ${prev.year}`
+                : `Deficitul a scăzut cu ${formatDecimal(Math.abs(deficitTrend), 1)} puncte procentuale față de ${prev.year}`
+            }
+          >
+            <span aria-hidden="true">{deficitTrend > 0 ? "▲" : "▼"}</span>{" "}
+            {formatDecimal(Math.abs(deficitTrend), 1)} pp vs {prev.year}
           </div>
         </Card>
         <Card className="text-center">
@@ -75,7 +86,7 @@ export default function BugetPage() {
             PIB estimat
           </div>
           <div className="text-2xl md:text-3xl font-bold text-[var(--color-primary)]">
-            {(latest.pib / 1000).toFixed(2)} <span className="text-sm">trilion</span>
+            {formatDecimal(latest.pib / 1000, 2)} <span className="text-sm">trilion lei</span>
           </div>
         </Card>
       </div>
@@ -83,7 +94,7 @@ export default function BugetPage() {
       {/* EVOLUȚIE */}
       <section className="mb-10">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-4 flex items-center gap-2">
-          <TrendingUp size={22} className="text-[var(--color-primary)]" />
+          <TrendingUp size={22} className="text-[var(--color-primary)]" aria-hidden="true" />
           Evoluția deficitului 2020-2025 (% din PIB)
         </h2>
         <Card>
@@ -91,15 +102,15 @@ export default function BugetPage() {
             data={BUGET_NATIONAL.map((b) => ({
               label: String(b.year),
               value: b.deficitProcPib,
-              sub: `${b.venituri.toFixed(0)} vs ${b.cheltuieli.toFixed(0)} mld`,
+              sub: `Ven: ${formatDecimal(b.venituri, 0)} vs Chelt: ${formatDecimal(b.cheltuieli, 0)} mld`,
               color: b.deficitProcPib > 7 ? "#DC2626" : b.deficitProcPib > 4 ? "#F59E0B" : "#10B981",
             }))}
-            format={(v) => `${v.toFixed(1)}%`}
+            format={(v) => `${formatDecimal(v, 1)}%`}
             max={10}
           />
         </Card>
         <div className="mt-3 p-3 rounded-[8px] bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 text-xs flex gap-2 items-start">
-          <AlertTriangle size={14} className="text-amber-600 mt-0.5 shrink-0" />
+          <AlertTriangle size={14} className="text-amber-600 mt-0.5 shrink-0" aria-hidden="true" />
           <p className="text-[var(--color-text-muted)]">
             România e singurul stat UE în procedura de deficit excesiv din 2020. Limita Pactului
             de Stabilitate e 3% din PIB — depășită în fiecare an. Plan ajustare agreat cu
@@ -118,10 +129,10 @@ export default function BugetPage() {
             data={BUGET_CHELTUIELI_2025.map((c) => ({
               label: c.categorie,
               value: c.procent,
-              sub: `${c.mldLei.toFixed(1)} mld lei`,
+              sub: `${formatDecimal(c.mldLei, 1)} mld lei`,
               color: c.color,
             }))}
-            format={(v) => `${v.toFixed(1)}%`}
+            format={(v) => `${formatDecimal(v, 1)}%`}
             max={35}
           />
         </Card>

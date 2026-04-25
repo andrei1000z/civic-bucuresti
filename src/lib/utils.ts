@@ -61,6 +61,24 @@ export function formatNumber(num: number): string {
   return new Intl.NumberFormat("ro-RO").format(num);
 }
 
+/** Format un număr cu 1-2 zecimale (ex: 596.5 → "596,5", 4.27 → "4,27").
+ *  Folosit pe paginile de date publice unde toFixed() nu respecta locale-ul. */
+export function formatDecimal(num: number, fractionDigits = 1): string {
+  return new Intl.NumberFormat("ro-RO", {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  }).format(num);
+}
+
+/** Format prescurtat pentru numere mari ("125 mii", "3,4 mil", "1,2 mld").
+ *  Folosit pentru stat-uri unde precizia nu contează (homepage, OG images). */
+export function formatCompact(num: number): string {
+  if (num < 1_000) return formatNumber(Math.round(num));
+  if (num < 1_000_000) return `${formatDecimal(num / 1_000, 0)} mii`;
+  if (num < 1_000_000_000) return `${formatDecimal(num / 1_000_000, 1)} mil`;
+  return `${formatDecimal(num / 1_000_000_000, 1)} mld`;
+}
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()

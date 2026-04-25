@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
+import { formatDecimal, formatNumber } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Siguranța pe străzile României — statistici reale",
@@ -35,7 +36,7 @@ export default function SigurantaPage() {
       />
       <Badge className="mb-4">Siguranță publică</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
-        <ShieldAlert size={40} className="text-[var(--color-primary)]" />
+        <ShieldAlert size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
         Cât de sigură e România
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
@@ -44,29 +45,32 @@ export default function SigurantaPage() {
 
       {/* KEY NUMBERS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <Card className="text-center">
+        <Card className="text-center" title={`Total infracțiuni înregistrate în ${latest.year}: ${formatNumber(latest.totalInfractiuni)}`}>
           <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">Total {latest.year}</div>
           <div className="text-2xl md:text-3xl font-bold text-[var(--color-primary)]">
-            {(latest.totalInfractiuni / 1000).toFixed(0)}k
+            {formatDecimal(latest.totalInfractiuni / 1000, 0)} <span className="text-sm font-normal text-[var(--color-text-muted)]">mii</span>
           </div>
         </Card>
-        <Card className="text-center">
+        <Card className="text-center" title={`Infracțiuni cu violență (lovituri, vătămări, omor) în ${latest.year}: ${formatNumber(latest.violente)}`}>
           <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">Violente</div>
           <div className="text-2xl md:text-3xl font-bold text-red-600">
-            {(latest.violente / 1000).toFixed(1)}k
+            {formatDecimal(latest.violente / 1000, 1)} <span className="text-sm font-normal text-[var(--color-text-muted)]">mii</span>
           </div>
+          <div className="text-[10px] text-[var(--color-text-muted)] mt-1">lovituri · omor · viol</div>
         </Card>
-        <Card className="text-center">
+        <Card className="text-center" title={`Infracțiuni de patrimoniu (furt, tâlhărie, înșelăciune) în ${latest.year}: ${formatNumber(latest.patrimoniu)}`}>
           <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">Patrimoniu</div>
           <div className="text-2xl md:text-3xl font-bold text-amber-600">
-            {(latest.patrimoniu / 1000).toFixed(0)}k
+            {formatDecimal(latest.patrimoniu / 1000, 0)} <span className="text-sm font-normal text-[var(--color-text-muted)]">mii</span>
           </div>
+          <div className="text-[10px] text-[var(--color-text-muted)] mt-1">furt · tâlhărie · înșelăciune</div>
         </Card>
-        <Card className="text-center">
+        <Card className="text-center" title={`Trafic și consum droguri în ${latest.year}: ${formatNumber(latest.droguri)}`}>
           <div className="text-xs uppercase text-[var(--color-text-muted)] mb-2">Droguri</div>
           <div className="text-2xl md:text-3xl font-bold text-violet-600">
-            {(latest.droguri / 1000).toFixed(1)}k
+            {formatDecimal(latest.droguri / 1000, 1)} <span className="text-sm font-normal text-[var(--color-text-muted)]">mii</span>
           </div>
+          <div className="text-[10px] text-[var(--color-text-muted)] mt-1">trafic și consum</div>
         </Card>
       </div>
 
@@ -80,10 +84,10 @@ export default function SigurantaPage() {
             data={CRIMINALITATE.map((c) => ({
               label: String(c.year),
               value: c.totalInfractiuni,
-              sub: `${((c.violente / c.totalInfractiuni) * 100).toFixed(0)}% violente`,
+              sub: `${formatDecimal((c.violente / c.totalInfractiuni) * 100, 0)}% violente`,
               color: "#DC2626",
             }))}
-            format={(v) => `${(v / 1000).toFixed(0)}k`}
+            format={(v) => `${formatDecimal(v / 1000, 0)} mii`}
           />
         </Card>
       </section>
@@ -117,10 +121,10 @@ export default function SigurantaPage() {
             data={TOP_SIGURANTA_JUDETE.sort((a, b) => b.rata - a.rata).map((c) => ({
               label: countyName(c.county),
               value: c.rata,
-              sub: c.trend === "up" ? "↑" : c.trend === "down" ? "↓" : "→",
+              sub: c.trend === "up" ? "↑ în creștere" : c.trend === "down" ? "↓ în scădere" : "→ stabil",
               color: c.rata > 35 ? "#DC2626" : c.rata > 25 ? "#F59E0B" : "#10B981",
             }))}
-            format={(v) => v.toFixed(1)}
+            format={(v) => `${formatDecimal(v, 1)} ‰`}
             max={50}
           />
         </Card>
