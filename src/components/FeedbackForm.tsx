@@ -139,10 +139,22 @@ export function FeedbackForm({
           onChange={(e) => setText(e.target.value.slice(0, 3000))}
           placeholder={placeholder}
           rows={5}
+          aria-describedby="fb-text-hint"
+          aria-invalid={text.length > 0 && text.trim().length < 10}
           className="w-full px-3 py-2 rounded-[8px] bg-[var(--color-bg)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] resize-y min-h-[110px]"
         />
-        <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
+        <p
+          id="fb-text-hint"
+          className={`text-[11px] mt-1 tabular-nums ${
+            text.length > 0 && text.trim().length < 10
+              ? "text-amber-600 dark:text-amber-400"
+              : "text-[var(--color-text-muted)]"
+          }`}
+        >
           {text.length}/3000 · minim 10 caractere
+          {text.length > 0 && text.trim().length < 10 && (
+            <> · mai ai {10 - text.trim().length} de scris</>
+          )}
         </p>
       </div>
 
@@ -153,6 +165,8 @@ export function FeedbackForm({
         <input
           id="fb-email"
           type="email"
+          autoComplete="email"
+          inputMode="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="nume@exemplu.ro"
@@ -172,7 +186,10 @@ export function FeedbackForm({
       />
 
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-[8px] px-3 py-2">
+        <p
+          role="alert"
+          className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-[8px] px-3 py-2"
+        >
           {error}
         </p>
       )}
@@ -180,9 +197,9 @@ export function FeedbackForm({
       <button
         type="submit"
         disabled={submitting || text.trim().length < 10}
-        className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
       >
-        {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+        {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Send size={14} aria-hidden="true" />}
         {submitting ? "Se trimite..." : "Trimite mesaj"}
       </button>
     </form>

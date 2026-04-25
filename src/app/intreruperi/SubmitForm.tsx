@@ -71,9 +71,13 @@ export function SubmitForm() {
 
   if (submitted) {
     return (
-      <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-[12px] p-6 text-center">
+      <div
+        role="status"
+        aria-live="polite"
+        className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-[12px] p-6 text-center"
+      >
         <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-3">
-          <Check size={24} />
+          <Check size={24} aria-hidden="true" />
         </div>
         <h3 className="font-[family-name:var(--font-sora)] text-lg font-bold mb-1">
           Mulțumim!
@@ -109,10 +113,22 @@ export function SubmitForm() {
           onChange={(e) => setText(e.target.value.slice(0, 2000))}
           placeholder="Ex: „Apa oprită din 08:00 astăzi pe Calea Victoriei 40-60. Anunțul e afișat în scara blocului pe gresie. Lucrări până mâine 18:00 conform hârtiei.”"
           rows={5}
+          aria-describedby="isub-text-hint"
+          aria-invalid={text.length > 0 && text.trim().length < 20}
           className="w-full px-3 py-2 rounded-[8px] bg-[var(--color-bg)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] resize-y min-h-[110px]"
         />
-        <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
+        <p
+          id="isub-text-hint"
+          className={`text-[11px] mt-1 tabular-nums ${
+            text.length > 0 && text.trim().length < 20
+              ? "text-amber-600 dark:text-amber-400"
+              : "text-[var(--color-text-muted)]"
+          }`}
+        >
           {text.length}/2000 · minim 20 caractere
+          {text.length > 0 && text.trim().length < 20 && (
+            <> · mai ai {20 - text.trim().length} de scris</>
+          )}
         </p>
       </div>
 
@@ -122,17 +138,17 @@ export function SubmitForm() {
         </label>
         {imageUrl ? (
           <div className="flex items-center gap-3 p-3 rounded-[8px] bg-[var(--color-bg)] border border-[var(--color-border)]">
-            <ImgIcon size={18} className="text-[var(--color-primary)] shrink-0" />
+            <ImgIcon size={18} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
             <span className="flex-1 text-xs truncate text-[var(--color-text-muted)]">
               Imagine încărcată ✓
             </span>
             <button
               type="button"
               onClick={() => setImageUrl(null)}
-              className="w-7 h-7 rounded-full bg-[var(--color-surface)] hover:bg-red-50 flex items-center justify-center"
+              className="w-7 h-7 rounded-full bg-[var(--color-surface)] hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               aria-label="Elimină imaginea"
             >
-              <X size={14} />
+              <X size={14} aria-hidden="true" />
             </button>
           </div>
         ) : (
@@ -145,12 +161,12 @@ export function SubmitForm() {
           >
             {uploading ? (
               <>
-                <Loader2 size={14} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin" aria-hidden="true" />
                 Se încarcă...
               </>
             ) : (
               <>
-                <ImgIcon size={14} />
+                <ImgIcon size={14} aria-hidden="true" />
                 Adaugă o poză (anunț, stradă, lucrări)
               </>
             )}
@@ -172,6 +188,8 @@ export function SubmitForm() {
         <input
           id="isub-email"
           type="email"
+          autoComplete="email"
+          inputMode="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="nume@exemplu.ro"
@@ -194,7 +212,10 @@ export function SubmitForm() {
       />
 
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-[8px] px-3 py-2">
+        <p
+          role="alert"
+          className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-[8px] px-3 py-2"
+        >
           {error}
         </p>
       )}
@@ -202,10 +223,10 @@ export function SubmitForm() {
       <button
         type="submit"
         disabled={submitting || text.trim().length < 20}
-        className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
       >
-        {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-        {submitting ? "Se trimite..." : "Trimite"}
+        {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Send size={14} aria-hidden="true" />}
+        {submitting ? "Se trimite..." : "Trimite raport"}
       </button>
     </form>
   );

@@ -88,7 +88,7 @@ export default function IntreruperiPage() {
 
       <header className="mb-8">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-xs font-semibold mb-4">
-          <AlertTriangle size={12} /> În test — scraper live în v2
+          <AlertTriangle size={12} aria-hidden="true" /> În test — scraper live în v2
         </div>
         <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-5xl font-bold mb-3">
           Întreruperi programate
@@ -129,25 +129,36 @@ export default function IntreruperiPage() {
             aria-hidden="true"
           />
           <h2 className="font-semibold text-lg mb-1">
-            Nicio întrerupere în catalog momentan
+            Nicio întrerupere programată în catalog
           </h2>
-          <p className="text-sm text-[var(--color-text-muted)] mb-4">
-            Catalogul se actualizează automat la 6 ore. Vino din nou mai
-            târziu sau verifică direct la sursa oficială.
+          <p className="text-sm text-[var(--color-text-muted)] mb-4 max-w-md mx-auto leading-relaxed">
+            E vești bune sau înseamnă că anunțul nu a ajuns încă în catalog.
+            Verifică din nou peste câteva ore — sau, dacă știi o întrerupere
+            despre care nu vezi nimic aici, raporteaz-o tu mai jos.
           </p>
-          <Link
-            href="/sesizari"
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
-          >
-            Raportează o problemă pe care ai văzut-o →
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Link
+              href="#submit-form"
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+            >
+              Raportează una <span aria-hidden="true">↓</span>
+            </Link>
+            <a
+              href="/intreruperi/rss"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-bg)] transition-colors"
+            >
+              <Rss size={14} aria-hidden="true" /> Subscribe RSS
+            </a>
+          </div>
         </div>
       ) : (
         <IntreruperiFilters items={all} />
       )}
 
       {/* User submission — cineva care știe ceva despre întreruperi poate raporta */}
-      <section className="mt-12 border-t-2 border-dashed border-[var(--color-border)] pt-10">
+      <section id="submit-form" className="mt-12 border-t-2 border-dashed border-[var(--color-border)] pt-10 scroll-mt-24">
         <div className="text-center mb-6 max-w-2xl mx-auto">
           <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-2">
             Știi o întrerupere pe care nu o vezi aici?
@@ -166,7 +177,7 @@ export default function IntreruperiPage() {
       {/* Subscribe bar — ICS + RSS + API */}
       <section className="mt-10 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
         <h2 className="font-semibold mb-3 flex items-center gap-2">
-          <Calendar size={16} /> Rămâi la curent automat
+          <Calendar size={16} aria-hidden="true" /> Rămâi la curent automat
         </h2>
         <p className="text-sm text-[var(--color-text-muted)] mb-4 leading-relaxed">
           Nu mai verifica manual. Subscribe la calendar sau RSS — actualizate
@@ -178,7 +189,7 @@ export default function IntreruperiPage() {
             download="civia-intreruperi.ics"
             className="inline-flex items-center gap-2 h-11 px-4 rounded-[8px] bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors justify-center"
           >
-            <Download size={14} /> Calendar (ICS)
+            <Download size={14} aria-hidden="true" /> Calendar (ICS)
           </a>
           <a
             href="/intreruperi/rss"
@@ -186,7 +197,7 @@ export default function IntreruperiPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 h-11 px-4 rounded-[8px] bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 transition-colors justify-center"
           >
-            <Rss size={14} /> Flux RSS
+            <Rss size={14} aria-hidden="true" /> Flux RSS
           </a>
           <a
             href="/api/intreruperi"
@@ -194,7 +205,7 @@ export default function IntreruperiPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 h-11 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-bg)] transition-colors justify-center"
           >
-            <ExternalLink size={14} /> JSON API
+            <ExternalLink size={14} aria-hidden="true" /> JSON API
           </a>
         </div>
         <p className="text-xs text-[var(--color-text-muted)] mt-3 leading-relaxed">
@@ -205,7 +216,7 @@ export default function IntreruperiPage() {
 
       <section className="mt-6 bg-[var(--color-primary-soft)] rounded-[12px] p-6">
         <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2 flex items-center gap-2">
-          <MapPin size={18} /> Surse oficiale
+          <MapPin size={18} aria-hidden="true" /> Surse oficiale
         </h2>
         <p className="text-sm text-[var(--color-text-muted)] mb-4">
           Fiecare întrerupere provine dintr-un anunț public al unuia dintre
@@ -219,7 +230,7 @@ export default function IntreruperiPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-[var(--color-primary)] hover:underline"
             >
-              <ExternalLink size={12} /> Apa Nova București
+              <ExternalLink size={12} aria-hidden="true" /> Apa Nova București
             </a>
           </li>
           <li>
@@ -229,7 +240,7 @@ export default function IntreruperiPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-[var(--color-primary)] hover:underline"
             >
-              <ExternalLink size={12} /> Termoenergetica
+              <ExternalLink size={12} aria-hidden="true" /> Termoenergetica
             </a>
           </li>
           <li>
@@ -239,7 +250,7 @@ export default function IntreruperiPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-[var(--color-primary)] hover:underline"
             >
-              <ExternalLink size={12} /> Distrigaz Sud Rețele
+              <ExternalLink size={12} aria-hidden="true" /> Distrigaz Sud Rețele
             </a>
           </li>
           <li>
@@ -249,7 +260,7 @@ export default function IntreruperiPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-[var(--color-primary)] hover:underline"
             >
-              <ExternalLink size={12} /> E-Distribuție Muntenia
+              <ExternalLink size={12} aria-hidden="true" /> E-Distribuție Muntenia
             </a>
           </li>
         </ul>
