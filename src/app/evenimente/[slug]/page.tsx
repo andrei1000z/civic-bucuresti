@@ -131,12 +131,12 @@ export default async function EvenimentDetailPage({
         <div className="container-narrow relative z-10 py-12 md:py-16">
           <Link
             href="/evenimente"
-            className="inline-flex items-center gap-1 text-white/70 hover:text-white text-sm mb-6 transition-colors"
+            className="inline-flex items-center gap-1 text-white/70 hover:text-white text-sm mb-6 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded"
           >
-            <ChevronLeft size={16} /> Toate evenimentele
+            <ChevronLeft size={16} aria-hidden="true" /> Toate evenimentele
           </Link>
           <div className="flex items-start gap-6">
-            <div className="hidden md:flex w-20 h-20 rounded-[12px] bg-white/10 border border-white/20 items-center justify-center backdrop-blur">
+            <div className="hidden md:flex w-20 h-20 rounded-[12px] bg-white/10 border border-white/20 items-center justify-center backdrop-blur" aria-hidden="true">
               <Icon size={44} strokeWidth={1.5} />
             </div>
             <div className="flex-1">
@@ -148,7 +148,7 @@ export default async function EvenimentDetailPage({
                   {severityLabels[eveniment.severity].toUpperCase()}
                 </Badge>
                 <Badge className="bg-white/15 text-white border border-white/20">
-                  {formatDate(eveniment.data)}
+                  <time dateTime={eveniment.data}>{formatDate(eveniment.data)}</time>
                 </Badge>
               </div>
               <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-5xl font-bold mb-3">
@@ -161,9 +161,9 @@ export default async function EvenimentDetailPage({
       </section>
 
       {detail?.ongoingStatus && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900">
+        <div role="status" className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900">
           <div className="container-narrow py-3 flex items-center gap-3 text-sm">
-            <TriangleAlert size={16} className="text-amber-700 dark:text-amber-400" />
+            <TriangleAlert size={16} className="text-amber-700 dark:text-amber-400" aria-hidden="true" />
             <span className="text-amber-900 dark:text-amber-200">
               <strong>Status:</strong> {detail.ongoingStatus}
             </span>
@@ -221,7 +221,10 @@ export default async function EvenimentDetailPage({
                   height="400px"
                 />
                 <p className="text-xs text-[var(--color-text-muted)] mt-2 flex items-center gap-1">
-                  <MapPin size={12} /> {detail.coords[0].toFixed(4)}, {detail.coords[1].toFixed(4)}
+                  <MapPin size={12} aria-hidden="true" />
+                  <span aria-label={`Coordonate ${detail.coords[0].toFixed(4)} latitudine, ${detail.coords[1].toFixed(4)} longitudine`}>
+                    {detail.coords[0].toFixed(4)}, {detail.coords[1].toFixed(4)}
+                  </span>
                 </p>
               </div>
 
@@ -247,7 +250,7 @@ export default async function EvenimentDetailPage({
                         key={i}
                         className="bg-[var(--color-surface)] border-l-4 border-[var(--color-primary)] rounded-r-[12px] p-4 not-italic"
                       >
-                        <Quote size={16} className="text-[var(--color-primary)] mb-1" />
+                        <Quote size={16} className="text-[var(--color-primary)] mb-1" aria-hidden="true" />
                         <p className="text-sm italic mb-2">&ldquo;{q.text}&rdquo;</p>
                         <footer className="text-xs text-[var(--color-text-muted)] font-medium">
                           — {q.author}
@@ -262,8 +265,14 @@ export default async function EvenimentDetailPage({
               <ul className="not-prose space-y-2 text-sm">
                 {detail.sources.map((src, i) => (
                   <li key={i} className="flex items-center gap-2 text-[var(--color-text-muted)]">
-                    <ExternalLink size={14} />
-                    <a href={src.url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--color-primary)] hover:underline">
+                    <ExternalLink size={14} aria-hidden="true" />
+                    <a
+                      href={src.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[var(--color-primary)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
+                      aria-label={`${src.name} (deschide în tab nou)`}
+                    >
                       {src.name}
                     </a>
                   </li>
@@ -276,13 +285,13 @@ export default async function EvenimentDetailPage({
               <p>{eveniment.descriere}</p>
               <div className="not-prose mt-6 p-4 rounded-[12px] bg-[var(--color-surface-2)] border border-[var(--color-border)]">
                 <p className="text-sm text-[var(--color-text-muted)] mb-3">
-                  📝 Detalii complete (cronologie, cauze, impact, surse) sunt în curs de documentare. Dacă ai informații verificabile despre acest eveniment, <Link href="/#footer-feedback" className="text-[var(--color-primary)] hover:underline">scrie-ne</Link>.
+                  <span aria-hidden="true">📝 </span>Detalii complete (cronologie, cauze, impact, surse) sunt în curs de documentare. Dacă ai informații verificabile despre acest eveniment, <Link href="/#footer-feedback" className="text-[var(--color-primary)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded">scrie-ne</Link>.
                 </p>
                 <Link
                   href="/evenimente"
-                  className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary)] hover:underline"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
                 >
-                  ← Vezi toate evenimentele documentate
+                  <span aria-hidden="true">←</span> Vezi toate evenimentele documentate
                 </Link>
               </div>
             </>
@@ -299,7 +308,9 @@ export default async function EvenimentDetailPage({
               <dl className="space-y-3 text-sm">
                 <div>
                   <dt className="text-xs text-[var(--color-text-muted)]">Data</dt>
-                  <dd className="font-medium">{formatDate(eveniment.data)}</dd>
+                  <dd className="font-medium">
+                    <time dateTime={eveniment.data}>{formatDate(eveniment.data)}</time>
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-xs text-[var(--color-text-muted)]">Categorie</dt>
@@ -315,8 +326,8 @@ export default async function EvenimentDetailPage({
                 </div>
                 {eveniment.victime != null && eveniment.victime > 0 && (
                   <div>
-                    <dt className="text-xs text-[var(--color-text-muted)]">Victime</dt>
-                    <dd className="font-medium text-red-600">{eveniment.victime.toLocaleString("ro-RO")}</dd>
+                    <dt className="text-xs text-[var(--color-text-muted)]">{eveniment.victime === 1 ? "Victimă" : "Victime"}</dt>
+                    <dd className="font-medium text-red-600 tabular-nums">{eveniment.victime.toLocaleString("ro-RO")}</dd>
                   </div>
                 )}
               </dl>
