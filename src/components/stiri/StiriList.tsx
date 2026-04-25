@@ -125,8 +125,9 @@ export function StiriList() {
             </div>
             <div className="relative flex-1 sm:w-64">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none"
                 size={16}
+                aria-hidden="true"
               />
               <input
                 type="search"
@@ -153,8 +154,9 @@ export function StiriList() {
       </p>
 
       {loading && rows.length === 0 ? (
-        <div className="py-20 text-center">
-          <Loader2 size={28} className="animate-spin mx-auto text-[var(--color-text-muted)]" />
+        <div className="py-20 text-center" role="status" aria-label="Se încarcă știrile">
+          <Loader2 size={28} className="animate-spin mx-auto text-[var(--color-text-muted)]" aria-hidden="true" />
+          <span className="sr-only">Se încarcă știrile...</span>
         </div>
       ) : rows.length === 0 ? (
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-10 text-center">

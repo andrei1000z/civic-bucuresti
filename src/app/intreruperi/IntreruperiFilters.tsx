@@ -222,18 +222,19 @@ export function IntreruperiFilters({ items }: { items: Interruption[] }) {
               return (
                 <button
                   key={t.value}
+                  type="button"
                   onClick={() => setType(t.value)}
                   role="tab"
                   aria-selected={type === t.value}
-                  className={`shrink-0 px-3 h-8 rounded-[8px] text-xs font-medium transition-colors inline-flex items-center gap-1.5 ${
+                  className={`shrink-0 px-3 h-8 rounded-[8px] text-xs font-medium transition-colors inline-flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
                     type === t.value
                       ? "bg-[var(--color-primary)] text-white shadow-sm"
                       : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg)]"
                   }`}
                 >
-                  {t.value !== "toate" && <span>{TYPE_ICONS[t.value]}</span>}
+                  {t.value !== "toate" && <span aria-hidden="true">{TYPE_ICONS[t.value]}</span>}
                   {t.label}
-                  <span className="opacity-70 text-[10px]">{count}</span>
+                  <span className="opacity-70 text-[10px] tabular-nums">{count}</span>
                 </button>
               );
             })}
@@ -269,35 +270,41 @@ export function IntreruperiFilters({ items }: { items: Interruption[] }) {
             } ${locating ? "opacity-60" : ""}`}
           >
             {locating ? (
-              <Loader2 size={13} className="animate-spin" />
+              <Loader2 size={13} className="animate-spin" aria-hidden="true" />
             ) : (
-              <Locate size={13} />
+              <Locate size={13} aria-hidden="true" />
             )}
             {me ? (sort === "distanta" ? "Distanță" : "Timp") : "Aproape de mine"}
           </button>
 
-          <div className="ml-auto inline-flex rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] p-0.5">
+          <div
+            className="ml-auto inline-flex rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] p-0.5"
+            role="group"
+            aria-label="Mod de afișare"
+          >
             <button
+              type="button"
               onClick={() => setView("list")}
               aria-pressed={view === "list"}
-              className={`px-3 h-9 rounded-[6px] text-xs font-medium transition-colors inline-flex items-center gap-1.5 ${
+              className={`px-3 h-9 rounded-[6px] text-xs font-medium transition-colors inline-flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
                 view === "list"
                   ? "bg-[var(--color-primary)] text-white"
-                  : "text-[var(--color-text-muted)]"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
               }`}
             >
-              <ListIcon size={13} /> Listă
+              <ListIcon size={13} aria-hidden="true" /> Listă
             </button>
             <button
+              type="button"
               onClick={() => setView("map")}
               aria-pressed={view === "map"}
-              className={`px-3 h-9 rounded-[6px] text-xs font-medium transition-colors inline-flex items-center gap-1.5 ${
+              className={`px-3 h-9 rounded-[6px] text-xs font-medium transition-colors inline-flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
                 view === "map"
                   ? "bg-[var(--color-primary)] text-white"
-                  : "text-[var(--color-text-muted)]"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
               }`}
             >
-              <MapIcon size={13} /> Hartă
+              <MapIcon size={13} aria-hidden="true" /> Hartă
             </button>
           </div>
         </div>
@@ -315,13 +322,14 @@ export function IntreruperiFilters({ items }: { items: Interruption[] }) {
             Resetează filtrele să vezi tot ce e activ acum.
           </p>
           <button
+            type="button"
             onClick={() => {
               setType("toate");
               setCounty("toate");
             }}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
           >
-            Resetează filtrele →
+            Resetează filtrele <span aria-hidden="true">→</span>
           </button>
         </div>
       ) : view === "map" ? (
