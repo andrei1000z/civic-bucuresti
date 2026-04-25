@@ -16,6 +16,7 @@ export function BackToTop() {
 
   return (
     <button
+      type="button"
       onClick={() => {
         // Respect prefers-reduced-motion — instant scroll for users
         // with vestibular issues instead of the smooth animation.

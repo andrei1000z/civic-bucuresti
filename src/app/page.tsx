@@ -37,7 +37,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-grid-pattern opacity-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/80 via-transparent to-transparent" />
 
-        <div className="container-narrow relative z-10 py-20 md:py-28 lg:py-32">
+        <div className="container-narrow relative z-10 py-14 md:py-24 lg:py-32">
           <div className="max-w-3xl mx-auto text-center">
             <p className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-white border border-white/20 text-xs font-semibold mb-8 backdrop-blur-sm">
               🇷🇴 Civia — gratuit, open-source, fără politică
