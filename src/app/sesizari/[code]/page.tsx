@@ -138,9 +138,9 @@ export default async function SesizareDetailPage({
       />
       <Link
         href="/sesizari-publice"
-        className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"
+        className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
       >
-        <ChevronLeft size={16} /> Toate sesizările publice
+        <ChevronLeft size={16} aria-hidden="true" /> Toate sesizările publice
       </Link>
 
       {/* Header */}
@@ -150,11 +150,14 @@ export default async function SesizareDetailPage({
             {STATUS_LABELS[sesizare.status] ?? sesizare.status}
           </Badge>
           <Badge variant="neutral">
-            <span className="mr-1">{tipIcon}</span>
+            <span className="mr-1" aria-hidden="true">{tipIcon}</span>
             {tipLabel}
           </Badge>
           <Badge variant="neutral">{sesizare.sector}</Badge>
-          <span className="font-mono text-xs text-[var(--color-text-muted)] ml-auto">
+          <span
+            className="font-mono text-xs text-[var(--color-text-muted)] ml-auto"
+            aria-label={`Cod sesizare ${sesizare.code}`}
+          >
             {sesizare.code}
           </span>
         </div>
@@ -163,16 +166,16 @@ export default async function SesizareDetailPage({
         </h1>
         <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-muted)] mb-4">
           <span className="flex items-center gap-1.5">
-            <MapPin size={14} />
+            <MapPin size={14} aria-hidden="true" />
             {sesizare.locatie}
           </span>
           <span className="flex items-center gap-1.5">
-            <User size={14} />
+            <User size={14} aria-hidden="true" />
             {sesizare.author_name}
           </span>
           <span className="flex items-center gap-1.5">
-            <Calendar size={14} />
-            {formatDate(sesizare.created_at)}
+            <Calendar size={14} aria-hidden="true" />
+            <time dateTime={sesizare.created_at}>{formatDate(sesizare.created_at)}</time>
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -352,9 +355,12 @@ export default async function SesizareDetailPage({
               {(() => {
                 const cosemneNr = timeline.filter((e) => e.event_type === "cosemnat").length;
                 return cosemneNr > 0 ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-400">
-                    <UserPlus size={10} />
-                    +{cosemneNr} cetățeni
+                  <span
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 tabular-nums"
+                    aria-label={`${cosemneNr} ${cosemneNr === 1 ? "cetățean a co-semnat" : "cetățeni au co-semnat"}`}
+                  >
+                    <UserPlus size={10} aria-hidden="true" />
+                    +{cosemneNr} {cosemneNr === 1 ? "cetățean" : "cetățeni"}
                   </span>
                 ) : null;
               })()}
@@ -385,6 +391,7 @@ export default async function SesizareDetailPage({
                       <span
                         className="absolute -left-[13px] w-6 h-6 rounded-full flex items-center justify-center text-white ring-2 ring-[var(--color-surface)]"
                         style={{ backgroundColor: accent }}
+                        aria-hidden="true"
                       >
                         <Icon size={12} />
                       </span>
@@ -397,8 +404,8 @@ export default async function SesizareDetailPage({
                         </p>
                       )}
                       <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-1 mt-0.5">
-                        <Clock size={10} />
-                        {formatDateTime(step.created_at)}
+                        <Clock size={10} aria-hidden="true" />
+                        <time dateTime={step.created_at}>{formatDateTime(step.created_at)}</time>
                       </p>
                     </li>
                   );
