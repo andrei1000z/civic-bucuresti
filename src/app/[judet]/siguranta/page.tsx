@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
+import { formatDecimal } from "@/lib/utils";
 
 export const revalidate = 604800; // 1 week
 
@@ -143,7 +144,7 @@ export default async function CountySigurantaPage({
         <p className="text-sm text-[var(--color-text-muted)] mb-6 max-w-3xl">
           Infracțiunile detaliate pe județ nu sunt publicate de Poliția Română. Estimările de mai jos
           sunt proiecții ale datelor naționale {latest?.year ?? ""} ponderate cu populația județului
-          ({(shareRatio * 100).toFixed(1)}% din total România).
+          ({formatDecimal(shareRatio * 100, 1)}% din total România).
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
