@@ -30,12 +30,14 @@ export function JudeteGrid({ sesizariStats, authStats }: Props) {
   const persist = (slug: string) => {
     if (typeof window === "undefined") return;
     localStorage.setItem("civia_county", slug);
+    // eslint-disable-next-line react-hooks/immutability -- assigning to document.cookie is standard cookie API, not "modification"
     document.cookie = `county=${slug}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
   };
 
   const clear = () => {
     if (typeof window === "undefined") return;
     localStorage.removeItem("civia_county");
+     
     document.cookie = "county=; path=/; max-age=0; SameSite=Lax";
     setSavedSlug(null);
   };

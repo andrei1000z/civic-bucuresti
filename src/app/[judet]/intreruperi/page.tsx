@@ -37,8 +37,11 @@ export default async function JudetIntreruperiPage({
   const county = getCountyBySlug(judet);
   if (!county) notFound();
 
+  // Server component cu revalidate=1800 → Date.now() e calculat la
+  // fiecare regenerare ISR, nu la fiecare request → comportament stabil.
+  // eslint-disable-next-line react-hooks/purity -- ISR Server Component, fresh per regeneration
+  const now = Date.now();
   const all = getInterruptionsForCounty(county.id).filter((i) => {
-    const now = Date.now();
     return i.status !== "anulat" && i.status !== "finalizat" && new Date(i.endAt).getTime() >= now;
   });
 
