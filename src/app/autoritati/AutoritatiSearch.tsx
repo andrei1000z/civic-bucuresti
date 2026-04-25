@@ -100,9 +100,24 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-center text-sm text-[var(--color-text-muted)] py-8">
-          Niciun rezultat pentru „{query}". Încearcă cu altceva.
-        </p>
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-10 text-center">
+          <div className="text-5xl mb-3 opacity-60" aria-hidden="true">
+            🔎
+          </div>
+          <p className="text-base font-semibold mb-1">
+            Niciun rezultat pentru „{query}"
+          </p>
+          <p className="text-sm text-[var(--color-text-muted)] mb-4">
+            Încearcă alt cuvânt — caută după nume județ (ex: „Cluj"), cod
+            („CJ") sau oraș specific („Onești").
+          </p>
+          <button
+            onClick={() => setQuery("")}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
+          >
+            Șterge căutarea
+          </button>
+        </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((row) => (

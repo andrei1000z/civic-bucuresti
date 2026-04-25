@@ -304,9 +304,26 @@ export function IntreruperiFilters({ items }: { items: Interruption[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-center text-sm text-[var(--color-text-muted)] py-12">
-          Nicio întrerupere cu filtrele curente.
-        </p>
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] p-10 text-center">
+          <div className="text-5xl mb-3 opacity-60" aria-hidden="true">
+            🔎
+          </div>
+          <p className="text-base font-semibold mb-1">
+            Nicio întrerupere cu aceste filtre
+          </p>
+          <p className="text-sm text-[var(--color-text-muted)] mb-4">
+            Resetează filtrele să vezi tot ce e activ acum.
+          </p>
+          <button
+            onClick={() => {
+              setType("toate");
+              setCounty("toate");
+            }}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+          >
+            Resetează filtrele →
+          </button>
+        </div>
       ) : view === "map" ? (
         <IntreruperiMap items={filtered} />
       ) : (
