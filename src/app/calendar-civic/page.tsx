@@ -149,7 +149,8 @@ export default function CalendarCivicPage() {
       {/* CTA */}
       <section className="mt-16 p-6 rounded-[var(--radius-card)] bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 text-center">
         <p className="text-sm text-[var(--color-text-muted)] mb-3">
-          Cunoști o dată publică care ar trebui aici? Ne-o poți semnala.
+          Vezi și ghidul de drepturi al cetățeanului — informări legale,
+          sesizări, petiții, acces la informații publice.
         </p>
         <Link
           href="/ghiduri/ghid-cetatean"
