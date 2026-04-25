@@ -34,15 +34,17 @@ export function BeforeAfter({ beforeUrl, afterUrl, resolvedAt }: Props) {
             <button
               type="button"
               onClick={() => setLightbox({ urls: [beforeUrl, afterUrl], index: 0 })}
-              className="aspect-video w-full rounded-[8px] overflow-hidden bg-[var(--color-surface-2)] block group relative"
+              aria-label="Vezi poza „înainte" la mărime mare"
+              className="aspect-video w-full rounded-[8px] overflow-hidden bg-[var(--color-surface-2)] block group relative focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={beforeUrl}
-                alt="Înainte"
+                alt="Starea problemei înainte de rezolvare"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                loading="lazy"
               />
-              <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+              <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full" aria-hidden="true">
                 BEFORE
               </span>
             </button>
@@ -54,15 +56,17 @@ export function BeforeAfter({ beforeUrl, afterUrl, resolvedAt }: Props) {
             <button
               type="button"
               onClick={() => setLightbox({ urls: [beforeUrl, afterUrl], index: 1 })}
-              className="aspect-video w-full rounded-[8px] overflow-hidden bg-[var(--color-surface-2)] block group relative"
+              aria-label="Vezi poza „după" la mărime mare"
+              className="aspect-video w-full rounded-[8px] overflow-hidden bg-[var(--color-surface-2)] block group relative focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={afterUrl}
-                alt="După"
+                alt="Starea după rezolvare — dovadă vizuală"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                loading="lazy"
               />
-              <span className="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+              <span className="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full" aria-hidden="true">
                 AFTER
               </span>
             </button>
