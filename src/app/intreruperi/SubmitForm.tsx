@@ -83,6 +83,7 @@ export function SubmitForm() {
           relevantă, o adaugă în catalog.
         </p>
         <button
+          type="button"
           onClick={() => setSubmitted(false)}
           className="text-xs text-[var(--color-primary)] hover:underline font-medium"
         >

@@ -91,6 +91,7 @@ export function FeedbackForm({
             în 24-48h.
           </p>
           <button
+            type="button"
             onClick={() => setSubmitted(false)}
             className="mt-2 text-xs text-[var(--color-primary)] hover:underline font-medium"
           >
