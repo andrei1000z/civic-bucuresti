@@ -16,8 +16,15 @@ export function UserMenu() {
         setOpen(false);
       }
     };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
   }, []);
 
   if (loading) {
@@ -61,9 +68,9 @@ export function UserMenu() {
           <Link
             href="/cont"
             onClick={() => setOpen(false)}
-            className="w-full px-4 py-2.5 text-left text-sm hover:bg-[var(--color-surface-2)] flex items-center gap-2 transition-colors border-b border-[var(--color-border)]"
+            className="w-full px-4 py-2.5 text-left text-sm hover:bg-[var(--color-surface-2)] flex items-center gap-2 transition-colors border-b border-[var(--color-border)] focus:outline-none focus-visible:bg-[var(--color-surface-2)]"
           >
-            <UserIcon size={14} />
+            <UserIcon size={14} aria-hidden="true" />
             Contul tău
           </Link>
           <button
