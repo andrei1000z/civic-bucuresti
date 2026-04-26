@@ -51,10 +51,10 @@ export function LiveStatsBar() {
     ? [
         { icon: AlertCircle, text: `${data.sesizariAzi} sesizări noi astăzi`, color: "text-red-500" },
         { icon: Clock, text: `${data.sesizariInLucru} în lucru la autorități`, color: "text-amber-500" },
-        { icon: Wind, text: `AQI București: ${data.aqi} — ${data.aqiQuality}`, color: "text-sky-500" },
+        { icon: Wind, text: `AQI național mediu: ${data.aqi} — ${data.aqiQuality}`, color: "text-sky-500" },
         { icon: Activity, text: `${data.totalSesizari.toLocaleString("ro-RO")} sesizări trimise în total`, color: "text-emerald-500" },
         { icon: TrendingUp, text: "Actualizat în timp real", color: "text-blue-500" },
-        { icon: Thermometer, text: "Date oficiale INS + INSP + OpenAQ", color: "text-purple-500" },
+        { icon: Thermometer, text: "Date oficiale INS + OpenAQ + Sensor.Community", color: "text-purple-500" },
       ]
     : [
         { icon: AlertCircle, text: "Se încarcă statisticile live...", color: "text-[var(--color-text-muted)]" },

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { fetchAllFeeds } from "@/lib/stiri/rss";
+import * as Sentry from "@sentry/nextjs";
+import { fetchAllFeedsWithDiag } from "@/lib/stiri/rss";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { createSupabaseServer } from "@/lib/supabase/server";
 
@@ -44,9 +45,30 @@ export async function POST(req: Request) {
   }
 
   try {
-    const articles = await fetchAllFeeds();
+    const { articles, perFeed } = await fetchAllFeedsWithDiag();
+
+    // Diagnostic: dacă TOATE feed-urile sunt 0 sau eșuate, raportează la Sentry —
+    // probabil RSS endpoints au murit/migrat. Apare în Sentry ca event distinct
+    // de eroare, dar urmărit pentru intervenție rapidă.
     if (articles.length === 0) {
-      return NextResponse.json({ data: { inserted: 0, total: 0 } });
+      Sentry.captureMessage("stiri_cache: 0 articles after fetchAll", {
+        level: "warning",
+        extra: { perFeed },
+      });
+      return NextResponse.json({
+        data: { inserted: 0, total: 0, perFeed },
+        warning: "All RSS feeds returned 0 articles — check feed URLs",
+      });
+    }
+
+    // Per-feed warning: dacă majoritatea feed-urilor pică sau returnează 0,
+    // probabil tu ai o problemă (network/blocked) sau ei (deprecated feeds).
+    const dead = perFeed.filter((p) => !p.ok || p.count === 0);
+    if (dead.length >= perFeed.length / 2) {
+      Sentry.captureMessage("stiri_cache: more than half feeds returned 0 or failed", {
+        level: "warning",
+        extra: { perFeed },
+      });
     }
 
     const supabase = createSupabaseAdmin();
@@ -83,9 +105,11 @@ export async function POST(req: Request) {
         inserted: count ?? 0,
         deleted: deleted ?? 0,
         sources: [...new Set(articles.map((a) => a.source))],
+        perFeed,
       },
     });
   } catch (e) {
+    Sentry.captureException(e, { tags: { kind: "stiri_fetch" } });
     const msg = e instanceof Error ? e.message : "Fetch failed";
     return NextResponse.json({ error: msg }, { status: 500 });
   }

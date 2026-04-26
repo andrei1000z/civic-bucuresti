@@ -159,9 +159,35 @@ async function fetchOgImage(url: string): Promise<string | null> {
   }
 }
 
-export async function fetchAllFeeds(): Promise<RssArticle[]> {
-  const results = await Promise.all(FEEDS.map((f) => fetchFeed(f)));
-  const articles = results.flat();
+export interface FetchAllResult {
+  articles: RssArticle[];
+  perFeed: Array<{ source: string; count: number; ok: boolean }>;
+}
+
+/**
+ * Fetch all feeds, returning articles + per-source diagnostic.
+ * Use the diagnostic to detect dead feeds in production logs.
+ */
+export async function fetchAllFeedsWithDiag(): Promise<FetchAllResult> {
+  const results = await Promise.allSettled(FEEDS.map((f) => fetchFeed(f)));
+  const articles: RssArticle[] = [];
+  const perFeed: FetchAllResult["perFeed"] = [];
+
+  for (let i = 0; i < results.length; i++) {
+    const r = results[i];
+    const f = FEEDS[i];
+    if (!f) continue;
+    if (r?.status === "fulfilled") {
+      articles.push(...r.value);
+      perFeed.push({ source: f.source, count: r.value.length, ok: true });
+      if (r.value.length === 0) {
+        console.warn(`[stiri] ${f.source} returned 0 articles`);
+      }
+    } else {
+      perFeed.push({ source: f.source, count: 0, ok: false });
+      console.error(`[stiri] ${f.source} REJECTED:`, (r?.reason as Error)?.message);
+    }
+  }
 
   // Scrape OG images for articles that don't have one (batch, max 20 at a time)
   const noImage = articles.filter((a) => !a.image_url);
@@ -173,5 +199,11 @@ export async function fetchAllFeeds(): Promise<RssArticle[]> {
     });
   }
 
+  return { articles, perFeed };
+}
+
+/** Backwards-compat: old call site only wanted the articles. */
+export async function fetchAllFeeds(): Promise<RssArticle[]> {
+  const { articles } = await fetchAllFeedsWithDiag();
   return articles;
 }

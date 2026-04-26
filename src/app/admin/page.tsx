@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileText, Users, Newspaper, Shield, BarChart3 } from "lucide-react";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { RefreshStiriButton } from "./RefreshStiriButton";
 
 export const dynamic = "force-dynamic";
 
@@ -84,17 +85,7 @@ export default async function AdminDashboard() {
               <p className="text-xs text-[var(--color-text-muted)]">Trafic, dispozitive, țări, erori, performanță</p>
             </div>
           </Link>
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-          <a
-            href="/api/stiri/fetch"
-            className="flex items-center gap-3 p-4 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-          >
-            <Newspaper size={20} className="text-emerald-500" aria-hidden="true" />
-            <div>
-              <p className="font-medium text-sm">Reîncarcă feed-urile RSS</p>
-              <p className="text-xs text-[var(--color-text-muted)]">Forțează un fetch imediat al tuturor surselor</p>
-            </div>
-          </a>
+          <RefreshStiriButton />
         </div>
       </div>
     </div>
