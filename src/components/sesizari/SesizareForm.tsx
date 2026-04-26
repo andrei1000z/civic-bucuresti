@@ -201,7 +201,7 @@ export function SesizareForm() {
       if (parsed.parkingPlateText) setParkingPlateText(parsed.parkingPlateText);
       if (parsed.parkingJurisdiction) setParkingJurisdiction(parsed.parkingJurisdiction);
       if (parsed.parkingObservedAt) setParkingObservedAt(parsed.parkingObservedAt);
-      setDraftRestoredAt(new Date(parsed.t).toLocaleString("ro-RO"));
+      setDraftRestoredAt(new Date(parsed.t).toLocaleString("ro-RO", { timeZone: "Europe/Bucharest" }));
     } catch { /* corrupt draft — ignore */ }
 
   }, []);
