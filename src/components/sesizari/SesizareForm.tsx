@@ -125,16 +125,26 @@ export function SesizareForm() {
   const [parkingPlateText, setParkingPlateText] = useState("");
   const [parkingJurisdiction, setParkingJurisdiction] = useState<ParkingJurisdiction | "">("");
   // datetime-local value "YYYY-MM-DDTHH:MM" in the user's local timezone.
-  // Defaults to "now" on first render so the common case (constatare
-  // pe loc) is a zero-click field. User can dial it back if they're
-  // reporting a car they saw earlier in the day.
-  const [parkingObservedAt, setParkingObservedAt] = useState(() => {
+  // Defaults to "now" on mount (NU în useState initializer) — initializer
+  // rulează și pe server SSR, iar new Date() server vs client diferă →
+  // React hydration error #418. Mount-only setarea garantează SSR = "" și
+  // client populated după hydration.
+  const [parkingObservedAt, setParkingObservedAt] = useState("");
+  const [parkingObservedMax, setParkingObservedMax] = useState("");
+  const [hotspotShown, setHotspotShown] = useState(false);
+
+  // Inițializează „acum" (rotunjit la minut) după mount — NU în render,
+  // ca să eviți hydration mismatch cross-minute. La fel pentru max prop
+  // pe datetime-local input.
+  useEffect(() => {
     const d = new Date();
     d.setSeconds(0, 0);
     const pad = (n: number) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  });
-  const [hotspotShown, setHotspotShown] = useState(false);
+    const nowLocal = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    setParkingObservedMax(nowLocal);
+    if (!parkingObservedAt) setParkingObservedAt(nowLocal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const update = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setData((d) => ({ ...d, [key]: value }));
@@ -1237,14 +1247,7 @@ ${today}`;
                 type="datetime-local"
                 value={parkingObservedAt}
                 onChange={(e) => setParkingObservedAt(e.target.value)}
-                max={(() => {
-                  // Block picking a moment in the future — a sesizare
-                  // can't be for a fact not yet observed.
-                  const d = new Date();
-                  d.setSeconds(0, 0);
-                  const pad = (n: number) => String(n).padStart(2, "0");
-                  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-                })()}
+                max={parkingObservedMax || undefined}
                 className="w-full h-11 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               />
               <p className="text-xs text-[var(--color-text-muted)] mt-1">
