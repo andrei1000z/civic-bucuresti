@@ -82,6 +82,22 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
   const [lightbox, setLightbox] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Lightbox: Escape closes, ←/→ navigate, body scroll locked while open.
+  useEffect(() => {
+    if (lightbox === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null);
+      else if (e.key === "ArrowLeft" && lightbox > 0) setLightbox(lightbox - 1);
+      else if (e.key === "ArrowRight" && lightbox < urls.length - 1) setLightbox(lightbox + 1);
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [lightbox, urls.length]);
+
   // Revoke any leftover object URLs when the component unmounts — otherwise
   // the blobs leak in memory until full page refresh.
   useEffect(() => {

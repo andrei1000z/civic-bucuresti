@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Loader2, X, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -21,6 +21,22 @@ export function DeleteSesizareButton({ code, isAuthor }: Props) {
   const router = useRouter();
   const [confirm, setConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Escape closes confirm + lock body scroll while modal is open.
+  // (We don't allow Escape during delete in flight — accidental cancel mid-call
+  // would leave the user wondering whether the delete went through.)
+  useEffect(() => {
+    if (!confirm) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !deleting) setConfirm(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [confirm, deleting]);
 
   // Only show to author
   if (!user || !isAuthor) return null;

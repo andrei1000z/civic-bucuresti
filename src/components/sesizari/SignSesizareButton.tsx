@@ -57,6 +57,25 @@ export function SignSesizareButton({
   const [remember, setRemember] = useState(true);
   const [profileLoaded, setProfileLoaded] = useState(false);
 
+  // Escape closes + lock body scroll while modal is open.
+  // Inline the close logic so the effect has stable deps (`[open]`)
+  // instead of depending on a function recreated every render.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        setTimeout(() => setStep("form"), 300);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   // Auto-fill from user profile when logged in (overrides localStorage if profile has data)
   useEffect(() => {
     if (!user || profileLoaded) return;

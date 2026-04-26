@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, X } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -27,6 +27,22 @@ export function MarkResolvedButton({ code, status, isAuthor }: Props) {
   const [photo, setPhoto] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Escape closes + lock body scroll while modal is open.
+  // Hook runs before the early-return below — react-hooks/rules-of-hooks
+  // requires hooks to fire in the same order on every render.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   if (status === "rezolvat") return null;
 
