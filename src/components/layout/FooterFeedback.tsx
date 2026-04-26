@@ -109,14 +109,15 @@ export function FooterFeedback() {
                   key={k}
                   type="button"
                   onClick={() => setKind(k)}
-                  className={`flex-1 inline-flex items-center justify-center gap-1 h-8 px-2 rounded-[6px] text-[11px] font-medium transition-colors ${
+                  className={`flex-1 inline-flex items-center justify-center gap-1 h-8 px-2 rounded-[6px] text-[11px] font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
                     active
                       ? "bg-[var(--color-primary)] text-white"
                       : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)]"
                   }`}
                   aria-pressed={active}
+                  aria-label={`Categorie feedback: ${KIND_META[k].label}`}
                 >
-                  <Icon size={12} />
+                  <Icon size={12} aria-hidden="true" />
                   <span className="hidden sm:inline">{KIND_META[k].label}</span>
                 </button>
               );
@@ -150,16 +151,17 @@ export function FooterFeedback() {
             <button
               type="submit"
               disabled={sending || message.trim().length < 5}
-              className="h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center gap-2"
+              aria-busy={sending}
+              className="h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
-              {sending ? <Loader2 size={14} className="animate-spin" /> : done ? <Check size={14} /> : null}
+              {sending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : done ? <Check size={14} aria-hidden="true" /> : null}
               {sending ? "Se trimite..." : done ? "Mulțumesc!" : "Trimite"}
             </button>
           </div>
-          {error && <p className="text-xs text-red-500">{error}</p>}
+          {error && <p role="alert" className="text-xs text-red-500">{error}</p>}
           {done && (
-            <p className="text-xs text-emerald-600 dark:text-emerald-400">
-              ✓ Mesajul a ajuns. Mersi că te-ai implicat.
+            <p role="status" className="text-xs text-emerald-600 dark:text-emerald-400">
+              <span aria-hidden="true">✓ </span>Mesajul a ajuns. Mersi că te-ai implicat.
             </p>
           )}
         </form>
@@ -188,16 +190,17 @@ export function FooterFeedback() {
             <button
               type="submit"
               disabled={nlSending || !newsletterEmail.trim()}
-              className="h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-semibold hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center gap-2"
+              aria-busy={nlSending}
+              className="h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-semibold hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
-              {nlSending ? <Loader2 size={14} className="animate-spin" /> : nlDone ? <Check size={14} /> : null}
+              {nlSending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : nlDone ? <Check size={14} aria-hidden="true" /> : null}
               {nlSending ? "Înscriere..." : nlDone ? "Înscris!" : "Înscrie-mă"}
             </button>
           </div>
-          {nlError && <p className="text-xs text-red-500">{nlError}</p>}
+          {nlError && <p role="alert" className="text-xs text-red-500">{nlError}</p>}
           {nlDone && (
-            <p className="text-xs text-emerald-600 dark:text-emerald-400">
-              ✓ Te-am adăugat. Primul newsletter vine vinerea următoare.
+            <p role="status" className="text-xs text-emerald-600 dark:text-emerald-400">
+              <span aria-hidden="true">✓ </span>Te-am adăugat. Primul newsletter vine vinerea următoare.
             </p>
           )}
           <p className="text-[11px] text-[var(--color-text-muted)]">
