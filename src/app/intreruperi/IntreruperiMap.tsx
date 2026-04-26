@@ -67,6 +67,7 @@ function timeRangeLabel(startAt: string, endAt: string): string {
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "Europe/Bucharest",
     });
   return `${fmt(s)} — ${fmt(e)}`;
 }

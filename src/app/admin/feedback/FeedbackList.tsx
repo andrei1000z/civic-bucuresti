@@ -114,9 +114,13 @@ export function FeedbackList({ rows: initial }: { rows: Row[] }) {
                   <span className="font-mono text-[10px] text-[var(--color-text-muted)]">
                     {r.id.slice(0, 8)}
                   </span>
-                  <span className="text-xs text-[var(--color-text-muted)]">
-                    {new Date(r.created_at).toLocaleString("ro-RO")}
-                  </span>
+                  <time
+                    dateTime={r.created_at}
+                    className="text-xs text-[var(--color-text-muted)]"
+                    suppressHydrationWarning
+                  >
+                    {new Date(r.created_at).toLocaleString("ro-RO", { timeZone: "Europe/Bucharest" })}
+                  </time>
                 </div>
                 <button
                   type="button"

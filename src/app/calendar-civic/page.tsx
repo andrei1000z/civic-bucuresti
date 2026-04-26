@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export const revalidate = 86400; // 24h
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("ro-RO", {
+  return new Date(iso).toLocaleDateString("ro-RO", { timeZone: "Europe/Bucharest",
     day: "numeric",
     month: "long",
     year: "numeric",

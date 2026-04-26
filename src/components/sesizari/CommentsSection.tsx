@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { MessageSquare, Send, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/components/Toast";
-import { timeAgo } from "@/lib/utils";
+import { TimeAgo } from "@/components/ui/TimeAgo";
 import type { SesizareCommentRow } from "@/lib/supabase/types";
 
 interface CommentsSectionProps {
@@ -131,9 +131,10 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
             >
               <header className="flex items-center justify-between mb-2">
                 <p className="font-medium text-sm">{c.author_name}</p>
-                <span className="text-xs text-[var(--color-text-muted)]">
-                  {timeAgo(c.created_at)}
-                </span>
+                <TimeAgo
+                  date={c.created_at}
+                  className="text-xs text-[var(--color-text-muted)]"
+                />
               </header>
               <p className="text-sm whitespace-pre-wrap">{c.body}</p>
             </article>

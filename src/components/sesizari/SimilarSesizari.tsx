@@ -22,7 +22,7 @@ export function SimilarSesizari({ sesizari }: Props) {
             <Link
               href={`/sesizari/${s.code}`}
               className="group block p-3 -mx-3 rounded-[8px] hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-inset"
-              aria-label={`${s.titlu} — ${STATUS_LABELS[s.status] ?? s.status}, ${timeAgo(s.created_at)}`}
+              aria-label={`${s.titlu} — ${STATUS_LABELS[s.status] ?? s.status}`}
             >
               <div className="flex items-start gap-2 mb-1">
                 <span
@@ -38,7 +38,13 @@ export function SimilarSesizari({ sesizari }: Props) {
                     <MapPin size={11} className="shrink-0" aria-hidden="true" />
                     <span className="truncate flex-1 min-w-0">{s.author_name}</span>
                     <span className="shrink-0" aria-hidden="true">·</span>
-                    <time dateTime={s.created_at} className="shrink-0 whitespace-nowrap">{timeAgo(s.created_at)}</time>
+                    <time
+                      dateTime={s.created_at}
+                      className="shrink-0 whitespace-nowrap"
+                      suppressHydrationWarning
+                    >
+                      {timeAgo(s.created_at)}
+                    </time>
                   </div>
                   <span className="inline-block mt-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
                     {STATUS_LABELS[s.status] ?? s.status}

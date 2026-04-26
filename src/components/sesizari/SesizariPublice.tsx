@@ -290,7 +290,7 @@ export function SesizariPublice() {
                 key={s.id}
                 href={`/sesizari/${s.code}`}
                 className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-primary)]/30 transition-all overflow-hidden min-w-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
-                aria-label={`${s.titlu} — ${STATUS_LABELS[s.status]}, ${s.upvotes} ${s.upvotes === 1 ? "vot" : "voturi"}, ${timeAgo(s.created_at)}`}
+                aria-label={`${s.titlu} — ${STATUS_LABELS[s.status]}, ${s.upvotes} ${s.upvotes === 1 ? "vot" : "voturi"}`}
               >
                 <div className="flex items-start justify-between mb-3 gap-2 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -313,6 +313,7 @@ export function SesizariPublice() {
                   <time
                     dateTime={s.created_at}
                     className="text-xs text-[var(--color-text-muted)] shrink-0 whitespace-nowrap"
+                    suppressHydrationWarning
                   >
                     {timeAgo(s.created_at)}
                   </time>

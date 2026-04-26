@@ -218,7 +218,9 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
                   </div>
                   <p className="text-sm font-medium line-clamp-1">{s.titlu}</p>
                   <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
-                    {new Date(s.created_at).toLocaleDateString("ro-RO")}
+                    <time dateTime={s.created_at}>
+                      {new Date(s.created_at).toLocaleDateString("ro-RO", { timeZone: "Europe/Bucharest" })}
+                    </time>
                   </p>
                 </Link>
               ))}

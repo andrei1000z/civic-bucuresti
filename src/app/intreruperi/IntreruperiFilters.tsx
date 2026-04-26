@@ -81,6 +81,8 @@ function formatDistance(km: number): string {
 }
 
 // Relative time: „În 2h", „Mâine 08:00", „Ieri"
+// IMPORTANT: timeZone explicit (Europe/Bucharest) ca server (UTC) și
+// client (local) să producă ACELAȘI text. Altfel React hydration error.
 function relativeTime(iso: string): string {
   const t = new Date(iso).getTime();
   const now = Date.now();
@@ -99,26 +101,33 @@ function relativeTime(iso: string): string {
   const start = new Date(d);
   start.setHours(0, 0, 0, 0);
   const days = Math.round((start.getTime() - today.getTime()) / 86_400_000);
-  if (days === 1) return `mâine ${d.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" })}`;
-  if (days < 7) return d.toLocaleDateString("ro-RO", { weekday: "long", hour: "2-digit", minute: "2-digit" });
-  return d.toLocaleDateString("ro-RO", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  if (days === 1) return `mâine ${d.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Bucharest" })}`;
+  if (days < 7) return d.toLocaleDateString("ro-RO", { weekday: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Bucharest" });
+  return d.toLocaleDateString("ro-RO", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Bucharest" });
 }
 
 function timeRangeLabel(startAt: string, endAt: string): string {
+  // sameDay folosește toDateString() care depinde de timezone-ul runtime —
+  // pentru consistență server (UTC) ↔ client (Europe/Bucharest) folosim
+  // tot timeZone explicit.
   const s = new Date(startAt);
   const e = new Date(endAt);
-  const sameDay = s.toDateString() === e.toDateString();
+  const sLocal = s.toLocaleDateString("ro-RO", { timeZone: "Europe/Bucharest" });
+  const eLocal = e.toLocaleDateString("ro-RO", { timeZone: "Europe/Bucharest" });
+  const sameDay = sLocal === eLocal;
   const fmt = (d: Date) =>
     d.toLocaleString("ro-RO", {
       day: "numeric",
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "Europe/Bucharest",
     });
   if (sameDay) {
     return `${fmt(s)} — ${e.toLocaleString("ro-RO", {
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "Europe/Bucharest",
     })}`;
   }
   return `${fmt(s)} — ${fmt(e)}`;
@@ -365,9 +374,9 @@ function groupByDay(
     else if (days === 0) key = "Astăzi";
     else if (days === 1) key = "Mâine";
     else if (days < 7)
-      key = start.toLocaleDateString("ro-RO", { weekday: "long", day: "numeric", month: "short" });
+      key = start.toLocaleDateString("ro-RO", { weekday: "long", day: "numeric", month: "short", timeZone: "Europe/Bucharest" });
     else
-      key = start.toLocaleDateString("ro-RO", { day: "numeric", month: "long" });
+      key = start.toLocaleDateString("ro-RO", { day: "numeric", month: "long", timeZone: "Europe/Bucharest" });
 
     const arr = buckets.get(key) ?? [];
     arr.push(item);
@@ -384,8 +393,11 @@ function GroupedList({
   me: [number, number] | null;
 }) {
   const groups = useMemo(() => groupByDay(items), [items]);
+  // groupByDay folosește data curentă pentru bucketing („Astăzi", „Mâine").
+  // Server SSR la 23:59 + client hydration la 00:01 = bucket-uri diferite.
+  // suppressHydrationWarning pe wrapper anulează eroarea pe rare midnight crossings.
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" suppressHydrationWarning>
       {groups.map((g) => (
         <section key={g.label}>
           <h3 className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)] mb-3 flex items-center gap-2">
@@ -490,8 +502,9 @@ function InterruptionCard({
               ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
               : "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300"
           }`}
+          suppressHydrationWarning
         >
-          <Clock size={10} />
+          <Clock size={10} aria-hidden="true" />
           {isActive ? endRelative : `începe ${startRelative}`}
         </div>
       )}
