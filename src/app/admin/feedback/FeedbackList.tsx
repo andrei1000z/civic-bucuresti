@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check, Archive, AlertCircle, Copy, Mail, ExternalLink } from "lucide-react";
+import { useToast } from "@/components/Toast";
 
 interface Row {
   id: string;
@@ -40,6 +41,7 @@ export function FeedbackList({ rows: initial }: { rows: Row[] }) {
   const [rows, setRows] = useState(initial);
   const [acting, setActing] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "replied" | "archived" | "spam">("pending");
+  const { toast } = useToast();
 
   const updateStatus = async (id: string, status: Row["status"]) => {
     setActing(id);
@@ -51,8 +53,9 @@ export function FeedbackList({ rows: initial }: { rows: Row[] }) {
       });
       if (!res.ok) throw new Error((await res.json()).error || "Eroare");
       setRows((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+      toast("Status actualizat", "success");
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Eroare");
+      toast(e instanceof Error ? e.message : "Eroare", "error");
     } finally {
       setActing(null);
     }
