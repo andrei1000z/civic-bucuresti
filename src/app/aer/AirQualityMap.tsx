@@ -98,12 +98,6 @@ export default function AirQualityMap({
 
   const filteredSensors = sensors.filter((s) => showSources[s.source] !== false);
 
-  const getValue = (s: UnifiedSensor) => {
-    if (selectedPollutant === "pm25") return s.pm25;
-    if (selectedPollutant === "pm10") return s.pm10;
-    return s.aqi;
-  };
-
   // Top 10 most polluted
   const top10 = [...filteredSensors]
     .filter((s) => s.aqi != null)
@@ -134,7 +128,6 @@ export default function AirQualityMap({
 
           {/* Station markers (on top of heatmap) */}
           {showMarkers && filteredSensors.map((sensor) => {
-            const val = getValue(sensor);
             const color = getAqiColor(sensor.aqi);
             const radius = sensor.isOfficial ? 8 : 5;
 

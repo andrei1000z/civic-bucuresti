@@ -69,18 +69,6 @@ function metroStationStyle(): PathOptions {
 // longer loaded. Footway styling now lives in DynamicPedestrianLayer
 // which serves Overpass results on the current viewport.
 
-const autoAccessStyle: PathOptions = {
-  color: "#2563EB", // blue — driveable city street
-  weight: 1.5,
-  opacity: 0.5,
-};
-
-const autoRestrictedStyle: PathOptions = {
-  color: "#F97316", // orange — major roads, no pedestrians
-  weight: 3,
-  opacity: 0.8,
-};
-
 const parkStyle: PathOptions = {
   color: "#059669",
   weight: 1.5,
@@ -115,13 +103,6 @@ function metroStationPopup(feature: Feature): string {
 
 // pedestrianPopup + pedestrianRestrictedPopup moved into
 // DynamicPedestrianLayer where the rendering now happens.
-
-function autoPopup(feature: Feature): string {
-  const p = feature.properties ?? {};
-  const name = p.name ?? "Stradă";
-  const type = p.highway ?? "";
-  return `<div><b>${name}</b><br/><span style="font-size:11px;color:#64748b">${type}</span></div>`;
-}
 
 function parkPopup(feature: Feature): string {
   const p = feature.properties ?? {};

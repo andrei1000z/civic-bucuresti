@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Bell, MessageCircle, CheckCircle2, X } from "lucide-react";
+import { Bell, MessageCircle, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";

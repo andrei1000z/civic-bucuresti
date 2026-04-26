@@ -86,7 +86,6 @@ export default async function SesizariResolvatePage() {
               </h2>
               <div className="grid md:grid-cols-2 gap-6">
                 {withPhotos.map((s) => {
-                  const tipLabel = SESIZARE_TIPURI.find((t) => t.value === s.tip)?.label ?? s.tip;
                   const tipIcon = SESIZARE_TIPURI.find((t) => t.value === s.tip)?.icon ?? "📝";
                   return (
                     <Link

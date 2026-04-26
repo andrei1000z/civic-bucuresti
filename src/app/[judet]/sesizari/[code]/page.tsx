@@ -25,7 +25,6 @@ export async function generateMetadata({
   params: Promise<{ judet: string; code: string }>;
 }): Promise<Metadata> {
   const { judet, code } = await params;
-  const county = getCountyBySlug(judet);
   const s = await getSesizareByCode(code);
   if (!s) return { title: "Sesizare negăsită" };
   return {

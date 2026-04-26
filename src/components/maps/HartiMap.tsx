@@ -88,10 +88,10 @@ export function HartiMap({
   const [layersOpen, setLayersOpen] = useState(false);
   const [mapStyle, setMapStyle] = useState<"standard" | "satelit">("standard");
 
-  // Bicycle layer toggles
-  const [showDedicate, setShowDedicate] = useState(true);
-  const [showMarcate, setShowMarcate] = useState(true);
-  const [showRecomandate, setShowRecomandate] = useState(true);
+  // Bicycle layer toggles — currently always-on (UI controls planned in v2)
+  const showDedicate = true;
+  const showMarcate = true;
+  const showRecomandate = true;
 
   // Pe jos filters
   const [showParcuri, setShowParcuri] = useState(true);
@@ -138,9 +138,6 @@ export function HartiMap({
       prev.includes(id) ? prev.filter((l) => l !== id) : [...prev, id]
     );
   };
-
-  // 327 features × avg ~60m = ~20km of real bike paths in Bucharest
-  const totalPisteKm = 38;
 
   return (
     <div className="flex h-[calc(100vh-64px)] relative">

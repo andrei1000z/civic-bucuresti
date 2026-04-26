@@ -39,7 +39,6 @@ const ParkingHotspotModal = nextDynamic(
 import { PARKING_JURISDICTION_OPTIONS, type ParkingJurisdiction } from "@/lib/sesizari/parking";
 import { VoiceInput } from "./VoiceInput";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { EmailChoicePanel } from "./EmailChoicePanel";
 import { buildFormalText, buildGmailLink, buildMailtoLink, type MailtoInput } from "@/lib/sesizari/mailto";
 import { trackFunnelStep, trackAiUsage, trackFormAbandon } from "@/components/analytics/CiviaTracker";
 import { useCountyOptional } from "@/lib/county-context";
@@ -1415,7 +1414,6 @@ function Field({
 function SuccessScreen({
   code,
   emailInput,
-  imaginiCount,
   onAnother,
 }: {
   code: string;
@@ -1424,8 +1422,8 @@ function SuccessScreen({
   onAnother: () => void;
 }) {
   const router = useRouter();
-  const [autoOpened, setAutoOpened] = useState(false);
-  const [popupBlocked, setPopupBlocked] = useState(false);
+  const [, setAutoOpened] = useState(false);
+  const [, setPopupBlocked] = useState(false);
 
   // Auto-open email provider on mount. If user has @gmail address → Gmail.
   // Otherwise → mailto: (system default).
