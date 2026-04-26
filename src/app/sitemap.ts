@@ -8,10 +8,16 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
 export const revalidate = 3600; // hourly
 
+// Toate sub-page-urile per județ. Trebuie să rămână sincronizat cu
+// `src/app/[judet]/<slug>/page.tsx`. La adăugarea unui nou sub-page,
+// adaugă slug-ul aici (altfel Google nu-l indexează automat).
 const COUNTY_PAGES = [
   "", "/sesizari", "/aer", "/harti", "/statistici", "/stiri", "/ghiduri",
   "/autoritati", "/bilete", "/evenimente", "/istoric", "/cum-functioneaza",
   "/impact", "/intreruperi",
+  // Sub-pages pentru date publice — au fost adăugate ca pagini per-județ
+  // în refactor-ul național dar lipseau din sitemap.
+  "/educatie", "/sanatate", "/siguranta", "/buget",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
