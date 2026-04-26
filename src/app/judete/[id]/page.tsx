@@ -207,12 +207,14 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
                 <Link
                   key={s.code}
                   href={`/sesizari/${s.code}`}
-                  className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] p-3 hover:border-[var(--color-primary)]/40 transition-colors"
+                  aria-label={`Sesizarea ${s.code}: ${s.titlu}`}
+                  className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] p-3 hover:border-[var(--color-primary)]/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <span
                       className="w-2 h-2 rounded-full"
                       style={{ backgroundColor: STATUS_COLORS[s.status] ?? "#64748b" }}
+                      aria-hidden="true"
                     />
                     <span className="font-mono text-[10px] text-[var(--color-text-muted)]">{s.code}</span>
                   </div>
