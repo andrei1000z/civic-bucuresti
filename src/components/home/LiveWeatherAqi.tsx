@@ -132,18 +132,23 @@ export function LiveWeatherCard() {
   const [aqi, setAqi] = useState<Aqi | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     const load = () => {
       Promise.all([
         fetch("/api/weather").then((r) => r.json()).catch(() => null),
         fetch("/api/statistici/aqi").then((r) => r.json()).catch(() => null),
       ]).then(([w, a]) => {
+        if (cancelled) return;
         if (w?.data) setWeather(w.data);
         if (a?.data && a.data.aqi != null) setAqi({ aqi: a.data.aqi, quality: a.data.quality ?? "Moderat" });
       });
     };
     load();
     const id = setInterval(load, 10 * 60 * 1000);
-    return () => clearInterval(id);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, []);
 
   const wi = weatherIcon(weather?.code ?? null);
