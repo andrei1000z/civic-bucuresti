@@ -42,7 +42,9 @@ export default async function JudetIntreruperiPage({
   // eslint-disable-next-line react-hooks/purity -- ISR Server Component, fresh per regeneration
   const now = Date.now();
   const all = getInterruptionsForCounty(county.id).filter((i) => {
-    return i.status !== "anulat" && i.status !== "finalizat" && new Date(i.endAt).getTime() >= now;
+    // Strict > now (NU >=) — întreruperi care s-au terminat exact acum
+    // nu mai apar ca active. Consistent cu getActiveInterruptions().
+    return i.status !== "anulat" && i.status !== "finalizat" && new Date(i.endAt).getTime() > now;
   });
 
   const jsonLd = {
