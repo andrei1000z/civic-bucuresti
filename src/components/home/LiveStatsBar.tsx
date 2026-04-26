@@ -15,6 +15,7 @@ export function LiveStatsBar() {
   const [data, setData] = useState<LiveData | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     // Helper: treat 4xx/5xx as failures too, not just network errors.
     // Returning the fallback object here keeps the ticker from jumping
     // to "Se încarcă..." forever on a bad backend response.
@@ -31,6 +32,7 @@ export function LiveStatsBar() {
       fetchJson<{ data: { total: number; today: number; inLucru: number } | null }>("/api/statistici/summary", { data: null }),
       fetchJson<{ data: { aqi: number; quality: string } | null }>("/api/statistici/aqi", { data: { aqi: 65, quality: "Moderat" } }),
     ]).then(([summary, aqi]) => {
+      if (cancelled) return;
       const s = summary.data ?? { total: 0, today: 0, inLucru: 0 };
       setData({
         sesizariAzi: s.today,
@@ -40,6 +42,9 @@ export function LiveStatsBar() {
         totalSesizari: s.total,
       });
     });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const stats = data

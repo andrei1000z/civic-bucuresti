@@ -48,6 +48,7 @@ export function LiveWeatherAqi() {
   const [aqi, setAqi] = useState<Aqi | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     const params = county?.center
       ? `?lat=${county.center[0]}&lng=${county.center[1]}`
       : "";
@@ -65,13 +66,17 @@ export function LiveWeatherAqi() {
         safeJson(`/api/weather${params}`),
         safeJson(`/api/statistici/aqi${params}`),
       ]).then(([w, a]) => {
+        if (cancelled) return;
         if (w?.data) setWeather(w.data);
         if (a?.data && a.data.aqi != null) setAqi({ aqi: a.data.aqi, quality: a.data.quality ?? "Moderat" });
       });
     };
     load();
     const id = setInterval(load, 10 * 60 * 1000);
-    return () => clearInterval(id);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, [county]);
 
   if (!weather && !aqi) {
