@@ -388,6 +388,7 @@ export function CivicAssistant() {
               <button
                 type="submit"
                 disabled={!input.trim() || streaming}
+                aria-busy={streaming}
                 className="w-10 h-10 rounded-[8px] bg-[var(--color-primary)] text-white flex items-center justify-center hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
                 aria-label="Trimite mesajul"
               >
