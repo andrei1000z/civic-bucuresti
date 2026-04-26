@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
 import { STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
-import { timeAgo } from "@/lib/utils";
+import { TimeAgo } from "@/components/ui/TimeAgo";
 import type { SesizareFeedRow } from "@/lib/supabase/types";
 
 interface Props {
@@ -38,13 +38,10 @@ export function SimilarSesizari({ sesizari }: Props) {
                     <MapPin size={11} className="shrink-0" aria-hidden="true" />
                     <span className="truncate flex-1 min-w-0">{s.author_name}</span>
                     <span className="shrink-0" aria-hidden="true">·</span>
-                    <time
-                      dateTime={s.created_at}
+                    <TimeAgo
+                      date={s.created_at}
                       className="shrink-0 whitespace-nowrap"
-                      suppressHydrationWarning
-                    >
-                      {timeAgo(s.created_at)}
-                    </time>
+                    />
                   </div>
                   <span className="inline-block mt-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
                     {STATUS_LABELS[s.status] ?? s.status}

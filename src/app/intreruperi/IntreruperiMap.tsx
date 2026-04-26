@@ -268,9 +268,9 @@ export default function IntreruperiMap({ items }: { items: Interruption[] }) {
           className="w-10 h-10 rounded-full bg-white text-slate-900 shadow-md border border-slate-300 flex items-center justify-center hover:bg-slate-50 disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         >
           {locating ? (
-            <Loader2 size={18} className="animate-spin" />
+            <Loader2 size={18} className="animate-spin" aria-hidden="true" />
           ) : (
-            <Locate size={18} className={me ? "text-blue-600" : ""} />
+            <Locate size={18} className={me ? "text-blue-600" : ""} aria-hidden="true" />
           )}
         </button>
         {me && meAccuracy != null && (

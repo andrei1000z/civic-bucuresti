@@ -555,20 +555,21 @@ function InterruptionCard({
         </span>
         <div className="flex items-center gap-2 shrink-0">
           <button
+            type="button"
             onClick={handleShare}
             aria-label="Distribuie"
-            className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
-            <Share2 size={11} />
+            <Share2 size={11} aria-hidden="true" />
           </button>
           <a
             href={`/api/intreruperi/${item.id}/ics`}
             onClick={(e) => e.stopPropagation()}
             aria-label="Adaugă în calendar"
-            className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             title="Descarcă în calendar (ICS)"
           >
-            <Calendar size={11} />
+            <Calendar size={11} aria-hidden="true" />
           </a>
           {(item.sourceEntryUrl || item.sourceUrl) && (
             <a
@@ -576,7 +577,7 @@ function InterruptionCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-primary)] hover:underline"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-primary)] hover:underline rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               title={
                 item.sourceEntryUrl
                   ? "Anunțul oficial exact (PDF/pagină)"
@@ -584,7 +585,7 @@ function InterruptionCard({
               }
             >
               {item.sourceEntryUrl ? "PDF oficial" : "Vezi la provider"}{" "}
-              <ExternalLink size={10} />
+              <ExternalLink size={10} aria-hidden="true" />
             </a>
           )}
         </div>
