@@ -119,7 +119,14 @@ export function IntreruperiSubmissions({ rows: initial }: { rows: Row[] }) {
                 </div>
                 <button
                   type="button"
-                  onClick={() => navigator.clipboard.writeText(r.text)}
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(r.text);
+                      toast("Text copiat", "success", 1500);
+                    } catch {
+                      toast("Browser-ul nu permite copierea — selectează manual", "error");
+                    }
+                  }}
                   aria-label="Copiază textul submisiei"
                   className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1 -m-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 >
