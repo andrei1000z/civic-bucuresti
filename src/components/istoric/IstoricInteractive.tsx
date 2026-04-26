@@ -290,6 +290,7 @@ export function IstoricInteractive({ primari }: Props) {
               [modalPrimar.id]: prev[modalPrimar.id] === section ? null : section,
             }))
           }
+          currentYear={currentYear}
         />
       )}
     </div>
@@ -301,11 +302,13 @@ function PrimarModal({
   onClose,
   expandedSection,
   onExpand,
+  currentYear,
 }: {
   primar: Primar;
   onClose: () => void;
   expandedSection: string | null;
   onExpand: (section: string) => void;
+  currentYear: number;
 }) {
   const sections = [
     { id: "realizari", label: "Realizări", icon: CheckCircle2, items: primar.realizari, color: "text-emerald-600" },
