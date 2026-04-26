@@ -25,9 +25,18 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Prea rapid — așteaptă o secundă" }, { status: 429 });
   }
 
-  const result = await reverseGeocode(lat, lng);
-  return NextResponse.json(
-    { data: result },
-    { headers: { "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=3600" } }
-  );
+  try {
+    const result = await reverseGeocode(lat, lng);
+    return NextResponse.json(
+      { data: result },
+      { headers: { "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=3600" } }
+    );
+  } catch (err) {
+    // Nominatim down sau timeout — degradăm grațios la „nu am putut detecta".
+    // Frontend-ul handle-uiește data:null ca fallback la „introdu manual".
+    return NextResponse.json(
+      { data: null, error: err instanceof Error ? err.message : "Geocoding indisponibil" },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
+  }
 }

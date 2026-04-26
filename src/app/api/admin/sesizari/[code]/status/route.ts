@@ -95,22 +95,28 @@ export async function POST(
         ? `<p><strong>Răspunsul autorității:</strong></p>
            <blockquote style="margin:0;padding:12px 16px;background:#f8fafc;border-left:3px solid #059669;color:#475569;font-size:14px;line-height:1.6;white-space:pre-wrap">${escapeHtml(parsed.data.official_response)}</blockquote>`
         : "";
-      await sendEmail({
-        to: recipient,
-        subject: `${meta.icon} ${meta.label} · Sesizarea ${sesizare.code} · Civia`,
-        html: emailTemplate({
-          title: meta.label,
-          preheader: sesizare.titlu,
-          kicker: meta.kicker,
-          icon: meta.icon,
-          body: `<p>Bună,</p>
-                 <p>Statusul sesizării tale <strong>${sesizare.code}</strong> a fost actualizat.</p>
-                 <p><strong>${sesizare.titlu}</strong></p>
-                 ${responseBlock}`,
-          ctaText: "Vezi sesizarea",
-          ctaUrl: sesizareUrl,
-        }),
-      });
+      // Email best-effort — Resend down nu trebuie să blocheze răspunsul
+      // (DB update deja a avut succes mai sus).
+      try {
+        await sendEmail({
+          to: recipient,
+          subject: `${meta.icon} ${meta.label} · Sesizarea ${sesizare.code} · Civia`,
+          html: emailTemplate({
+            title: meta.label,
+            preheader: sesizare.titlu,
+            kicker: meta.kicker,
+            icon: meta.icon,
+            body: `<p>Bună,</p>
+                   <p>Statusul sesizării tale <strong>${sesizare.code}</strong> a fost actualizat.</p>
+                   <p><strong>${sesizare.titlu}</strong></p>
+                   ${responseBlock}`,
+            ctaText: "Vezi sesizarea",
+            ctaUrl: sesizareUrl,
+          }),
+        });
+      } catch (emailErr) {
+        console.error("[status] email failed:", emailErr);
+      }
     }
   }
 

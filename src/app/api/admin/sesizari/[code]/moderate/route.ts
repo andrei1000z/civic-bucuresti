@@ -81,21 +81,28 @@ export async function POST(
          <p>Sesizarea ta <strong>${sesizare.code}</strong> a fost respinsă de moderare.</p>
          <p><strong>${sesizare.titlu}</strong></p>
          <p>Motive frecvente: limbaj inadecvat, conținut duplicat, date personale sensibile sau informații insuficiente. Poți trimite o sesizare nouă cu detalii clare.</p>`;
-    await sendEmail({
-      to: recipient,
-      subject: approved
-        ? `✓ Sesizarea ${sesizare.code} a fost aprobată · Civia`
-        : `Sesizarea ${sesizare.code} a fost respinsă · Civia`,
-      html: emailTemplate({
-        title: approved ? "Sesizare aprobată" : "Sesizare respinsă",
-        preheader: sesizare.titlu,
-        kicker: approved ? "MODERARE · APROBAT" : "MODERARE · RESPINS",
-        icon: approved ? "✅" : "⚠️",
-        body,
-        ctaText: approved ? "Vezi sesizarea" : "Urmărește codul",
-        ctaUrl: approved ? sesizareUrl : trackUrl,
-      }),
-    });
+    // sendEmail e best-effort — Resend down nu trebuie să blocheze
+    // răspunsul către admin (DB update deja a avut succes).
+    try {
+      await sendEmail({
+        to: recipient,
+        subject: approved
+          ? `✓ Sesizarea ${sesizare.code} a fost aprobată · Civia`
+          : `Sesizarea ${sesizare.code} a fost respinsă · Civia`,
+        html: emailTemplate({
+          title: approved ? "Sesizare aprobată" : "Sesizare respinsă",
+          preheader: sesizare.titlu,
+          kicker: approved ? "MODERARE · APROBAT" : "MODERARE · RESPINS",
+          icon: approved ? "✅" : "⚠️",
+          body,
+          ctaText: approved ? "Vezi sesizarea" : "Urmărește codul",
+          ctaUrl: approved ? sesizareUrl : trackUrl,
+        }),
+      });
+    } catch (emailErr) {
+      // Log dar continuă — DB-ul e deja consistent.
+      console.error("[moderate] email failed:", emailErr);
+    }
   }
 
   return NextResponse.json({ ok: true });
