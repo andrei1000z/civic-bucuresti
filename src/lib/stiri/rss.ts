@@ -41,18 +41,19 @@ const FEEDS: Feed[] = [
 ];
 
 // Simple category classifier from keywords in title + excerpt
-function classifyCategory(text: string): string {
+export function classifyCategory(text: string): string {
   const lower = text.toLowerCase();
   if (/metrou|metrorex|stb|autobuz|tramvai|bilet|abonament|trafic|pasaj|centură|transport public/.test(lower)) return "transport";
   if (/urbanism|pug|puz|construcții|construire|imobiliar|cartier|bloc/.test(lower)) return "urbanism";
-  if (/aer|poluare|parc|verde|copac|mediu|deșeu|salubri|climă/.test(lower)) return "mediu";
+  // word-boundary on "parc" / "parcuri" / "parcurile" so "parcare" / "parcaj" don't false-match.
+  if (/aer|poluare|\bparc(uri|ul|urile)?\b|verde|copac|mediu|deșeu|salubri|climă/.test(lower)) return "mediu";
   if (/accident|incendiu|poliție|furt|siguranță|violență|jandarm/.test(lower)) return "siguranta";
   if (/primar|consiliu|buget|primărie|pmb|hotărâre|taxe|alegeri|guvern|ministru/.test(lower)) return "administratie";
   if (/festival|concert|protest|manifest|eveniment|paradă/.test(lower)) return "eveniment";
   return "administratie";
 }
 
-function cleanText(html: string | undefined): string {
+export function cleanText(html: string | undefined): string {
   if (!html) return "";
   return html
     .replace(/<[^>]+>/g, "")
