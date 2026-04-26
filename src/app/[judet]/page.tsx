@@ -38,19 +38,22 @@ export async function generateMetadata({
   };
 }
 
+// `prefetch: true` doar pe top-3 destinații (sesizari/aer/harti). Restul
+// au prefetch=false ca să nu trigger-uim 12 fetches simultan la viewport
+// entry. Userul prefetch-uiește on-hover natural prin Next-Link.
 const sections = [
-  { path: "/sesizari", icon: AlertCircle, label: "Sesizări", color: "#DC2626" },
-  { path: "/impact", icon: BarChart3, label: "Impact local", color: "#1C4ED8" },
-  { path: "/aer", icon: Wind, label: "Calitate aer", color: "#059669" },
-  { path: "/harti", icon: MapIcon, label: "Hărți", color: "#2563EB" },
-  { path: "/statistici", icon: BarChart3, label: "Statistici", color: "#8B5CF6" },
-  { path: "/stiri", icon: Newspaper, label: "Știri", color: "#0EA5E9" },
-  { path: "/ghiduri", icon: BookOpen, label: "Ghiduri", color: "#F59E0B" },
-  { path: "/autoritati", icon: Building2, label: "Autorități", color: "#64748B" },
-  { path: "/evenimente", icon: Calendar, label: "Evenimente", color: "#EC4899" },
-  { path: "/istoric", icon: History, label: "Istoric", color: "#6366F1" },
-  { path: "/cum-functioneaza", icon: HelpCircle, label: "Administrația", color: "#14B8A6" },
-  { path: "/bilete", icon: Ticket, label: "Bilete", color: "#F97316" },
+  { path: "/sesizari", icon: AlertCircle, label: "Sesizări", color: "#DC2626", prefetch: true },
+  { path: "/impact", icon: BarChart3, label: "Impact local", color: "#1C4ED8", prefetch: false },
+  { path: "/aer", icon: Wind, label: "Calitate aer", color: "#059669", prefetch: true },
+  { path: "/harti", icon: MapIcon, label: "Hărți", color: "#2563EB", prefetch: true },
+  { path: "/statistici", icon: BarChart3, label: "Statistici", color: "#8B5CF6", prefetch: false },
+  { path: "/stiri", icon: Newspaper, label: "Știri", color: "#0EA5E9", prefetch: false },
+  { path: "/ghiduri", icon: BookOpen, label: "Ghiduri", color: "#F59E0B", prefetch: false },
+  { path: "/autoritati", icon: Building2, label: "Autorități", color: "#64748B", prefetch: false },
+  { path: "/evenimente", icon: Calendar, label: "Evenimente", color: "#EC4899", prefetch: false },
+  { path: "/istoric", icon: History, label: "Istoric", color: "#6366F1", prefetch: false },
+  { path: "/cum-functioneaza", icon: HelpCircle, label: "Administrația", color: "#14B8A6", prefetch: false },
+  { path: "/bilete", icon: Ticket, label: "Bilete", color: "#F97316", prefetch: false },
 ];
 
 export default async function CountyHomePage({
@@ -180,6 +183,7 @@ export default async function CountyHomePage({
                 <Link
                   key={s.path}
                   href={`/${judet}${s.path}`}
+                  prefetch={s.prefetch}
                   className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:border-[var(--color-primary)]/30 hover:shadow-[var(--shadow-md)] transition-all text-center"
                 >
                   <div

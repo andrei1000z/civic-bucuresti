@@ -1,5 +1,16 @@
 import type { Bilet, Linie } from "@/types";
 
+/**
+ * Ultima verificare a tarifelor: 2026-04-26.
+ * STB tarif standard: 3 lei / 90 min (valabil din 2024). Metrorex: 3 lei / 1
+ * călătorie M1-M4, 5 lei / 1 călătorie M5 (Drumul Taberei). Anunțuri de
+ * scumpire 2026 — verifică data cu stb.ro/preturi-bilete și metrorex.ro.
+ *
+ * IMPORTANT: dacă schimbi prețuri, actualizează DATE_VERIFIED și
+ * adaugă un comentariu cu sursa (link la news/comunicat).
+ */
+export const DATE_VERIFIED = "2026-04-26";
+
 export const bilete: Bilet[] = [
   // STB
   {
