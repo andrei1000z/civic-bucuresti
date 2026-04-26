@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { ALL_COUNTIES, getCountyBySlug } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
+import { CountyStatCards } from "@/components/county/CountyStatCards";
 
 export async function generateStaticParams() {
   return ALL_COUNTIES.map((c) => ({ judet: c.slug }));
@@ -35,20 +36,6 @@ export async function generateMetadata({
     description: `Sesizări, calitate aer, statistici și ghiduri civice pentru județul ${county.name}.`,
     alternates: { canonical: `/${county.slug}` },
   };
-}
-
-function aqiColor(aqi: number): string {
-  if (aqi <= 50) return "#059669";
-  if (aqi <= 100) return "#EAB308";
-  if (aqi <= 150) return "#F97316";
-  return "#DC2626";
-}
-
-function aqiLabel(aqi: number): string {
-  if (aqi <= 50) return "Bun";
-  if (aqi <= 100) return "Moderat";
-  if (aqi <= 150) return "Slab";
-  return "Periculos";
 }
 
 const sections = [
@@ -123,34 +110,8 @@ export default async function CountyHomePage({
               </div>
             </div>
 
-            {/* Right — floating info cards */}
-            <div className="hidden lg:flex flex-col gap-4 w-72">
-              {/* AQI card */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-[12px] p-5">
-                <p className="text-emerald-200/70 text-xs font-medium mb-1">Calitate aer</p>
-                <p className="text-3xl font-bold tabular-nums" style={{ color: aqiColor(stats.aqiMediu) }}>
-                  AQI: {stats.aqiMediu} — {aqiLabel(stats.aqiMediu)}
-                </p>
-                <p className="text-emerald-200/60 text-xs mt-1">medie anuală ANPM</p>
-              </div>
-
-              {/* Population card */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-[12px] p-5">
-                <p className="text-emerald-200/70 text-xs font-medium mb-1">Primar {county.name}</p>
-                <p className="text-xl font-bold">{stats.primarName}</p>
-                <p className="text-emerald-200/60 text-xs mt-1">{stats.primarPartid} · {stats.populatie.toLocaleString("ro-RO")} loc.</p>
-              </div>
-
-              {/* Transport card */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-[12px] p-5">
-                <p className="text-emerald-200/70 text-xs font-medium mb-1">Transport public</p>
-                <p className="text-xl font-bold">{stats.transportPublicOperator}</p>
-                <p className="text-emerald-400 text-xs mt-1">
-                  {stats.hasMetrou ? "Cu metrou · " : ""}
-                  {stats.spatiiVerziMpPerLocuitor} m² spații verzi/loc.
-                </p>
-              </div>
-            </div>
+            {/* Right — floating info cards (lg+ only). Mobile vede grid mai jos. */}
+            <CountyStatCards countyName={county.name} stats={stats} variant="floating" />
           </div>
         </div>
 
@@ -193,28 +154,7 @@ export default async function CountyHomePage({
       {/* ─── Mobile stat cards (hidden on lg, visible on mobile) ─── */}
       <section className="lg:hidden py-6">
         <div className="container-narrow">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4">
-              <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Calitate aer</p>
-              <p className="text-2xl font-bold" style={{ color: aqiColor(stats.aqiMediu) }}>AQI {stats.aqiMediu}</p>
-              <p className="text-xs text-[var(--color-text-muted)]">{stats.aqiQuality}</p>
-            </div>
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4">
-              <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Populație</p>
-              <p className="text-2xl font-bold">{stats.populatie.toLocaleString("ro-RO")}</p>
-              <p className="text-xs text-[var(--color-text-muted)]">{stats.suprafataKmp.toLocaleString("ro-RO")} km²</p>
-            </div>
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4">
-              <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Primar</p>
-              <p className="text-sm font-bold truncate">{stats.primarName}</p>
-              <p className="text-xs text-[var(--color-text-muted)]">{stats.primarPartid}</p>
-            </div>
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4">
-              <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Transport</p>
-              <p className="text-sm font-bold truncate">{stats.transportPublicOperator}</p>
-              <p className="text-xs text-[var(--color-text-muted)]">{stats.hasMetrou ? "Cu metrou" : "Fără metrou"}</p>
-            </div>
-          </div>
+          <CountyStatCards countyName={county.name} stats={stats} variant="grid" />
         </div>
       </section>
 

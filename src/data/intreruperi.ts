@@ -658,7 +658,10 @@ export function getActiveInterruptions(): Interruption[] {
     .filter((i) => {
       if (i.status === "anulat") return false;
       if (i.status === "finalizat") return false;
-      return new Date(i.endAt).getTime() >= now;
+      // Strict > now — întrerupere care s-a terminat exact ACUM nu mai e
+      // „activă". Evită să afișezi întreruperi de ieri care apar ca active
+      // pentru că dataset-ul e static și ora de comparație drift-ează.
+      return new Date(i.endAt).getTime() > now;
     })
     .sort((a, b) => {
       // „in-desfasurare" primele

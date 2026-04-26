@@ -66,7 +66,25 @@ export async function sendEmail(params: {
 }
 
 /**
+ * Escape HTML — folosit intern de emailTemplate ca să prevină XSS dacă
+ * cineva apelează emailTemplate({ title: <user-input> }) fără sanitize.
+ * `body` rămâne raw fiindcă caller-ii compun HTML structurat (table, p, a).
+ */
+function escapeAttr(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/**
  * HTML email template with Civia branding.
+ *
+ * SECURITY: title/preheader/kicker/icon/ctaText/ctaUrl sunt escape-uite
+ * automat. body e raw HTML (callers compun structura). NU pasa input
+ * user în body fără să-l escape-uiești cu escapeHtml() din ./sanitize.
  */
 export function emailTemplate(params: {
   title: string;
@@ -79,6 +97,13 @@ export function emailTemplate(params: {
   /** Optional emoji / status icon displayed large in the header. */
   icon?: string;
 }): string {
+  // Defense-in-depth: escape toate atributele/text-urile non-body
+  const title = escapeAttr(params.title);
+  const preheader = params.preheader ? escapeAttr(params.preheader) : undefined;
+  const kicker = params.kicker ? escapeAttr(params.kicker) : undefined;
+  const icon = params.icon ? escapeAttr(params.icon) : undefined;
+  const ctaText = params.ctaText ? escapeAttr(params.ctaText) : undefined;
+  const ctaUrl = params.ctaUrl ? escapeAttr(params.ctaUrl) : undefined;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://civia.ro";
   // Brand palette. Kept in sync with globals.css (light mode). Email
   // clients generally ignore prefers-color-scheme so we commit to the
@@ -101,8 +126,8 @@ export function emailTemplate(params: {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
-<title>${params.title}</title>
-${params.preheader ? `<span style="display:none;max-height:0;overflow:hidden;visibility:hidden;opacity:0;color:transparent;font-size:1px;line-height:1px;mso-hide:all">${params.preheader}</span>` : ""}
+<title>${title}</title>
+${preheader ? `<span style="display:none;max-height:0;overflow:hidden;visibility:hidden;opacity:0;color:transparent;font-size:1px;line-height:1px;mso-hide:all">${preheader}</span>` : ""}
 </head>
 <body style="margin:0;padding:0;background:${BG};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;color:${TEXT};-webkit-font-smoothing:antialiased">
 
@@ -124,18 +149,18 @@ ${params.preheader ? `<span style="display:none;max-height:0;overflow:hidden;vis
 
   <!-- Hero header -->
   <tr><td style="background:linear-gradient(135deg,${PRIMARY} 0%,${PRIMARY_DARK} 60%,${PRIMARY_DARKER} 100%);padding:40px 40px 44px;text-align:center;position:relative">
-    ${params.icon ? `<div style="font-size:44px;line-height:1;margin-bottom:14px">${params.icon}</div>` : ""}
-    ${params.kicker ? `<p style="color:${PRIMARY_SOFT};font-size:11px;margin:0 0 6px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;opacity:0.9">${params.kicker}</p>` : ""}
-    <h1 style="color:#fff;font-size:26px;margin:0;font-weight:800;letter-spacing:-0.5px;line-height:1.2">${params.title}</h1>
+    ${icon ? `<div style="font-size:44px;line-height:1;margin-bottom:14px">${icon}</div>` : ""}
+    ${kicker ? `<p style="color:${PRIMARY_SOFT};font-size:11px;margin:0 0 6px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;opacity:0.9">${kicker}</p>` : ""}
+    <h1 style="color:#fff;font-size:26px;margin:0;font-weight:800;letter-spacing:-0.5px;line-height:1.2">${title}</h1>
   </td></tr>
 
   <!-- Body -->
   <tr><td style="padding:36px 40px 24px;color:${TEXT};font-size:15px;line-height:1.7">
     ${params.body}
-    ${params.ctaText && params.ctaUrl ? `
+    ${ctaText && ctaUrl ? `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0 8px">
       <tr><td align="center">
-        <a href="${params.ctaUrl}" style="display:inline-block;background:linear-gradient(135deg,${PRIMARY},${PRIMARY_DARK});color:#fff;padding:15px 40px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:0.2px;box-shadow:0 4px 12px rgba(5,150,105,0.3);transition:all 0.2s">${params.ctaText} →</a>
+        <a href="${ctaUrl}" style="display:inline-block;background:linear-gradient(135deg,${PRIMARY},${PRIMARY_DARK});color:#fff;padding:15px 40px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:0.2px;box-shadow:0 4px 12px rgba(5,150,105,0.3);transition:all 0.2s">${ctaText} →</a>
       </td></tr>
     </table>` : ""}
   </td></tr>
