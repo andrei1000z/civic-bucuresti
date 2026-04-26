@@ -128,7 +128,11 @@ export function AlertBanner() {
   );
 
   return (
-    <div className={`${style.bg} ${style.text} sticky top-0 z-[60] shadow-md`}>
+    <div
+      className={`${style.bg} ${style.text} sticky top-0 z-[60] shadow-md`}
+      role={alert.severity === "critical" ? "alert" : "status"}
+      aria-live={alert.severity === "critical" ? "assertive" : "polite"}
+    >
       <div className="container-narrow flex items-center gap-3 py-2.5">
         <Icon size={18} className="shrink-0" aria-hidden="true" />
         {alert.link ? (
