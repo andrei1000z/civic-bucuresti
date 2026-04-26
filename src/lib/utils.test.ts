@@ -1,5 +1,17 @@
 import { describe, it, expect } from "vitest";
-import { cn, slugify, truncate, clamp, formatCurrency, formatNumber, randomInt } from "./utils";
+import {
+  cn,
+  slugify,
+  truncate,
+  clamp,
+  formatCurrency,
+  formatNumber,
+  formatDecimal,
+  formatCompact,
+  formatDate,
+  formatDateTime,
+  randomInt,
+} from "./utils";
 
 describe("cn (className merger)", () => {
   it("combines multiple classes", () => {
@@ -83,6 +95,66 @@ describe("formatNumber", () => {
     expect(result.length).toBeGreaterThan(7);
     expect(result).toContain("1");
     expect(result).toContain("234");
+  });
+});
+
+describe("formatDecimal", () => {
+  it("uses Romanian comma separator", () => {
+    expect(formatDecimal(596.5, 1)).toMatch(/596,5/);
+    expect(formatDecimal(4.27, 2)).toMatch(/4,27/);
+  });
+  it("respects fractionDigits parameter", () => {
+    expect(formatDecimal(1.5, 0)).toBe("2");
+    expect(formatDecimal(1.5555, 3)).toMatch(/1,(556|555)/);
+  });
+  it("handles zero correctly", () => {
+    expect(formatDecimal(0, 1)).toBe("0,0");
+  });
+});
+
+describe("formatCompact", () => {
+  it("formats small numbers as-is", () => {
+    expect(formatCompact(42)).toBe("42");
+    expect(formatCompact(999)).toBe("999");
+  });
+  it("formats thousands as 'mii'", () => {
+    expect(formatCompact(1500)).toMatch(/2 mii|1 mii/);
+    expect(formatCompact(125_000)).toContain("mii");
+  });
+  it("formats millions as 'mil'", () => {
+    expect(formatCompact(3_400_000)).toContain("mil");
+  });
+  it("formats billions as 'mld'", () => {
+    expect(formatCompact(1_200_000_000)).toContain("mld");
+  });
+});
+
+describe("formatDate (SSR-safe)", () => {
+  it("uses Europe/Bucharest timezone", () => {
+    // 2024-01-15T22:00:00Z = 2024-01-16 00:00 in Bucharest (CET, UTC+1)
+    // În UTC ar fi „15 ianuarie", în Bucharest „16 ianuarie".
+    const d = new Date("2024-01-15T22:30:00Z");
+    const result = formatDate(d);
+    expect(result).toContain("16"); // ziua în Bucharest, nu UTC
+    expect(result).toContain("ianuarie");
+    expect(result).toContain("2024");
+  });
+  it("handles ISO string input", () => {
+    const result = formatDate("2024-06-15T10:00:00Z");
+    expect(result).toContain("15");
+    expect(result).toContain("iunie");
+  });
+});
+
+describe("formatDateTime (SSR-safe)", () => {
+  it("includes hour and minute in Bucharest tz", () => {
+    // 2024-06-15T10:00:00Z = 13:00 in Bucharest (DST, UTC+3)
+    const result = formatDateTime("2024-06-15T10:00:00Z");
+    expect(result).toContain("13:00");
+  });
+  it("uses Romanian locale", () => {
+    const result = formatDateTime("2024-12-25T12:00:00Z");
+    expect(result.toLowerCase()).toMatch(/dec|25/);
   });
 });
 
