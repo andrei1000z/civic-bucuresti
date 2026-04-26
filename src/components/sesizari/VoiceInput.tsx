@@ -49,6 +49,8 @@ export function VoiceInput({
     if (typeof window === "undefined") return;
     const w = window as SpeechWindow;
     const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+    // setState în effect e intenționat — feature detection rulează doar pe client.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSupported(!!Ctor);
   }, []);
 

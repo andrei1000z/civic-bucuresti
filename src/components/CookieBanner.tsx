@@ -23,6 +23,9 @@ export function CookieBanner() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const consent = localStorage.getItem(STORAGE_KEY);
+    // setState în effect e intenționat: citire localStorage post-mount,
+    // ca să eviți SSR/CSR mismatch (server nu are localStorage).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!consent) setVisible(true);
 
     const reopen = () => setVisible(true);

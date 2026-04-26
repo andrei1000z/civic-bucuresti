@@ -8,6 +8,10 @@ export function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  // Canonical hydration-safe pattern: server SSR + first client paint
+  // arată skeleton-ul (mounted=false), după mount comutăm la theme detected.
+  // setState în effect e INTENȚIONAT aici — alternativa e SSR/CSR mismatch.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {

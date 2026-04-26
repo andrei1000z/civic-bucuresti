@@ -21,6 +21,8 @@ export function NavProgress() {
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) return;
 
+    // setState aici e intenționat: pulse pe schimbarea pathname-ului.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisible(true);
     // Pathname already changed by the time this effect fires, so the
     // "loading" perception window is short. 400ms felt right in testing

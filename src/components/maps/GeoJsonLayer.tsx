@@ -29,6 +29,8 @@ export function GeoJsonLayer({
     urlRef.current = url;
     const cached = dataCache.get(url);
     if (cached) {
+      // setState în effect e intenționat — folosește cache cross-component.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setData(cached);
       return;
     }

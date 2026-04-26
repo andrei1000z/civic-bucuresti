@@ -99,7 +99,7 @@ export function SesizariPublice() {
       });
 
     return () => controller.abort();
-  }, [filterTip, filterStatus, filterSector, sort, fetchKey]);
+  }, [filterTip, filterStatus, filterSector, sort, fetchKey, county]);
 
   // Realtime subscribe to new sesizari
   useEffect(() => {

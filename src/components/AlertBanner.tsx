@@ -56,6 +56,8 @@ export function AlertBanner() {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    // Citire localStorage doar pe client → setState în effect e intenționat.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDismissed(loadDismissed());
 
     let cancelled = false;

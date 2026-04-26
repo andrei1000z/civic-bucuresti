@@ -39,8 +39,10 @@ export function MobileFab() {
     pathname.startsWith("/auth") ||
     pathname.startsWith("/cont");
 
-  // Close menu on route change
+  // Close menu on route change — setState în effect e intenționat (sync
+  // pathname schimbare cu open=false).
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpen(false);
   }, [pathname]);
 

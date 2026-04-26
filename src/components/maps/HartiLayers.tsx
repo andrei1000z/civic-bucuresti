@@ -122,8 +122,12 @@ export default function HartiLayers(props: HartiLayersProps) {
   } = props;
 
   // Memoize style functions — stable references prevent GeoJSON re-creation on every map pan/zoom
+  // show* aren't args la bikeStyle(); sunt totuși deps logice fiindcă schimbarea
+  // lor poate trigger-uia un re-render intenționat dacă bikeStyle ajunge să
+  // consume props în viitor.
   const memoizedBikeStyle = useMemo(
     () => bikeStyle(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [showDedicate, showMarcate, showRecomandate]
   );
   const memoizedMetroStyle = useMemo(() => metroLineStyle(visibleLines), [visibleLines]);

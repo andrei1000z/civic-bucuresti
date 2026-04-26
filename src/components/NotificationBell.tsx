@@ -55,9 +55,11 @@ export function NotificationBell() {
     setUnread((u) => u + 1);
   }, []);
 
-  // Hydrate from localStorage on mount
+  // Hydrate from localStorage on mount — setState aici e singura cale,
+  // localStorage nu există pe server.
   useEffect(() => {
     const stored = loadStored();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNotifs(stored);
     const lastSeen = Number(localStorage.getItem(LAST_SEEN_KEY) ?? "0");
     setUnread(stored.filter((n) => new Date(n.createdAt).getTime() > lastSeen).length);

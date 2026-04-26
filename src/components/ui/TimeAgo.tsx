@@ -32,6 +32,9 @@ export function TimeAgo({ date, className, refreshMs = 60_000 }: Props) {
   const [, force] = useState(0);
 
   useEffect(() => {
+    // setState în effect e fix-ul pentru hydration mismatch — vezi comment
+    // mai sus. Server SSR primește mounted=false, client comută după hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     if (refreshMs <= 0) return;
     const id = setInterval(() => force((n) => n + 1), refreshMs);
