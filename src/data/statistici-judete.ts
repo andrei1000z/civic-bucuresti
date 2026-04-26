@@ -6,14 +6,21 @@
 //   - Suprafețe: INS Anuarul Statistic 2023, tabel 1.2
 //   - Calitate aer: calitateaer.ro / ANPM raport anual 2023
 //   - Spații verzi: INS / studii municipale 2022-2023
-//   - Primari: rezultate alegeri locale 2024 (BEC)
-//   - Operatori transport: site-uri oficiale operatori, 2024
+//   - Primari: rezultate alegeri locale 2024 (BEC), reales/nou-aleși post-noi 2024
+//   - Operatori transport: site-uri oficiale operatori, 2024-2025
+//   - Populație: INS Recensământ 2021 (ediția finală publicată 2023)
+//
+// ULTIMA VERIFICARE: 2026-04-26
+// Pentru update primari sau alte câmpuri, actualizează DATE_VERIFIED și adaugă
+// commit cu sursa (link BEC / comunicat oficial primărie).
 //
 // NOTĂ: Datele privind accidentele sunt estimări proporționale cu populația,
 // densitatea drumurilor naționale/județene și pattern-urile cunoscute DRPCIV.
 // Județele cu trafic intens (coridoare TEN-T) sau cu drumuri cu probleme structurale
 // cunoscute au coeficienți mai mari. Valorile exacte se actualizează când DRPCIV
 // publică detaliile pe județ.
+
+export const DATE_VERIFIED = "2026-04-26";
 
 export interface MonthlyValue {
   month: string;
