@@ -50,6 +50,12 @@ export function IstoricInteractive({ primari }: Props) {
   const [modalId, setModalId] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<Record<string, string | null>>({});
 
+  // Cache anul curent — evita `new Date().getFullYear()` repetat în render
+  // care ar putea rări să producă valori diferite SSR vs client la cross-year
+  // midnight boundary (hydration mismatch). useState initializer rulează pe
+  // ambele, dar diferența e <1ms la New Year — practic irelevantă.
+  const [currentYear] = useState(() => new Date().getFullYear());
+
   const partide = useMemo(() => Array.from(new Set(primari.map((p) => p.partid))), [primari]);
 
   const filtered = useMemo(() => {
@@ -73,9 +79,9 @@ export function IstoricInteractive({ primari }: Props) {
 
   // Aggregate stats
   const avgDurata = useMemo(() => {
-    const durate = primari.map((p) => (p.anSfarsit ?? new Date().getFullYear()) - p.anInceput);
+    const durate = primari.map((p) => (p.anSfarsit ?? currentYear) - p.anInceput);
     return (durate.reduce((a, b) => a + b, 0) / durate.length).toFixed(1);
-  }, [primari]);
+  }, [primari, currentYear]);
 
   return (
     <div>
@@ -161,7 +167,7 @@ export function IstoricInteractive({ primari }: Props) {
                 </div>
                 <div className="text-xs space-y-1.5">
                   <p><strong>Partid:</strong> {p.partid}</p>
-                  <p><strong>Durata:</strong> {(p.anSfarsit ?? new Date().getFullYear()) - p.anInceput} ani</p>
+                  <p><strong>Durata:</strong> {(p.anSfarsit ?? currentYear) - p.anInceput} ani</p>
                   <p><strong>Rating:</strong> {p.rating}/5</p>
                   <p><strong>Realizări:</strong> {p.realizari.length}</p>
                   <p><strong>Controverse:</strong> {p.controverse.length}</p>
@@ -363,7 +369,7 @@ function PrimarModal({
             <div className="text-right">
               <p className="text-xs text-[var(--color-text-muted)]">Durata mandat</p>
               <p className="font-bold text-lg">
-                {(primar.anSfarsit ?? new Date().getFullYear()) - primar.anInceput} ani
+                {(primar.anSfarsit ?? currentYear) - primar.anInceput} ani
               </p>
             </div>
           </div>

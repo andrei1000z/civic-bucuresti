@@ -432,10 +432,16 @@ export default function ContPage() {
           { }
           <a
             href="/api/profile/export"
-            download={`civia-export-${new Date().toISOString().slice(0, 10)}.json`}
+            download="civia-export.json"
+            onClick={(e) => {
+              // Stamp filename cu data click-ului (nu pe render — eviti hydration
+              // mismatch dacă SSR și client cad pe zile diferite cross-midnight).
+              const today = new Date().toISOString().slice(0, 10);
+              e.currentTarget.setAttribute("download", `civia-export-${today}.json`);
+            }}
             className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
-            📥 Descarcă datele mele (JSON)
+            <span aria-hidden="true">📥</span> Descarcă datele mele (JSON)
           </a>
           <button
             type="button"
