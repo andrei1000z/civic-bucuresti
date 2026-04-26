@@ -34,7 +34,7 @@ export function BeforeAfter({ beforeUrl, afterUrl, resolvedAt }: Props) {
             <button
               type="button"
               onClick={() => setLightbox({ urls: [beforeUrl, afterUrl], index: 0 })}
-              aria-label="Vezi poza „înainte" la mărime mare"
+              aria-label={`Vezi poza „înainte" la mărime mare`}
               className="aspect-video w-full rounded-[8px] overflow-hidden bg-[var(--color-surface-2)] block group relative focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -56,7 +56,7 @@ export function BeforeAfter({ beforeUrl, afterUrl, resolvedAt }: Props) {
             <button
               type="button"
               onClick={() => setLightbox({ urls: [beforeUrl, afterUrl], index: 1 })}
-              aria-label="Vezi poza „după" la mărime mare"
+              aria-label={`Vezi poza „după" la mărime mare`}
               className="aspect-video w-full rounded-[8px] overflow-hidden bg-[var(--color-surface-2)] block group relative focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
