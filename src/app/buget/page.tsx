@@ -29,7 +29,7 @@ export default function BugetPage() {
     <div className="container-narrow py-12 md:py-16">
       <DatasetJsonLd
         name="Buget național România"
-        description="Execuție bugetară România: venituri, cheltuieli, deficit % PIB, evoluție 2020-2025. Surse: Ministerul Finanțelor, INS."
+        description="Execuție bugetară România: venituri, cheltuieli, deficit % PIB, evoluție 2020-2026. Surse: Ministerul Finanțelor, INS."
         url="https://civia.ro/buget"
         keywords={["buget", "romania", "fisc", "deficit", "pib", "transparenta"]}
       />
@@ -95,7 +95,7 @@ export default function BugetPage() {
       <section className="mb-10">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-4 flex items-center gap-2">
           <TrendingUp size={22} className="text-[var(--color-primary)]" aria-hidden="true" />
-          Evoluția deficitului 2020-2025 (% din PIB)
+          Evoluția deficitului 2020-2026 (% din PIB)
         </h2>
         <Card>
           <SimpleBar

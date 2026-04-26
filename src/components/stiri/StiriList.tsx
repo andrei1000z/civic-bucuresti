@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Search, ArrowRight, ExternalLink, Loader2 } from "lucide-react";
 import { SOURCE_COLORS } from "@/lib/constants";
 import { Badge } from "@/components/ui/Badge";
-import { timeAgo } from "@/lib/utils";
+import { TimeAgo } from "@/components/ui/TimeAgo";
 import { cn } from "@/lib/utils";
 import { useCountyOptional } from "@/lib/county-context";
 
@@ -238,9 +238,9 @@ export function StiriList() {
                   </h2>
                   <p className="text-[var(--color-text-muted)] mb-4 flex-1 line-clamp-4">{featured.excerpt}</p>
                   <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)] pt-4 border-t border-[var(--color-border)]">
-                    <span>{timeAgo(featured.published_at)}</span>
+                    <TimeAgo date={featured.published_at} />
                     <span className="flex items-center gap-1">
-                      Citește <ExternalLink size={12} />
+                      Citește <ExternalLink size={12} aria-hidden="true" />
                     </span>
                   </div>
                 </div>
@@ -263,12 +263,17 @@ export function StiriList() {
                   )}
                 >
                   {stire.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={stire.image_url}
                       alt={stire.title}
-                      className="absolute inset-0 w-full h-full object-cover opacity-90"
-                      onError={(e) => (e.currentTarget.style.display = "none")}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover opacity-90"
+                      unoptimized
+                      loading="lazy"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLElement).style.display = "none";
+                      }}
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -306,9 +311,7 @@ export function StiriList() {
                   <p className="text-sm text-[var(--color-text-muted)] line-clamp-2 mb-4">{stire.excerpt}</p>
                   <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)] pt-3 border-t border-[var(--color-border)] gap-2 min-w-0">
                     <span className="truncate min-w-0 flex-1">{stire.author ?? "Redacție"}</span>
-                    <span className="shrink-0 ml-2">
-                      {timeAgo(stire.published_at)}
-                    </span>
+                    <TimeAgo date={stire.published_at} className="shrink-0 ml-2" />
                   </div>
                 </div>
               </Link>
@@ -318,11 +321,12 @@ export function StiriList() {
           {rows.length - 1 > visible && (
             <div className="flex justify-center mt-10">
               <button
+                type="button"
                 onClick={() => setVisible((v) => v + 12)}
-                className="inline-flex items-center gap-2 h-11 px-6 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors"
+                className="inline-flex items-center gap-2 h-11 px-6 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
               >
                 Încarcă mai multe
-                <ArrowRight size={14} />
+                <ArrowRight size={14} aria-hidden="true" />
               </button>
             </div>
           )}
