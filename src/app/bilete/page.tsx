@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { BileteTabs } from "@/components/bilete/BileteTabs";
 import { TariffCalculator } from "@/components/bilete/TariffCalculator";
-import { bilete, linii } from "@/data/bilete";
+import { LastUpdated } from "@/components/data/LastUpdated";
+import { bilete, linii, DATE_VERIFIED } from "@/data/bilete";
 import { formatCurrency } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -242,6 +243,12 @@ export default function BiletePage() {
           </Link>
         </div>
       </section>
+
+      <LastUpdated
+        date={DATE_VERIFIED}
+        sources={["stb.ro", "metrorex.ro", "ctp-ploiesti.ro", "ratb.ro / app 24pay"]}
+        note="Tarifele pot diferi în zilele de modificare oficială — verifică pe site-ul operatorului înainte de cumpărare."
+      />
     </div>
   );
 }

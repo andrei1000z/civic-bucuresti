@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BarChart3, Users, Wind, TreePine, Car, MapPin, ArrowRight } from "lucide-react";
-import { getNationalTotals } from "@/data/statistici-judete";
+import { getNationalTotals, DATE_VERIFIED } from "@/data/statistici-judete";
 import { ALL_COUNTIES } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
+import { LastUpdated } from "@/components/data/LastUpdated";
 
 export const metadata: Metadata = {
   title: "Statistici România",
@@ -201,9 +202,10 @@ export default function StatisticiPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetJsonLd) }}
       />
 
-      <p className="text-xs text-[var(--color-text-muted)] mt-6 text-center">
-        Surse: INS Recensământul 2021, DRPCIV 2023, ANPM/calitateaer.ro · Ultima actualizare: aprilie 2026
-      </p>
+      <LastUpdated
+        date={DATE_VERIFIED}
+        sources={["INS — Recensământul 2021", "DRPCIV 2023", "ANPM / calitateaer.ro"]}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { ArrowRight, Code, Database, Shield, Zap } from "lucide-react";
 import { SITE_URL } from "@/lib/constants";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { DatasetJsonLd } from "@/components/FaqJsonLd";
 
 export const metadata: Metadata = {
   title: "API public pentru dezvoltatori — Civia",
@@ -15,6 +16,12 @@ export const metadata: Metadata = {
 export default function ApiDocsPage() {
   return (
     <div className="container-narrow py-12 md:py-16">
+      <DatasetJsonLd
+        name="Civia — Sesizări civice România (API public)"
+        description="Toate sesizările publice și aprobate trimise prin civia.ro către primării și autorități. Date civice deschise: tip problemă, locație, status (nou/în-lucru/rezolvat), județ/sector, data depunerii. Acces JSON CORS-enabled, fără autentificare. Licență CC BY 4.0."
+        url={`${SITE_URL}/dezvoltatori`}
+        keywords={["api", "open-data", "sesizari", "romania", "civic-tech", "transparenta", "cc-by-4.0"]}
+      />
       <Badge className="mb-4">v1 · stabil</Badge>
       <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4">
         API public Civia
