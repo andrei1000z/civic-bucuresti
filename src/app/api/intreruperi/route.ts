@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getActiveInterruptions, INTRERUPERI } from "@/data/intreruperi";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const revalidate = 1800;
 
@@ -11,9 +12,18 @@ export const revalidate = 1800;
  *   ?active=1           — doar cele active (neterminate)
  *   ?lat=44.43&lng=26.1&radius_km=5 — bounding-circle distance filter
  *
- * Cache: 30 min (revalidate).
+ * Cache: 30 min (revalidate). Rate-limit covers the rare miss.
  */
 export async function GET(req: NextRequest) {
+  const ip = getClientIp(req);
+  const rl = await rateLimitAsync(`intreruperi-list:${ip}`, {
+    limit: 120,
+    windowMs: 60_000,
+  });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Rate limit" }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const county = searchParams.get("county")?.toUpperCase();
   const type = searchParams.get("type");

@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 import { fetchAllFeedsWithDiag } from "@/lib/stiri/rss";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -13,10 +14,12 @@ export const maxDuration = 60;
  *   1. Authorization: Bearer <CRON_SECRET> (for Vercel Cron / GitHub Actions)
  *   2. Logged-in admin user (role='admin' on profile)
  */
-async function authorize(req: Request): Promise<{ ok: boolean; reason?: string }> {
+async function authorize(
+  req: Request,
+): Promise<{ ok: boolean; reason?: string; userId?: string; viaCron?: boolean }> {
   const auth = req.headers.get("authorization") ?? "";
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && auth === `Bearer ${cronSecret}`) return { ok: true };
+  if (cronSecret && auth === `Bearer ${cronSecret}`) return { ok: true, viaCron: true };
 
   // fallback: allow if logged-in user has role='admin'
   try {
@@ -28,7 +31,9 @@ async function authorize(req: Request): Promise<{ ok: boolean; reason?: string }
       .select("role")
       .eq("id", user.id)
       .maybeSingle();
-    if ((profile as { role?: string } | null)?.role === "admin") return { ok: true };
+    if ((profile as { role?: string } | null)?.role === "admin") {
+      return { ok: true, userId: user.id };
+    }
     return { ok: false, reason: "admin required" };
   } catch {
     return { ok: false, reason: "auth check failed" };
@@ -42,6 +47,22 @@ export async function POST(req: Request) {
       { error: `Forbidden: ${authResult.reason}` },
       { status: 403 }
     );
+  }
+
+  // Rate-limit admin-triggered refreshes only — cron jobs are trusted.
+  // Refresh is a 60s op (parallel RSS fetches + DB upsert); 5/min per admin
+  // is more than enough and stops accidental button-mashing.
+  if (!authResult.viaCron && authResult.userId) {
+    const rl = await rateLimitAsync(`stiri-fetch:${authResult.userId}`, {
+      limit: 5,
+      windowMs: 60_000,
+    });
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Prea multe refresh-uri. Încearcă peste un minut." },
+        { status: 429 },
+      );
+    }
   }
 
   try {

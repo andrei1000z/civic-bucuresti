@@ -1,12 +1,22 @@
 import { getInterruptionById, toIcsVEvent } from "@/data/intreruperi";
 import { NextResponse } from "next/server";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const revalidate = 3600;
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const ip = getClientIp(req);
+  const rl = await rateLimitAsync(`intreruperi-ics-one:${ip}`, {
+    limit: 60,
+    windowMs: 60_000,
+  });
+  if (!rl.success) {
+    return new Response("Rate limit", { status: 429 });
+  }
+
   const { id } = await params;
   const item = getInterruptionById(id);
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });

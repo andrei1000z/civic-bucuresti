@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,14 @@ export async function PATCH(
     .maybeSingle();
   if ((profile as { role?: string } | null)?.role !== "admin") {
     return NextResponse.json({ error: "Admin only" }, { status: 403 });
+  }
+
+  const rl = await rateLimitAsync(`admin-intreruperi-patch:${user.id}`, {
+    limit: 60,
+    windowMs: 60_000,
+  });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Rate limit. Try again in a minute." }, { status: 429 });
   }
 
   const body = await req.json().catch(() => ({}));

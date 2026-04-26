@@ -1,4 +1,5 @@
 import { getActiveInterruptions, getInterruptionsForCounty, toIcsCalendar } from "@/data/intreruperi";
+import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
 export const revalidate = 1800;
 
@@ -10,6 +11,15 @@ export const revalidate = 1800;
  * Subscribe: pune linkul ăsta în Google Calendar → „Add calendar" → „From URL".
  */
 export async function GET(req: Request) {
+  const ip = getClientIp(req);
+  const rl = await rateLimitAsync(`intreruperi-ics:${ip}`, {
+    limit: 30,
+    windowMs: 60_000,
+  });
+  if (!rl.success) {
+    return new Response("Rate limit", { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const county = searchParams.get("county")?.toUpperCase();
   const items = county
