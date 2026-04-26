@@ -67,7 +67,7 @@ export function StiriList() {
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(12);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setFetchError(null);
     const params = new URLSearchParams();
@@ -76,20 +76,24 @@ export function StiriList() {
     if (county) params.set("county", county.id);
     params.set("limit", "100");
     try {
-      const res = await fetch(`/api/stiri?${params.toString()}`);
+      const res = await fetch(`/api/stiri?${params.toString()}`, { signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
+      if (signal?.aborted) return;
       setRows(json.data ?? []);
     } catch (e) {
+      if (e instanceof Error && e.name === "AbortError") return;
       setRows([]);
       setFetchError(e instanceof Error ? e.message : "Eroare");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }, [category, query, county]);
 
   useEffect(() => {
-    load();
+    const ctrl = new AbortController();
+    load(ctrl.signal);
+    return () => ctrl.abort();
   }, [load]);
 
   // Prefer featured articles with images, then any with images, then first
