@@ -23,7 +23,9 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     const keyHandler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key !== "Escape") return;
+      if (qrOpen) setQrOpen(false);
+      else if (open) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     document.addEventListener("keydown", keyHandler);
@@ -31,7 +33,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
       document.removeEventListener("mousedown", handler);
       document.removeEventListener("keydown", keyHandler);
     };
-  }, []);
+  }, [open, qrOpen]);
 
   const fullText = `${title} - Civia`;
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${fullText}\n${url}`)}`;
@@ -116,6 +118,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
+              role="menuitem"
               onClick={() => { setOpen(false); trackShare("whatsapp"); }}
               className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)]"
             >
@@ -126,6 +129,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
               href={telegramUrl}
               target="_blank"
               rel="noopener noreferrer"
+              role="menuitem"
               onClick={() => { setOpen(false); trackShare("telegram"); }}
               className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)]"
             >
@@ -136,6 +140,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
               href={twitterUrl}
               target="_blank"
               rel="noopener noreferrer"
+              role="menuitem"
               onClick={() => { setOpen(false); trackShare("twitter"); }}
               className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)]"
             >
@@ -146,6 +151,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
               href={facebookUrl}
               target="_blank"
               rel="noopener noreferrer"
+              role="menuitem"
               onClick={() => { setOpen(false); trackShare("facebook"); }}
               className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)]"
             >
