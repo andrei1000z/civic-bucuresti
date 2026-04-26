@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { MapPin, Navigation, Loader2, AlertCircle } from "lucide-react";
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
@@ -36,6 +36,14 @@ export function NearMeWidget() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nearby, setNearby] = useState<(SesizareFeedRow & { distance: number })[] | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const findNearby = () => {
     if (!("geolocation" in navigator)) {
@@ -51,6 +59,7 @@ export function NearMeWidget() {
         try {
           const res = await fetch(`/api/public/sesizari?limit=100`);
           const json = await res.json();
+          if (!mountedRef.current) return;
           const rows = (json.data ?? []) as SesizareFeedRow[];
           const withDist = rows
             .filter(
@@ -65,12 +74,13 @@ export function NearMeWidget() {
             .slice(0, 5);
           setNearby(withDist);
         } catch {
-          setError("Nu s-au putut încărca sesizările.");
+          if (mountedRef.current) setError("Nu s-au putut încărca sesizările.");
         } finally {
-          setLoading(false);
+          if (mountedRef.current) setLoading(false);
         }
       },
       (err) => {
+        if (!mountedRef.current) return;
         setLoading(false);
         if (err.code === err.PERMISSION_DENIED) {
           setError("Ai refuzat accesul la locație.");
@@ -94,8 +104,10 @@ export function NearMeWidget() {
           </p>
         </div>
         <button
+          type="button"
           onClick={findNearby}
           disabled={loading}
+          aria-busy={loading}
           className="shrink-0 inline-flex items-center gap-2 h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
           {loading ? (
