@@ -19,10 +19,17 @@ export function stripPrivateAddress(text: string): string {
   );
 
   // Fallback: if "mă adresez" pattern didn't match, catch simpler patterns
-  // "domiciliată în ADDR, ADDR, ADDR." (ends with period)
+  // "domiciliată în ADDR, ADDR, ADDR." (ends with sentence-final period).
+  // Greedy body up to a real terminator (newline or end-of-string), so
+  // address abbreviations like "Str." / "Bd." / "nr." inside the body
+  // don't end the match prematurely (which previously leaked the rest of
+  // the address after a period that was actually an abbreviation).
   result = result.replace(
-    /(domiciliat[ăa]?\(?[ăa]?\)?\s+în\s+)((?:(?!\[adresă)[^.])+)(\.)/gi,
-    "$1[adresă protejată]$3"
+    /(domiciliat[ăa]?\(?[ăa]?\)?\s+în\s+)([^\n]+?)(\.?\s*)$/gim,
+    (full, prefix, body, terminator) => {
+      if ((body as string).includes("[adresă")) return full; // already redacted
+      return `${prefix}[adresă protejată]${terminator}`;
+    },
   );
 
   // Strip phone numbers (Romanian format)

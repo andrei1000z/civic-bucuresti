@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { X, ChevronLeft, ChevronRight, Download } from "lucide-react";
 
 interface Props {
@@ -11,11 +11,17 @@ interface Props {
 
 export function ImageLightbox({ urls, initialIndex = 0, onClose }: Props) {
   const [index, setIndex] = useState(initialIndex);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
   const prev = useCallback(() => setIndex((i) => (i - 1 + urls.length) % urls.length), [urls.length]);
   const next = useCallback(() => setIndex((i) => (i + 1) % urls.length), [urls.length]);
 
   useEffect(() => {
+    // Save who had focus before lightbox opened, so screen-reader users
+    // (and keyboard users) land back where they were on close instead of
+    // on <body>.
+    previouslyFocusedRef.current = (document.activeElement as HTMLElement) ?? null;
+
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
       if (e.key === "ArrowLeft") prev();
@@ -26,6 +32,7 @@ export function ImageLightbox({ urls, initialIndex = 0, onClose }: Props) {
     return () => {
       document.removeEventListener("keydown", handler);
       document.body.style.overflow = "";
+      previouslyFocusedRef.current?.focus?.();
     };
   }, [prev, next, onClose]);
 
