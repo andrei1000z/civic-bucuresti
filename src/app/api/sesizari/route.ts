@@ -95,7 +95,21 @@ export async function POST(req: Request) {
 
     // Honeypot: if filled, silent drop with fake success — the bot thinks it worked,
     // we don't pollute the DB, and real users who hit this via mobile autofill also get a 200.
+    // Loghează la Sentry ca să detectezi false positives (autofill mobil completează
+    // câmpul „website" → user real e dropped → primește cod fals → /urmareste 404
+    // → utilizatorul crede că Civia e brokat).
     if (parsed._honey && parsed._honey.length > 0) {
+      Sentry.captureMessage("honeypot triggered on /api/sesizari POST", {
+        level: "info",
+        tags: { kind: "honeypot" },
+        extra: {
+          honey_value: parsed._honey.slice(0, 200),
+          ip_hash: getClientIp(req).slice(0, 8) + "…",
+          user_agent: req.headers.get("user-agent")?.slice(0, 200) ?? "",
+          has_real_content:
+            (parsed.titlu?.length ?? 0) > 5 || (parsed.descriere?.length ?? 0) > 20,
+        },
+      });
       return NextResponse.json({ data: { code: "XXXXXX", titlu: parsed.titlu } });
     }
 
@@ -107,12 +121,26 @@ export async function POST(req: Request) {
     // Polish title + descriere + locatie via AI before saving. User input
     // is often ALL CAPS, imperative and without diacritics — not something
     // we want as the public face of the sesizare. Fast model, ~200ms.
-    const polished = await polishSesizare({
-      titlu: sanitizeText(parsed.titlu, 200),
-      descriere: sanitizeText(parsed.descriere, 2000),
-      locatie: sanitizeText(parsed.locatie, 300),
-      tip: parsed.tip,
-    });
+    //
+    // Best-effort: dacă Groq pică (rate limit, timeout, key invalid),
+    // folosim textul original sanitizat. NU vrem ca utilizatorul să piardă
+    // sesizarea pentru că AI-ul a hâcâit. Sentry capturează ca să detectăm
+    // pattern de eșuări.
+    const safeTitlu = sanitizeText(parsed.titlu, 200);
+    const safeDescriere = sanitizeText(parsed.descriere, 2000);
+    const safeLocatie = sanitizeText(parsed.locatie, 300);
+    let polished = { titlu: safeTitlu, descriere: safeDescriere, locatie: safeLocatie };
+    try {
+      polished = await polishSesizare({
+        titlu: safeTitlu,
+        descriere: safeDescriere,
+        locatie: safeLocatie,
+        tip: parsed.tip,
+      });
+    } catch (polishErr) {
+      Sentry.captureException(polishErr, { tags: { kind: "polish_failed" }, extra: { code } });
+      // polished e deja inițializat cu textul sanitizat raw — sesizarea pleacă
+    }
 
     // If the submitted lat/lng doesn't match the polished location text,
     // replace it with the forward-geocode result. Most users type the

@@ -32,12 +32,22 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },
       { protocol: "https", hostname: "unpkg.com" }, // Leaflet marker icons
+      // Newsfeed image hosts — wildcards ca să acopere CDN subdomains
       { protocol: "https", hostname: "s.digi24.ro" },
       { protocol: "https", hostname: "b365.ro" },
       { protocol: "https", hostname: "hotnews.ro" },
       { protocol: "https", hostname: "*.b365.ro" },
       { protocol: "https", hostname: "*.hotnews.ro" },
       { protocol: "https", hostname: "*.digi24.ro" },
+      { protocol: "https", hostname: "*.g4media.ro" },
+      { protocol: "https", hostname: "*.mediafax.ro" },
+      { protocol: "https", hostname: "*.news.ro" },
+      { protocol: "https", hostname: "*.monitorulcj.ro" },
+      { protocol: "https", hostname: "*.ziaruldeiasi.ro" },
+      { protocol: "https", hostname: "*.opiniatimisoarei.ro" },
+      { protocol: "https", hostname: "*.stiridecluj.ro" },
+      { protocol: "https", hostname: "*.editiadedimineata.ro" },
+      { protocol: "https", hostname: "*.stiridinromania.ro" },
     ],
     // Format AVIF prima dată (~50% mai mic decât JPEG la aceeași calitate),
     // fallback automat la WebP, apoi JPEG. Next.js servește formatul cel mai
@@ -45,6 +55,21 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     // Cache-ul imaginilor optimizate la edge — 30 zile (default e 60s).
     minimumCacheTTL: 2592000,
+  },
+  /**
+   * Redirect canonic www.civia.ro → civia.ro (preferred apex).
+   * Backup la nivelul Vercel domain settings — în caz că cineva schimbă
+   * config-ul fără să updateze și ăsta. permanent=true emite 308.
+   */
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.civia.ro" }],
+        destination: "https://civia.ro/:path*",
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     const csp = [

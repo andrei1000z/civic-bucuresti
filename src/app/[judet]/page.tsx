@@ -102,7 +102,7 @@ export default async function CountyHomePage({
               </h1>
 
               <p className="text-lg md:text-xl text-emerald-100/85 max-w-xl leading-relaxed mb-8">
-                Hărți, sesizări, ghiduri, știri și statistici despre {isBucharest ? "orașul tău" : `județul ${county.name}`} — într-un singur loc.
+                Hărți, sesizări, ghiduri, știri și statistici despre {isBucharest ? "Bucureștiul tău" : `județul ${county.name}`} — într-un singur loc.
               </p>
 
               <div className="flex flex-wrap gap-3">

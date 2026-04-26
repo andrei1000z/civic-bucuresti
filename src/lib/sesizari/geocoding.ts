@@ -104,13 +104,18 @@ export interface ForwardGeocodingResult {
 }
 
 // Single-query Nominatim call. Returns null on miss / non-Romania match.
+// 3s timeout — Nominatim e capricios, mai bine null decât blocare la submit.
 async function nominatimOne(query: string): Promise<ForwardGeocodingResult | null> {
   if (!query || query.length < 3) return null;
   const q = query.replace(/\s+/g, " ").trim().slice(0, 180);
   try {
     await waitNominatimGap();
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=ro&limit=1&addressdetails=1&accept-language=ro`;
-    const res = await fetch(url, { headers: GEOCODE_HEADERS, next: { revalidate: 86400 } });
+    const res = await fetch(url, {
+      headers: GEOCODE_HEADERS,
+      next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(3000),
+    });
     if (!res.ok) return null;
     const arr = (await res.json()) as Array<{
       lat: string;
@@ -177,6 +182,7 @@ export async function reverseGeocode(lat: number, lng: number): Promise<Geocodin
       headers: { "User-Agent": "CivicBucuresti/1.0 (.)" },
       // Reverse geocode results are stable — cache 24h to cut Nominatim load.
       next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) return null;
     const data = (await res.json()) as {

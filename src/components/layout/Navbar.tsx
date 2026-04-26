@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Menu, X, ChevronDown, AlertCircle, MapPin, Search } from "lucide-react";
 import { NAV_LINKS, NAV_MORE, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -35,6 +35,27 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [ghidDropdown, setGhidDropdown] = useState(false);
   const [moreDropdown, setMoreDropdown] = useState(false);
+
+  // Debounce close pe dropdown-uri cu 150ms — evită flicker când mouse-ul
+  // traversează diagonal de la trigger la submenu (zona „outside" dintre ele).
+  const ghidCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const moreCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openGhid = () => {
+    if (ghidCloseTimer.current) clearTimeout(ghidCloseTimer.current);
+    setGhidDropdown(true);
+  };
+  const closeGhidSoon = () => {
+    if (ghidCloseTimer.current) clearTimeout(ghidCloseTimer.current);
+    ghidCloseTimer.current = setTimeout(() => setGhidDropdown(false), 150);
+  };
+  const openMore = () => {
+    if (moreCloseTimer.current) clearTimeout(moreCloseTimer.current);
+    setMoreDropdown(true);
+  };
+  const closeMoreSoon = () => {
+    if (moreCloseTimer.current) clearTimeout(moreCloseTimer.current);
+    moreCloseTimer.current = setTimeout(() => setMoreDropdown(false), 150);
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -95,8 +116,8 @@ export function Navbar() {
                   <div
                     key={link.href}
                     className="relative"
-                    onMouseEnter={() => setGhidDropdown(true)}
-                    onMouseLeave={() => setGhidDropdown(false)}
+                    onMouseEnter={openGhid}
+                    onMouseLeave={closeGhidSoon}
                   >
                     <Link
                       href={link.href}
@@ -163,8 +184,8 @@ export function Navbar() {
               return (
                 <div
                   className="relative"
-                  onMouseEnter={() => setMoreDropdown(true)}
-                  onMouseLeave={() => setMoreDropdown(false)}
+                  onMouseEnter={openMore}
+                  onMouseLeave={closeMoreSoon}
                 >
                   <button
                     type="button"
