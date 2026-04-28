@@ -43,7 +43,10 @@ const sora = Sora({
   subsets: ["latin", "latin-ext"],
   variable: "--font-sora",
   display: "swap",
-  weight: ["500", "600", "700", "800"],
+  // 500 weight era inclus dar nefolosit nicăieri (verificat 2026-04-28).
+  // Sora e font de display — folosit doar pentru titluri (font-bold +
+  // font-extrabold). Drop 500 → ~10 KB savings la încărcare.
+  weight: ["600", "700", "800"],
   adjustFontFallback: true,
   preload: true,
 });

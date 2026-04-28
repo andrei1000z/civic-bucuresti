@@ -64,6 +64,7 @@ export function LiveStatsBar() {
     <section
       aria-label="Statistici live Civia"
       className="bg-[var(--color-surface)] border-b border-[var(--color-border)] overflow-hidden"
+      style={{ minHeight: "44px" }}
     >
       <div className="relative">
         <div className="flex animate-ticker whitespace-nowrap" aria-hidden="true">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
   Flame,
@@ -117,12 +118,13 @@ export default async function EvenimentDetailPage({
       <section className={`relative bg-gradient-to-br ${eveniment.gradient} text-white overflow-hidden`}>
         {eveniment.image && (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={`/images/evenimente/${eveniment.image}.webp`}
               alt=""
-              className="absolute inset-0 w-full h-full object-cover opacity-40"
-              loading="eager"
+              fill
+              sizes="100vw"
+              priority
+              className="absolute inset-0 object-cover opacity-40"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
           </>
