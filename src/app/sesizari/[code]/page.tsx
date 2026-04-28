@@ -224,7 +224,7 @@ export default async function SesizareDetailPage({
           )}
 
           {/* Description */}
-          <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
+          <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6 mb-6">
             <h2 className="font-semibold mb-3">Descriere</h2>
             <p className="text-sm leading-relaxed whitespace-pre-wrap">{sesizare.descriere}</p>
           </section>
@@ -235,7 +235,7 @@ export default async function SesizareDetailPage({
               it's the authoritative answer. */}
           {sesizare.official_response && (
             <section
-              className={`border rounded-[12px] p-6 mb-6 ${
+              className={`border rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6 mb-6 ${
                 sesizare.status === "respins"
                   ? "bg-slate-50 dark:bg-slate-900/20 border-slate-300 dark:border-slate-700"
                   : sesizare.status === "amanata"
@@ -273,7 +273,7 @@ export default async function SesizareDetailPage({
 
           {/* Formal text — address stripped for privacy */}
           {sesizare.formal_text && (
-            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
+            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6 mb-6">
               <h2 className="font-semibold mb-3 flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 text-xs font-medium">
                   ✨ AI
@@ -291,7 +291,7 @@ export default async function SesizareDetailPage({
 
           {/* Photos */}
           {sesizare.imagini.length > 0 && (
-            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
+            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6 mb-6">
               <h2 className="font-semibold mb-3">Fotografii</h2>
               <PhotoGallery urls={sesizare.imagini} title="Fotografie" />
             </section>
@@ -316,7 +316,7 @@ export default async function SesizareDetailPage({
         {/* Sidebar */}
         <aside className="space-y-4">
           {/* Vote */}
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-5">
             <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3">
               Sprijină sesizarea
             </p>
@@ -347,7 +347,7 @@ export default async function SesizareDetailPage({
           <SimilarSesizari sesizari={similar} />
 
           {/* Timeline */}
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-5">
             <div className="flex items-center justify-between mb-4">
               <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold">
                 Status & activitate

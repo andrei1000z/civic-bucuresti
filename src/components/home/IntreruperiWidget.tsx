@@ -51,7 +51,7 @@ export function IntreruperiWidget() {
               key={i.id}
               href={`/intreruperi/${i.id}`}
               prefetch
-              className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-primary)]/30 transition-all min-w-0"
+              className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 shadow-[var(--shadow-1)] hover:shadow-[var(--shadow-3)] hover:border-[var(--color-primary)]/30 transition-all min-w-0"
               style={{
                 borderLeftWidth: "4px",
                 borderLeftColor: TYPE_COLORS[i.type],

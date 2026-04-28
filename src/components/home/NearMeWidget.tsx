@@ -93,7 +93,7 @@ export function NearMeWidget() {
   };
 
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <h3 className="font-[family-name:var(--font-sora)] font-bold text-lg mb-1">

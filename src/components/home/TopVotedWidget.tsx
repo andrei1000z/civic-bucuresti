@@ -79,9 +79,9 @@ export function TopVotedWidget() {
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
-                className="flex items-center gap-4 p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] animate-pulse"
+                className="flex items-center gap-4 p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] animate-pulse"
               >
-                <div className="shrink-0 w-12 h-12 rounded-[12px] bg-[var(--color-surface-2)]" />
+                <div className="shrink-0 w-12 h-12 rounded-[var(--radius-md)] bg-[var(--color-surface-2)]" />
                 <div className="flex-1 min-w-0 space-y-2">
                   <div className="h-3 w-24 rounded bg-[var(--color-surface-2)]" />
                   <div className="h-4 w-3/4 rounded bg-[var(--color-surface-2)]" />
@@ -99,10 +99,10 @@ export function TopVotedWidget() {
               <Link
                 key={s.id}
                 href={`/sesizari/${s.code}`}
-                className="flex items-center gap-4 p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+                className="flex items-center gap-4 p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-3)] transition-all group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
                 aria-label={`#${i + 1}: ${s.titlu}, ${s.voturi_net} voturi, ${s.nr_comentarii} ${s.nr_comentarii === 1 ? "comentariu" : "comentarii"}`}
               >
-                <div className="shrink-0 w-12 h-12 rounded-[12px] bg-gradient-to-br from-red-500 to-orange-600 text-white flex flex-col items-center justify-center" aria-hidden="true">
+                <div className="shrink-0 w-12 h-12 rounded-[var(--radius-md)] bg-gradient-to-br from-red-500 to-orange-600 text-white flex flex-col items-center justify-center" aria-hidden="true">
                   <ThumbsUp size={14} strokeWidth={2.5} />
                   <span className="text-xs font-bold leading-none mt-0.5 tabular-nums">{s.voturi_net}</span>
                 </div>

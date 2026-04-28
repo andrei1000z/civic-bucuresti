@@ -249,7 +249,7 @@ export default function HomePage() {
 
 function CoverageStat({ value, label }: { value: number; label: string }) {
   return (
-    <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[12px] p-5 text-center">
+    <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5 text-center">
       <div className="text-3xl md:text-4xl font-bold text-[var(--color-primary)] font-[family-name:var(--font-sora)]">
         {value}
       </div>
