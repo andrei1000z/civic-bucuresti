@@ -156,7 +156,14 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.02em;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar — subtle, theme-aware. Track stays transparent
+   so it disappears in screenshots; thumb uses border tone with
+   slightly darker hover accent. Firefox uses scrollbar-color (CSS
+   standard); WebKit uses ::-webkit-scrollbar-* pseudo-elements. */
+html {
+  scrollbar-color: var(--color-border) transparent;
+  scrollbar-width: thin;
+}
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -167,9 +174,25 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb {
   background: var(--color-border);
   border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-muted);
+  background-clip: padding-box;
+}
+
+/* Selection color — albastru-civic în loc de albastru-OS-default. Subtil. */
+::selection {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* Scroll-margin pentru anchor jumps — ca să nu ajungă headingul
+   exact sub navbar (h-16 sticky). Lasă ~80px space de la top
+   când useri click pe un link cu hash (#section). */
+h1, h2, h3, h4, [id] {
+  scroll-margin-top: 80px;
 }
 
 /* Grid pattern */
@@ -511,6 +534,26 @@ h1, h2, h3, h4, h5, h6 {
 kbd {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.85em;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Page-enter animation — subtil fade pe main content la fiecare
+   navigație. Combinat cu NavProgress (top bar) dă senzația de SPA
+   smooth fără jank. 240ms e sub pragul de „distrage atenția"
+   conform Material Design motion guidelines.
+   ─────────────────────────────────────────────────────────────── */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+main#main-content > * {
+  animation: pageEnter 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Suprimat dacă user-ul preferă reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  main#main-content > * {
+    animation: none;
+  }
 }
 
 /* ───────────────────────────────────────────────────────────────
