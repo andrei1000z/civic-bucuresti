@@ -3,10 +3,14 @@ import { cn } from "@/lib/utils";
 
 export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonShape = "default" | "pill";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  /** "pill" = full-rounded (radius-full) pentru CTA-uri primare cu vibe One UI.
+      "default" = radius-button (8px). Default rămâne 8px backwards-compat. */
+  shape?: ButtonShape;
   loading?: boolean;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
@@ -35,6 +39,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   {
     variant = "primary",
     size = "md",
+    shape = "default",
     loading,
     leftIcon,
     rightIcon,
@@ -50,9 +55,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       disabled={disabled || loading}
       className={cn(
-        "inline-flex items-center justify-center gap-2 font-medium rounded-[var(--radius-button)]",
-        "transition-all duration-200 ease-out whitespace-nowrap",
-        "disabled:opacity-50 disabled:cursor-not-allowed",
+        // Phase 3 v2: shape="pill" → radius-full (One UI primary CTA feel).
+        // Default rămâne radius-button (8px) backwards-compat.
+        "inline-flex items-center justify-center gap-2 font-medium",
+        shape === "pill"
+          ? "rounded-[var(--radius-full)]"
+          : "rounded-[var(--radius-button)]",
+        // Tactile micro-bounce pe :active — feel premium pe touch.
+        "transition-all duration-200 ease-out whitespace-nowrap active:scale-[0.97] active:duration-75",
+        "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]",
         variantStyles[variant],
         sizeStyles[size],

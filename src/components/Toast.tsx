@@ -73,7 +73,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           return (
             <div
               key={t.id}
-              className="pointer-events-auto bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-xl)] px-4 py-3 flex items-start gap-3 min-w-[280px] max-w-[420px] animate-toast-in"
+              // Phase 3 v2: glass-surface-strong (85% bg + blur 16px) +
+              // radius-lg (24px squircle) + shadow-4 (more diffused depth).
+              // Premium feel — toast feels like an iOS/One UI overlay.
+              className="glass-surface-strong pointer-events-auto rounded-[var(--radius-lg)] shadow-[var(--shadow-4)] px-4 py-3 flex items-start gap-3 min-w-[280px] max-w-[420px] animate-toast-in"
               style={{ borderLeftWidth: 4, borderLeftColor: color }}
             >
               <Icon size={18} style={{ color }} className="shrink-0 mt-0.5" aria-hidden="true" />

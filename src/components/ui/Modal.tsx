@@ -88,7 +88,10 @@ export function Modal({ open, onClose, title, children, size = "md", className }
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start md:items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto animate-fade-in"
+      // Phase 3 v2: overlay folosește backdrop-blur mai puternic (16px via
+      // glass token --glass-blur prin clasa generică). Black/50 base ca să
+      // suprafețele albe din spate să se vadă atenuate, nu invizibile.
+      className="fixed inset-0 z-[var(--z-modal)] flex items-start md:items-center justify-center p-4 bg-black/50 backdrop-blur-md overflow-y-auto animate-fade-in"
       onClick={onClose}
       role="presentation"
     >
@@ -99,7 +102,9 @@ export function Modal({ open, onClose, title, children, size = "md", className }
         aria-label={title ?? undefined}
         tabIndex={-1}
         className={cn(
-          "w-full bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-xl)] my-8 outline-none animate-modal-pop",
+          // Phase 3 v2: radius 12 → 24 (radius-lg, squircle), shadow-4 mai
+          // diffused. Border păstrat pentru contrast subtil.
+          "w-full bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-4)] my-8 outline-none animate-modal-pop",
           "border border-[var(--color-border)]",
           sizeClass,
           className
