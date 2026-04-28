@@ -22,6 +22,52 @@
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.03);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.07), 0 4px 10px rgba(0, 0, 0, 0.04);
   --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.05);
+
+  /* ─── Phase 2: Design system v2 (One UI 8.5 + Claude) ─────────
+     Tokens NOI care extind sistemul existent. Cele vechi rămân
+     pentru backwards-compat (zero breaking change). În Phase 3
+     componentele opt-in la cele noi gradual. */
+
+  /* Extended radii (squircle aesthetic — One UI 8.5).
+     8/12/20px existente păstrate (radius-button, radius-card, radius-pill). */
+  --radius-xs: 8px;       /* alias pentru radius-button — chips/inputs mici */
+  --radius-sm: 12px;      /* default mic — current button on tap surfaces */
+  --radius-md: 16px;      /* card upgrade (current 12px → preferred 16px) */
+  --radius-lg: 24px;      /* modals, hero cards, bottom sheets — squircle */
+  --radius-xl: 32px;      /* extreme rounded — large surfaces, glass blocks */
+  --radius-full: 9999px;  /* fully rounded — primary CTAs, badges, pills */
+
+  /* Layered shadows (5-tier) — softer, more diffused decât 4-tier original.
+     Each tier are 2-layer composition (close + ambient) pentru depth real.
+     Pe dark mode multiplicăm opacity ×3 + adăugăm tint subtil. */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.05), 0 6px 12px rgba(0, 0, 0, 0.04);
+  --shadow-3: 0 4px 12px rgba(0, 0, 0, 0.06), 0 12px 24px rgba(0, 0, 0, 0.05);
+  --shadow-4: 0 8px 24px rgba(0, 0, 0, 0.08), 0 24px 48px rgba(0, 0, 0, 0.06);
+  --shadow-5: 0 12px 32px rgba(0, 0, 0, 0.10), 0 32px 64px rgba(0, 0, 0, 0.08);
+
+  /* Glass tokens (glassmorphism uniform).
+     Folosit în Phase 3 pentru: navbar sticky, modal overlay, bottom sheet,
+     command palette, install prompt. backdrop-filter cu saturate(180%) dă
+     viu de iOS/macOS glass. */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg-strong: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-blur: 16px;
+
+  /* Surface variants — micro-hierarchy fără să stricăm surface/surface-2.
+     Folosite în Phase 3 ca să avem 3-4 niveluri de elevation:
+       bg → surface-soft → surface → surface-elevated */
+  --color-surface-soft: #F8F9FB;       /* mai deschis decât bg, sub surface */
+  --color-surface-elevated: #FFFFFF;   /* peste surface, cu shadow-3 */
+
+  /* Spacing scale ergonomic (One UI: generous breathing room).
+     Folosite în Phase 3 pentru gap-uri între secțiuni. */
+  --space-section: 96px;     /* gap între secțiuni mari */
+  --space-block: 48px;       /* gap între blocuri în secțiune */
+  --space-card: 24px;        /* padding interior cards mari */
+  --space-tight: 12px;
+  --space-snug: 8px;
 }
 
 .dark {
@@ -33,7 +79,11 @@
   --color-accent: #ef4444;
   --color-accent-soft: #7f1d1d;
 
-  --color-bg: #0a0a0a;
+  /* OLED true-black bg (#000000) în loc de #0a0a0a — economie de baterie
+     pe ecrane AMOLED + un look „premium black" specific One UI 8.5.
+     Light pixels stinși = energy saved. surface-uri rămân #171717
+     ca să avem contrast suficient față de bg-ul nou. */
+  --color-bg: #000000;
   --color-surface: #171717;
   --color-surface-2: #262626;
   --color-border: #2e2e2e;
@@ -44,6 +94,22 @@
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
   --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.6), 0 8px 16px rgba(0, 0, 0, 0.4);
+
+  /* Layered shadows dark — opacity ×4 + tint pure black pentru OLED depth */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.5), 0 6px 12px rgba(0, 0, 0, 0.3);
+  --shadow-3: 0 4px 12px rgba(0, 0, 0, 0.55), 0 12px 24px rgba(0, 0, 0, 0.35);
+  --shadow-4: 0 8px 24px rgba(0, 0, 0, 0.65), 0 24px 48px rgba(0, 0, 0, 0.45);
+  --shadow-5: 0 12px 32px rgba(0, 0, 0, 0.7), 0 32px 64px rgba(0, 0, 0, 0.55);
+
+  /* Glass dark — tint pe surface în loc de white pentru contrast */
+  --glass-bg: rgba(23, 23, 23, 0.7);
+  --glass-bg-strong: rgba(23, 23, 23, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  /* Surface variants dark — true-black pentru OLED + soft offset */
+  --color-surface-soft: #0F0F10;       /* aproape pure black, sub surface */
+  --color-surface-elevated: #1A1A1C;   /* peste surface, ușor mai deschis */
 }
 
 @theme inline {
@@ -69,10 +135,29 @@
   --radius-button: 8px;
   --radius-pill: 20px;
 
+  /* Phase 2 v2 radii — expose to Tailwind arbitrary `rounded-[var(--*)]` */
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-full: var(--radius-full);
+
   --shadow-soft: var(--shadow-soft);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
+
+  /* Phase 2 v2 shadows */
+  --shadow-1: var(--shadow-1);
+  --shadow-2: var(--shadow-2);
+  --shadow-3: var(--shadow-3);
+  --shadow-4: var(--shadow-4);
+  --shadow-5: var(--shadow-5);
+
+  /* Phase 2 v2 surfaces */
+  --color-surface-soft: var(--color-surface-soft);
+  --color-surface-elevated: var(--color-surface-elevated);
 }
 
 /* ───────────────────────────────────────────────────────────────
@@ -238,6 +323,41 @@ html {
    când useri click pe un link cu hash (#section). */
 h1, h2, h3, h4, [id] {
   scroll-margin-top: 80px;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Phase 2: Glass surface utility (One UI / iOS glass aesthetic).
+   Folosit în Phase 3 pentru: modal overlay, navbar sticky, bottom
+   sheet, command palette. Saturate(180%) dă viu de iOS glass.
+
+   Suport: Chrome 76+, Safari 9+ (cu -webkit-prefix), Firefox 103+.
+   Browser-ele vechi văd doar bg-ul opaq (graceful degradation).
+
+   Variante:
+     .glass-surface       — default 70% opacity (subtle blur)
+     .glass-surface-strong — 85% opacity (mai puțin transparent, lizibilitate)
+   ─────────────────────────────────────────────────────────────── */
+.glass-surface,
+.glass-surface-strong {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+}
+.glass-surface-strong {
+  background: var(--glass-bg-strong);
+}
+
+/* Squircle helper — combinația radius-lg + shadow-3 dă feel-ul One UI
+   pentru cards mari (modale, hero cards). Nu suprascrie radius/shadow
+   dacă elementul are deja Tailwind classes — folosit ca base layer. */
+.squircle {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-3);
+}
+.squircle-xl {
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-4);
 }
 
 /* Grid pattern */
