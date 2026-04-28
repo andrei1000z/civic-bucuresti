@@ -101,7 +101,7 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-10 text-center">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-10 text-center">
           <div className="text-5xl mb-3 opacity-60" aria-hidden="true">
             🔎
           </div>
@@ -125,7 +125,7 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
           {filtered.map((row) => (
             <article
               key={row.id}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:border-[var(--color-primary)]/50 transition-colors"
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-4 hover:border-[var(--color-primary)]/50 hover:shadow-[var(--shadow-2)] transition-all"
             >
               <div className="flex items-start justify-between mb-3 gap-2">
                 <div className="min-w-0">

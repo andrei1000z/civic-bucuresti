@@ -184,7 +184,7 @@ export default async function CountyHomePage({
                   key={s.path}
                   href={`/${judet}${s.path}`}
                   prefetch={s.prefetch}
-                  className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:border-[var(--color-primary)]/30 hover:shadow-[var(--shadow-md)] transition-all text-center"
+                  className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-4 hover:border-[var(--color-primary)]/30 hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 transition-all text-center"
                 >
                   <div
                     className="w-10 h-10 rounded-[8px] flex items-center justify-center mx-auto mb-2"
@@ -205,7 +205,7 @@ export default async function CountyHomePage({
       {/* ─── CTA ─── */}
       <section className="pb-14">
         <div className="container-narrow">
-          <div className="relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] rounded-[16px] p-8 md:p-12 text-white text-center">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] rounded-[var(--radius-lg)] shadow-[var(--shadow-4)] p-8 md:p-12 text-white text-center">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_110%,rgba(120,119,198,0.2),transparent)]" />
             <div className="relative z-10">
               <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-3">

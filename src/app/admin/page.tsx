@@ -42,7 +42,7 @@ export default async function AdminDashboard() {
               <Link
                 key={card.label}
                 href={card.href}
-                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 hover:shadow-[var(--shadow-md)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5 hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               >
                 {inner}
               </Link>
@@ -51,7 +51,7 @@ export default async function AdminDashboard() {
           return (
             <div
               key={card.label}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5"
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5"
               aria-label={`${card.label}: ${card.value}`}
             >
               {inner}
@@ -60,7 +60,7 @@ export default async function AdminDashboard() {
         })}
       </div>
 
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6">
         <h2 className="font-semibold mb-4">Unde mergi de aici</h2>
         <div className="grid md:grid-cols-2 gap-3">
           <Link

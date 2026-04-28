@@ -132,7 +132,7 @@ export default function AutoritatiIndexPage() {
 
       <AutoritatiSearch rows={rows} />
 
-      <section className="mt-12 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+      <section className="mt-12 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6">
         <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2">
           Locuiești într-o comună sau sat?
         </h2>
@@ -151,7 +151,7 @@ export default function AutoritatiIndexPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-4">
       <div className="text-3xl font-bold text-[var(--color-primary)] font-[family-name:var(--font-sora)]">
         {value}
       </div>

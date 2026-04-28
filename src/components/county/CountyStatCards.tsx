@@ -32,7 +32,7 @@ export function CountyStatCards({ countyName, stats, variant }: Props) {
     return (
       <div className="hidden lg:flex flex-col gap-4 w-72">
         {/* AQI card */}
-        <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-[12px] p-5">
+        <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-5">
           <p className="text-emerald-200/70 text-xs font-medium mb-1">Calitate aer</p>
           <p className="text-3xl font-bold tabular-nums" style={{ color: aqiColor(stats.aqiMediu) }}>
             AQI: {stats.aqiMediu} — {aqiLabel(stats.aqiMediu)}
@@ -41,7 +41,7 @@ export function CountyStatCards({ countyName, stats, variant }: Props) {
         </div>
 
         {/* Primar card */}
-        <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-[12px] p-5">
+        <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-5">
           <p className="text-emerald-200/70 text-xs font-medium mb-1">Primar {countyName}</p>
           <p className="text-xl font-bold">{stats.primarName}</p>
           <p className="text-emerald-200/60 text-xs mt-1">
@@ -50,7 +50,7 @@ export function CountyStatCards({ countyName, stats, variant }: Props) {
         </div>
 
         {/* Transport card */}
-        <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-[12px] p-5">
+        <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-5">
           <p className="text-emerald-200/70 text-xs font-medium mb-1">Transport public</p>
           <p className="text-xl font-bold">{stats.transportPublicOperator}</p>
           <p className="text-emerald-400 text-xs mt-1">
