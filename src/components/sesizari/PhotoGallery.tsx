@@ -62,16 +62,19 @@ export function PhotoGallery({ urls, title = "Foto" }: Props) {
                 Click pentru mărire
               </span>
             </div>
-            {/* Download button — z-20 ca să fie peste butonul de mărire */}
+            {/* Download button — z-20 ca să fie peste butonul de mărire.
+                44×44 tap target (WCAG AAA) — pe mobile, tactil tap area
+                contează mai mult decât silueta vizuală. Pe pointer:fine
+                rămâne hidden until hover, pe touch e mereu visible. */}
             <a
               href={url}
               download
               target="_blank"
               rel="noopener noreferrer"
-              className="absolute top-2 right-2 z-20 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-black/80 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="absolute top-2 right-2 z-20 w-11 h-11 rounded-full bg-black/60 text-white flex items-center justify-center opacity-100 [@media(hover:hover)]:opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-black/80 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/60"
               aria-label={`Salvează ${title} ${i + 1}`}
             >
-              <Download size={13} aria-hidden="true" />
+              <Download size={16} aria-hidden="true" />
             </a>
           </div>
         ))}

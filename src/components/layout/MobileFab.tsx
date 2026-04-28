@@ -70,6 +70,7 @@ export function MobileFab() {
   return (
     <div
       ref={wrapRef}
+      data-floating
       className="lg:hidden fixed right-4 z-40"
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 5rem)" }}
     >

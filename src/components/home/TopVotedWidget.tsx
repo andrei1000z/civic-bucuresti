@@ -23,11 +23,25 @@ export function TopVotedWidget() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/sesizari/top-voted?limit=5")
+    // 6s hard timeout — if the API hangs (Supabase pause, network),
+    // skeleton-ul nu trebuie să rămână veșnic; mai bine ascundem secțiunea
+    // și layout-ul de homepage rămâne stabil.
+    const ctrl = new AbortController();
+    const timeoutId = setTimeout(() => ctrl.abort(), 6000);
+
+    fetch("/api/sesizari/top-voted?limit=5", { signal: ctrl.signal })
       .then((r) => r.json())
       .then((j) => setRows(j.data ?? []))
       .catch(() => setRows([]))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        clearTimeout(timeoutId);
+        setLoading(false);
+      });
+
+    return () => {
+      clearTimeout(timeoutId);
+      ctrl.abort();
+    };
   }, []);
 
   // Hide the whole section only when we've confirmed there's nothing

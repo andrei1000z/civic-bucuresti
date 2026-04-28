@@ -108,17 +108,24 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
 
       {/* List */}
       {comments.length === 0 ? (
-        <div className="text-sm text-[var(--color-text-muted)] text-center py-8 space-y-1">
-          <p>Niciun comentariu încă.</p>
+        <div className="text-center py-10 px-4 bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[12px]">
+          <MessageSquare
+            size={36}
+            className="mx-auto mb-3 text-[var(--color-text-muted)] opacity-60"
+            aria-hidden="true"
+          />
+          <p className="text-sm font-medium text-[var(--color-text)] mb-1">Niciun comentariu încă</p>
           {user ? (
-            <p className="text-xs">Lasă tu primul comentariu — alți cetățeni pot adăuga context.</p>
+            <p className="text-xs text-[var(--color-text-muted)]">
+              Lasă tu primul comentariu — alți cetățeni pot adăuga context.
+            </p>
           ) : (
             <button
               type="button"
               onClick={openAuthModal}
-              className="text-xs text-[var(--color-primary)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
+              className="inline-block mt-1 text-xs text-[var(--color-primary)] font-medium hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 rounded px-1"
             >
-              Autentifică-te ca să lași primul comentariu →
+              Autentifică-te ca să lași primul comentariu <span aria-hidden="true">→</span>
             </button>
           )}
         </div>

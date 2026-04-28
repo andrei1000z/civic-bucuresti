@@ -468,14 +468,27 @@ h1, h2, h3, h4, h5, h6 {
 /* Print-friendly sesizari */
 @media print {
   nav, footer, aside, button:not([data-print-keep]),
-  .leaflet-container, [data-no-print], .animate-ticker {
+  .leaflet-container, [data-no-print], .animate-ticker,
+  .animate-fade-in-up, [role="dialog"], [data-mobile-fab],
+  [data-floating] {
     display: none !important;
   }
   body { background: white !important; color: black !important; }
   main { padding: 0 !important; }
   a { color: black !important; text-decoration: none !important; }
+  /* Show full URL after links so the printed page is self-referential */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    color: #555;
+  }
   h1, h2, h3 { page-break-after: avoid; }
   p, li { page-break-inside: avoid; }
+  /* Force light-mode colors so printed pages are readable on paper */
+  *, *::before, *::after {
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
 }
 
 /* ───────────────────────────────────────────────────────────────

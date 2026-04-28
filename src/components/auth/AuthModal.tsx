@@ -12,12 +12,23 @@ const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_AUTH === "1";
 const APPLE_ENABLED = process.env.NEXT_PUBLIC_ENABLE_APPLE_AUTH === "1";
 const ANY_OAUTH = GOOGLE_ENABLED || APPLE_ENABLED;
 
+// Email format check (loose — server has the authoritative rules; client
+// just catches typos before a Supabase round-trip).
+const EMAIL_RE = /^[\w.+-]+@[\w-]+\.[\w.-]+$/;
+
 export function AuthModal() {
   const { isAuthModalOpen, closeAuthModal, signInWithEmail, signInWithOAuth } = useAuth();
   const [email, setEmail] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Inline validation: only show error AFTER user has blurred the field
+  // and only when the value isn't empty (don't shame empty fields prematurely).
+  const inlineError = emailTouched && email.trim() && !EMAIL_RE.test(email.trim())
+    ? `Format invalid — încearcă „nume@exemplu.ro"`
+    : null;
 
   // When the user clicks Back after a failed OAuth redirect, the browser
   // restores this component from bfcache with oauthLoading still set.
@@ -175,11 +186,23 @@ export function AuthModal() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => setEmailTouched(true)}
+                aria-invalid={inlineError != null || (status === "error" && errorMsg != null)}
+                aria-describedby={inlineError ? "auth-email-error" : undefined}
                 placeholder="nume@exemplu.ro"
-                className="w-full h-11 pl-9 pr-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                className={`w-full h-11 pl-9 pr-4 rounded-[8px] bg-[var(--color-surface-2)] border text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 transition-colors ${
+                  inlineError
+                    ? "border-red-500 dark:border-red-400"
+                    : "border-[var(--color-border)]"
+                }`}
                 disabled={status === "sending" || oauthLoading !== null}
               />
             </div>
+            {inlineError && !errorMsg && (
+              <p id="auth-email-error" role="status" className="text-xs text-red-600 dark:text-red-400 mb-3 -mt-2">
+                {inlineError}
+              </p>
+            )}
             {errorMsg && (
               <p role="alert" className="text-sm text-red-600 dark:text-red-400 mb-3">{errorMsg}</p>
             )}

@@ -14,6 +14,7 @@ export function SearchBar({ className, placeholder = "Caută...", ...props }: Se
       <SearchIcon
         className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none"
         size={18}
+        aria-hidden="true"
       />
       <input
         type="search"
@@ -22,7 +23,8 @@ export function SearchBar({ className, placeholder = "Caută...", ...props }: Se
           "w-full h-11 pl-10 pr-4 rounded-[var(--radius-button)]",
           "bg-[var(--color-surface)] border border-[var(--color-border)]",
           "text-sm text-[var(--color-text)] placeholder-[var(--color-text-muted)]",
-          "focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+          "transition-colors",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:border-transparent"
         )}
         {...props}
       />
