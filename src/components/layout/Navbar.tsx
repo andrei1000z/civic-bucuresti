@@ -82,7 +82,10 @@ export function Navbar() {
         className={cn(
           "sticky top-0 z-50 transition-all duration-300",
           scrolled
-            ? "bg-[var(--color-surface)]/85 backdrop-blur-md border-b border-[var(--color-border)] shadow-[var(--shadow-soft)]"
+            // Phase 3 v2 round 3: backdrop-blur 16px + saturate(180%) inline
+            // (folosim glass token-urile direct, NU clasa .glass-surface
+            // care ar adăuga full border conflictual cu border-b sticky).
+            ? "bg-[var(--glass-bg)] [backdrop-filter:blur(var(--glass-blur))_saturate(180%)] [-webkit-backdrop-filter:blur(var(--glass-blur))_saturate(180%)] border-b border-[var(--color-border)] shadow-[var(--shadow-1)]"
             : "bg-transparent"
         )}
       >

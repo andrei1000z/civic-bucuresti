@@ -9,7 +9,7 @@ const linkCls =
 
 export function Footer() {
   return (
-    <footer className="bg-[var(--color-surface)] border-t border-[var(--color-border)] mt-auto">
+    <footer className="bg-[var(--color-surface-soft)] border-t border-[var(--color-border)] mt-auto">
       <div className="container-narrow py-12">
         {/* ── 5-column grid ─────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8">

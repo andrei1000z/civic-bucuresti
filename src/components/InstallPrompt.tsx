@@ -78,7 +78,7 @@ export function InstallPrompt() {
       aria-labelledby="install-prompt-title"
       className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-[90] animate-fade-in-up"
     >
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-xl)] p-4 flex items-start gap-3">
+      <div className="glass-surface-strong rounded-[var(--radius-lg)] shadow-[var(--shadow-4)] p-4 flex items-start gap-3">
         <div className="shrink-0 w-10 h-10 rounded-[8px] bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 flex items-center justify-center text-white">
           <Download size={18} aria-hidden="true" />
         </div>

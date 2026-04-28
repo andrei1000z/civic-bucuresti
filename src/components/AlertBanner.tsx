@@ -33,19 +33,23 @@ function saveDismissed(ids: Set<string>) {
   }
 }
 
+// Phase 3 v2 round 3: bg cu /95 alpha + backdrop-blur-sm.
+// Când AlertBanner e sticky-top (z-60) și utilizatorul scrol-ează peste
+// content, se vede subtil ce trece pe sub el — feel iOS premium.
+// Severity colors rămân la fel (red/amber/blue) — doar adăugăm transparency.
 const SEVERITY_STYLES: Record<string, { bg: string; text: string; icon: typeof Info }> = {
   critical: {
-    bg: "bg-red-600 dark:bg-red-700",
+    bg: "bg-red-600/95 dark:bg-red-700/95 backdrop-blur-sm",
     text: "text-white",
     icon: AlertOctagon,
   },
   warning: {
-    bg: "bg-amber-500 dark:bg-amber-600",
+    bg: "bg-amber-500/95 dark:bg-amber-600/95 backdrop-blur-sm",
     text: "text-white",
     icon: AlertTriangle,
   },
   info: {
-    bg: "bg-blue-600 dark:bg-blue-700",
+    bg: "bg-blue-600/95 dark:bg-blue-700/95 backdrop-blur-sm",
     text: "text-white",
     icon: Info,
   },
