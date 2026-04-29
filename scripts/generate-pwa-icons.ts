@@ -6,7 +6,8 @@ import { join } from "path";
 
 const OUT = join(process.cwd(), "public");
 
-// Civia gradient logo: blue gradient + white "C" monogram
+// Civia gradient logo: emerald gradient + white "C" monogram
+// Match cu navbar (icon.tsx + apple-icon.tsx) — același gradient 3-stop.
 async function makeIcon(size: number, maskable = false): Promise<Buffer> {
   // Maskable icons need a safe zone (content within 80% center)
   const padding = maskable ? Math.round(size * 0.1) : 0;
@@ -16,13 +17,13 @@ async function makeIcon(size: number, maskable = false): Promise<Buffer> {
   const svg = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#2563EB"/>
-        <stop offset="50%" stop-color="#1C4ED8"/>
-        <stop offset="100%" stop-color="#1e3a8a"/>
+        <stop offset="0%" stop-color="#059669"/>
+        <stop offset="60%" stop-color="#047857"/>
+        <stop offset="100%" stop-color="#064e3b"/>
       </linearGradient>
     </defs>
     ${maskable
-      ? `<rect width="${size}" height="${size}" fill="#1C4ED8"/>`
+      ? `<rect width="${size}" height="${size}" fill="#047857"/>`
       : `<rect width="${size}" height="${size}" rx="${radius}" ry="${radius}" fill="url(#g)"/>`}
     ${maskable ? `<rect x="${padding}" y="${padding}" width="${innerSize}" height="${innerSize}" rx="${innerSize * 0.2}" fill="url(#g)"/>` : ""}
     <text
@@ -31,10 +32,10 @@ async function makeIcon(size: number, maskable = false): Promise<Buffer> {
       text-anchor="middle"
       dominant-baseline="central"
       font-family="system-ui, -apple-system, sans-serif"
-      font-weight="800"
-      font-size="${size * 0.55}"
+      font-weight="900"
+      font-size="${size * 0.58}"
       fill="white"
-      letter-spacing="-0.02em"
+      letter-spacing="-0.04em"
     >C</text>
   </svg>`;
 
