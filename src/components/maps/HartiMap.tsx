@@ -51,15 +51,13 @@ const LeafletMap = dynamic(() => import("./LeafletMap"), {
 
 const HartiLayers = dynamic(() => import("./HartiLayers"), { ssr: false });
 
-type Tab = "bicicleta" | "pejos" | "auto" | "transport" | "statistici" | "intreruperi";
+type Tab = "bicicleta" | "pejos" | "auto" | "transport";
 
 const tabs = [
   { id: "bicicleta" as const, label: "Cu bicicleta", icon: Bike, href: "/harti/bicicleta" },
   { id: "pejos" as const, label: "Pe jos", icon: Footprints, href: "/harti/pejos" },
   { id: "auto" as const, label: "Cu mașina", icon: Car, href: "/harti/cumasina" },
   { id: "transport" as const, label: "Transport public", icon: Bus, href: "/harti/transport" },
-  { id: "statistici" as const, label: "Calitatea aerului", icon: BarChart3, href: "/aer" },
-  { id: "intreruperi" as const, label: "Întreruperi", icon: AlertTriangle, href: "/intreruperi" },
 ];
 
 export function HartiMap({
@@ -149,28 +147,24 @@ export function HartiMap({
           sidebarOpen ? "w-80" : "w-0 -ml-px overflow-hidden md:w-0"
         )}
       >
-        {/* Tabs — scrollable horizontal pe mobile (6 tab-uri se înghesuie
-            la 320px sidebar). Întreruperi și Aer sunt pagini SEPARATE
-            (Leaflet diferit + sursă de date diferită) — pentru acelea
-            lăsăm Link-ul să navigheze natural în loc de pushState local. */}
-        <div className="flex border-b border-[var(--color-border)] shrink-0 overflow-x-auto no-scrollbar">
+        {/* Tabs — 4 layer-overlay tabs fit comfortably în 320px sidebar.
+            Aer + Întreruperi (pagini complet separate cu hărți proprii)
+            au mutat în footer-ul sidebar-ului ca link-uri externe, ca
+            să nu mai concureze cu butonul de collapse pentru spațiu. */}
+        <div className="relative flex border-b border-[var(--color-border)] shrink-0 overflow-x-auto no-scrollbar pr-10">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            // "Aer" și "Întreruperi" sunt pagini top-level distincte cu
-            // hărți separate — lăsăm href-ul absolut și nav natural.
-            const isExternalPage = tab.id === "statistici" || tab.id === "intreruperi";
-            const scopedHref =
-              countySlug && !isExternalPage
-                ? `/${countySlug}${tab.href}`
-                : tab.href;
+            const scopedHref = countySlug ? `/${countySlug}${tab.href}` : tab.href;
             return (
               <Link
                 key={tab.id}
                 href={scopedHref}
-                onClick={isExternalPage
-                  ? undefined
-                  : (e) => { e.preventDefault(); setActiveTab(tab.id); window.history.pushState(null, "", scopedHref); }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveTab(tab.id);
+                  window.history.pushState(null, "", scopedHref);
+                }}
                 className={cn(
                   "shrink-0 flex flex-col items-center gap-1 py-3 px-3 min-w-[72px] text-xs font-medium border-b-2 transition-colors",
                   isActive
@@ -183,6 +177,16 @@ export function HartiMap({
               </Link>
             );
           })}
+          {/* Close button — pin la top-right corner sidebar header.
+              Înainte era extern, suprapunându-se cu tab-ul Întreruperi. */}
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Ascunde meniul"
+            className="absolute top-1 right-1 z-10 h-8 w-8 rounded-full bg-[var(--color-surface-2)]/80 backdrop-blur-sm hover:bg-[var(--color-surface-2)] flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          >
+            <ChevronLeft size={16} aria-hidden="true" />
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-5">
@@ -310,7 +314,7 @@ export function HartiMap({
                       key={line.id}
                       onClick={() => toggleLine(line.id)}
                       className={cn(
-                        "w-full flex items-center gap-3 p-3 rounded-[8px] transition-all",
+                        "w-full flex items-center gap-3 p-3 rounded-[var(--radius-xs)] transition-all",
                         active
                           ? "bg-[var(--color-surface-2)]"
                           : "opacity-40 bg-[var(--color-surface-2)]"
@@ -335,45 +339,52 @@ export function HartiMap({
             </div>
           )}
 
-          {activeTab === "statistici" && (
-            <div>
-              <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Statistici pe hartă
-              </h3>
-              <div className="bg-[var(--color-surface-2)] rounded-[var(--radius-md)] p-4">
-                <p className="text-xs text-[var(--color-text-muted)] mb-1">Calitate aer per sector</p>
-                <p className="text-2xl font-bold text-amber-600">AQI live</p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-2">
-                  Verde ≤ 50 · Galben &lt; 80 · Portocaliu &lt; 100 · Roșu ≥ 100
-                </p>
-              </div>
-            </div>
-          )}
+        </div>
+
+        {/* Footer link section — pagini distincte (hărți + surse de date
+            proprii) accesibile rapid din sidebar fără să încarce tab-bar-ul. */}
+        <div className="border-t border-[var(--color-border)] px-4 py-3 shrink-0">
+          <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-2">
+            Vezi și
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/aer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[var(--radius-xs)] text-xs font-medium text-[var(--color-text)] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            >
+              <BarChart3 size={13} aria-hidden="true" />
+              Calitatea aerului
+            </Link>
+            <Link
+              href="/intreruperi"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[var(--radius-xs)] text-xs font-medium text-[var(--color-text)] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            >
+              <AlertTriangle size={13} aria-hidden="true" />
+              Întreruperi
+            </Link>
+          </div>
         </div>
       </aside>
 
-      {/* Toggle sidebar button */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className={cn(
-          "absolute top-4 z-30 h-10 w-10 rounded-r-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] border-l-0 flex items-center justify-center shadow-md transition-all",
-          sidebarOpen ? "left-80" : "left-0"
-        )}
-        aria-label={sidebarOpen ? "Ascunde meniul" : "Afișează meniul"}
-      >
-        <ChevronLeft
-          size={18}
-          className={cn("transition-transform", !sidebarOpen && "rotate-180")}
-        />
-      </button>
+      {/* Open-sidebar button — vizibil doar când sidebar e închis.
+          Când e deschis, close-ul este în header-ul sidebar-ului
+          (top-right corner) ca să nu mai concureze cu tab-urile. */}
+      {!sidebarOpen && (
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="absolute top-4 left-0 z-30 h-10 w-10 rounded-r-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] border-l-0 flex items-center justify-center shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          aria-label="Afișează meniul"
+        >
+          <ChevronLeft size={18} className="rotate-180" aria-hidden="true" />
+        </button>
+      )}
 
       {/* Map */}
       <div className="flex-1 relative">
         <LeafletMap center={center} zoom={zoom} scrollWheelZoom flyToTarget={flyTarget} tileStyle={mapStyle}>
           <HartiLayers
-            // „intreruperi" e tab navigation only (Link spre /intreruperi),
-            // nu un layer real → cast la unul existent pentru type safety
-            activeTab={activeTab === "intreruperi" ? "bicicleta" : activeTab}
+            activeTab={activeTab}
             showDedicate={showDedicate}
             showMarcate={showMarcate}
             showRecomandate={showRecomandate}
@@ -389,7 +400,7 @@ export function HartiMap({
         <div className="absolute top-4 right-4 z-20">
           <button
             onClick={() => setLayersOpen(!layersOpen)}
-            className="h-11 px-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center gap-2 text-sm font-medium shadow-md hover:bg-[var(--color-surface-2)] transition-colors"
+            className="h-11 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center gap-2 text-sm font-medium shadow-md hover:bg-[var(--color-surface-2)] transition-colors"
           >
             <Layers size={16} />
             Straturi
@@ -399,7 +410,7 @@ export function HartiMap({
               <button
                 onClick={() => { setMapStyle("standard"); setLayersOpen(false); }}
                 className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-[8px] text-sm transition-colors",
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-xs)] text-sm transition-colors",
                   mapStyle === "standard" ? "bg-[var(--color-primary-soft)] text-[var(--color-primary)] font-medium" : "hover:bg-[var(--color-surface-2)]"
                 )}
               >
@@ -408,7 +419,7 @@ export function HartiMap({
               <button
                 onClick={() => { setMapStyle("satelit"); setLayersOpen(false); }}
                 className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-[8px] text-sm transition-colors",
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-xs)] text-sm transition-colors",
                   mapStyle === "satelit" ? "bg-[var(--color-primary-soft)] text-[var(--color-primary)] font-medium" : "hover:bg-[var(--color-surface-2)]"
                 )}
               >
@@ -422,14 +433,14 @@ export function HartiMap({
         <button
           onClick={handleLocate}
           disabled={locateLoading}
-          className="absolute bottom-24 right-4 z-20 h-11 w-11 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center shadow-md hover:bg-[var(--color-surface-2)] transition-colors disabled:opacity-60"
+          className="absolute bottom-24 right-4 z-20 h-11 w-11 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center shadow-md hover:bg-[var(--color-surface-2)] transition-colors disabled:opacity-60"
           title="Localizează-mă"
         >
           {locateLoading ? <Loader2 size={18} className="animate-spin" /> : <Locate size={18} />}
         </button>
 
         {locateError && (
-          <div className="absolute bottom-40 right-4 z-20 px-3 py-2 rounded-[8px] bg-red-500 text-white text-xs font-medium shadow-lg">
+          <div className="absolute bottom-40 right-4 z-20 px-3 py-2 rounded-[var(--radius-xs)] bg-red-500 text-white text-xs font-medium shadow-lg">
             {locateError}
           </div>
         )}
