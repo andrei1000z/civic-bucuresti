@@ -30,15 +30,23 @@ describe("autoritati-contact — structural integrity", () => {
     expect(Object.keys(POLITIA_LOCALA_JUDET).length).toBe(42);
   });
 
-  it("all PRIMARII entries have a valid email (no placeholder pattern-strings)", () => {
+  it("PRIMARII entries either have a valid email OR fallback (phone + website)", () => {
+    // Email e best-effort — multe primării n-au email public verificat.
+    // MX-ul e validat prin scripts/verify-emails.ts; aici doar verificăm
+    // că entries fără email au fallback (cetățeanul are unde să sune).
     for (const [code, entry] of Object.entries(PRIMARII)) {
-      expect(entry.email, `${code} missing email`).toBeDefined();
-      // Ensure we didn't regress to the broken auto-generated patterns
-      expect(entry.email).not.toMatch(/pfre(cluj|ilfov)/i);
-      expect(entry.email).not.toMatch(/pfri(a|mi)/i);
-      expect(entry.email).not.toMatch(/primariafcsani/i);
-      expect(entry.email).not.toMatch(/primarimara/i);
-      expect(entry.email).not.toMatch(/tifrugmures/i);
+      if (entry.email) {
+        // No placeholder patterns
+        expect(entry.email).not.toMatch(/pfre(cluj|ilfov)/i);
+        expect(entry.email).not.toMatch(/pfri(a|mi)/i);
+        expect(entry.email).not.toMatch(/primariafcsani/i);
+        expect(entry.email).not.toMatch(/primarimara/i);
+        expect(entry.email).not.toMatch(/tifrugmures/i);
+      } else {
+        // No email → must have phone or website fallback
+        const hasFallback = !!(entry.phone || entry.website);
+        expect(hasFallback, `${code} has no email AND no phone/website fallback`).toBe(true);
+      }
     }
   });
 

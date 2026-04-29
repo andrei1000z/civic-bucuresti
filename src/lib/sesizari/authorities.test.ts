@@ -136,18 +136,20 @@ describe("getAuthoritiesFor — county routing (non-București)", () => {
     expect(emails).toContain("politialocala@primariaclujnapoca.ro");
   });
 
-  it("graffiti in a county routes to PL (not IPJ)", () => {
+  it("graffiti in a county routes to primăria (PL fallback dacă lipsește email)", () => {
     const r = getAuthoritiesFor("graffiti", null, "IS", "Str. Lascăr Catargi, Iași");
     const emails = r.primary.map((a) => a.email);
-    expect(emails).toContain("contact@politialocala-iasi.ro");
+    // PL Iași email was removed (no MX record — verify-emails 2026-04-29).
+    // Routing fallback: primăria. Cetățeanul are phone PL în UI separat.
+    expect(emails).toContain("cabinetprimar@primaria-iasi.ro");
   });
 
-  it("Primăria ALWAYS appears in TO (never just PL alone)", () => {
+  it("Primăria ALWAYS appears in TO (PL e adăugat doar dacă are email valid)", () => {
     const r = getAuthoritiesFor("parcare", null, "BV", "Str. Republicii, Brașov");
     const emails = r.primary.map((a) => a.email);
-    // Both PL and primărie should be in TO for parcare-type tips
+    // Primăria mereu prezentă; PL Brașov email removed (no MX), nu mai apare.
     expect(emails).toContain("info@brasovcity.ro"); // primăria
-    expect(emails).toContain("contact@polcombv.ro"); // PL
+    expect(emails.length).toBeGreaterThanOrEqual(1);
   });
 
   it("handles tip 'altele' with a valid county fallback", () => {
