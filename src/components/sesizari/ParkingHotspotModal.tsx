@@ -91,7 +91,7 @@ export function ParkingHotspotModal({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto animate-fade-in"
+      className="fixed inset-0 z-[var(--z-modal-priority)] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto animate-fade-in"
       onClick={onClose}
       role="presentation"
     >

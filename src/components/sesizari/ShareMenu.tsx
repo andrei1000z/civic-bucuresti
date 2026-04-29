@@ -183,7 +183,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
 
       {qrOpen && (
         <div
-          className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+          className="fixed inset-0 z-[var(--z-modal-priority)] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
           onClick={() => setQrOpen(false)}
           role="presentation"
         >

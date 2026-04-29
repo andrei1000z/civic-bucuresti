@@ -98,7 +98,7 @@ export function MarkResolvedButton({ code, status, isAuthor }: Props) {
 
       {open && (
         <div
-          className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-start md:items-center justify-center p-4 overflow-y-auto animate-fade-in"
+          className="fixed inset-0 z-[var(--z-modal)] bg-black/50 backdrop-blur-sm flex items-start md:items-center justify-center p-4 overflow-y-auto animate-fade-in"
           onClick={() => setOpen(false)}
           role="presentation"
         >

@@ -307,7 +307,7 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
 
       {lightbox !== null && (
         <div
-          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center animate-fade-in"
+          className="fixed inset-0 z-[var(--z-modal-priority)] bg-black/90 flex items-center justify-center animate-fade-in"
           onClick={() => setLightbox(null)}
           role="dialog"
           aria-modal="true"

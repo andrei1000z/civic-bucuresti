@@ -133,7 +133,7 @@ export function AlertBanner() {
 
   return (
     <div
-      className={`${style.bg} ${style.text} sticky top-0 z-[60] shadow-md`}
+      className={`${style.bg} ${style.text} sticky top-0 z-[var(--z-banner)] shadow-md`}
       role={alert.severity === "critical" ? "alert" : "status"}
       aria-live={alert.severity === "critical" ? "assertive" : "polite"}
     >

@@ -98,14 +98,14 @@ export default async function CountyHomePage({
               <div className="flex flex-wrap gap-3">
                 <Link
                   href={`/${judet}/harti`}
-                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 transition-colors backdrop-blur-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-full)] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 active:scale-[0.97] backdrop-blur-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
                   <MapIcon size={18} aria-hidden="true" />
                   Explorează harta
                 </Link>
                 <Link
                   href={`/${judet}/sesizari`}
-                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-700"
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-full)] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 active:scale-[0.97] shadow-[var(--shadow-3)] hover:shadow-[var(--shadow-4)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-700"
                 >
                   <AlertCircle size={18} aria-hidden="true" />
                   Fă o sesizare
@@ -218,16 +218,16 @@ export default async function CountyHomePage({
               <div className="flex flex-wrap gap-3 justify-center">
                 <Link
                   href={`/${judet}/sesizari`}
-                  className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
+                  className="inline-flex items-center gap-2 h-12 px-7 rounded-[var(--radius-full)] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 active:scale-[0.97] shadow-[var(--shadow-3)] hover:shadow-[var(--shadow-4)] transition-all"
                 >
-                  <AlertCircle size={18} />
-                  Fă o sesizare <ArrowRight size={16} />
+                  <AlertCircle size={18} aria-hidden="true" />
+                  Fă o sesizare <ArrowRight size={16} aria-hidden="true" />
                 </Link>
                 <Link
                   href={`/compara/${judet}/b`}
-                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 transition-colors backdrop-blur-sm"
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-full)] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 active:scale-[0.97] backdrop-blur-sm transition-all"
                 >
-                  ⚖️ Compară cu alt județ
+                  <span aria-hidden="true">⚖️</span> Compară cu alt județ
                 </Link>
               </div>
             </div>
