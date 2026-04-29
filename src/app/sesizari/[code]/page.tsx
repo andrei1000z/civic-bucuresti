@@ -274,10 +274,7 @@ export default async function SesizareDetailPage({
           {/* Formal text — address stripped for privacy */}
           {sesizare.formal_text && (
             <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6 mb-6">
-              <h2 className="font-semibold mb-3 flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 text-xs font-medium">
-                  ✨ AI
-                </span>
+              <h2 className="font-semibold mb-3">
                 Text formal
               </h2>
               <div className="bg-[var(--color-surface-2)] rounded-[8px] p-4 text-xs font-mono whitespace-pre-wrap">

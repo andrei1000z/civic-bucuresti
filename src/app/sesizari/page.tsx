@@ -30,7 +30,7 @@ export default function SesizariPage() {
           <Eye size={20} className="text-[var(--color-primary)] shrink-0" />
           <div>
             <p className="text-sm font-semibold">Ce semnalează alții</p>
-            <p className="text-[10px] text-[var(--color-text-muted)]">Votează + co-semnează public</p>
+            <p className="text-[10px] text-[var(--color-text-muted)]">Votează + trimite și tu</p>
           </div>
         </Link>
         <Link

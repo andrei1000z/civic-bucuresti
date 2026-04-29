@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ChevronLeft, ExternalLink, Calendar, User, Tag, Sparkles } from "lucide-react";
+import { ChevronLeft, ExternalLink, Calendar, User, Tag } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/Badge";
 import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
@@ -229,16 +229,11 @@ export default async function StireDetailPage({
 
       <div className="grid lg:grid-cols-[1fr_300px] gap-8">
         <div>
-          {/* AI Synthesis */}
-          <div className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200 dark:border-violet-800/40 rounded-[var(--radius-md)] p-6 mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center" aria-hidden="true">
-                <Sparkles size={14} className="text-white" />
-              </div>
-              <div>
-                <p className="font-[family-name:var(--font-sora)] font-bold text-sm">Sinteză Civia AI</p>
-                <p className="text-[10px] text-[var(--color-text-muted)]">Rezumat generat automat din articolul original</p>
-              </div>
+          {/* Sinteză */}
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6 mb-6">
+            <div className="mb-4">
+              <p className="font-[family-name:var(--font-sora)] font-bold text-sm">Sinteză Civia</p>
+              <p className="text-[10px] text-[var(--color-text-muted)]">Rezumat al articolului original</p>
             </div>
             <AiSummary
               stireId={stire.id}

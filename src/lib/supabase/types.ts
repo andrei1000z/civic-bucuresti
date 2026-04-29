@@ -71,6 +71,27 @@ export interface SesizareCommentRow {
   author_name: string;
   body: string;
   created_at: string;
+  /** NULL = top-level. UUID = reply la comentariul respectiv (threading 1 nivel). */
+  parent_comment_id?: string | null;
+}
+
+export interface SesizareCommentVoteRow {
+  id: string;
+  comment_id: string;
+  user_id: string;
+  /** -1 = dislike, +1 = like */
+  value: -1 | 1;
+  created_at: string;
+}
+
+/** Comentariu cu agregări incluse (upvotes / downvotes / replies counts).
+    Construit client-side din join-uri sau direct în query. */
+export interface SesizareCommentWithMeta extends SesizareCommentRow {
+  upvotes: number;
+  downvotes: number;
+  /** Vot-ul user-ului curent (-1, 1, sau null dacă n-a votat) */
+  user_vote: -1 | 1 | null;
+  replies: SesizareCommentRow[];
 }
 
 export interface SesizareTimelineRow {

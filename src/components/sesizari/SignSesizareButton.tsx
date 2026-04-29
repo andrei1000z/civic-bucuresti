@@ -143,7 +143,7 @@ export function SignSesizareButton({
         title="Trimiți același email la autorități, cu numele tău — dă mai multă greutate sesizării"
       >
         <UserPlus size={variant === "primary" ? 16 : 13} aria-hidden="true" />
-        {variant === "primary" ? "Co-semnez și trimit și eu" : "Co-semnează"}
+        {variant === "primary" ? "Trimite și tu" : "Trimite și tu"}
       </button>
 
       {open && (
@@ -169,7 +169,7 @@ export function SignSesizareButton({
                 <X size={16} aria-hidden="true" />
               </button>
               <h3 id="sign-modal-title" className="font-[family-name:var(--font-sora)] text-xl font-bold mb-1">
-                {step === "form" ? "Co-semnează această sesizare" : "Alege cum trimiți emailul"}
+                {step === "form" ? "Trimite și tu această sesizare" : "Alege cum trimiți emailul"}
               </h3>
               <p className="text-sm text-white/85">
                 {step === "form"

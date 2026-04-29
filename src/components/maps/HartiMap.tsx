@@ -149,31 +149,37 @@ export function HartiMap({
           sidebarOpen ? "w-80" : "w-0 -ml-px overflow-hidden md:w-0"
         )}
       >
-        {/* Tabs vertical on mobile, horizontal on desktop */}
-        <div className="flex border-b border-[var(--color-border)] shrink-0">
+        {/* Tabs — scrollable horizontal pe mobile (6 tab-uri se înghesuie
+            la 320px sidebar). Întreruperi și Aer sunt pagini SEPARATE
+            (Leaflet diferit + sursă de date diferită) — pentru acelea
+            lăsăm Link-ul să navigheze natural în loc de pushState local. */}
+        <div className="flex border-b border-[var(--color-border)] shrink-0 overflow-x-auto no-scrollbar">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            // "Aer" is a separate top-level page (/aer) and doesn't
-            // have a per-county sibling — leave that href absolute.
+            // "Aer" și "Întreruperi" sunt pagini top-level distincte cu
+            // hărți separate — lăsăm href-ul absolut și nav natural.
+            const isExternalPage = tab.id === "statistici" || tab.id === "intreruperi";
             const scopedHref =
-              countySlug && tab.id !== "statistici"
+              countySlug && !isExternalPage
                 ? `/${countySlug}${tab.href}`
                 : tab.href;
             return (
               <Link
                 key={tab.id}
                 href={scopedHref}
-                onClick={(e) => { e.preventDefault(); setActiveTab(tab.id); window.history.pushState(null, "", scopedHref); }}
+                onClick={isExternalPage
+                  ? undefined
+                  : (e) => { e.preventDefault(); setActiveTab(tab.id); window.history.pushState(null, "", scopedHref); }}
                 className={cn(
-                  "flex-1 flex flex-col items-center gap-1 py-3 px-2 text-xs font-medium border-b-2 transition-colors",
+                  "shrink-0 flex flex-col items-center gap-1 py-3 px-3 min-w-[72px] text-xs font-medium border-b-2 transition-colors",
                   isActive
                     ? "border-[var(--color-primary)] text-[var(--color-primary)] bg-[var(--color-primary-soft)]/30"
                     : "border-transparent text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
                 )}
               >
-                <Icon size={18} />
-                <span className="leading-none">{tab.label}</span>
+                <Icon size={18} aria-hidden="true" />
+                <span className="leading-none whitespace-nowrap">{tab.label}</span>
               </Link>
             );
           })}

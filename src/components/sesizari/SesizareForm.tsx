@@ -1088,8 +1088,8 @@ ${today}`;
               </span>
             )}
             {tipDetectedByAI && !tipDetecting && (
-              <span className="text-xs text-purple-600 dark:text-purple-400 font-medium inline-flex items-center gap-1" title="Detectat automat cu AI din descriere">
-                <Sparkles size={12} aria-hidden="true" /> AI
+              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium" title="Detectat automat din descriere">
+                Auto
               </span>
             )}
           </div>

@@ -27,7 +27,9 @@ export const NAV_LINKS = [
   { href: "/statistici", label: "Statistici" },
   { href: "/stiri", label: "Știri" },
   { href: "/ghiduri", label: "Ghiduri" },
-  { href: "/evenimente", label: "Evenimente" },
+  // Evenimente disabled 2026-04-29 (user request: „renunțăm deocamdată").
+  // Pentru a re-activa: uncomment + verifică Navbar/Footer/sitemap.
+  // { href: "/evenimente", label: "Evenimente" },
 ] as const;
 
 // "Mai mult" dropdown — secondary routes.

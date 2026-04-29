@@ -218,6 +218,8 @@ export async function addComment(params: {
   userId: string;
   authorName: string;
   body: string;
+  /** ID-ul comentariului-părinte (null = top-level). Permite reply 1-nivel. */
+  parentCommentId?: string | null;
 }): Promise<SesizareCommentRow> {
   const supabase = await createSupabaseServer();
   const { data, error } = await supabase
@@ -227,6 +229,7 @@ export async function addComment(params: {
       user_id: params.userId,
       author_name: params.authorName,
       body: params.body,
+      parent_comment_id: params.parentCommentId ?? null,
     })
     .select()
     .single();

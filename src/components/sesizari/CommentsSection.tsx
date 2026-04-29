@@ -1,15 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageSquare, Send, Loader2 } from "lucide-react";
+import { MessageSquare, Send, Loader2, ThumbsUp, ThumbsDown, CornerDownRight } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/components/Toast";
 import { TimeAgo } from "@/components/ui/TimeAgo";
+import { cn } from "@/lib/utils";
 import type { SesizareCommentRow } from "@/lib/supabase/types";
 
 interface CommentsSectionProps {
   code: string;
   initialComments: SesizareCommentRow[];
+}
+
+interface CommentMeta {
+  upvotes: number;
+  downvotes: number;
+  userVote: -1 | 1 | null;
 }
 
 export function CommentsSection({ code, initialComments }: CommentsSectionProps) {
@@ -19,10 +26,40 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
   const [body, setBody] = useState("");
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [replyBody, setReplyBody] = useState("");
+  const [replyPosting, setReplyPosting] = useState(false);
+  // Per-comment vote state — populated lazily; absent = not yet loaded.
+  // Optimistic updates: client state changes immediately, server sync in background.
+  const [voteMeta, setVoteMeta] = useState<Record<string, CommentMeta>>({});
 
   useEffect(() => {
     setComments(initialComments);
   }, [initialComments]);
+
+  // Group comments: top-level + replies map keyed by parent_comment_id.
+  // 1-level threading — replies to replies become flat (rendered as replies
+  // to the parent's first-level reply too). Reddit-style flat replies.
+  const topLevel = comments.filter((c) => !c.parent_comment_id);
+  const repliesByParent = new Map<string, SesizareCommentRow[]>();
+  for (const c of comments) {
+    if (c.parent_comment_id) {
+      const arr = repliesByParent.get(c.parent_comment_id) ?? [];
+      arr.push(c);
+      repliesByParent.set(c.parent_comment_id, arr);
+    }
+  }
+
+  const post = async (text: string, parentId: string | null) => {
+    const res = await fetch(`/api/sesizari/${code}/comments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ body: text, parent_comment_id: parentId }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Eroare");
+    return json.data as SesizareCommentRow;
+  };
 
   const handlePost = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,24 +71,197 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
     setPosting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/sesizari/${code}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: body.trim() }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Eroare");
-      setComments((prev) => [...prev, json.data]);
+      const row = await post(body.trim(), null);
+      setComments((prev) => [...prev, row]);
       setBody("");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Eroare";
       setError(msg);
-      // Also push a toast — the inline error below the form can be
-      // missed on long pages, and the submit happens at the bottom.
       toast(msg, "error");
     } finally {
       setPosting(false);
     }
+  };
+
+  const handleReply = async (parentId: string) => {
+    if (!user) {
+      openAuthModal();
+      return;
+    }
+    if (!replyBody.trim() || replyPosting) return;
+    setReplyPosting(true);
+    try {
+      const row = await post(replyBody.trim(), parentId);
+      setComments((prev) => [...prev, row]);
+      setReplyBody("");
+      setReplyTo(null);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Eroare", "error");
+    } finally {
+      setReplyPosting(false);
+    }
+  };
+
+  const handleVote = async (commentId: string, value: -1 | 1) => {
+    if (!user) {
+      openAuthModal();
+      return;
+    }
+    // Optimistic update — UI răspunde instant. Pe error rollback.
+    const prev = voteMeta[commentId] ?? { upvotes: 0, downvotes: 0, userVote: null };
+    const newValue = prev.userVote === value ? 0 : value;
+    const next: CommentMeta = {
+      upvotes: prev.upvotes
+        + (newValue === 1 ? 1 : 0)
+        - (prev.userVote === 1 ? 1 : 0),
+      downvotes: prev.downvotes
+        + (newValue === -1 ? 1 : 0)
+        - (prev.userVote === -1 ? 1 : 0),
+      userVote: newValue === 0 ? null : (newValue as -1 | 1),
+    };
+    setVoteMeta((m) => ({ ...m, [commentId]: next }));
+
+    try {
+      const res = await fetch(`/api/sesizari/${code}/comments/${commentId}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: newValue }),
+      });
+      if (!res.ok) throw new Error("Vote failed");
+    } catch {
+      // Rollback
+      setVoteMeta((m) => ({ ...m, [commentId]: prev }));
+      toast("Nu s-a putut înregistra votul", "error");
+    }
+  };
+
+  const renderComment = (c: SesizareCommentRow, isReply: boolean) => {
+    const meta = voteMeta[c.id] ?? { upvotes: 0, downvotes: 0, userVote: null };
+    return (
+      <article
+        key={c.id}
+        className={cn(
+          "bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4",
+          isReply && "ml-6 md:ml-8 border-l-2 border-l-[var(--color-primary)]/30",
+        )}
+      >
+        <header className="flex items-center justify-between mb-2 gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            {isReply && (
+              <CornerDownRight
+                size={14}
+                className="text-[var(--color-text-muted)] shrink-0"
+                aria-hidden="true"
+              />
+            )}
+            <p className="font-medium text-sm truncate">{c.author_name}</p>
+          </div>
+          <TimeAgo
+            date={c.created_at}
+            className="text-xs text-[var(--color-text-muted)] shrink-0"
+          />
+        </header>
+        <p className="text-sm whitespace-pre-wrap mb-3">{c.body}</p>
+
+        {/* Actions: like / dislike / reply */}
+        <div className="flex items-center gap-1 -ml-1">
+          <button
+            type="button"
+            onClick={() => handleVote(c.id, 1)}
+            aria-pressed={meta.userVote === 1}
+            aria-label={`Like (${meta.upvotes})`}
+            className={cn(
+              "inline-flex items-center gap-1 h-8 px-2 rounded-[var(--radius-sm)] text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
+              meta.userVote === 1
+                ? "bg-emerald-500 text-white"
+                : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)]",
+            )}
+          >
+            <ThumbsUp size={12} aria-hidden="true" />
+            <span className="tabular-nums">{meta.upvotes}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleVote(c.id, -1)}
+            aria-pressed={meta.userVote === -1}
+            aria-label={`Dislike (${meta.downvotes})`}
+            className={cn(
+              "inline-flex items-center gap-1 h-8 px-2 rounded-[var(--radius-sm)] text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
+              meta.userVote === -1
+                ? "bg-red-500 text-white"
+                : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)]",
+            )}
+          >
+            <ThumbsDown size={12} aria-hidden="true" />
+            <span className="tabular-nums">{meta.downvotes}</span>
+          </button>
+          {/* Reply button — only on top-level comments (1-nivel threading) */}
+          {!isReply && (
+            <button
+              type="button"
+              onClick={() => {
+                setReplyTo(replyTo === c.id ? null : c.id);
+                setReplyBody("");
+              }}
+              className="ml-1 inline-flex items-center gap-1 h-8 px-2 rounded-[var(--radius-sm)] text-xs font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            >
+              <CornerDownRight size={12} aria-hidden="true" />
+              Răspunde
+            </button>
+          )}
+        </div>
+
+        {/* Inline reply composer */}
+        {replyTo === c.id && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleReply(c.id);
+            }}
+            className="mt-3 pt-3 border-t border-[var(--color-border)]"
+          >
+            <label htmlFor={`reply-${c.id}`} className="sr-only">
+              Răspuns la {c.author_name}
+            </label>
+            <textarea
+              id={`reply-${c.id}`}
+              value={replyBody}
+              onChange={(e) => setReplyBody(e.target.value.slice(0, 2000))}
+              rows={2}
+              placeholder={`Răspunde lui ${c.author_name}...`}
+              className="w-full p-2 rounded-[var(--radius-sm)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              disabled={replyPosting}
+              autoFocus
+            />
+            <div className="flex items-center justify-end gap-2 mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setReplyTo(null);
+                  setReplyBody("");
+                }}
+                className="h-8 px-3 rounded-[var(--radius-sm)] text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] transition-colors"
+              >
+                Anulează
+              </button>
+              <button
+                type="submit"
+                disabled={!replyBody.trim() || replyPosting}
+                aria-busy={replyPosting}
+                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              >
+                {replyPosting ? (
+                  <Loader2 size={12} className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Send size={12} aria-hidden="true" />
+                )}
+                Trimite
+              </button>
+            </div>
+          </form>
+        )}
+      </article>
+    );
   };
 
   return (
@@ -61,7 +271,7 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
         Comentarii (<span className="tabular-nums">{comments.length}</span>)
       </h3>
 
-      {/* Compose */}
+      {/* Compose top-level */}
       <form
         onSubmit={handlePost}
         className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 mb-4"
@@ -107,7 +317,7 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
       </form>
 
       {/* List */}
-      {comments.length === 0 ? (
+      {topLevel.length === 0 ? (
         <div className="text-center py-10 px-4 bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-md)]">
           <MessageSquare
             size={36}
@@ -131,20 +341,13 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
         </div>
       ) : (
         <div className="space-y-3">
-          {comments.map((c) => (
-            <article
-              key={c.id}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4"
-            >
-              <header className="flex items-center justify-between mb-2">
-                <p className="font-medium text-sm">{c.author_name}</p>
-                <TimeAgo
-                  date={c.created_at}
-                  className="text-xs text-[var(--color-text-muted)]"
-                />
-              </header>
-              <p className="text-sm whitespace-pre-wrap">{c.body}</p>
-            </article>
+          {topLevel.map((c) => (
+            <div key={c.id} className="space-y-2">
+              {renderComment(c, false)}
+              {(repliesByParent.get(c.id) ?? []).map((reply) =>
+                renderComment(reply, true),
+              )}
+            </div>
           ))}
         </div>
       )}

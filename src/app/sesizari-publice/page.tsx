@@ -5,7 +5,7 @@ import { SesizariPublice } from "@/components/sesizari/SesizariPublice";
 
 export const metadata: Metadata = {
   title: "Vezi ce semnalează cetățenii — Civia",
-  description: "Probleme reale din orașele României: gropi, trotuare distruse, iluminat defect, parcări ilegale. Votează, co-semnează, mai multe voci = răspuns mai rapid de la primărie.",
+  description: "Probleme reale din orașele României: gropi, trotuare distruse, iluminat defect, parcări ilegale. Votează și trimite și tu — mai multe voci = răspuns mai rapid de la primărie.",
   alternates: { canonical: "/sesizari-publice" },
 };
 
@@ -24,7 +24,7 @@ export default function SesizariPublicePage() {
           Ce se întâmplă în orașul tău
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">
-          Sesizări trimise de alți cetățeni. Dacă vezi o problemă care te afectează și pe tine, <strong>votează</strong> ca să arăți că nu e doar a unuia, sau <strong>co-semnează</strong> ca să trimiți și tu același email la primărie — numere mari schimbă prioritatea.
+          Sesizări trimise de alți cetățeni. Dacă vezi o problemă care te afectează și pe tine, <strong>votează</strong> ca să arăți că nu e doar a unuia, sau apasă <strong>„Trimite și tu"</strong> ca să trimiți același email la primărie — numere mari schimbă prioritatea.
         </p>
       </div>
 

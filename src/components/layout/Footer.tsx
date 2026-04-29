@@ -39,21 +39,12 @@ export function Footer() {
               <li><Link href="/harti" className={linkCls}>Hărți interactive</Link></li>
               <li><Link href="/aer" className={linkCls}>Calitatea aerului — live</Link></li>
               <li><Link href="/stiri" className={linkCls}>Știri locale</Link></li>
-              <li><Link href="/evenimente" className={linkCls}>Evenimente civice</Link></li>
+              {/* <li><Link href="/evenimente" className={linkCls}>Evenimente civice</Link></li> — disabled 2026-04-29 */}
               <li><Link href="/calendar-civic" className={linkCls}>Calendar civic</Link></li>
               <li><Link href="/judete" className={linkCls}>Toate cele 42 de județe</Link></li>
               <li><Link href="/autoritati" className={linkCls}>Autorități publice — contacte</Link></li>
               <li><Link href="/intreruperi" className={linkCls}>Întreruperi apă/caldură/curent</Link></li>
               <li><Link href="/compara" className={linkCls}>Compară două județe</Link></li>
-            </ul>
-            <h4 className="font-semibold mt-5 mb-3 text-[var(--color-text)] text-sm">
-              Transparență bugete
-            </h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/buget" className={linkCls}>Bugetul țării</Link></li>
-              <li><Link href="/sanatate" className={linkCls}>Sănătate publică</Link></li>
-              <li><Link href="/educatie" className={linkCls}>Educație și BAC</Link></li>
-              <li><Link href="/siguranta" className={linkCls}>Criminalitate și siguranță</Link></li>
             </ul>
           </div>
 

@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 const commentSchema = z.object({
   body: z.string().min(1).max(2000),
+  parent_comment_id: z.string().uuid().nullable().optional(),
 });
 
 export async function GET(
@@ -78,6 +79,7 @@ export async function POST(
       userId: user.id,
       authorName: displayName ?? user.email?.split("@")[0] ?? "Cetățean",
       body: sanitizeText(parsed.body, 2000),
+      parentCommentId: parsed.parent_comment_id ?? null,
     });
     return NextResponse.json({ data: row });
   } catch (e) {
