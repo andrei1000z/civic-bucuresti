@@ -10,6 +10,8 @@ import { formatDateTime } from "@/lib/utils";
 import { getOrGenerateAiSummary } from "@/lib/stiri/ai-summary";
 import { AiSummary } from "./AiSummary";
 import { NewsArticleJsonLd } from "@/components/JsonLd";
+import { StireFacts } from "@/components/stiri/StireFacts";
+import { ReadingProgress } from "@/components/stiri/ReadingProgress";
 
 const SOURCE_LOGOS: Record<string, string> = {
   "Digi24": "/images/sources/digi24.png",
@@ -138,8 +140,15 @@ export default async function StireDetailPage({
   const related = await getRelatedArticles(stire);
   const sourceColor = SOURCE_COLORS[stire.source] ?? "#64748b";
 
+  // Pool the text we mine for interactive facts: title + excerpt + body +
+  // AI summary, joined so the regex extractor sees every numeric mention.
+  const factText = [stire.title, stire.excerpt, stire.content, aiSummary]
+    .filter(Boolean)
+    .join("\n");
+
   return (
     <div className="container-narrow py-8 md:py-12 max-w-4xl">
+      <ReadingProgress />
       <NewsArticleJsonLd
         headline={stire.title}
         description={stire.excerpt ?? undefined}
@@ -229,11 +238,25 @@ export default async function StireDetailPage({
 
       <div className="grid lg:grid-cols-[1fr_300px] gap-8">
         <div>
+          {/* Interactive key-facts panel — mines the article + summary for
+              numbers and date ranges, renders animated stat cards + a
+              countdown when an event date is detected. Renders nothing
+              when there's no extractable signal. */}
+          <StireFacts text={factText} />
+
           {/* Sinteză */}
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6 mb-6">
-            <div className="mb-4">
-              <p className="font-[family-name:var(--font-sora)] font-bold text-sm">Sinteză Civia</p>
-              <p className="text-[10px] text-[var(--color-text-muted)]">Rezumat al articolului original</p>
+            <div className="flex items-center gap-2 mb-4">
+              <span
+                className="w-7 h-7 rounded-[var(--radius-xs)] bg-gradient-to-br from-violet-500 to-fuchsia-600 grid place-items-center text-white text-[11px] font-extrabold"
+                aria-hidden="true"
+              >
+                AI
+              </span>
+              <div>
+                <p className="font-[family-name:var(--font-sora)] font-bold text-sm leading-tight">Sinteză Civia</p>
+                <p className="text-[10px] text-[var(--color-text-muted)] leading-tight">Rezumat AI al articolului original</p>
+              </div>
             </div>
             <AiSummary
               stireId={stire.id}
