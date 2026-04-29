@@ -100,7 +100,7 @@ export function MobileFab() {
           href="/autoritati"
           icon={<Building2 size={16} />}
           label="Autorități"
-          bg="bg-slate-700"
+          bg="bg-slate-700 dark:bg-slate-600"
         />
         <SpeedDialLink
           href={aerTarget}

@@ -235,7 +235,18 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
               autoCapitalize="sentences"
               spellCheck
             />
-            <div className="flex items-center justify-end gap-2 mt-2">
+            <div className="flex items-center justify-between gap-2 mt-2">
+              <span
+                className={cn(
+                  "text-[10px] tabular-nums",
+                  replyBody.length >= 1800
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-[var(--color-text-muted)]"
+                )}
+              >
+                {replyBody.length}/2000
+              </span>
+              <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -259,6 +270,7 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
                 )}
                 Trimite
               </button>
+              </div>
             </div>
           </form>
         )}

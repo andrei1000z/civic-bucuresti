@@ -39,7 +39,6 @@ export function Footer() {
               <li><Link href="/harti" className={linkCls}>Hărți interactive</Link></li>
               <li><Link href="/aer" className={linkCls}>Calitatea aerului — live</Link></li>
               <li><Link href="/stiri" className={linkCls}>Știri locale</Link></li>
-              {/* <li><Link href="/evenimente" className={linkCls}>Evenimente civice</Link></li> — disabled 2026-04-29 */}
               <li><Link href="/calendar-civic" className={linkCls}>Calendar civic</Link></li>
               <li><Link href="/judete" className={linkCls}>Toate cele 42 de județe</Link></li>
               <li><Link href="/autoritati" className={linkCls}>Autorități publice — contacte</Link></li>

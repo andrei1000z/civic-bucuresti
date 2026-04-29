@@ -328,7 +328,7 @@ function Slot({
         {url ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url} alt={meta.title} className="w-full h-full object-cover" loading="lazy" />
+            <img src={url} alt={meta.title} width={120} height={120} className="w-full h-full object-cover" loading="lazy" />
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onRemove(); }}

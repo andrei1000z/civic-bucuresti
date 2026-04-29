@@ -2,16 +2,17 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, X, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  MAX_UPLOAD_BYTES as MAX_BYTES,
+  COMPRESS_THRESHOLD_BYTES as COMPRESS_THRESHOLD,
+  MAX_IMAGE_DIMENSION as MAX_DIMENSION,
+} from "@/lib/constants";
 
 interface PhotoUploaderProps {
   urls: string[];
   onChange: (urls: string[]) => void;
   max?: number;
 }
-
-const MAX_BYTES = 5 * 1024 * 1024;
-const COMPRESS_THRESHOLD = 1.5 * 1024 * 1024;
-const MAX_DIMENSION = 1920;
 
 async function compressImage(file: File): Promise<File> {
   if (file.size <= COMPRESS_THRESHOLD) return file;
@@ -262,7 +263,7 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
                 <span className="sr-only">Mărește</span>
               </button>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover pointer-events-none" loading="lazy" />
+              <img src={url} alt={`Foto ${i + 1}`} width={120} height={120} className="w-full h-full object-cover pointer-events-none" loading="lazy" />
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onChange(urls.filter((_, j) => j !== i)); }}

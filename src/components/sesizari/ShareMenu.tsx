@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Share2, MessageCircle, Send, Link2, QrCode, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/Toast";
+import { QR_API_BASE_URL } from "@/lib/constants";
 
 interface Props {
   url: string;
@@ -62,7 +63,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
     }
   };
 
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
+  const qrUrl = `${QR_API_BASE_URL}?size=300x300&data=${encodeURIComponent(url)}`;
 
   const iconSize = size === "sm" ? 13 : 15;
   const px = size === "sm" ? "px-2 py-1" : "px-3 py-1.5";

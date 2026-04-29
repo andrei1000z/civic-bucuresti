@@ -240,8 +240,24 @@ export function SesizareForm() {
   // Funnel entry — user landed on the form
   useEffect(() => {
     trackFunnelStep("sesizare-create", "start");
-     
+
   }, []);
+
+  // beforeunload guard — dacă user încearcă să închidă tab-ul în timpul
+  // submit-ului, prevenim pierderea silentă a datelor / imaginilor
+  // unloaded. Listener-ul stă on doar cât durează submit-ul efectiv.
+  useEffect(() => {
+    if (!submitting) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      // Some browsers still need returnValue set even though the spec
+      // says preventDefault is enough. The actual string is ignored —
+      // browser shows generic "Leave site?" prompt.
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [submitting]);
 
   // Abandon signal — if the user leaves without hitting submit, fire a
   // form-abandon event marking the furthest step reached. Lets the
@@ -1064,7 +1080,16 @@ ${today}`;
             <strong>Cu cât mai concret, cu atât primești răspuns mai rapid.</strong>{" "}
             Dă dimensiuni aproximative, intersecția / nr. stâlp / reper, dacă e
             pe trotuar sau carosabil. AI-ul pune textul în formă oficială după.{" "}
-            <span className="whitespace-nowrap">{data.descriere.length}/2000 · minim 10</span>
+            <span
+              className={cn(
+                "whitespace-nowrap tabular-nums font-medium",
+                data.descriere.length >= 1900
+                  ? "text-red-500"
+                  : data.descriere.length >= 1600
+                    ? "text-amber-500"
+                    : "text-[var(--color-text-muted)]"
+              )}
+            >{data.descriere.length}/2000 · minim 10</span>
           </p>
         </Field>
 
@@ -1325,6 +1350,7 @@ ${today}`;
           type="button"
           disabled={!canSubmit}
           onClick={handleSubmit}
+          aria-busy={submitting}
           className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
           {submitting ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Send size={16} aria-hidden="true" />}
@@ -1354,7 +1380,7 @@ ${today}`;
               </span>
             )}
           </div>
-          <div className="bg-white dark:bg-slate-900 border border-[var(--color-border)] rounded-[var(--radius-xs)] p-5 mb-4 text-sm leading-relaxed text-slate-800 dark:text-slate-200 max-h-[420px] overflow-y-auto shadow-inner">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xs)] p-5 mb-4 text-sm leading-relaxed text-[var(--color-text)] max-h-[420px] overflow-y-auto shadow-inner">
             {previewText.split(/\n\n+/).map((paragraph, i) => (
               <p key={i} className="mb-3 last:mb-0 whitespace-pre-line">
                 {paragraph}

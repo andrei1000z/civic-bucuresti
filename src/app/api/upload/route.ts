@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 import { isValidImage } from "@/lib/sanitize";
+import { MAX_UPLOAD_BYTES as MAX_FILE_SIZE } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 export async function POST(req: Request) {

@@ -18,6 +18,16 @@ export const BUCHAREST_BOUNDS: [[number, number], [number, number]] = [
   [44.55, 26.25],
 ];
 
+// File upload limits — single source of truth, folosite în
+// /api/upload route + PhotoUploader / ParkingProofUploader compress logic.
+export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB
+export const COMPRESS_THRESHOLD_BYTES = 1.5 * 1024 * 1024; // 1.5 MB
+export const MAX_IMAGE_DIMENSION = 1920;
+
+// QR generator service — folosit în ShareMenu pentru sesizări.
+// goqr.me e gratuit, fără tracking, returnează PNG (300x300 default).
+export const QR_API_BASE_URL = "https://api.qrserver.com/v1/create-qr-code/";
+
 // ============================================================
 // NAVIGATION — main links + "Mai mult" dropdown + date publice submenu
 // ============================================================
