@@ -133,7 +133,7 @@ export default function BiletePage() {
           Comparator operatori
         </h2>
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse bg-[var(--color-surface)] rounded-[12px] overflow-hidden border border-[var(--color-border)]">
+          <table className="w-full border-collapse bg-[var(--color-surface)] rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)]">
             <thead>
               <tr className="bg-[var(--color-surface-2)]">
                 <th className="text-left p-4 text-sm font-semibold">Operator</th>
@@ -224,7 +224,7 @@ export default function BiletePage() {
           ].map((step) => (
             <div
               key={step.nr}
-              className="relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5"
+              className="relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5"
             >
               <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-sm font-bold mb-3">
                 {step.nr}

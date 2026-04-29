@@ -100,7 +100,7 @@ export function FeedbackList({ rows: initial }: { rows: Row[] }) {
           {filtered.map((r) => (
             <article
               key={r.id}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5"
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5"
             >
               <header className="flex items-start justify-between gap-2 mb-3 flex-wrap">
                 <div className="flex items-center gap-2 flex-wrap">

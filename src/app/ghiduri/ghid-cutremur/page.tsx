@@ -152,7 +152,7 @@ export default function GhidCutremurPage() {
       <Chapter id="checklist" title="Checklist descărcabil & aplicații" number={6}>
         <h3>Checklist minim</h3>
         <div className="overflow-x-auto my-6">
-          <table className="w-full border-collapse bg-[var(--color-surface)] rounded-[12px] overflow-hidden border border-[var(--color-border)] text-sm">
+          <table className="w-full border-collapse bg-[var(--color-surface)] rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] text-sm">
             <thead>
               <tr className="bg-[var(--color-surface-2)]">
                 <th className="text-left p-3 font-semibold">Element</th>

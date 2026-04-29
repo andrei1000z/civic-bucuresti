@@ -185,7 +185,7 @@ export default function ContPage() {
         <aside>
           <form
             onSubmit={handleSave}
-            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 sticky top-24"
+            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 sticky top-24"
           >
             <div className="flex items-center gap-3 mb-5">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-indigo-800 text-white flex items-center justify-center text-lg font-bold">
@@ -360,7 +360,7 @@ export default function ContPage() {
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 animate-pulse">
+                <div key={i} className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 animate-pulse">
                   <div className="h-4 bg-[var(--color-surface-2)] rounded w-1/3 mb-2" />
                   <div className="h-5 bg-[var(--color-surface-2)] rounded w-3/4 mb-2" />
                   <div className="h-3 bg-[var(--color-surface-2)] rounded w-1/2" />
@@ -368,7 +368,7 @@ export default function ContPage() {
               ))}
             </div>
           ) : sesizari.length === 0 ? (
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-10 text-center">
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-10 text-center">
               <User size={32} className="mx-auto text-[var(--color-text-muted)] mb-3" aria-hidden="true" />
               <p className="text-[var(--color-text-muted)] mb-2 font-medium">Nu ai încă nicio sesizare</p>
               <p className="text-xs text-[var(--color-text-muted)] mb-4 max-w-md mx-auto">
@@ -389,7 +389,7 @@ export default function ContPage() {
                   <Link
                     key={s.id}
                     href={`/sesizari/${s.code}`}
-                    className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+                    className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
                   >
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <Badge bgColor={STATUS_COLORS[s.status] ?? "#64748b"} color="white">
@@ -464,7 +464,7 @@ export default function ContPage() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-[var(--color-surface)] rounded-[12px] shadow-[var(--shadow-xl)] overflow-hidden"
+            className="w-full max-w-md bg-[var(--color-surface)] rounded-[var(--radius-md)] shadow-[var(--shadow-xl)] overflow-hidden"
           >
             <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-5 relative">
               {!deleting && (
@@ -558,7 +558,7 @@ export default function ContPage() {
 
 function StatBox({ label, value, delta, color }: { label: string; value: string; delta?: string; color: string }) {
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 text-center">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 text-center">
       <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-1">
         {label}
       </p>

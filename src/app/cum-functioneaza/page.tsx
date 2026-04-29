@@ -84,7 +84,7 @@ function SectionHeading({
 }) {
   return (
     <div className="flex items-center gap-3 mb-5">
-      <div className="w-12 h-12 rounded-[12px] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+      <div className="w-12 h-12 rounded-[var(--radius-md)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
         {icon}
       </div>
       <div>
@@ -111,7 +111,7 @@ function InstitutieCard({
   extra?: React.ReactNode;
 }) {
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
       <h4 className="font-bold text-base mb-1">{nume}</h4>
       <p className="text-sm text-[var(--color-text-muted)] mb-3 leading-relaxed">{role}</p>
       {extra}
@@ -158,7 +158,7 @@ export default function CumFunctioneazaPage() {
           și la buna funcționare a autorităților publice.
         </p>
 
-        <div className="bg-gradient-to-br from-[var(--color-primary-soft)] to-transparent border border-[var(--color-primary)]/20 rounded-[12px] p-6 mb-6">
+        <div className="bg-gradient-to-br from-[var(--color-primary-soft)] to-transparent border border-[var(--color-primary)]/20 rounded-[var(--radius-md)] p-6 mb-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-14 h-14 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-xl font-bold">
               {PRESEDINTE.nume
@@ -186,7 +186,7 @@ export default function CumFunctioneazaPage() {
           </a>
         </div>
 
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
           <h4 className="font-bold text-sm mb-3 uppercase tracking-wider text-[var(--color-text-muted)]">
             Atribuții principale
           </h4>
@@ -207,7 +207,7 @@ export default function CumFunctioneazaPage() {
         <p className="text-[var(--color-text-muted)] mb-6 max-w-3xl">{GUVERN.rolGeneral}</p>
 
         <div className="grid md:grid-cols-[1fr_1fr] gap-5 mb-6">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
             <div className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
               Prim-Ministru
             </div>
@@ -216,7 +216,7 @@ export default function CumFunctioneazaPage() {
               {GUVERN.primMinistruPartid}
             </div>
           </div>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
             <div className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
               Coaliție guvernamentală
             </div>
@@ -259,7 +259,7 @@ export default function CumFunctioneazaPage() {
           ))}
         </div>
 
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
           <h4 className="font-bold text-sm mb-3 uppercase tracking-wider text-[var(--color-text-muted)]">
             Atribuții
           </h4>
@@ -336,7 +336,7 @@ export default function CumFunctioneazaPage() {
         </div>
 
         {/* Compoziție politică */}
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 mb-6">
           <h4 className="font-bold text-sm mb-4 uppercase tracking-wider text-[var(--color-text-muted)]">
             Compoziția Parlamentului (după alegerile 2024)
           </h4>
@@ -363,7 +363,7 @@ export default function CumFunctioneazaPage() {
           </div>
         </div>
 
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
           <h4 className="font-bold text-sm mb-3 uppercase tracking-wider text-[var(--color-text-muted)]">
             Atribuții Parlament
           </h4>
@@ -404,7 +404,7 @@ export default function CumFunctioneazaPage() {
           ))}
         </div>
 
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 mb-6">
           <h4 className="font-bold text-sm mb-4 uppercase tracking-wider text-[var(--color-text-muted)]">
             Ierarhia instanțelor de drept comun
           </h4>
@@ -425,7 +425,7 @@ export default function CumFunctioneazaPage() {
           </div>
         </div>
 
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
           <h4 className="font-bold text-sm mb-3 uppercase tracking-wider text-[var(--color-text-muted)]">
             Atribuții fundamentale
           </h4>
@@ -456,7 +456,7 @@ export default function CumFunctioneazaPage() {
           {ADMINISTRATIE_LOCALA.map((nivel) => (
             <div
               key={nivel.nivel}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5"
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5"
             >
               <div className="text-3xl mb-2">{nivel.icon}</div>
               <h4 className="font-bold text-base mb-1">{nivel.nivel}</h4>
@@ -479,7 +479,7 @@ export default function CumFunctioneazaPage() {
           ))}
         </div>
 
-        <div className="bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[12px] p-5 text-sm">
+        <div className="bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[var(--radius-md)] p-5 text-sm">
           <p className="mb-2">
             💡 <strong>Vrei să vezi administrația din județul tău?</strong>
           </p>

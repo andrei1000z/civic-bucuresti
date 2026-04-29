@@ -138,7 +138,7 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
       <Icon size={18} style={{ color: accent }} className="mb-2" />
       <p className="text-3xl font-bold" style={{ color: accent }}>{value}</p>
       <p className="text-xs text-[var(--color-text-muted)] mt-1">{label}</p>
@@ -163,7 +163,7 @@ function BreakdownList({
     .slice(0, max);
   const total = entries.reduce((s, [, v]) => s + v, 0) || 1;
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
       <div className="flex items-center gap-2 mb-4">
         <Icon size={16} className="text-[var(--color-text-muted)]" />
         <h3 className="font-semibold text-sm">{title}</h3>
@@ -205,7 +205,7 @@ function HourlyChart({ data }: { data: Record<string, string | number> }) {
   }
   const max = Math.max(1, ...buckets.map((b) => b.value));
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
       <div className="flex items-center gap-2 mb-4">
         <Clock size={16} className="text-[var(--color-text-muted)]" />
         <h3 className="font-semibold text-sm">Vizualizări · ultimele 24h (UTC)</h3>
@@ -243,7 +243,7 @@ function DeviceBreakdown({ total }: { total: Record<string, string | number> }) 
   }
   const sumDev = device.mobile + device.desktop + device.tablet || 1;
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
       <div className="flex items-center gap-2 mb-4">
         <Smartphone size={16} className="text-[var(--color-text-muted)]" />
         <h3 className="font-semibold text-sm">Device · Browser · OS</h3>
@@ -439,7 +439,7 @@ export function AnalyticsDashboard() {
 
       {/* Errors */}
       {errorCount > 0 && (
-        <div className="bg-[var(--color-surface)] border border-red-500/30 rounded-[12px] p-5">
+        <div className="bg-[var(--color-surface)] border border-red-500/30 rounded-[var(--radius-md)] p-5">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle size={16} className="text-red-500" />
             <h3 className="font-semibold text-sm">Erori JavaScript</h3>
@@ -464,7 +464,7 @@ export function AnalyticsDashboard() {
       )}
 
       {/* Web Vitals */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
         <div className="flex items-center gap-2 mb-4">
           <Zap size={16} className="text-[var(--color-text-muted)]" />
           <h3 className="font-semibold text-sm">Web Vitals · performanță percepută</h3>
@@ -499,7 +499,7 @@ export function AnalyticsDashboard() {
 
       {/* Sesizare funnel */}
       {data.funnels && Object.keys(data.funnels).length > 0 && (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp size={16} className="text-[var(--color-text-muted)]" />
             <h3 className="font-semibold text-sm">Funnel creare sesizare</h3>
@@ -548,7 +548,7 @@ export function AnalyticsDashboard() {
 
       {/* Rage clicks — frustration */}
       {sum(data.rageClicks) > 0 && (
-        <div className="bg-[var(--color-surface)] border border-amber-500/30 rounded-[12px] p-5">
+        <div className="bg-[var(--color-surface)] border border-amber-500/30 rounded-[var(--radius-md)] p-5">
           <div className="flex items-center gap-2 mb-4">
             <Frown size={16} className="text-amber-500" />
             <h3 className="font-semibold text-sm">Rage clicks · semnale de frustrare</h3>
@@ -564,7 +564,7 @@ export function AnalyticsDashboard() {
       <div className="grid md:grid-cols-2 gap-4">
         <BreakdownList title="Căutări populare" icon={Search} data={data.searchTerms} max={15} />
         {sum(data.searchZero) > 0 && (
-          <div className="bg-[var(--color-surface)] border border-red-500/30 rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-red-500/30 rounded-[var(--radius-md)] p-5">
             <div className="flex items-center gap-2 mb-3">
               <Search size={16} className="text-red-500" />
               <h3 className="font-semibold text-sm">Căutări fără rezultate</h3>
@@ -605,7 +605,7 @@ export function AnalyticsDashboard() {
 
       {/* Feedback inbox — what users told us */}
       {data.feedback && data.feedback.length > 0 && (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <MessageSquareMore size={16} className="text-[var(--color-primary)]" />
@@ -672,7 +672,7 @@ export function AnalyticsDashboard() {
 
       {/* Newsletter subscribers */}
       {data.newsletter && data.newsletter.length > 0 && (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Mail size={16} className="text-[var(--color-primary)]" />
@@ -707,7 +707,7 @@ export function AnalyticsDashboard() {
       )}
 
       {/* Real-time feed */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
         <div className="flex items-center gap-2 mb-4">
           <Activity size={16} className="text-[var(--color-text-muted)]" />
           <h3 className="font-semibold text-sm">Live feed · ultimele 50 evenimente</h3>
@@ -738,7 +738,7 @@ export function AnalyticsDashboard() {
 
       {/* Top users */}
       {data.topUsers.length > 0 && (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
           <div className="flex items-center gap-2 mb-4">
             <Users size={16} className="text-[var(--color-text-muted)]" />
             <h3 className="font-semibold text-sm">Top utilizatori (după vizualizări)</h3>

@@ -220,7 +220,7 @@ export default function AirQualityMap({
         {/* Loading indicator */}
         {loading && sensors.length === 0 && (
           <div className="absolute inset-0 z-[30] flex items-center justify-center bg-black/20 backdrop-blur-sm">
-            <div className="bg-[var(--color-surface)] rounded-[12px] p-6 shadow-xl text-center">
+            <div className="bg-[var(--color-surface)] rounded-[var(--radius-md)] p-6 shadow-xl text-center">
               <RefreshCw size={24} className="animate-spin mx-auto mb-3 text-[var(--color-primary)]" />
               <p className="text-sm font-medium">Se încarcă senzorii...</p>
               <p className="text-xs text-[var(--color-text-muted)] mt-1">Agregăm date din mai multe surse</p>
@@ -252,7 +252,7 @@ export default function AirQualityMap({
           {/* AQI Overview */}
           {meta?.avgAqi != null && (
             <div
-              className="rounded-[12px] p-4 text-center"
+              className="rounded-[var(--radius-md)] p-4 text-center"
               style={{ backgroundColor: `${getAqiColor(meta.avgAqi)}20` }}
             >
               <p className="text-4xl font-bold" style={{ color: getAqiColor(meta.avgAqi) }}>

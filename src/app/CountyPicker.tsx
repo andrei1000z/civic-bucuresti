@@ -126,7 +126,7 @@ export function CountyPicker() {
     <section className="py-10">
       <div className="container-narrow">
         {savedCounty && (
-          <div className="max-w-xl mx-auto mb-6 flex flex-wrap items-center gap-3 bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[12px] px-4 py-3">
+          <div className="max-w-xl mx-auto mb-6 flex flex-wrap items-center gap-3 bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[var(--radius-md)] px-4 py-3">
             <div className="flex items-center gap-2 text-sm min-w-0">
               <Check size={16} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
               <span className="truncate">
