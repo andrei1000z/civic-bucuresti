@@ -28,6 +28,25 @@ export const MAX_IMAGE_DIMENSION = 1920;
 // goqr.me e gratuit, fără tracking, returnează PNG (300x300 default).
 export const QR_API_BASE_URL = "https://api.qrserver.com/v1/create-qr-code/";
 
+// Categorii pentru petiții civice — listă predefinită ca admin să nu
+// inventeze 100 de categorii diferite. Folosit în /admin/petitii dropdown.
+export const PETITIE_CATEGORII = [
+  { value: "Mediu", label: "Mediu și natură", icon: "🌳" },
+  { value: "Transport", label: "Transport public și mobilitate", icon: "🚇" },
+  { value: "Sănătate", label: "Sănătate publică", icon: "🏥" },
+  { value: "Educație", label: "Educație", icon: "🎓" },
+  { value: "Drepturi", label: "Drepturile cetățeanului", icon: "⚖️" },
+  { value: "Locuințe", label: "Locuințe și urbanism", icon: "🏘️" },
+  { value: "Siguranță", label: "Siguranță publică", icon: "🛡️" },
+  { value: "Justiție", label: "Justiție și anti-corupție", icon: "⚖️" },
+  { value: "Cultură", label: "Cultură și patrimoniu", icon: "🎭" },
+  { value: "Tehnologie", label: "Tehnologie și open data", icon: "💻" },
+  { value: "Animale", label: "Drepturile animalelor", icon: "🐾" },
+  { value: "Egalitate", label: "Egalitate și non-discriminare", icon: "🤝" },
+  { value: "Economie", label: "Economie și taxe", icon: "💰" },
+  { value: "Altele", label: "Alte cauze civice", icon: "📝" },
+] as const;
+
 // ============================================================
 // NAVIGATION — main links + "Mai mult" dropdown + date publice submenu
 // ============================================================

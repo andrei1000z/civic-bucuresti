@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Megaphone, Users, ArrowRight, Calendar } from "lucide-react";
+import { Megaphone, ArrowRight, ExternalLink } from "lucide-react";
 import { listPetitii } from "@/lib/petitii/repository";
 import { CollectionPageJsonLd } from "@/components/JsonLd";
-import { SITE_URL } from "@/lib/constants";
+import { SITE_URL, PETITIE_CATEGORII } from "@/lib/constants";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Petiții civice — Civia",
   description:
-    "Semnează online petiții civice care pun presiune publică pe autorități. Mai multe semnături = răspuns mai rapid. Gratuit, fără spam.",
+    "Petiții civice cu impact real. Click → vezi argumentele, semnezi pe site-ul oficial. Mai multe voci = autoritățile răspund.",
   alternates: { canonical: "/petitii" },
 };
 
@@ -28,7 +28,7 @@ export default async function PetitiiPage() {
     <div className="container-narrow py-12 md:py-16">
       <CollectionPageJsonLd
         name="Petiții civice — Civia"
-        description="Catalog cu petiții civice active. Semnează online — mai multe voci = autoritățile răspund."
+        description="Catalog cu petiții civice active. Click → semnează pe site-ul oficial. Mai multe voci = autoritățile răspund."
         url={`${SITE_URL}/petitii`}
       />
 
@@ -40,9 +40,9 @@ export default async function PetitiiPage() {
           Petiții civice
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] leading-relaxed">
-          Semnături online care pun presiune publică pe autorități. Spre deosebire de o
-          sesizare, petiția adună <strong>multe voci pentru aceeași cauză</strong> —
-          autoritățile nu pot ignora 1.000 de oameni.
+          Curatat de Civia. Click pe petiție → vezi argumentele și sursa oficială (Declic /
+          Avaaz / etc.) unde semnezi. Spre deosebire de o sesizare individuală, petiția
+          adună <strong>multe voci pentru aceeași cauză</strong>.
         </p>
       </header>
 
@@ -93,7 +93,7 @@ function EmptyState() {
         </div>
         <h2 className="font-semibold text-lg mb-2">Nicio petiție activă acum</h2>
         <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-          Verifică curând — adăugăm petiții civice când avem o cauză suficient
+          Verifică curând — adăugăm petiții când avem o cauză suficient
           de importantă pentru presiune publică. Între timp, poți trimite o
           sesizare individuală.
         </p>
@@ -109,63 +109,77 @@ function EmptyState() {
   );
 }
 
-function PetitieCard({ p }: { p: { slug: string; title: string; summary: string; image_url: string | null; signature_count: number; target_signatures: number; status: string; ends_at: string | null; category: string | null } }) {
-  const progress = Math.min(100, Math.round((p.signature_count / Math.max(1, p.target_signatures)) * 100));
+function PetitieCard({ p }: { p: { slug: string; title: string; summary: string; image_url: string | null; category: string | null; county_code: string | null; status: string; ends_at: string | null; external_url: string | null } }) {
+  const cat = PETITIE_CATEGORII.find((c) => c.value === p.category);
+  let externalHost: string | null = null;
+  if (p.external_url) {
+    try {
+      externalHost = new URL(p.external_url).hostname.replace(/^www\./, "");
+    } catch {
+      externalHost = null;
+    }
+  }
   return (
     <Link
       href={`/petitii/${p.slug}`}
-      className="group flex flex-col bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] overflow-hidden hover:shadow-[var(--shadow-3)] hover:border-[var(--color-primary)]/30 transition-all"
+      className="group flex flex-col bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] overflow-hidden hover:shadow-[var(--shadow-3)] hover:border-[var(--color-primary)]/30 hover:-translate-y-0.5 transition-all"
     >
       {p.image_url ? (
-        <div className="relative w-full aspect-[16/9] bg-[var(--color-surface-2)]">
+        <div className="relative w-full aspect-[16/9] bg-[var(--color-surface-2)] overflow-hidden">
           <Image
             src={p.image_url}
             alt={p.title}
             fill
             sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-            className="object-cover"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         </div>
       ) : (
-        <div className="w-full aspect-[16/9] bg-gradient-to-br from-purple-500/20 to-purple-900/20 flex items-center justify-center">
-          <Megaphone size={48} className="text-purple-500/50" aria-hidden="true" />
+        <div className="w-full aspect-[16/9] bg-gradient-to-br from-purple-500/20 via-purple-700/15 to-purple-900/20 flex items-center justify-center">
+          <Megaphone size={48} className="text-purple-500/60" aria-hidden="true" />
         </div>
       )}
       <div className="flex-1 p-5 flex flex-col">
-        {p.category && (
-          <span className="inline-block self-start text-[10px] uppercase tracking-wider font-bold text-purple-600 dark:text-purple-400 mb-2">
-            {p.category}
-          </span>
-        )}
-        <h3 className="font-[family-name:var(--font-sora)] font-bold text-base mb-2 line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
-          {p.title}
-        </h3>
-        <p className="text-sm text-[var(--color-text-muted)] line-clamp-2 mb-4">
-          {p.summary}
-        </p>
-        <div className="mt-auto space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="inline-flex items-center gap-1 text-[var(--color-text)] font-medium">
-              <Users size={12} aria-hidden="true" />
-              {p.signature_count.toLocaleString("ro-RO")} / {p.target_signatures.toLocaleString("ro-RO")}
+        <div className="flex items-center gap-2 flex-wrap mb-2">
+          {cat && (
+            <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-purple-600 dark:text-purple-400">
+              <span aria-hidden="true">{cat.icon}</span> {cat.value}
             </span>
-            <span className="text-[var(--color-text-muted)] tabular-nums">{progress}%</span>
-          </div>
-          <div className="h-1.5 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-purple-500 to-purple-700 rounded-full transition-all"
-              style={{ width: `${progress}%` }}
-              aria-hidden="true"
-            />
-          </div>
-          {p.ends_at && (
-            <p className="text-[10px] text-[var(--color-text-muted)] flex items-center gap-1 pt-1">
-              <Calendar size={10} aria-hidden="true" />
-              {p.status === "closed" ? "Încheiată " : "Până "}
-              {formatDate(p.ends_at)}
-            </p>
+          )}
+          {p.county_code ? (
+            <span className="text-[10px] uppercase tracking-wider font-bold text-[var(--color-text-muted)]">
+              · {p.county_code}
+            </span>
+          ) : (
+            <span className="text-[10px] uppercase tracking-wider font-bold text-[var(--color-text-muted)]">
+              · Național
+            </span>
           )}
         </div>
+        <h3 className="font-[family-name:var(--font-sora)] font-bold text-base md:text-lg mb-2 line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors leading-snug">
+          {p.title}
+        </h3>
+        <p className="text-sm text-[var(--color-text-muted)] line-clamp-3 mb-4 leading-relaxed">
+          {p.summary}
+        </p>
+        <div className="mt-auto flex items-center justify-between text-xs">
+          {externalHost && (
+            <span className="inline-flex items-center gap-1 text-[var(--color-text-muted)]">
+              <ExternalLink size={11} aria-hidden="true" />
+              {externalHost}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1 font-medium text-[var(--color-primary)] group-hover:gap-2 transition-all">
+            Vezi detalii
+            <ArrowRight size={12} aria-hidden="true" />
+          </span>
+        </div>
+        {p.ends_at && (
+          <p className="text-[10px] text-[var(--color-text-muted)] mt-2 pt-2 border-t border-[var(--color-border)]">
+            {p.status === "closed" ? "Încheiată " : "Până "}
+            {formatDate(p.ends_at)}
+          </p>
+        )}
       </div>
     </Link>
   );

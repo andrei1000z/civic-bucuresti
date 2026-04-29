@@ -2,18 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Megaphone, Users, Calendar, ExternalLink, ChevronLeft, ArrowRight } from "lucide-react";
 import {
-  getPetitieBySlug,
-  listSignatures,
-  userHasSigned,
-} from "@/lib/petitii/repository";
-import { createSupabaseServer } from "@/lib/supabase/server";
-import { SITE_URL } from "@/lib/constants";
+  Megaphone,
+  Calendar,
+  ExternalLink,
+  ChevronLeft,
+  ArrowRight,
+  CheckCircle2,
+  Share2,
+} from "lucide-react";
+import { getPetitieBySlug } from "@/lib/petitii/repository";
+import { SITE_URL, PETITIE_CATEGORII } from "@/lib/constants";
+import { ALL_COUNTIES } from "@/data/counties";
 import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
-import { SignPetitieButton } from "./SignPetitieButton";
 
-export const revalidate = 120;
+export const revalidate = 60;
 
 export async function generateMetadata({
   params,
@@ -49,23 +52,23 @@ export default async function PetitiePage({
   const petitie = await getPetitieBySlug(slug);
   if (!petitie) notFound();
 
-  const signatures = await listSignatures(petitie.id, 30);
-
-  // Check if logged-in user already signed
-  const supabase = await createSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const alreadySigned = user ? await userHasSigned(petitie.id, user.id) : false;
-
-  const progress = Math.min(
-    100,
-    Math.round((petitie.signature_count / Math.max(1, petitie.target_signatures)) * 100),
-  );
   const isActive = petitie.status === "active";
+  const cat = PETITIE_CATEGORII.find((c) => c.value === petitie.category);
+  const county = petitie.county_code
+    ? ALL_COUNTIES.find((c) => c.id === petitie.county_code)
+    : null;
+
+  let externalHost: string | null = null;
+  if (petitie.external_url) {
+    try {
+      externalHost = new URL(petitie.external_url).hostname.replace(/^www\./, "");
+    } catch {
+      externalHost = null;
+    }
+  }
 
   return (
-    <article className="container-narrow py-8 md:py-12">
+    <article>
       <BreadcrumbJsonLd
         items={[
           { name: "Acasă", url: SITE_URL },
@@ -74,152 +77,173 @@ export default async function PetitiePage({
         ]}
       />
 
-      <Link
-        href="/petitii"
-        className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"
-      >
-        <ChevronLeft size={16} aria-hidden="true" /> Toate petițiile
-      </Link>
-
-      <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
-        {/* Main content */}
-        <div>
-          {petitie.image_url && (
-            <div className="relative w-full aspect-[16/9] bg-[var(--color-surface-2)] rounded-[var(--radius-md)] overflow-hidden mb-6">
-              <Image
-                src={petitie.image_url}
-                alt={petitie.title}
-                fill
-                priority
-                sizes="(min-width: 1024px) 60vw, 100vw"
-                className="object-cover"
-              />
-            </div>
-          )}
-
-          <div className="flex items-center gap-2 flex-wrap mb-4">
-            {petitie.category && (
-              <span className="inline-block text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400">
-                {petitie.category}
-              </span>
-            )}
-            {!isActive && (
-              <span className="inline-block text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text-muted)]">
-                Încheiată
-              </span>
-            )}
-            {petitie.county_code && (
-              <span className="inline-block text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text)]">
-                {petitie.county_code}
-              </span>
-            )}
-          </div>
-
-          <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-extrabold mb-4 leading-tight tracking-tight">
-            {petitie.title}
-          </h1>
-
-          <p className="text-lg text-[var(--color-text-muted)] mb-6 leading-relaxed">
-            {petitie.summary}
-          </p>
-
-          {/* Body — preserve newlines, no markdown parsing yet */}
-          <div className="prose prose-invert max-w-none text-[var(--color-text)] leading-relaxed whitespace-pre-line text-base">
-            {petitie.body}
-          </div>
-
-          {petitie.external_url && (
-            <a
-              href={petitie.external_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 mt-6 text-sm text-[var(--color-primary)] hover:underline"
-            >
-              <ExternalLink size={14} aria-hidden="true" />
-              Vezi petiția oficială →
-            </a>
-          )}
-        </div>
-
-        {/* Sidebar — sign + counter + recent signatures */}
-        <aside className="lg:sticky lg:top-24 space-y-4">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 shadow-[var(--shadow-1)]">
-            <div className="flex items-baseline justify-between mb-2">
-              <span className="font-[family-name:var(--font-sora)] text-3xl font-extrabold text-[var(--color-primary)] tabular-nums">
-                {petitie.signature_count.toLocaleString("ro-RO")}
-              </span>
-              <span className="text-xs text-[var(--color-text-muted)]">
-                din {petitie.target_signatures.toLocaleString("ro-RO")}
-              </span>
-            </div>
-            <div className="h-2 bg-[var(--color-surface-2)] rounded-full overflow-hidden mb-3">
-              <div
-                className="h-full bg-gradient-to-r from-purple-500 to-purple-700 rounded-full transition-all"
-                style={{ width: `${progress}%` }}
-                aria-hidden="true"
-              />
-            </div>
-            <p className="text-xs text-[var(--color-text-muted)] mb-4 flex items-center gap-1.5">
-              <Users size={12} aria-hidden="true" />
-              <strong className="text-[var(--color-text)]">{progress}%</strong> din obiectiv
-              {petitie.ends_at && (
-                <>
-                  {" · "}
-                  <Calendar size={11} aria-hidden="true" className="ml-1" />
-                  {formatDate(petitie.ends_at)}
-                </>
-              )}
-            </p>
-
-            <SignPetitieButton
-              petitieId={petitie.id}
-              petitieSlug={petitie.slug}
-              isActive={isActive}
-              isLoggedIn={!!user}
-              alreadySigned={alreadySigned}
+      {/* HERO with image as background or solid gradient if no image */}
+      <header className="relative overflow-hidden">
+        {petitie.image_url ? (
+          <div className="relative w-full aspect-[21/9] sm:aspect-[3/1] max-h-[500px] bg-[var(--color-surface-2)]">
+            <Image
+              src={petitie.image_url}
+              alt={petitie.title}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          </div>
+        ) : (
+          <div className="relative w-full aspect-[21/9] sm:aspect-[3/1] max-h-[400px] bg-gradient-to-br from-purple-600 via-purple-800 to-[#0a0a0a]">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(168,85,247,0.4),transparent)]" />
+            <div className="absolute inset-0 flex items-center justify-center opacity-20">
+              <Megaphone size={120} aria-hidden="true" className="text-white" />
+            </div>
+          </div>
+        )}
+
+        <div className="container-narrow">
+          <div
+            className={
+              petitie.image_url
+                ? "absolute inset-x-0 bottom-0 px-4 sm:px-8 pb-6 md:pb-10 text-white"
+                : "absolute inset-x-0 bottom-0 px-4 sm:px-8 pb-6 md:pb-10 text-white"
+            }
+          >
+            <div className="max-w-3xl">
+              <Link
+                href="/petitii"
+                className="inline-flex items-center gap-1 text-sm text-white/80 hover:text-white mb-3 transition-colors"
+              >
+                <ChevronLeft size={14} aria-hidden="true" /> Toate petițiile
+              </Link>
+
+              <div className="flex items-center gap-2 flex-wrap mb-3">
+                {cat && (
+                  <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white">
+                    <span aria-hidden="true">{cat.icon}</span> {cat.value}
+                  </span>
+                )}
+                <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white">
+                  {county ? `📍 ${county.name}` : "🇷🇴 Național"}
+                </span>
+                {!isActive && (
+                  <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white">
+                    Încheiată
+                  </span>
+                )}
+              </div>
+
+              <h1 className="font-[family-name:var(--font-sora)] text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight tracking-tight mb-2 max-w-3xl">
+                {petitie.title}
+              </h1>
+              {petitie.ends_at && (
+                <p className="text-sm text-white/80 inline-flex items-center gap-1.5 mt-2">
+                  <Calendar size={14} aria-hidden="true" />
+                  {petitie.status === "closed" ? "Încheiată " : "Până "}
+                  {formatDate(petitie.ends_at)}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="container-narrow py-8 md:py-12">
+        <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
+          {/* Main content */}
+          <div className="max-w-2xl">
+            <p className="text-xl text-[var(--color-text)] mb-8 leading-relaxed font-medium">
+              {petitie.summary}
+            </p>
+
+            <div className="text-base text-[var(--color-text)] leading-relaxed whitespace-pre-line space-y-4">
+              {petitie.body}
+            </div>
+
+            {/* Inline CTA after body */}
+            {petitie.external_url && isActive && (
+              <div className="mt-10 p-6 rounded-[var(--radius-lg)] bg-gradient-to-br from-purple-600 to-purple-800 text-white">
+                <p className="text-xs uppercase tracking-wider font-bold opacity-90 mb-2 inline-flex items-center gap-1">
+                  <Megaphone size={12} aria-hidden="true" /> Susține petiția
+                </p>
+                <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold mb-3">
+                  Semnează pe {externalHost}
+                </h2>
+                <p className="text-sm text-white/90 mb-5 leading-relaxed">
+                  Civia agregă petițiile civice. Click → semnezi pe site-ul oficial unde
+                  petiția a fost lansată. Una secundă, niciun spam.
+                </p>
+                <a
+                  href={petitie.external_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 h-12 px-7 rounded-[var(--radius-full)] bg-white text-purple-700 font-semibold hover:bg-white/90 active:scale-[0.97] transition-all shadow-[var(--shadow-3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-purple-700"
+                >
+                  Semnează pe {externalHost} <ExternalLink size={16} aria-hidden="true" />
+                </a>
+              </div>
+            )}
+
+            {!isActive && (
+              <div className="mt-8 p-5 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+                <p className="text-sm font-semibold mb-1 inline-flex items-center gap-1.5">
+                  <CheckCircle2 size={14} className="text-emerald-500" aria-hidden="true" />
+                  Petiție încheiată
+                </p>
+                <p className="text-xs text-[var(--color-text-muted)]">
+                  Această petiție nu mai primește semnături. O lăsăm publică pentru
+                  transparență.
+                </p>
+              </div>
+            )}
           </div>
 
-          {signatures.length > 0 && (
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
-                Ultimele semnături
-              </p>
-              <ul className="space-y-2">
-                {signatures.map((s) => (
-                  <li key={s.id} className="text-sm">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 text-white text-xs font-bold flex items-center justify-center"
-                        aria-hidden="true"
-                      >
-                        {s.display_name.charAt(0).toUpperCase()}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{s.display_name}</p>
-                        {s.comment && (
-                          <p className="text-xs text-[var(--color-text-muted)] line-clamp-1">
-                            „{s.comment}"
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {/* Sidebar */}
+          <aside className="lg:sticky lg:top-24 space-y-3">
+            {petitie.external_url && isActive && (
+              <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 shadow-[var(--shadow-1)]">
+                <p className="text-[10px] uppercase tracking-wider font-bold text-[var(--color-text-muted)] mb-3">
+                  Semnează aici
+                </p>
+                <a
+                  href={petitie.external_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[var(--radius-full)] bg-purple-600 hover:bg-purple-700 active:scale-[0.97] text-white text-sm font-semibold transition-all shadow-[var(--shadow-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+                >
+                  <Megaphone size={16} aria-hidden="true" />
+                  Mergi pe {externalHost}
+                </a>
+                <p className="text-[10px] text-[var(--color-text-muted)] mt-3 text-center leading-relaxed">
+                  Petiția e găzduită pe <strong>{externalHost}</strong>. Civia o
+                  agregă pentru vizibilitate.
+                </p>
+              </div>
+            )}
 
-          <Link
-            href="/sesizari"
-            className="block bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[var(--radius-md)] p-4 hover:bg-[var(--color-primary-soft)]/80 transition-colors group"
-          >
-            <p className="text-xs font-semibold text-[var(--color-primary)] uppercase tracking-wider mb-1 inline-flex items-center gap-1">
-              <Megaphone size={12} aria-hidden="true" /> Acțiune individuală
-            </p>
-            <p className="text-sm font-medium">Trimite și o sesizare la primărie <ArrowRight size={12} className="inline group-hover:translate-x-0.5 transition-transform" aria-hidden="true" /></p>
-          </Link>
-        </aside>
+            <Link
+              href="/sesizari"
+              className="block bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[var(--radius-md)] p-5 hover:bg-[var(--color-primary-soft)]/80 transition-colors group"
+            >
+              <p className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider mb-2 inline-flex items-center gap-1">
+                <Share2 size={12} aria-hidden="true" /> Acțiune individuală
+              </p>
+              <p className="text-sm font-semibold mb-1">Trimite și o sesizare la primărie</p>
+              <p className="text-xs text-[var(--color-text-muted)] mb-2">
+                Petiția pune presiune publică, sesizarea ta intră direct în registratura primăriei.
+              </p>
+              <span className="text-xs font-medium text-[var(--color-primary)] inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                Începe sesizarea <ArrowRight size={12} aria-hidden="true" />
+              </span>
+            </Link>
+
+            <Link
+              href="/petitii"
+              className="block text-xs text-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] py-2 transition-colors"
+            >
+              ← Toate petițiile
+            </Link>
+          </aside>
+        </div>
       </div>
     </article>
   );

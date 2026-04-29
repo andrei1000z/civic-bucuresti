@@ -9,20 +9,24 @@ import {
   Trash2,
   ExternalLink,
   Loader2,
-  Users,
   CheckCircle2,
   AlertTriangle,
   X,
   Clock,
   Eye,
   ImageIcon,
+  Sparkles,
+  Upload,
+  Infinity as InfinityIcon,
 } from "lucide-react";
 import { useToast } from "@/components/Toast";
 import { cn } from "@/lib/utils";
+import { PETITIE_CATEGORII } from "@/lib/constants";
+import { ALL_COUNTIES } from "@/data/counties";
 
 export const dynamic = "force-dynamic";
 
-interface PetitieWithCount {
+interface PetitieRow {
   id: string;
   slug: string;
   title: string;
@@ -30,7 +34,7 @@ interface PetitieWithCount {
   body: string;
   image_url: string | null;
   external_url: string | null;
-  target_signatures: number;
+  target_signatures: number | null;
   category: string | null;
   county_code: string | null;
   starts_at: string;
@@ -40,20 +44,6 @@ interface PetitieWithCount {
   created_at: string;
   updated_at: string;
 }
-
-const STATUS_LABEL: Record<string, string> = {
-  draft: "Ciornă",
-  active: "Activă",
-  closed: "Încheiată",
-  archived: "Arhivată",
-};
-
-const STATUS_BG: Record<string, string> = {
-  draft: "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
-  active: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
-  closed: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-  archived: "bg-zinc-100 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-500",
-};
 
 const DRAFT_KEY_NEW = "civia_admin_petitie_draft_new";
 const DRAFT_KEY_EDIT_PREFIX = "civia_admin_petitie_draft_edit_";
@@ -65,11 +55,11 @@ interface FormState {
   body: string;
   image_url: string;
   external_url: string;
+  target_unlimited: boolean;
   target_signatures: number;
   category: string;
-  county_code: string;
+  county_code: string; // empty string = național
   ends_at: string;
-  status: "active" | "draft" | "closed" | "archived";
 }
 
 const EMPTY_FORM: FormState = {
@@ -79,16 +69,30 @@ const EMPTY_FORM: FormState = {
   body: "",
   image_url: "",
   external_url: "",
+  target_unlimited: false,
   target_signatures: 1000,
   category: "",
   county_code: "",
   ends_at: "",
-  status: "active",
 };
+
+function getDraftKey(editingId: string | null): string {
+  return editingId ? `${DRAFT_KEY_EDIT_PREFIX}${editingId}` : DRAFT_KEY_NEW;
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 100);
+}
 
 export default function AdminPetitiiPage() {
   const { toast } = useToast();
-  const [rows, setRows] = useState<PetitieWithCount[]>([]);
+  const [rows, setRows] = useState<PetitieRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -96,7 +100,7 @@ export default function AdminPetitiiPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/petitii");
+      const res = await fetch("/api/admin/petitii", { cache: "no-store" });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Failed");
       setRows(json.data ?? []);
@@ -109,7 +113,6 @@ export default function AdminPetitiiPage() {
 
   useEffect(() => {
     load();
-    // load() referențiază doar setRows + setLoading care sunt stabili.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -134,7 +137,7 @@ export default function AdminPetitiiPage() {
             Petiții civice
           </h1>
           <p className="text-sm text-[var(--color-text-muted)] mt-1">
-            CRUD pentru petițiile afișate pe /petitii. Doar admin. Auto-save activ la 2s.
+            Postează petițiile pe /petitii. Auto-save la 2s + AI helpers pentru sumar și slug.
           </p>
         </div>
         <button
@@ -179,97 +182,97 @@ export default function AdminPetitiiPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {rows.map((p) => (
-            <article
-              key={p.id}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 flex items-start gap-4"
-            >
-              {p.image_url && (
-                <div className="relative shrink-0 w-20 h-20 rounded-[var(--radius-xs)] overflow-hidden bg-[var(--color-surface-2)] hidden sm:block">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.image_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+          {rows.map((p) => {
+            const cat = PETITIE_CATEGORII.find((c) => c.value === p.category);
+            return (
+              <article
+                key={p.id}
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 flex items-start gap-4"
+              >
+                {p.image_url && (
+                  <div className="relative shrink-0 w-20 h-20 rounded-[var(--radius-xs)] overflow-hidden bg-[var(--color-surface-2)] hidden sm:block">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.image_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-2">
+                    {cat && (
+                      <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 inline-flex items-center gap-1">
+                        <span aria-hidden="true">{cat.icon}</span>
+                        {cat.value}
+                      </span>
+                    )}
+                    {p.county_code ? (
+                      <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text-muted)]">
+                        {p.county_code}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text-muted)]">
+                        🇷🇴 Național
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="font-[family-name:var(--font-sora)] font-bold text-base mb-1 line-clamp-1">
+                    {p.title}
+                  </h2>
+                  <p className="text-xs text-[var(--color-text-muted)] line-clamp-2 mb-2">
+                    {p.summary}
+                  </p>
+                  <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)] flex-wrap">
+                    <span className="font-mono">/{p.slug}</span>
+                    {p.external_url && (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <a
+                          href={p.external_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 hover:text-[var(--color-primary)]"
+                        >
+                          <ExternalLink size={11} aria-hidden="true" />
+                          {new URL(p.external_url).hostname.replace(/^www\./, "")}
+                        </a>
+                      </>
+                    )}
+                  </div>
                 </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap mb-2">
-                  <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${STATUS_BG[p.status]}`}>
-                    {STATUS_LABEL[p.status]}
-                  </span>
-                  {p.category && (
-                    <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text-muted)]">
-                      {p.category}
-                    </span>
-                  )}
-                  {p.county_code && (
-                    <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text-muted)]">
-                      {p.county_code}
-                    </span>
-                  )}
+                <div className="flex items-center gap-1 shrink-0">
+                  <Link
+                    href={`/petitii/${p.slug}`}
+                    target="_blank"
+                    className="w-9 h-9 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                    aria-label="Vezi pe site"
+                    title="Vezi pe site"
+                  >
+                    <Eye size={14} aria-hidden="true" />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingId(p.id);
+                      setShowForm(true);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="w-9 h-9 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                    aria-label="Editează"
+                    title="Editează"
+                  >
+                    <Pencil size={14} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(p.id, p.title)}
+                    className="w-9 h-9 rounded-[var(--radius-xs)] bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-950/50 border border-red-200 dark:border-red-900 flex items-center justify-center text-red-600 dark:text-red-400 transition-colors"
+                    aria-label="Șterge"
+                    title="Șterge"
+                  >
+                    <Trash2 size={14} aria-hidden="true" />
+                  </button>
                 </div>
-                <h2 className="font-[family-name:var(--font-sora)] font-bold text-base mb-1 line-clamp-1">
-                  {p.title}
-                </h2>
-                <p className="text-xs text-[var(--color-text-muted)] line-clamp-2 mb-2">
-                  {p.summary}
-                </p>
-                <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)] flex-wrap">
-                  <span className="inline-flex items-center gap-1 tabular-nums font-medium text-[var(--color-text)]">
-                    <Users size={11} aria-hidden="true" />
-                    {p.signature_count.toLocaleString("ro-RO")} / {p.target_signatures.toLocaleString("ro-RO")}
-                  </span>
-                  <span aria-hidden="true">·</span>
-                  <span className="font-mono">/{p.slug}</span>
-                  {p.external_url && (
-                    <>
-                      <span aria-hidden="true">·</span>
-                      <a
-                        href={p.external_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 hover:text-[var(--color-primary)]"
-                      >
-                        <ExternalLink size={11} aria-hidden="true" />
-                        link extern
-                      </a>
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
-                <Link
-                  href={`/petitii/${p.slug}`}
-                  target="_blank"
-                  className="w-9 h-9 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-                  aria-label="Deschide pe site"
-                  title="Deschide pe site"
-                >
-                  <Eye size={14} aria-hidden="true" />
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingId(p.id);
-                    setShowForm(true);
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                  className="w-9 h-9 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-                  aria-label="Editează"
-                  title="Editează"
-                >
-                  <Pencil size={14} aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(p.id, p.title)}
-                  className="w-9 h-9 rounded-[var(--radius-xs)] bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-950/50 border border-red-200 dark:border-red-900 flex items-center justify-center text-red-600 dark:text-red-400 transition-colors"
-                  aria-label="Șterge"
-                  title="Șterge"
-                >
-                  <Trash2 size={14} aria-hidden="true" />
-                </button>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       )}
     </div>
@@ -277,23 +280,8 @@ export default function AdminPetitiiPage() {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// PetitieForm cu auto-save la 2s în localStorage
+// PetitieForm
 // ─────────────────────────────────────────────────────────────────
-
-function getDraftKey(editingId: string | null): string {
-  return editingId ? `${DRAFT_KEY_EDIT_PREFIX}${editingId}` : DRAFT_KEY_NEW;
-}
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    // Remove combining diacritical marks (Latin + cyrillic ranges).
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 100);
-}
 
 function PetitieForm({
   editingId,
@@ -302,7 +290,7 @@ function PetitieForm({
   onSaved,
 }: {
   editingId: string | null;
-  existing: PetitieWithCount | null;
+  existing: PetitieRow | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -312,7 +300,10 @@ function PetitieForm({
   const [now, setNow] = useState(Date.now());
   const [restoredBanner, setRestoredBanner] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [aiBusy, setAiBusy] = useState<"slug" | "summary" | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
   const slugManuallyEditedRef = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const baseForm: FormState = existing
     ? {
@@ -322,11 +313,11 @@ function PetitieForm({
         body: existing.body,
         image_url: existing.image_url ?? "",
         external_url: existing.external_url ?? "",
-        target_signatures: existing.target_signatures,
+        target_unlimited: existing.target_signatures === null,
+        target_signatures: existing.target_signatures ?? 1000,
         category: existing.category ?? "",
         county_code: existing.county_code ?? "",
         ends_at: existing.ends_at?.slice(0, 10) ?? "",
-        status: existing.status,
       }
     : EMPTY_FORM;
 
@@ -339,7 +330,6 @@ function PetitieForm({
       const raw = localStorage.getItem(getDraftKey(editingId));
       if (!raw) return;
       const parsed = JSON.parse(raw) as { form: FormState; savedAt: number };
-      // Only restore if draft has meaningful content vs base form
       const hasContent =
         parsed.form.title.trim().length > 0 ||
         parsed.form.summary.trim().length > 0 ||
@@ -357,7 +347,7 @@ function PetitieForm({
     }
   }, [editingId]);
 
-  // ─── Auto-save la 2s ────────────────────────────────────────────
+  // ─── Auto-save 2s ──────────────────────────────────────────────
   useEffect(() => {
     if (typeof window === "undefined") return;
     const key = getDraftKey(editingId);
@@ -377,14 +367,14 @@ function PetitieForm({
     return () => clearTimeout(t);
   }, [form, editingId]);
 
-  // ─── "X secunde acum" updater ──────────────────────────────────
+  // ─── "Salvat acum X" updater ──────────────────────────────────
   useEffect(() => {
     if (!draftSavedAt) return;
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, [draftSavedAt]);
 
-  // ─── Auto-slug generator (până e editat manual) ────────────────
+  // ─── Auto-slug ─────────────────────────────────────────────────
   const updateTitle = (title: string) => {
     setForm((f) => ({
       ...f,
@@ -408,8 +398,76 @@ function PetitieForm({
     toast("Ciorna ștearsă", "info");
   };
 
+  // ─── AI helpers ────────────────────────────────────────────────
+  const runAi = async (type: "slug" | "summary") => {
+    if (!form.title.trim() || form.title.trim().length < 8) {
+      toast("Completează titlul mai întâi (min. 8 caractere)", "error");
+      return;
+    }
+    if (type === "summary" && form.body.trim().length < 50) {
+      toast("Completează conținutul mai întâi (min. 50 caractere) pentru AI summary", "error");
+      return;
+    }
+    setAiBusy(type);
+    try {
+      const res = await fetch("/api/admin/petitii/ai-helper", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type,
+          title: form.title,
+          ...(type === "summary" ? { body: form.body } : {}),
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "AI failed");
+      const text = json.data?.text ?? "";
+      if (type === "slug") {
+        slugManuallyEditedRef.current = true;
+        setForm((f) => ({ ...f, slug: text }));
+        toast("Slug generat cu AI", "success");
+      } else {
+        setForm((f) => ({ ...f, summary: text }));
+        toast("Sumar generat cu AI", "success");
+      }
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "AI helper a eșuat", "error");
+    } finally {
+      setAiBusy(null);
+    }
+  };
+
+  // ─── Image upload ──────────────────────────────────────────────
+  const uploadImage = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast("Doar fișiere imagine (jpg, png, webp)", "error");
+      return;
+    }
+    setImageUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Upload failed");
+      const url = json.data?.url ?? json.url ?? "";
+      if (!url) throw new Error("No URL returned");
+      setForm((f) => ({ ...f, image_url: url }));
+      toast("Imagine încărcată", "success");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Eroare upload", "error");
+    } finally {
+      setImageUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.external_url.trim()) {
+      toast("Link-ul extern e obligatoriu (sursa oficială a petiției)", "error");
+      return;
+    }
     setSaving(true);
     try {
       const payload = {
@@ -418,12 +476,12 @@ function PetitieForm({
         summary: form.summary.trim(),
         body: form.body.trim(),
         image_url: form.image_url.trim() || null,
-        external_url: form.external_url.trim() || null,
-        target_signatures: Number(form.target_signatures),
+        external_url: form.external_url.trim(),
+        target_signatures: form.target_unlimited ? null : Number(form.target_signatures),
         category: form.category.trim() || null,
-        county_code: form.county_code.trim().toUpperCase() || null,
+        county_code: form.county_code.trim() || null,
         ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
-        status: form.status,
+        status: "active" as const,
       };
       const url = editingId ? `/api/admin/petitii/${editingId}` : "/api/admin/petitii";
       const method = editingId ? "PATCH" : "POST";
@@ -434,9 +492,8 @@ function PetitieForm({
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Failed");
-      // Clear draft on successful save
       if (typeof window !== "undefined") localStorage.removeItem(getDraftKey(editingId));
-      toast(editingId ? "Salvat" : "Creată", "success");
+      toast(editingId ? "Salvat" : "Publicată!", "success");
       onSaved();
     } catch (e) {
       toast(e instanceof Error ? e.message : "Eroare", "error");
@@ -448,11 +505,9 @@ function PetitieForm({
   const inputCls = "w-full h-11 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]";
   const labelCls = "block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5";
 
-  // Estimate read time pentru body — ~200 words/min
   const wordCount = form.body.trim().split(/\s+/).filter(Boolean).length;
   const readMinutes = Math.max(1, Math.ceil(wordCount / 200));
 
-  // Format draftSavedAt
   const draftAge = draftSavedAt ? Math.floor((now - draftSavedAt) / 1000) : 0;
   const draftAgeText =
     draftAge < 5
@@ -462,6 +517,8 @@ function PetitieForm({
         : draftAge < 3600
           ? `acum ${Math.floor(draftAge / 60)}min`
           : `acum ${Math.floor(draftAge / 3600)}h`;
+
+  const sortedCounties = [...ALL_COUNTIES].sort((a, b) => a.name.localeCompare(b.name, "ro"));
 
   return (
     <form
@@ -522,14 +579,14 @@ function PetitieForm({
           <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
           <div className="flex-1 text-xs text-amber-800 dark:text-amber-300">
             <p className="font-semibold mb-0.5">Ciornă restaurată</p>
-            <p>Am găsit o ciornă nesalvată din sesiunea anterioară. Continuă de unde ai rămas sau șterge-o.</p>
+            <p>Am găsit o ciornă nesalvată din sesiunea anterioară. Continuă sau șterge.</p>
           </div>
           <button
             type="button"
             onClick={clearDraft}
             className="shrink-0 text-xs font-medium text-amber-700 dark:text-amber-300 underline hover:no-underline"
           >
-            Șterge ciornă
+            Șterge
           </button>
         </div>
       )}
@@ -537,23 +594,23 @@ function PetitieForm({
       <div className={showPreview ? "grid lg:grid-cols-2 gap-6" : ""}>
         <div className="space-y-4">
           <div>
-            <label htmlFor="p-title" className={labelCls}>Titlu</label>
+            <label htmlFor="p-title" className={labelCls}>Titlu *</label>
             <input
               id="p-title"
               type="text"
               value={form.title}
               onChange={(e) => updateTitle(e.target.value)}
-              placeholder="ex: Parcuri mai multe pentru București"
+              placeholder="ex: Mai multe parcuri pentru București"
               required
               className={inputCls}
               autoCapitalize="words"
             />
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-[1fr_auto] gap-2 items-end">
             <div>
               <label htmlFor="p-slug" className={labelCls}>
-                Slug (URL)
+                Slug (URL) *
                 {!slugManuallyEditedRef.current && form.title && (
                   <span className="ml-2 text-[10px] normal-case text-emerald-600 dark:text-emerald-400">
                     auto-generat
@@ -569,41 +626,43 @@ function PetitieForm({
                 required
                 className={`${inputCls} font-mono text-xs`}
               />
-              <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
-                URL: /petitii/{form.slug || "slug"}
-              </p>
             </div>
-            <div>
-              <label htmlFor="p-status" className={labelCls}>Status</label>
-              <select
-                id="p-status"
-                value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value as FormState["status"] })}
-                className={inputCls}
-              >
-                <option value="draft">Ciornă (ascuns public)</option>
-                <option value="active">Activă (semnabilă)</option>
-                <option value="closed">Încheiată (read-only)</option>
-                <option value="archived">Arhivată (ascuns)</option>
-              </select>
-            </div>
+            <button
+              type="button"
+              onClick={() => runAi("slug")}
+              disabled={aiBusy !== null || !form.title.trim()}
+              className="h-11 inline-flex items-center gap-1.5 px-3 rounded-[var(--radius-xs)] bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
+              title="Generează slug cu AI din titlu"
+            >
+              {aiBusy === "slug" ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+              AI
+            </button>
           </div>
+          <p className="text-[10px] text-[var(--color-text-muted)] -mt-3">
+            URL: civia.ro/petitii/<strong className="font-mono">{form.slug || "slug"}</strong>
+          </p>
 
           <div>
-            <label htmlFor="p-summary" className={labelCls}>
-              Sumar (afișat pe card){" "}
-              <span className={cn(
-                "tabular-nums normal-case font-medium",
-                form.summary.length >= 480 ? "text-red-500" : form.summary.length >= 400 ? "text-amber-500" : "text-[var(--color-text-muted)]",
-              )}>
-                {form.summary.length}/500
-              </span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label htmlFor="p-summary" className={`${labelCls} mb-0`}>
+                Sumar (afișat pe card) *
+              </label>
+              <button
+                type="button"
+                onClick={() => runAi("summary")}
+                disabled={aiBusy !== null || form.body.trim().length < 50}
+                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-[var(--radius-xs)] bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-[10px] font-semibold transition-colors"
+                title="Generează sumar cu AI din titlu + conținut"
+              >
+                {aiBusy === "summary" ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
+                Generează cu AI
+              </button>
+            </div>
             <textarea
               id="p-summary"
               value={form.summary}
               onChange={(e) => setForm({ ...form, summary: e.target.value.slice(0, 500) })}
-              placeholder="2-3 propoziții cu contextul petiției..."
+              placeholder={`2-3 propoziții cu contextul. Sau apasă "Generează cu AI" după ce completezi conținutul.`}
               required
               rows={3}
               maxLength={500}
@@ -611,11 +670,17 @@ function PetitieForm({
               autoCapitalize="sentences"
               spellCheck
             />
+            <p className={cn(
+              "text-[10px] mt-1 tabular-nums font-medium",
+              form.summary.length >= 480 ? "text-red-500" : form.summary.length >= 400 ? "text-amber-500" : "text-[var(--color-text-muted)]",
+            )}>
+              {form.summary.length}/500
+            </p>
           </div>
 
           <div>
             <label htmlFor="p-body" className={labelCls}>
-              Conținut complet{" "}
+              Conținut complet *{" "}
               <span className="tabular-nums normal-case text-[var(--color-text-muted)] font-medium">
                 {wordCount.toLocaleString("ro-RO")} cuvinte · ~{readMinutes} min lectură
               </span>
@@ -624,7 +689,7 @@ function PetitieForm({
               id="p-body"
               value={form.body}
               onChange={(e) => setForm({ ...form, body: e.target.value })}
-              placeholder="Argumentul detaliat. Linii noi se păstrează."
+              placeholder="Argumentul detaliat al petiției. Contextul, ce ceri, motivul. Linii noi se păstrează."
               required
               rows={10}
               className={`${inputCls} h-auto py-3 font-mono text-xs leading-relaxed`}
@@ -633,101 +698,153 @@ function PetitieForm({
             />
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="p-image" className={labelCls}>
-                <ImageIcon size={11} className="inline mr-1" aria-hidden="true" />
-                URL Imagine (opțional)
-              </label>
+          <div>
+            <label htmlFor="p-ext" className={labelCls}>
+              <ExternalLink size={11} className="inline mr-1" aria-hidden="true" />
+              Link extern obligatoriu *
+            </label>
+            <input
+              id="p-ext"
+              type="url"
+              value={form.external_url}
+              onChange={(e) => setForm({ ...form, external_url: e.target.value })}
+              placeholder="https://declic.ro/petitii/..."
+              required
+              className={inputCls}
+            />
+            <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
+              Sursa oficială a petiției (Declic / Avaaz / Change.org / petitie.civica.ro). Cetățenii sunt direcționați acolo să semneze.
+            </p>
+          </div>
+
+          {/* IMAGE */}
+          <div>
+            <label htmlFor="p-image" className={labelCls}>
+              <ImageIcon size={11} className="inline mr-1" aria-hidden="true" />
+              Imagine (opțional)
+            </label>
+            <div className="flex gap-2">
               <input
                 id="p-image"
                 type="url"
                 value={form.image_url}
                 onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                placeholder="https://..."
+                placeholder="URL imagine sau încarcă din disc"
                 className={inputCls}
               />
-              {form.image_url && (
-                <div className="mt-2 relative w-full aspect-[16/9] rounded-[var(--radius-xs)] overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={form.image_url}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-            <div>
-              <label htmlFor="p-ext" className={labelCls}>
-                <ExternalLink size={11} className="inline mr-1" aria-hidden="true" />
-                Link extern (opțional)
-              </label>
               <input
-                id="p-ext"
-                type="url"
-                value={form.external_url}
-                onChange={(e) => setForm({ ...form, external_url: e.target.value })}
-                placeholder="https://declic.ro/petitii/..."
-                className={inputCls}
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadImage(file);
+                }}
+                className="hidden"
               />
-              <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
-                Pentru petițiile oficiale (Declic, Avaaz, Change.org).
-              </p>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={imageUploading}
+                className="h-11 inline-flex items-center gap-1.5 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] border border-[var(--color-border)] text-sm font-medium disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                title="Încarcă imagine din disc"
+              >
+                {imageUploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                Încarcă
+              </button>
             </div>
+            {form.image_url && (
+              <div className="mt-2 relative w-full aspect-[16/9] rounded-[var(--radius-xs)] overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={form.image_url}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+            )}
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-4">
-            <div>
-              <label htmlFor="p-target" className={labelCls}>Semnături țintă</label>
-              <input
-                id="p-target"
-                type="number"
-                min={10}
-                max={10_000_000}
-                value={form.target_signatures}
-                onChange={(e) => setForm({ ...form, target_signatures: Number(e.target.value) })}
-                className={inputCls}
-              />
-            </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {/* CATEGORIE */}
             <div>
               <label htmlFor="p-cat" className={labelCls}>Categorie</label>
-              <input
+              <select
                 id="p-cat"
-                type="text"
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
-                placeholder="Mediu / Transport"
                 className={inputCls}
-                autoCapitalize="words"
-              />
+              >
+                <option value="">— alege —</option>
+                {PETITIE_CATEGORII.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.icon} {c.label}
+                  </option>
+                ))}
+              </select>
             </div>
+            {/* JUDET */}
             <div>
-              <label htmlFor="p-county" className={labelCls}>Județ</label>
-              <input
+              <label htmlFor="p-county" className={labelCls}>Județ / Național</label>
+              <select
                 id="p-county"
-                type="text"
                 value={form.county_code}
-                onChange={(e) => setForm({ ...form, county_code: e.target.value.toUpperCase().slice(0, 3) })}
-                placeholder="B / CJ"
-                maxLength={3}
-                className={`${inputCls} uppercase`}
-              />
+                onChange={(e) => setForm({ ...form, county_code: e.target.value })}
+                className={inputCls}
+              >
+                <option value="">🇷🇴 Național</option>
+                {sortedCounties.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} ({c.id})
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          <div>
-            <label htmlFor="p-ends" className={labelCls}>Data de încheiere (opțional)</label>
-            <input
-              id="p-ends"
-              type="date"
-              value={form.ends_at}
-              onChange={(e) => setForm({ ...form, ends_at: e.target.value })}
-              className={inputCls}
-            />
+          <div className="grid sm:grid-cols-2 gap-4">
+            {/* TARGET */}
+            <div>
+              <label className={labelCls}>Semnături țintă</label>
+              <div className="flex items-center gap-3 h-11">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.target_unlimited}
+                    onChange={(e) => setForm({ ...form, target_unlimited: e.target.checked })}
+                    className="w-4 h-4 accent-[var(--color-primary)]"
+                  />
+                  <span className="text-sm flex items-center gap-1">
+                    <InfinityIcon size={14} aria-hidden="true" />
+                    Nelimitat
+                  </span>
+                </label>
+                {!form.target_unlimited && (
+                  <input
+                    type="number"
+                    min={10}
+                    max={10_000_000}
+                    value={form.target_signatures}
+                    onChange={(e) => setForm({ ...form, target_signatures: Number(e.target.value) })}
+                    className={`${inputCls} max-w-[160px]`}
+                  />
+                )}
+              </div>
+            </div>
+            {/* ENDS AT */}
+            <div>
+              <label htmlFor="p-ends" className={labelCls}>Data de încheiere (opțional)</label>
+              <input
+                id="p-ends"
+                type="date"
+                value={form.ends_at}
+                onChange={(e) => setForm({ ...form, ends_at: e.target.value })}
+                className={inputCls}
+              />
+            </div>
           </div>
         </div>
 
@@ -743,11 +860,17 @@ function PetitieForm({
                 <img src={form.image_url} alt="" className="w-full h-full object-cover" />
               </div>
             )}
-            {form.category && (
-              <span className="inline-block text-[10px] uppercase tracking-wider font-bold text-purple-600 dark:text-purple-400 mb-2">
-                {form.category}
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              {form.category && (
+                <span className="text-[10px] uppercase tracking-wider font-bold text-purple-600 dark:text-purple-400">
+                  {PETITIE_CATEGORII.find((c) => c.value === form.category)?.icon}{" "}
+                  {form.category}
+                </span>
+              )}
+              <span className="text-[10px] uppercase tracking-wider font-bold text-[var(--color-text-muted)]">
+                {form.county_code ? `📍 ${form.county_code}` : "🇷🇴 Național"}
               </span>
-            )}
+            </div>
             <h3 className="font-[family-name:var(--font-sora)] font-bold text-lg mb-2">
               {form.title || "Titlul petiției"}
             </h3>

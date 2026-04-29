@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
@@ -11,8 +12,8 @@ const updateSchema = z.object({
   summary: z.string().min(20).max(500).optional(),
   body: z.string().min(50).optional(),
   image_url: z.string().url().nullable().optional(),
-  external_url: z.string().url().nullable().optional(),
-  target_signatures: z.number().int().min(10).max(10_000_000).optional(),
+  external_url: z.string().url().optional(),
+  target_signatures: z.number().int().min(10).max(10_000_000).nullable().optional(),
   category: z.string().max(40).nullable().optional(),
   county_code: z.string().max(3).nullable().optional(),
   starts_at: z.string().optional(),
@@ -61,6 +62,8 @@ export async function PATCH(
       }
       throw error;
     }
+    revalidatePath("/petitii");
+    if (data?.slug) revalidatePath(`/petitii/${data.slug}`);
     return NextResponse.json({ data });
   } catch (e) {
     if (e instanceof z.ZodError) {
@@ -80,7 +83,11 @@ export async function DELETE(
 
   const { id } = await params;
   const admin = createSupabaseAdmin();
+  // Get slug before delete pentru revalidatePath
+  const { data: existing } = await admin.from("petitii").select("slug").eq("id", id).maybeSingle();
   const { error } = await admin.from("petitii").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  revalidatePath("/petitii");
+  if (existing?.slug) revalidatePath(`/petitii/${existing.slug}`);
   return NextResponse.json({ ok: true });
 }

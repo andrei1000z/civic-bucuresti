@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
@@ -11,12 +12,16 @@ const schema = z.object({
   summary: z.string().min(20).max(500),
   body: z.string().min(50),
   image_url: z.string().url().nullable().optional(),
-  external_url: z.string().url().nullable().optional(),
-  target_signatures: z.number().int().min(10).max(10_000_000).default(1000),
+  // External link e obligatoriu — petițiile civice au mereu o sursă oficială.
+  external_url: z.string().url("Link extern invalid"),
+  // Target opțional — null = nelimitat / cât mai multe semnături.
+  target_signatures: z.number().int().min(10).max(10_000_000).nullable().optional(),
   category: z.string().max(40).nullable().optional(),
   county_code: z.string().max(3).nullable().optional(),
   starts_at: z.string().optional(),
   ends_at: z.string().nullable().optional(),
+  // Status mereu „active" la creare. Field păstrat ca enum DB pentru
+  // backward-compat dar nu mai e expus în UI.
   status: z.enum(["draft", "active", "closed", "archived"]).default("active"),
 });
 
@@ -62,6 +67,9 @@ export async function POST(req: Request) {
       }
       throw error;
     }
+    // Revalidate cached pages — altfel /petitii arată stale 5min după publish.
+    revalidatePath("/petitii");
+    if (data?.slug) revalidatePath(`/petitii/${data.slug}`);
     return NextResponse.json({ data });
   } catch (e) {
     if (e instanceof z.ZodError) {
