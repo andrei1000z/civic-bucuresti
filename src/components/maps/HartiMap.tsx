@@ -342,21 +342,22 @@ export function HartiMap({
         </div>
 
         {/* Footer link section — pagini distincte (hărți + surse de date
-            proprii) accesibile rapid din sidebar fără să încarce tab-bar-ul. */}
+            proprii) accesibile rapid din sidebar fără să încarce tab-bar-ul.
+            countySlug se păstrează ca user-ul să nu piardă contextul județean. */}
         <div className="border-t border-[var(--color-border)] px-4 py-3 shrink-0">
           <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-2">
             Vezi și
           </p>
           <div className="flex flex-wrap gap-2">
             <Link
-              href="/aer"
+              href={countySlug ? `/${countySlug}/aer` : "/aer"}
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[var(--radius-xs)] text-xs font-medium text-[var(--color-text)] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
               <BarChart3 size={13} aria-hidden="true" />
               Calitatea aerului
             </Link>
             <Link
-              href="/intreruperi"
+              href={countySlug ? `/${countySlug}/intreruperi` : "/intreruperi"}
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[var(--radius-xs)] text-xs font-medium text-[var(--color-text)] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
               <AlertTriangle size={13} aria-hidden="true" />
