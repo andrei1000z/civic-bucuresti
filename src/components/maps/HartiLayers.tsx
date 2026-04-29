@@ -13,7 +13,7 @@ import type { PathOptions } from "leaflet";
 import type { Feature } from "geojson";
 
 interface HartiLayersProps {
-  activeTab: "bicicleta" | "pejos" | "auto" | "transport" | "statistici";
+  activeTab: "bicicleta" | "pejos" | "auto" | "transport" | "aer";
   showDedicate: boolean;
   showMarcate: boolean;
   showRecomandate: boolean;
@@ -21,7 +21,6 @@ interface HartiLayersProps {
   showPietonal: boolean;
   showTraversari: boolean;
   visibleLines: string[];
-  statsMode: "accidente" | "aer" | "densitate";
 }
 
 // All bike paths shown as green — no categories, no "recomandate"
@@ -118,7 +117,6 @@ export default function HartiLayers(props: HartiLayersProps) {
     showParcuri,
     showPietonal,
     visibleLines,
-    statsMode,
   } = props;
 
   // Memoize style functions — stable references prevent GeoJSON re-creation on every map pan/zoom
@@ -205,7 +203,7 @@ export default function HartiLayers(props: HartiLayersProps) {
     );
   }
 
-  if (activeTab === "statistici" && statsMode === "aer") {
+  if (activeTab === "aer") {
     return <NationalAqiLayer key="aqi-national" />;
   }
 

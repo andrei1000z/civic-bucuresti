@@ -3,9 +3,10 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Bike, Footprints, Bus, BarChart3, Car, Layers, ChevronLeft, Locate, Loader2, AlertTriangle } from "lucide-react";
+import { Bike, Footprints, Bus, Car, Wind, Layers, ChevronLeft, Locate, Loader2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { METRO_COLORS } from "@/lib/constants";
+import { MapTopSwitcher, type SwitcherTab } from "./MapTopSwitcher";
 
 // Metrorex București — 5 magistrale, 63 stații total (confirmat 2025)
 const METRO_INFO = [
@@ -51,14 +52,26 @@ const LeafletMap = dynamic(() => import("./LeafletMap"), {
 
 const HartiLayers = dynamic(() => import("./HartiLayers"), { ssr: false });
 
-type Tab = "bicicleta" | "pejos" | "auto" | "transport";
+type Tab = "bicicleta" | "pejos" | "auto" | "transport" | "aer";
 
-const tabs = [
-  { id: "bicicleta" as const, label: "Cu bicicleta", icon: Bike, href: "/harti/bicicleta" },
-  { id: "pejos" as const, label: "Pe jos", icon: Footprints, href: "/harti/pejos" },
-  { id: "auto" as const, label: "Cu mașina", icon: Car, href: "/harti/cumasina" },
-  { id: "transport" as const, label: "Transport public", icon: Bus, href: "/harti/transport" },
+// Top-center switcher tabs (icon + short label so the pill stays compact).
+const SWITCHER_TABS: ReadonlyArray<SwitcherTab<Tab>> = [
+  { id: "bicicleta", label: "Bicicletă", icon: Bike },
+  { id: "pejos", label: "Pe jos", icon: Footprints },
+  { id: "auto", label: "Mașină", icon: Car },
+  { id: "transport", label: "Transport", icon: Bus },
+  { id: "aer", label: "Aer", icon: Wind },
 ];
+
+// Per-tab canonical URLs — used for pushState when the user switches
+// tabs so refreshes / shares preserve the selected layer.
+const TAB_HREF: Record<Tab, string> = {
+  bicicleta: "/harti/bicicleta",
+  pejos: "/harti/pejos",
+  auto: "/harti/cumasina",
+  transport: "/harti/transport",
+  aer: "/harti",
+};
 
 export function HartiMap({
   defaultTab = "bicicleta",
@@ -82,7 +95,10 @@ export function HartiMap({
   countySlug?: string;
 } = {}) {
   const [activeTab, setActiveTab] = useState<Tab>(defaultTab);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Sidebar collapsed by default — the top-center switcher handles tab
+  // selection, so the sidebar is now an *optional* details panel instead
+  // of the primary nav. User opens it when they want filters or legend.
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
   const [mapStyle, setMapStyle] = useState<"standard" | "satelit">("standard");
 
@@ -99,8 +115,16 @@ export function HartiMap({
   // Transport
   const [visibleLines, setVisibleLines] = useState<string[]>(["M1", "M2", "M3", "M4", "M5"]);
 
-  // Statistics — only "aer" mode for now (accidente + densitate removed with mock data)
-  const statsMode = "aer" as const;
+  // Switcher → also push the canonical URL so refresh / share keeps the
+  // active layer. Uses pushState (no SPA navigation) since HartiMap renders
+  // the same component for every tab.
+  const handleTabChange = (id: Tab) => {
+    setActiveTab(id);
+    const href = countySlug ? `/${countySlug}${TAB_HREF[id]}` : TAB_HREF[id];
+    if (typeof window !== "undefined") {
+      window.history.pushState(null, "", href);
+    }
+  };
 
   // Locate
   const [flyTarget, setFlyTarget] = useState<{ coords: [number, number]; zoom?: number } | null>(null);
@@ -147,43 +171,17 @@ export function HartiMap({
           sidebarOpen ? "w-80" : "w-0 -ml-px overflow-hidden md:w-0"
         )}
       >
-        {/* Tabs — 4 layer-overlay tabs fit comfortably în 320px sidebar.
-            Aer + Întreruperi (pagini complet separate cu hărți proprii)
-            au mutat în footer-ul sidebar-ului ca link-uri externe, ca
-            să nu mai concureze cu butonul de collapse pentru spațiu. */}
-        <div className="relative flex border-b border-[var(--color-border)] shrink-0 overflow-x-auto no-scrollbar pr-10">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            const scopedHref = countySlug ? `/${countySlug}${tab.href}` : tab.href;
-            return (
-              <Link
-                key={tab.id}
-                href={scopedHref}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveTab(tab.id);
-                  window.history.pushState(null, "", scopedHref);
-                }}
-                className={cn(
-                  "shrink-0 flex flex-col items-center gap-1 py-3 px-3 min-w-[72px] text-xs font-medium border-b-2 transition-colors",
-                  isActive
-                    ? "border-[var(--color-primary)] text-[var(--color-primary)] bg-[var(--color-primary-soft)]/30"
-                    : "border-transparent text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
-                )}
-              >
-                <Icon size={18} aria-hidden="true" />
-                <span className="leading-none whitespace-nowrap">{tab.label}</span>
-              </Link>
-            );
-          })}
-          {/* Close button — pin la top-right corner sidebar header.
-              Înainte era extern, suprapunându-se cu tab-ul Întreruperi. */}
+        {/* Sidebar header — just title + close. Tab nav lives in the
+            top-center switcher overlay on the map (MapTopSwitcher). */}
+        <div className="relative flex items-center justify-between border-b border-[var(--color-border)] shrink-0 px-4 py-3">
+          <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+            Detalii hartă
+          </p>
           <button
             type="button"
             onClick={() => setSidebarOpen(false)}
-            aria-label="Ascunde meniul"
-            className="absolute top-1 right-1 z-10 h-8 w-8 rounded-full bg-[var(--color-surface-2)]/80 backdrop-blur-sm hover:bg-[var(--color-surface-2)] flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            aria-label="Ascunde panoul de detalii"
+            className="h-8 w-8 rounded-full bg-[var(--color-surface-2)]/80 backdrop-blur-sm hover:bg-[var(--color-surface-2)] flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
             <ChevronLeft size={16} aria-hidden="true" />
           </button>
@@ -192,18 +190,20 @@ export function HartiMap({
         <div className="flex-1 overflow-y-auto p-5">
           {activeTab === "bicicleta" && (
             <div>
-              <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Unde poți merge cu bicicleta{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
+              <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-2">
+                Cu bicicleta{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
               </h3>
-              <p className="text-sm text-[var(--color-text-muted)] mb-4">
+              <p className="text-sm text-[var(--color-text-muted)] mb-4 leading-relaxed">
                 {scopeName
-                  ? `Piste dedicate, benzi marcate și drumuri permise bicicletei din ${scopeName}. Date oficiale din OpenStreetMap.`
-                  : "Piste dedicate și benzi marcate pentru biciclete din toată România. Date colaborative de la OpenStreetMap — actualizate de voluntari."}
+                  ? `Piste dedicate și benzi marcate pentru biciclete din ${scopeName}. Sursa: OpenStreetMap, contribuții colaborative.`
+                  : "Piste dedicate și benzi marcate pentru biciclete din toată România. Date colaborative OpenStreetMap, actualizate de voluntari."}
               </p>
-              <div className="flex items-start gap-3 mb-4">
-                <span className="w-6 h-1 rounded-full mt-2 shrink-0" style={{ background: "#059669" }} />
-                <p className="text-sm text-[var(--color-text-muted)]">Verde = piste și benzi ciclabile permise</p>
+              <div className="space-y-2 mb-4">
+                <Legend color="#059669" label="Pistă dedicată sau bandă marcată" />
               </div>
+              <p className="text-[11px] text-[var(--color-text-muted)] p-2.5 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] leading-relaxed">
+                💡 Mărește (zoom 14+) la nivel de oraș ca să vezi rețeaua locală în detaliu.
+              </p>
             </div>
           )}
 
@@ -300,11 +300,11 @@ export function HartiMap({
 
           {activeTab === "transport" && (
             <div>
-              <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Transport public — metrou + tramvai + autobuz
+              <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-2">
+                Transport public{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
               </h3>
-              <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                Metroul bucureștean (5 magistrale, 63 stații), rețeaua de tramvai și stații de autobuz — ultimele se încarcă pe măsură ce navighezi. Date OpenStreetMap.
+              <p className="text-sm text-[var(--color-text-muted)] mb-4 leading-relaxed">
+                Metroul bucureștean (5 magistrale, <strong>63 de stații</strong>), rețeaua de tramvai și stații de autobuz — acestea din urmă se încarcă pe măsură ce navighezi. Sursa: Metrorex + OpenStreetMap.
               </p>
               <div className="space-y-2 mb-5">
                 {METRO_INFO.map((line) => {
@@ -339,31 +339,43 @@ export function HartiMap({
             </div>
           )}
 
+          {activeTab === "aer" && (
+            <div>
+              <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-2">
+                Calitatea aerului{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
+              </h3>
+              <p className="text-sm text-[var(--color-text-muted)] mb-4 leading-relaxed">
+                Senzori europeni de calitate a aerului în timp real — PM2.5, PM10, NO₂, O₃. Sursa principală: OpenAQ + Sensor.Community (rețea civică).
+              </p>
+              <div className="space-y-1.5 mb-4">
+                <Legend color="#10B981" label="Bun (1–3) — fără riscuri" />
+                <Legend color="#F59E0B" label="Moderat (4–6) — sensibilizați atenți" />
+                <Legend color="#EF4444" label="Nesănătos (7–8) — limitează efortul" />
+                <Legend color="#7F1D1D" label="Periculos (9–10) — evită exteriorul" />
+              </div>
+              <Link
+                href={countySlug ? `/${countySlug}/aer` : "/aer"}
+                className="block w-full text-center text-xs font-medium text-[var(--color-primary)] hover:underline mt-3"
+              >
+                Vezi pagina completă cu trenduri →
+              </Link>
+            </div>
+          )}
+
         </div>
 
-        {/* Footer link section — pagini distincte (hărți + surse de date
-            proprii) accesibile rapid din sidebar fără să încarce tab-bar-ul.
-            countySlug se păstrează ca user-ul să nu piardă contextul județean. */}
+        {/* Footer — Întreruperi rămâne ca link extern; Aer e acum tab principal */}
         <div className="border-t border-[var(--color-border)] px-4 py-3 shrink-0">
           <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-2">
             Vezi și
           </p>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href={countySlug ? `/${countySlug}/aer` : "/aer"}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[var(--radius-xs)] text-xs font-medium text-[var(--color-text)] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-            >
-              <BarChart3 size={13} aria-hidden="true" />
-              Calitatea aerului
-            </Link>
-            <Link
-              href={countySlug ? `/${countySlug}/intreruperi` : "/intreruperi"}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[var(--radius-xs)] text-xs font-medium text-[var(--color-text)] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-            >
-              <AlertTriangle size={13} aria-hidden="true" />
-              Întreruperi
-            </Link>
-          </div>
+          <Link
+            href={countySlug ? `/${countySlug}/intreruperi` : "/intreruperi"}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[var(--radius-xs)] text-xs font-medium text-[var(--color-text)] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          >
+            <AlertTriangle size={13} aria-hidden="true" />
+            Întreruperi gaze, apă, curent
+          </Link>
         </div>
       </aside>
 
@@ -393,9 +405,11 @@ export function HartiMap({
             showPietonal={showPietonal}
             showTraversari={showTraversari}
             visibleLines={visibleLines}
-            statsMode={statsMode}
           />
         </LeafletMap>
+
+        {/* Top-center floating switcher with sliding liquid-glass indicator */}
+        <MapTopSwitcher tabs={SWITCHER_TABS} active={activeTab} onChange={handleTabChange} />
 
         {/* Map style switcher */}
         <div className="absolute top-4 right-4 z-20">
@@ -446,6 +460,19 @@ export function HartiMap({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function Legend({ color, label }: { color: string; label: string }) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <span
+        className="w-3 h-3 rounded-full mt-1 shrink-0 ring-2 ring-[var(--color-surface-2)]"
+        style={{ background: color }}
+        aria-hidden="true"
+      />
+      <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">{label}</p>
     </div>
   );
 }
