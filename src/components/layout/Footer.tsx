@@ -39,10 +39,13 @@ export function Footer() {
                 {SITE_NAME}
               </span>
             </Link>
-            <p className="text-sm text-[var(--color-text-muted)] mb-4 max-w-xs leading-relaxed">
+            <p className="text-sm text-[var(--color-text-muted)] mb-3 max-w-xs leading-relaxed">
               Platformă civică independentă, gratuită.
               <br />
               Făcută cu <span className="text-rose-500" aria-label="dragoste">❤️</span> pentru o țară ca afară.
+            </p>
+            <p className="text-xs text-[var(--color-text-muted)] max-w-xs leading-relaxed italic">
+              Civia.ro nu promovează niciun partid politic, nicio poziționare ideologică. Militam pentru o lume corectă, modernă și pentru oameni.
             </p>
           </div>
 
