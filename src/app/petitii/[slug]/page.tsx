@@ -15,6 +15,7 @@ import { getPetitieBySlug } from "@/lib/petitii/repository";
 import { SITE_URL, PETITIE_CATEGORII } from "@/lib/constants";
 import { ALL_COUNTIES } from "@/data/counties";
 import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
+import { SharePetitie } from "./SharePetitie";
 
 export const revalidate = 60;
 
@@ -26,15 +27,40 @@ export async function generateMetadata({
   const { slug } = await params;
   const p = await getPetitieBySlug(slug);
   if (!p) return {};
+
+  const url = `${SITE_URL}/petitii/${p.slug}`;
+  const title = `${p.title} — Petiție Civia`;
+  const description = p.summary.slice(0, 200);
+  // OG image: dacă petiția are image_url proprie folosește-o (1200px wide
+  // recomandat de Twitter/FB), altfel fallback la opengraph-image.tsx
+  // dynamic generated cu titlul petiției pe gradient verde.
+  const ogImages = p.image_url
+    ? [{ url: p.image_url, width: 1200, height: 630, alt: p.title }]
+    : [{ url: `${url}/opengraph-image`, width: 1200, height: 630, alt: p.title }];
+
   return {
-    title: `${p.title} — Petiție Civia`,
-    description: p.summary.slice(0, 160),
+    title,
+    description,
     alternates: { canonical: `/petitii/${p.slug}` },
     openGraph: {
       title: p.title,
-      description: p.summary.slice(0, 200),
+      description,
+      url,
       type: "article",
-      ...(p.image_url ? { images: [p.image_url] } : {}),
+      siteName: "Civia",
+      locale: "ro_RO",
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: p.title,
+      description,
+      images: ogImages.map((i) => i.url),
+    },
+    other: {
+      // Bluesky / Mastodon / Fediverse: respect og:image, plus we emit
+      // explicit „author" hint so AT-protocol clients can render attribution.
+      "og:image:secure_url": ogImages[0]?.url ?? "",
     },
   };
 }
@@ -219,6 +245,21 @@ export default async function PetitiePage({
                 </p>
               </div>
             )}
+
+            {/* Share — accesibil mereu (active sau closed) */}
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 shadow-[var(--shadow-1)]">
+              <p className="text-[10px] uppercase tracking-wider font-bold text-[var(--color-text-muted)] mb-3">
+                Distribuie petiția
+              </p>
+              <SharePetitie
+                url={`${SITE_URL}/petitii/${petitie.slug}`}
+                title={petitie.title}
+                summary={petitie.summary}
+              />
+              <p className="text-[10px] text-[var(--color-text-muted)] mt-2 leading-relaxed">
+                Mai mulți oameni = mai multe semnături. Distribuie pe X, Bluesky, Facebook, WhatsApp, etc.
+              </p>
+            </div>
 
             <Link
               href="/sesizari"
