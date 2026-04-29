@@ -225,39 +225,50 @@ export function CivicAssistant() {
 
   return (
     <>
-      {/* Launcher button — liquid-glass with visible gradient surface, frosted edges, halo glow + inner shine */}
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
+      {/* Launcher — fixed bottom-right, liquid-glass via overlapping layers.
+          Wrapper is fixed (positioning context for layers); button is full-size.
+          On mobile, env(safe-area-inset-bottom) keeps it clear of the iOS
+          home indicator. Two stacked layers (mobile_fab uses bottom 5rem,
+          so we sit at 1.25rem to stay below it). */}
+      <div
         className={cn(
-          "fixed bottom-6 right-6 z-40 rounded-full transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-primary)]/40",
-          "backdrop-blur-2xl",
-          "bg-gradient-to-br from-[var(--color-primary)]/85 via-emerald-600/75 to-indigo-700/85",
-          "ring-1 ring-white/40 ring-inset",
-          "text-white",
-          "hover:scale-105 active:scale-95",
-          "shadow-[0_10px_30px_-4px_rgba(5,150,105,0.55),0_4px_14px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.18)]",
-          "relative overflow-hidden",
+          "fixed right-5 z-40 transition-all",
           open ? "w-12 h-12" : "w-14 h-14",
         )}
-        aria-label={open ? "Închide asistentul civic" : "Deschide asistentul civic AI"}
-        aria-expanded={open}
-        aria-haspopup="dialog"
+        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1.25rem)" }}
       >
-        {/* Top-left glass highlight (white sheen) */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-[2px] rounded-full bg-gradient-to-br from-white/50 via-white/10 to-transparent opacity-70"
-        />
-        {/* Subtle bottom-right tint to deepen the glass */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tl from-indigo-900/30 via-transparent to-transparent"
-        />
-        <span className="relative z-10 flex items-center justify-center w-full h-full drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
-          {open ? <X size={20} aria-hidden="true" /> : <Sparkles size={22} aria-hidden="true" />}
-        </span>
-      </button>
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          aria-label={open ? "Închide asistentul civic" : "Deschide asistentul civic AI"}
+          aria-expanded={open}
+          aria-haspopup="dialog"
+          className={cn(
+            "relative w-full h-full rounded-full transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-primary)]/40",
+            "backdrop-blur-2xl",
+            "bg-gradient-to-br from-[var(--color-primary)]/85 via-emerald-600/75 to-indigo-700/85",
+            "ring-1 ring-white/40 ring-inset",
+            "text-white",
+            "hover:scale-105 active:scale-95",
+            "shadow-[0_10px_30px_-4px_rgba(5,150,105,0.55),0_4px_14px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.18)]",
+            "overflow-hidden",
+          )}
+        >
+          {/* Top-left glass sheen */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-[2px] rounded-full bg-gradient-to-br from-white/55 via-white/10 to-transparent opacity-75"
+          />
+          {/* Bottom tint to deepen the glass */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tl from-indigo-900/35 via-transparent to-transparent"
+          />
+          <span className="relative z-10 flex items-center justify-center w-full h-full drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+            {open ? <X size={20} aria-hidden="true" /> : <Sparkles size={22} aria-hidden="true" />}
+          </span>
+        </button>
+      </div>
 
       {/* Chat window */}
       {open && (
