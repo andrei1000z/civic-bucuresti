@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npx vercel:*)",
       "Bash(curl -s \"https://civia.ro/api/stiri/fetch\" -X POST -H \"Authorization: Bearer civia-cron-2026-secret\")",
-      "Bash(curl -sL \"https://www.civia.ro/api/stiri/fetch\" -X POST -H \"Authorization: Bearer civia-cron-2026-secret\")"
+      "Bash(curl -sL \"https://www.civia.ro/api/stiri/fetch\" -X POST -H \"Authorization: Bearer civia-cron-2026-secret\")",
+      "Bash(grep -v \"cache:\\\\|revalidate:\\\\|//\")"
     ]
   }
 }
