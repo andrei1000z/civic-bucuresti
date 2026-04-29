@@ -39,10 +39,6 @@ export default function HomePage() {
 
         <div className="container-narrow relative z-10 py-14 md:py-24 lg:py-32">
           <div className="max-w-3xl mx-auto text-center">
-            <p className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-white border border-white/20 text-xs font-semibold mb-8 backdrop-blur-sm">
-              🇷🇴 Civia — gratuit, open-source, fără politică
-            </p>
-
             <h1 className="font-[family-name:var(--font-sora)] text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-[1.08] tracking-tight">
               Orașul tău,{" "}
               <span className="bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">
