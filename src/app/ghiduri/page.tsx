@@ -26,7 +26,7 @@ export default function GhiduriPage() {
           <Badge className="mb-4 bg-white/10 text-white border border-white/20">
             📚 Ghiduri practice
           </Badge>
-          <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-6xl font-bold mb-4">
+          <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-6xl font-extrabold mb-4">
             Ce să faci când te lovești de stat
           </h1>
           <p className="text-lg md:text-xl text-white/85 max-w-2xl">

@@ -9,7 +9,7 @@ export default function CompareError({ reset }: { error: Error; reset: () => voi
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
         <Scale size={36} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
       </div>
-      <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-2">
+      <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-extrabold mb-2">
         Comparația nu se poate încărca
       </h1>
       <p className="text-[var(--color-text-muted)] mb-6">

@@ -177,7 +177,7 @@ export default async function StireDetailPage({
                   {categoryLabels[stire.category] ?? stire.category}
                 </Badge>
               </div>
-              <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-4xl font-bold text-white leading-tight drop-shadow-lg">
+              <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-4xl font-extrabold text-white leading-tight drop-shadow-lg">
                 {stire.title}
               </h1>
             </div>
@@ -192,7 +192,7 @@ export default async function StireDetailPage({
                 {categoryLabels[stire.category] ?? stire.category}
               </Badge>
             </div>
-            <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold leading-tight mb-4">
+            <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-extrabold leading-tight mb-4">
               {stire.title}
             </h1>
           </>

@@ -99,7 +99,7 @@ export default async function ComparePage({
       <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center mb-10">
         <div className="text-center sm:text-right">
           <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] mb-1">Județul A</div>
-          <h1 className="font-[family-name:var(--font-sora)] text-2xl sm:text-4xl md:text-5xl font-bold leading-tight">
+          <h1 className="font-[family-name:var(--font-sora)] text-2xl sm:text-4xl md:text-5xl font-extrabold leading-tight">
             {ca.name}
           </h1>
           <div className="text-xs text-[var(--color-text-muted)] mt-1">cod {ca.id}</div>
@@ -107,7 +107,7 @@ export default async function ComparePage({
         <div className="text-3xl md:text-5xl font-bold text-[var(--color-primary)] px-2">vs</div>
         <div className="text-center sm:text-left">
           <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] mb-1">Județul B</div>
-          <h1 className="font-[family-name:var(--font-sora)] text-2xl sm:text-4xl md:text-5xl font-bold leading-tight">
+          <h1 className="font-[family-name:var(--font-sora)] text-2xl sm:text-4xl md:text-5xl font-extrabold leading-tight">
             {cb.name}
           </h1>
           <div className="text-xs text-[var(--color-text-muted)] mt-1">cod {cb.id}</div>

@@ -50,7 +50,7 @@ export default async function AdminIntreruperiPage() {
         >
           ← Admin home
         </Link>
-        <h1 className="font-[family-name:var(--font-sora)] text-2xl font-bold mt-2">
+        <h1 className="font-[family-name:var(--font-sora)] text-2xl font-extrabold mt-2">
           Submisii întreruperi
         </h1>
         <p className="text-sm text-[var(--color-text-muted)] mt-1">

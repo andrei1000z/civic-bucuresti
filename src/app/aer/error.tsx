@@ -9,7 +9,7 @@ export default function AerError({ reset }: { error: Error; reset: () => void })
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
         <Wind size={36} className="text-sky-600 dark:text-sky-400" aria-hidden="true" />
       </div>
-      <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-2">
+      <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-extrabold mb-2">
         Datele despre aer nu se pot încărca
       </h1>
       <p className="text-[var(--color-text-muted)] mb-6">

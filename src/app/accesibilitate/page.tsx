@@ -15,7 +15,7 @@ export default function AccesibilitatePage() {
   return (
     <div className="container-narrow py-12 md:py-16">
       <Badge className="mb-4">Ghid cetățenesc</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
+      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
         <Accessibility size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
         Accesibilitate
       </h1>

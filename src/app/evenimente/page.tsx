@@ -21,7 +21,7 @@ export default function EvenimentePage() {
           <Badge className="mb-4 bg-white/10 text-white border border-white/20">
             📚 Arhivă cronologică
           </Badge>
-          <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
+          <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
             Evenimentele care au marcat România
           </h1>
           <p className="text-lg text-white/80 max-w-2xl">

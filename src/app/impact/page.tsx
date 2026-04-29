@@ -77,7 +77,7 @@ export default async function ImpactPage() {
       {/* HERO */}
       <div className="mb-10 md:mb-14">
         <Badge className="mb-4">Dashboard public</Badge>
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 leading-tight">
+        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
           Impactul platformei{" "}
           <span className="text-[var(--color-primary)]">Civia</span>
         </h1>

@@ -48,7 +48,7 @@ export default async function AdminFeedbackPage() {
         >
           ← Admin home
         </Link>
-        <h1 className="font-[family-name:var(--font-sora)] text-2xl font-bold mt-2">
+        <h1 className="font-[family-name:var(--font-sora)] text-2xl font-extrabold mt-2">
           Feedback / Contact
         </h1>
         <p className="text-sm text-[var(--color-text-muted)] mt-1">

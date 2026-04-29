@@ -41,7 +41,7 @@ export default function EducatiePage() {
         keywords={["educatie", "bac", "licee", "romania", "invatamant"]}
       />
       <Badge className="mb-4">Educație</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
+      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
         <GraduationCap size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
         Școala pe care o plătim
       </h1>

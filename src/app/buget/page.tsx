@@ -34,7 +34,7 @@ export default function BugetPage() {
         keywords={["buget", "romania", "fisc", "deficit", "pib", "transparenta"]}
       />
       <Badge className="mb-4">Transparență fiscală</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
+      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
         <Wallet size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
         Banii tăi, pe românește
       </h1>

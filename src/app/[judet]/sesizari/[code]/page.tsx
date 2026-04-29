@@ -86,7 +86,7 @@ export default async function CountySesizareDetail({
             {sesizare.code}
           </span>
         </div>
-        <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold mb-3">
+        <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-extrabold mb-3">
           {sesizare.titlu}
         </h1>
         <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-muted)] mb-4">

@@ -23,7 +23,7 @@ export default function ApiDocsPage() {
         keywords={["api", "open-data", "sesizari", "romania", "civic-tech", "transparenta", "cc-by-4.0"]}
       />
       <Badge className="mb-4">v1 · stabil</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4">
+      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4">
         API public Civia
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">

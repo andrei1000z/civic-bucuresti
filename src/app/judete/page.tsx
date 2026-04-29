@@ -60,7 +60,7 @@ export default async function JudetePage() {
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] text-xs font-semibold mb-4">
           <MapPin size={14} /> 42 JUDEȚE
         </div>
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
+        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
           Alege sau schimbă județul
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-2xl">

@@ -19,7 +19,7 @@ export default function ConfidentialitatePage() {
         <ChevronLeft size={16} /> Înapoi
       </Link>
       <article className="prose-civic">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl font-bold mb-2">
+        <h1 className="font-[family-name:var(--font-sora)] text-4xl font-extrabold mb-2">
           Politica de confidențialitate
         </h1>
         <p className="text-sm text-[var(--color-text-muted)] mb-8">

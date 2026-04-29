@@ -9,7 +9,7 @@ export default function EvenimentError({ reset }: { error: Error; reset: () => v
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
         <CalendarX size={36} className="text-purple-600 dark:text-purple-400" aria-hidden="true" />
       </div>
-      <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-2">
+      <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-extrabold mb-2">
         Evenimentul nu se poate încărca
       </h1>
       <p className="text-[var(--color-text-muted)] mb-6">

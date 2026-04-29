@@ -46,7 +46,7 @@ export default async function CountySanatatePage({
       </Link>
 
       <Badge className="mb-4" variant="primary">❤️ Sănătate</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 leading-tight">
+      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
         Sănătate în <span className="text-[var(--color-primary)]">{county.name}</span>
       </h1>
       <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">

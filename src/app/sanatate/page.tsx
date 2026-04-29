@@ -30,7 +30,7 @@ export default function SanatatePage() {
         keywords={["sanatate", "medicina", "spitale", "romania", "statistici"]}
       />
       <Badge className="mb-4">Sănătate publică</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
+      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
         <Heart size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
         Cât trăim și cum trăim
       </h1>

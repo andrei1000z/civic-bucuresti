@@ -24,7 +24,7 @@ export default function GlobalError({
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
         <AlertTriangle size={36} className="text-red-600 dark:text-red-400" aria-hidden="true" />
       </div>
-      <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold mb-2">
+      <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-extrabold mb-2">
         Ceva nu a mers bine
       </h1>
       <p className="text-[var(--color-text-muted)] mb-1">

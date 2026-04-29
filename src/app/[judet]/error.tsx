@@ -12,7 +12,7 @@ export default function JudetError({ reset }: { error: Error; reset: () => void 
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
         <MapPinOff size={36} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
       </div>
-      <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-2">
+      <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-extrabold mb-2">
         Județul nu se poate încărca
       </h1>
       <p className="text-[var(--color-text-muted)] mb-6">

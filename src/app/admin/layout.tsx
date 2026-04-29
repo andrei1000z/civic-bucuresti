@@ -40,7 +40,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           A
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="font-[family-name:var(--font-sora)] text-xl font-bold">Admin panel</h1>
+          <h1 className="font-[family-name:var(--font-sora)] text-xl font-extrabold">Admin panel</h1>
           <p className="text-xs text-[var(--color-text-muted)] truncate">
             Conectat ca {user.email}
           </p>

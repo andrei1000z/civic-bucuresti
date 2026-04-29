@@ -68,7 +68,7 @@ export default function BiletePage() {
     <div className="container-narrow py-12 md:py-16">
       {/* Header */}
       <div className="mb-10">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4">
+        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4">
           Bilete & Abonamente STB / Metrorex {new Date().getFullYear()}
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] mb-3">

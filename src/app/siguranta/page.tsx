@@ -35,7 +35,7 @@ export default function SigurantaPage() {
         keywords={["criminalitate", "politie", "siguranta", "romania", "statistici"]}
       />
       <Badge className="mb-4">Siguranță publică</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
+      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
         <ShieldAlert size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
         Cât de sigură e România
       </h1>

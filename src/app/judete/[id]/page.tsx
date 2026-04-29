@@ -102,7 +102,7 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
             {county.id}
           </span>
           <div>
-            <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold">
+            <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-extrabold">
               Județul {county.name}
             </h1>
             <p className="text-[var(--color-text-muted)]">

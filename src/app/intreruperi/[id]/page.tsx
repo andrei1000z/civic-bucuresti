@@ -175,7 +175,7 @@ export default async function InterruptionDetail({
             {STATUS_LABELS[item.status]}
           </span>
         </div>
-        <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-4xl font-bold mb-2">
+        <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-4xl font-extrabold mb-2">
           {item.reason}
         </h1>
         {item.excerpt && (

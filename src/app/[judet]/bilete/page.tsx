@@ -91,7 +91,7 @@ export default async function BiletePage({
     <div className="container-narrow py-12 md:py-16">
       {/* Header */}
       <div className="mb-10">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
+        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
           Transport public — {county.name}
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">

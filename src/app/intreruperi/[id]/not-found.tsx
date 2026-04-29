@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <div className="container-narrow py-20 text-center">
       <div className="text-6xl mb-4">🕵️</div>
-      <h1 className="font-[family-name:var(--font-sora)] text-3xl font-bold mb-3">
+      <h1 className="font-[family-name:var(--font-sora)] text-3xl font-extrabold mb-3">
         Întrerupere negăsită
       </h1>
       <p className="text-base text-[var(--color-text-muted)] mb-8 max-w-md mx-auto">

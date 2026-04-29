@@ -68,7 +68,7 @@ export function GhidLayout({
           <div className="flex items-start gap-6">
             <span className="text-6xl md:text-7xl hidden md:block">{icon}</span>
             <div>
-              <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-5xl font-bold mb-3">
+              <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-5xl font-extrabold mb-3">
                 {title}
               </h1>
               <p className="text-lg text-white/85 max-w-2xl mb-6">{subtitle}</p>

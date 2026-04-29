@@ -109,7 +109,7 @@ export default function CalendarCivicPage() {
         }))}
       />
       <Badge className="mb-4">Calendar civic</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
+      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
         <CalendarDays size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
         Date care contează pentru tine
       </h1>

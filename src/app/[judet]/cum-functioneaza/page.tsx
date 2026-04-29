@@ -76,7 +76,7 @@ export default async function CountyCumFunctioneazaPage({
         <Badge className="mb-4" variant="primary">
           📚 Educational
         </Badge>
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-4">
+        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4">
           Cum functioneaza administratia in {county.name}
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">

@@ -83,7 +83,7 @@ export default async function CountyHomePage({
                 🇷🇴 Platformă civică independentă
               </p>
 
-              <h1 className="font-[family-name:var(--font-sora)] text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold leading-[1.05] tracking-tight mb-6">
+              <h1 className="font-[family-name:var(--font-sora)] text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-extrabold leading-[1.05] tracking-tight mb-6">
                 {county.name},{" "}
                 <br className="hidden sm:block" />
                 <span className="bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">

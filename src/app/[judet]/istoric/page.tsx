@@ -41,7 +41,7 @@ function BucurestiIstoric() {
   return (
     <div className="container-narrow py-12 md:py-16">
       <div className="mb-12">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
+        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
           Istoric administratie Bucuresti
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">
@@ -123,7 +123,7 @@ function CountyIstoric({ countyName, countySlug, countyId }: { countyName: strin
   return (
     <div className="container-narrow py-12 md:py-16">
       <div className="mb-10">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
+        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
           Administratia locala — {countyName}
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">

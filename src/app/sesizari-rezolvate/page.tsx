@@ -52,7 +52,7 @@ export default async function SesizariResolvatePage() {
       </Link>
 
       <div className="mb-10">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
+        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
           Probleme rezolvate — dovada că funcționează
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">

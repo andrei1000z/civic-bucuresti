@@ -90,7 +90,7 @@ export default function IntreruperiPage() {
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-xs font-semibold mb-4">
           <AlertTriangle size={12} aria-hidden="true" /> În test — scraper live în v2
         </div>
-        <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-5xl font-bold mb-3">
+        <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-5xl font-extrabold mb-3">
           Întreruperi programate
         </h1>
         <p className="text-base md:text-lg text-[var(--color-text-muted)] max-w-3xl leading-relaxed">

@@ -13,7 +13,7 @@ export default function AuthErrorPage() {
       <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
         <AlertTriangle size={28} className="text-red-600 dark:text-red-400" />
       </div>
-      <h1 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-2">
+      <h1 className="font-[family-name:var(--font-sora)] text-2xl font-extrabold mb-2">
         Autentificare eșuată
       </h1>
       <p className="text-[var(--color-text-muted)] mb-6">

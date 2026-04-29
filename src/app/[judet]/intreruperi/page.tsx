@@ -74,7 +74,7 @@ export default async function JudetIntreruperiPage({
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] text-xs font-semibold mb-4">
           <MapPin size={12} /> {county.name}
         </div>
-        <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-5xl font-bold mb-3">
+        <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-5xl font-extrabold mb-3">
           Întreruperi programate — {county.name}
         </h1>
         <p className="text-base md:text-lg text-[var(--color-text-muted)] max-w-3xl leading-relaxed">

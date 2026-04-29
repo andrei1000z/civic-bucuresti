@@ -140,7 +140,7 @@ export default function ContPage() {
     return (
       <div role="alert" className="container-narrow py-20 max-w-md text-center">
         <AlertTriangle size={32} className="mx-auto mb-4 text-red-500" aria-hidden="true" />
-        <h1 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-2">
+        <h1 className="font-[family-name:var(--font-sora)] text-2xl font-extrabold mb-2">
           Nu s-a putut încărca contul
         </h1>
         <p className="text-[var(--color-text-muted)] mb-6">{loadError}</p>
@@ -159,7 +159,7 @@ export default function ContPage() {
     <div className="container-narrow py-12 md:py-16">
       <div className="mb-10 flex items-start justify-between">
         <div>
-          <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-2">
+          <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-2">
             Contul tău
           </h1>
           <p className="text-[var(--color-text-muted)]">

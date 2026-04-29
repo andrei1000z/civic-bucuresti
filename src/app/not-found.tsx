@@ -17,7 +17,7 @@ export default function NotFound() {
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center">
         <SearchX size={36} className="text-[var(--color-text-muted)]" aria-hidden="true" />
       </div>
-      <h1 className="font-[family-name:var(--font-sora)] text-5xl font-bold mb-2">404</h1>
+      <h1 className="font-[family-name:var(--font-sora)] text-5xl font-extrabold mb-2">404</h1>
       <p className="text-lg text-[var(--color-text-muted)] mb-2">
         N-am găsit pagina asta.
       </p>

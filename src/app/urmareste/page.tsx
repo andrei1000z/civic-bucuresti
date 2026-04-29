@@ -20,7 +20,7 @@ export default function UrmarestePage() {
       </Link>
 
       <div className="mb-8">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-bold mb-3">
+        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
           Unde a ajuns sesizarea ta?
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">

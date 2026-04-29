@@ -18,7 +18,7 @@ export default function Error({
   return (
     <div role="alert" aria-live="assertive" className="container-narrow py-16 text-center">
       <AlertTriangle size={48} className="mx-auto mb-4 text-amber-500" aria-hidden="true" />
-      <h1 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-2">
+      <h1 className="font-[family-name:var(--font-sora)] text-2xl font-extrabold mb-2">
         Sesizările publice nu se pot încărca
       </h1>
       <p className="text-sm text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">
