@@ -9,6 +9,7 @@ import {
 } from "@/data/autoritati-contact";
 import { SITE_URL } from "@/lib/constants";
 import { AutoritatiSearch, type Row } from "./AutoritatiSearch";
+import { GovernmentOrganizationJsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "Autorități publice în România — Civia",
@@ -112,6 +113,12 @@ export default function AutoritatiIndexPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <GovernmentOrganizationJsonLd
+        name="Catalog autorități publice — Civia"
+        description="Date de contact verificate pentru primăriile, Poliția Locală și prefecturile din România. 42 județe + 298 localități."
+        url={`${SITE_URL}/autoritati`}
+        areaServed="România"
       />
       <header className="mb-10">
         <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">

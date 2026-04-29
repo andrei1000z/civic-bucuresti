@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { StiriList } from "@/components/stiri/StiriList";
 import { Badge } from "@/components/ui/Badge";
-import { SOURCE_COLORS } from "@/lib/constants";
+import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
+import { CollectionPageJsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "Știri civice România",
@@ -12,6 +13,11 @@ export const metadata: Metadata = {
 export default function StiriPage() {
   return (
     <div className="container-narrow py-12 md:py-16">
+      <CollectionPageJsonLd
+        name="Știri civice — Civia"
+        description="Catalog de știri agregate din surse verificate (Digi24, HotNews, B365, G4Media, Mediafax, News.ro și ziare locale): transport, urbanism, mediu, siguranță."
+        url={`${SITE_URL}/stiri`}
+      />
       <div className="mb-8">
         <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
           Știri civice

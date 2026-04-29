@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/bilete" },
 };
 
+// Tarifele se schimbă rar — ISR 24h e safe.
+export const revalidate = 86400;
+
 function OperatorSection({ operator }: { operator: "stb" | "metrorex" | "ilfov" }) {
   const items = bilete.filter((b) => b.operator === operator);
   return (

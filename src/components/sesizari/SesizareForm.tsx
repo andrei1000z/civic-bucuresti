@@ -995,6 +995,7 @@ ${today}`;
           <input
             type="text"
             autoComplete="name"
+            autoCapitalize="words"
             value={data.nume}
             onChange={(e) => update("nume", e.target.value)}
             onBlur={() => { if (data.nume) update("nume", capitalizeName(data.nume)); }}
@@ -1007,6 +1008,7 @@ ${today}`;
           <input
             type="text"
             autoComplete="street-address"
+            autoCapitalize="words"
             value={data.adresa}
             onChange={(e) => update("adresa", e.target.value)}
             onBlur={() => { if (data.adresa) update("adresa", formatAddress(data.adresa)); }}
@@ -1021,7 +1023,9 @@ ${today}`;
         <Field label="Email de contact (opțional)">
           <input
             type="email"
+            inputMode="email"
             autoComplete="email"
+            autoCapitalize="none"
             value={data.email}
             onChange={(e) => update("email", e.target.value)}
             placeholder="nume@exemplu.ro"
@@ -1039,6 +1043,8 @@ ${today}`;
               onChange={(e) => update("descriere", e.target.value.slice(0, 2000))}
               rows={mode === "complet" ? 7 : 5}
               placeholder="Scrie liber, în limbaj normal. Ex: „Groapa adâncă pe trotuar lângă blocul H12, strada Matei Voievod."
+              autoCapitalize="sentences"
+              spellCheck
               className={cn(inputClass, "resize-y min-h-[120px] py-3 pr-12")}
             />
             <div className="absolute top-2 right-2">

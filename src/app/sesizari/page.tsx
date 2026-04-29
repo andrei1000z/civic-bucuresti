@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/sesizari" },
 };
 
+// Pure form shell — content e static. ISR 24h e suficient.
+export const revalidate = 86400;
+
 export default function SesizariPage() {
   return (
     <div className="container-narrow py-12 md:py-16">

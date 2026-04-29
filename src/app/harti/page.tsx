@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/harti" },
 };
 
+// Pure shell — Leaflet/HartiMap fac client-side data fetch. ISR 24h.
+export const revalidate = 86400;
+
 export default function HartiPage() {
   return (
     <>

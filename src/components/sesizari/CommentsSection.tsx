@@ -232,6 +232,8 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
               className="w-full p-2 rounded-[var(--radius-sm)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               disabled={replyPosting}
               autoFocus
+              autoCapitalize="sentences"
+              spellCheck
             />
             <div className="flex items-center justify-end gap-2 mt-2">
               <button
@@ -288,6 +290,8 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
               aria-describedby="comment-count"
               className="w-full p-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               disabled={posting}
+              autoCapitalize="sentences"
+              spellCheck
             />
             <div className="flex items-center justify-between mt-2">
               <span id="comment-count" className="text-xs text-[var(--color-text-muted)] tabular-nums">

@@ -332,10 +332,12 @@ function PrimarModal({
           style={{ background: `linear-gradient(135deg, ${primar.culoarePartid}, ${primar.culoarePartid}dd)` }}
         >
           <button
+            type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30"
+            aria-label="Închide modalul cu detalii primar"
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
-            <X size={16} />
+            <X size={16} aria-hidden="true" />
           </button>
           <div className="flex items-center gap-4">
             {primar.photo ? (

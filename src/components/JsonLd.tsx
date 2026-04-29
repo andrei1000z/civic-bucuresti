@@ -217,6 +217,109 @@ export function GovernmentServiceJsonLd({
 }
 
 /**
+ * ItemList for collection pages — sesizări publice, știri feed, întreruperi
+ * active. Google can use this to render "List of N items" snippets.
+ */
+export function ItemListJsonLd({
+  name,
+  description,
+  url,
+  items,
+}: {
+  name: string;
+  description?: string;
+  url: string;
+  items: Array<{ name: string; url: string; position?: number }>;
+}) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    ...(description ? { description: description.slice(0, 300) } : {}),
+    url,
+    numberOfItems: items.length,
+    inLanguage: "ro-RO",
+    itemListElement: items.map((it, i) => ({
+      "@type": "ListItem",
+      position: it.position ?? i + 1,
+      name: it.name,
+      url: it.url.startsWith("http") ? it.url : `${SITE_URL}${it.url}`,
+    })),
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
+    />
+  );
+}
+
+/**
+ * CollectionPage wrapper — typically combined with ItemListJsonLd.
+ * Tells search engines „this URL is a curated collection".
+ */
+export function CollectionPageJsonLd({
+  name,
+  description,
+  url,
+}: {
+  name: string;
+  description: string;
+  url: string;
+}) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description: description.slice(0, 300),
+    url,
+    inLanguage: "ro-RO",
+    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
+    />
+  );
+}
+
+/**
+ * GovernmentOrganization — pentru pagina /autoritati care indexează
+ * primării + Poliții Locale. Google clasifică pagina ca civic catalog.
+ */
+export function GovernmentOrganizationJsonLd({
+  name,
+  description,
+  url,
+  areaServed,
+}: {
+  name: string;
+  description: string;
+  url: string;
+  areaServed?: string;
+}) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "GovernmentOrganization",
+    name,
+    description: description.slice(0, 300),
+    url,
+    inLanguage: "ro-RO",
+    ...(areaServed
+      ? { areaServed: { "@type": "Country", name: areaServed } }
+      : { areaServed: { "@type": "Country", name: "România" } }),
+    parentOrganization: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
+    />
+  );
+}
+
+/**
  * Event schema for /evenimente/[slug] — historical civic events
  * (Colectiv, Rahova explosion, elections) surface in Google's "historical
  * event" panel and rich search results.

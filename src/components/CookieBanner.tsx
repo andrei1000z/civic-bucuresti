@@ -49,7 +49,8 @@ export function CookieBanner() {
     <div
       role="dialog"
       aria-labelledby="cookie-banner-title"
-      className="glass-surface-strong fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-sm z-40 rounded-[var(--radius-lg)] shadow-[var(--shadow-4)] p-4 animate-fade-in-up"
+      className="glass-surface-strong fixed left-4 right-4 md:left-auto md:right-6 md:max-w-sm z-40 rounded-[var(--radius-lg)] shadow-[var(--shadow-4)] p-4 animate-fade-in-up"
+      style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
     >
       <div className="flex items-start gap-3">
         <Cookie size={20} className="text-[var(--color-primary)] mt-0.5 shrink-0" aria-hidden="true" />

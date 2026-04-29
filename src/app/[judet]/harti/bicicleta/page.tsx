@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { getCountyBySlug } from "@/data/counties";
 import { HartiMap } from "@/components/maps/HartiMap";
 
+// Shell static — Leaflet face client-side fetch. ISR 24h.
+export const revalidate = 86400;
+
 export async function generateMetadata({
   params,
 }: {

@@ -18,6 +18,8 @@ import {
 import { ALL_COUNTIES, getCountyBySlug } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
 import { CountyStatCards } from "@/components/county/CountyStatCards";
+import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
+import { SITE_URL } from "@/lib/constants";
 
 export async function generateStaticParams() {
   return ALL_COUNTIES.map((c) => ({ judet: c.slug }));
@@ -70,6 +72,12 @@ export default async function CountyHomePage({
 
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Acasă", url: SITE_URL },
+          { name: county.name, url: `${SITE_URL}/${county.slug}` },
+        ]}
+      />
       {/* ─── HERO ─── */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] text-white min-h-[70vh] flex flex-col justify-center">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.3),transparent)]" />

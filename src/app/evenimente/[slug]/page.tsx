@@ -133,7 +133,7 @@ export default async function EvenimentDetailPage({
         <div className="container-narrow relative z-10 py-12 md:py-16">
           <Link
             href="/evenimente"
-            className="inline-flex items-center gap-1 text-white/70 hover:text-white text-sm mb-6 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded"
+            className="inline-flex items-center gap-1 text-white/80 hover:text-white text-sm mb-6 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded"
           >
             <ChevronLeft size={16} aria-hidden="true" /> Toate evenimentele
           </Link>

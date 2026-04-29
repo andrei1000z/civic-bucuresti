@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { SesizariPublice } from "@/components/sesizari/SesizariPublice";
+import { CollectionPageJsonLd } from "@/components/JsonLd";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Vezi ce semnalează cetățenii — Civia",
@@ -12,6 +14,11 @@ export const metadata: Metadata = {
 export default function SesizariPublicePage() {
   return (
     <div className="container-narrow py-12 md:py-16">
+      <CollectionPageJsonLd
+        name="Sesizări publice — Civia"
+        description="Catalog cu sesizări trimise de cetățeni la primării și autorități locale. Filtrat pe tip, sector, status. Votează pentru cele care te afectează."
+        url={`${SITE_URL}/sesizari-publice`}
+      />
       <Link
         href="/sesizari"
         className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"

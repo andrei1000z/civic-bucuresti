@@ -258,7 +258,7 @@ export function CivicAssistant() {
               </div>
               <div>
                 <p id="civic-assistant-title" className="font-semibold text-sm leading-tight">Asistent Civic</p>
-                <p className="text-[10px] text-white/70 leading-tight">powered by Groq AI</p>
+                <p className="text-[10px] text-white/80 leading-tight">powered by Groq AI</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
