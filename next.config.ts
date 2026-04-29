@@ -57,20 +57,12 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 2592000,
   },
   /**
-   * Redirect canonic www.civia.ro → civia.ro (preferred apex).
-   * Backup la nivelul Vercel domain settings — în caz că cineva schimbă
-   * config-ul fără să updateze și ăsta. permanent=true emite 308.
+   * NU mai facem redirect www↔apex la nivel Next.js. Vercel-ul are
+   * configurat la CDN civia.ro → www.civia.ro (la nivel infrastructure)
+   * iar redirect-ul invers din Next.js cauza un loop infinit
+   * (307 civia.ro → www, 308 www → civia.ro). Vercel Domains tab
+   * controlează canonical-ul; codeul rămâne neutru.
    */
-  async redirects() {
-    return [
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "www.civia.ro" }],
-        destination: "https://civia.ro/:path*",
-        permanent: true,
-      },
-    ];
-  },
   async headers() {
     const csp = [
       "default-src 'self'",
