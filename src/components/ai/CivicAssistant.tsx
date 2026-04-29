@@ -245,26 +245,29 @@ export function CivicAssistant() {
           aria-haspopup="dialog"
           className={cn(
             "relative w-full h-full rounded-full transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-primary)]/40",
-            "backdrop-blur-2xl",
-            "bg-gradient-to-br from-[var(--color-primary)]/85 via-emerald-600/75 to-indigo-700/85",
-            "ring-1 ring-white/40 ring-inset",
+            "backdrop-blur-2xl backdrop-saturate-150",
+            // Translucent surface: low alpha gradient lets the page genuinely
+            // show through. Was 75–85% — now 25–40%.
+            "bg-gradient-to-br from-[var(--color-primary)]/35 via-emerald-500/25 to-indigo-500/35",
+            "ring-1 ring-white/50 ring-inset",
             "text-white",
-            "hover:scale-105 active:scale-95",
-            "shadow-[0_10px_30px_-4px_rgba(5,150,105,0.55),0_4px_14px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.18)]",
+            "hover:scale-105 hover:from-[var(--color-primary)]/45 hover:to-indigo-500/45 active:scale-95",
+            // Soft outer halo + subtle outer shadow + inner top/bottom edges.
+            "shadow-[0_10px_30px_-6px_rgba(5,150,105,0.45),0_4px_14px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.12)]",
             "overflow-hidden",
           )}
         >
-          {/* Top-left glass sheen */}
+          {/* Top-left glass sheen — bright reflection that sells the glass effect */}
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-[2px] rounded-full bg-gradient-to-br from-white/55 via-white/10 to-transparent opacity-75"
+            className="pointer-events-none absolute inset-[1px] rounded-full bg-gradient-to-br from-white/45 via-white/5 to-transparent opacity-80"
           />
-          {/* Bottom tint to deepen the glass */}
+          {/* Bottom-right faint tint for depth */}
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tl from-indigo-900/35 via-transparent to-transparent"
+            className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tl from-indigo-900/15 via-transparent to-transparent"
           />
-          <span className="relative z-10 flex items-center justify-center w-full h-full drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+          <span className="relative z-10 flex items-center justify-center w-full h-full drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
             {open ? <X size={20} aria-hidden="true" /> : <Sparkles size={22} aria-hidden="true" />}
           </span>
         </button>

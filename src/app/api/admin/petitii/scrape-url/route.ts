@@ -159,9 +159,11 @@ export async function POST(req: Request) {
     try {
       const res = await fetch(url, {
         signal: controller.signal,
+        // HTTP headers must be ASCII-only — never use em-dash, smart quotes,
+        // or non-breaking spaces here, or fetch() throws ByteString errors.
         headers: {
           "User-Agent":
-            "Mozilla/5.0 (compatible; CiviaBot/1.0; +https://civia.ro) — civic petition scraper",
+            "Mozilla/5.0 (compatible; CiviaBot/1.0; +https://civia.ro) civic-petition-scraper",
           "Accept": "text/html,application/xhtml+xml",
           "Accept-Language": "ro-RO,ro;q=0.9,en;q=0.8",
         },

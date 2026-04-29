@@ -30,13 +30,16 @@ export default function HomePage() {
 
   return (
     <>
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] text-white">
+      {/* HERO — `-mt-16` bleeds the gradient up under the sticky navbar
+          (h-16 = 64px) so the page-bg black bar disappears behind it.
+          Inner padding adds back the 16 (= 4rem = 64px) so visible content
+          stays in the same place. */}
+      <section className="relative overflow-hidden -mt-16 bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] text-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.3),transparent)]" />
         <div className="absolute inset-0 bg-grid-pattern opacity-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/80 via-transparent to-transparent" />
 
-        <div className="container-narrow relative z-10 py-16 md:py-24 lg:py-32">
+        <div className="container-narrow relative z-10 pt-32 pb-16 md:pt-40 md:pb-24 lg:pt-48 lg:pb-32">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="font-[family-name:var(--font-sora)] text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-[1.05] tracking-tight">
               Ajută la schimbarea{" "}
