@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, Users, Newspaper, Shield, BarChart3, Megaphone } from "lucide-react";
+import { FileText, Users, Newspaper, ArrowRight, ShieldAlert } from "lucide-react";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { RefreshStiriButton } from "./RefreshStiriButton";
 
@@ -7,42 +7,134 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
   const admin = createSupabaseAdmin();
-  const [total, pending, stiri, users] = await Promise.all([
+
+  // ── Beginning of "today" in Bucharest local time, ISO for SQL filter ──
+  const todayStart = (() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d.toISOString();
+  })();
+
+  const [
+    totalSesizari,
+    totalStiri,
+    totalUsers,
+    pendingSesizari,
+    todaySesizari,
+    todayStiri,
+    todayUsers,
+  ] = await Promise.all([
     admin.from("sesizari").select("*", { count: "exact", head: true }),
-    admin.from("sesizari").select("*", { count: "exact", head: true }).eq("moderation_status", "pending"),
     admin.from("stiri_cache").select("*", { count: "exact", head: true }),
     admin.from("profiles").select("*", { count: "exact", head: true }),
+    admin
+      .from("sesizari")
+      .select("*", { count: "exact", head: true })
+      .eq("moderation_status", "pending"),
+    admin
+      .from("sesizari")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", todayStart),
+    admin
+      .from("stiri_cache")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", todayStart),
+    admin
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", todayStart),
   ]);
 
-  // Only the first 3 cards are clickable — "Conturi active" is
-  // a read-only metric until we build a user-management page, so
-  // it renders as a plain div. Having it pretend to be a Link
-  // ("#") was a broken affordance.
-  const cards = [
-    { label: "Sesizări primite (total)", value: total.count ?? 0, icon: FileText, href: "/admin/sesizari", color: "#2563EB" },
-    { label: "Necesită moderare", value: pending.count ?? 0, icon: Shield, href: "/admin/sesizari?status=pending", color: "#F59E0B" },
-    { label: "Articole știri indexate", value: stiri.count ?? 0, icon: Newspaper, href: "/stiri", color: "#059669" },
-    { label: "Conturi active", value: users.count ?? 0, icon: Users, href: null, color: "#8B5CF6" },
+  const stats = [
+    {
+      label: "Sesizări totale",
+      value: totalSesizari.count ?? 0,
+      delta: todaySesizari.count ?? 0,
+      icon: FileText,
+      href: "/admin/sesizari",
+      color: "#2563EB",
+      tint: "from-blue-500/10 to-transparent",
+    },
+    {
+      label: "Articole știri indexate",
+      value: totalStiri.count ?? 0,
+      delta: todayStiri.count ?? 0,
+      icon: Newspaper,
+      href: "/stiri",
+      color: "#059669",
+      tint: "from-emerald-500/10 to-transparent",
+    },
+    {
+      label: "Conturi active",
+      value: totalUsers.count ?? 0,
+      delta: todayUsers.count ?? 0,
+      icon: Users,
+      href: null,
+      color: "#8B5CF6",
+      tint: "from-violet-500/10 to-transparent",
+    },
   ] as const;
 
+  const pendingCount = pendingSesizari.count ?? 0;
+
   return (
-    <div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {cards.map((card) => {
-          const Icon = card.icon;
+    <div className="space-y-6">
+      {/* 3 hero stat cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {stats.map((stat) => {
+          const Icon = stat.icon;
           const inner = (
             <>
-              <Icon size={20} style={{ color: card.color }} className="mb-2" aria-hidden="true" />
-              <p className="text-3xl font-bold tabular-nums" style={{ color: card.color }}>{card.value.toLocaleString("ro-RO")}</p>
-              <p className="text-xs text-[var(--color-text-muted)] mt-1">{card.label}</p>
+              <div
+                className={`absolute inset-0 rounded-[var(--radius-md)] bg-gradient-to-br ${stat.tint} opacity-80 pointer-events-none`}
+                aria-hidden="true"
+              />
+              <div className="relative">
+                <div className="flex items-center justify-between mb-3">
+                  <div
+                    className="w-10 h-10 rounded-[var(--radius-xs)] grid place-items-center"
+                    style={{ backgroundColor: `${stat.color}1a`, color: stat.color }}
+                    aria-hidden="true"
+                  >
+                    <Icon size={18} />
+                  </div>
+                  {stat.delta > 0 && (
+                    <span
+                      className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider"
+                      style={{ color: stat.color, backgroundColor: `${stat.color}1a` }}
+                      title={`${stat.delta} înregistrări noi azi`}
+                    >
+                      <span aria-hidden="true">●</span>
+                      +{stat.delta} azi
+                    </span>
+                  )}
+                </div>
+                <p
+                  className="text-4xl md:text-5xl font-extrabold tabular-nums leading-none"
+                  style={{ color: stat.color }}
+                >
+                  {stat.value.toLocaleString("ro-RO")}
+                </p>
+                <p className="text-xs text-[var(--color-text-muted)] mt-2 font-medium uppercase tracking-wider">
+                  {stat.label}
+                </p>
+              </div>
+              {stat.href && (
+                <ArrowRight
+                  size={14}
+                  className="absolute bottom-4 right-4 text-[var(--color-text-muted)] group-hover:translate-x-0.5 group-hover:text-[var(--color-text)] transition-all"
+                  aria-hidden="true"
+                />
+              )}
             </>
           );
-          if (card.href) {
+
+          if (stat.href) {
             return (
               <Link
-                key={card.label}
-                href={card.href}
-                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5 hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                key={stat.label}
+                href={stat.href}
+                className="group relative block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5 hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 hover:border-[var(--color-primary)]/30 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
               >
                 {inner}
               </Link>
@@ -50,9 +142,9 @@ export default async function AdminDashboard() {
           }
           return (
             <div
-              key={card.label}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5"
-              aria-label={`${card.label}: ${card.value}`}
+              key={stat.label}
+              className="relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5"
+              aria-label={`${stat.label}: ${stat.value}`}
             >
               {inner}
             </div>
@@ -60,44 +152,37 @@ export default async function AdminDashboard() {
         })}
       </div>
 
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6">
-        <h2 className="font-semibold mb-4">Unde mergi de aici</h2>
-        <div className="grid md:grid-cols-2 gap-3">
-          <Link
-            href="/admin/sesizari"
-            className="flex items-center gap-3 p-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+      {/* Utility action — RSS feed refresh stays accessible since it's
+          an *action*, not a duplicate of a nav tab. */}
+      <RefreshStiriButton />
+
+      {/* Subtle moderation alert — only renders when there's actual work */}
+      {pendingCount > 0 && (
+        <Link
+          href="/admin/sesizari?status=pending"
+          className="group flex items-center gap-3 p-4 rounded-[var(--radius-md)] bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+        >
+          <div
+            className="w-9 h-9 rounded-full bg-amber-500/20 grid place-items-center text-amber-600 dark:text-amber-400 shrink-0"
+            aria-hidden="true"
           >
-            <Shield size={20} className="text-amber-500" aria-hidden="true" />
-            <div>
-              <p className="font-medium text-sm">Moderează sesizările noi</p>
-              <p className="text-xs text-[var(--color-text-muted)]">
-                <span className="tabular-nums">{(pending.count ?? 0).toLocaleString("ro-RO")}</span> așteaptă aprobare sau respingere
-              </p>
-            </div>
-          </Link>
-          <Link
-            href="/admin/analytics"
-            className="flex items-center gap-3 p-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-          >
-            <BarChart3 size={20} className="text-blue-500" aria-hidden="true" />
-            <div>
-              <p className="font-medium text-sm">Analytics în timp real</p>
-              <p className="text-xs text-[var(--color-text-muted)]">Trafic, dispozitive, țări, erori, performanță</p>
-            </div>
-          </Link>
-          <Link
-            href="/admin/petitii"
-            className="flex items-center gap-3 p-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-          >
-            <Megaphone size={20} className="text-purple-500" aria-hidden="true" />
-            <div>
-              <p className="font-medium text-sm">Gestionează petițiile civice</p>
-              <p className="text-xs text-[var(--color-text-muted)]">Postează, editează, închide; vezi semnături</p>
-            </div>
-          </Link>
-          <RefreshStiriButton />
-        </div>
-      </div>
+            <ShieldAlert size={16} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm text-amber-800 dark:text-amber-200">
+              {pendingCount} {pendingCount === 1 ? "sesizare așteaptă" : "sesizări așteaptă"} moderare
+            </p>
+            <p className="text-xs text-amber-700/90 dark:text-amber-300/90">
+              Aprobă sau respinge înainte ca autorii să primească status final.
+            </p>
+          </div>
+          <ArrowRight
+            size={14}
+            className="text-amber-600 dark:text-amber-400 group-hover:translate-x-0.5 transition-transform shrink-0"
+            aria-hidden="true"
+          />
+        </Link>
+      )}
     </div>
   );
 }
