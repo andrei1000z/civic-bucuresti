@@ -230,7 +230,7 @@ export default async function StireDetailPage({
       <div className="grid lg:grid-cols-[1fr_300px] gap-8">
         <div>
           {/* AI Synthesis */}
-          <div className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200 dark:border-violet-800/40 rounded-[12px] p-6 mb-6">
+          <div className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200 dark:border-violet-800/40 rounded-[var(--radius-md)] p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center" aria-hidden="true">
                 <Sparkles size={14} className="text-white" />
@@ -249,7 +249,7 @@ export default async function StireDetailPage({
 
           {/* Original content */}
           {(stire.excerpt || stire.content) && (
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 mb-6">
               <h2 className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-4">
                 Text original — {stire.source}
               </h2>
@@ -270,7 +270,7 @@ export default async function StireDetailPage({
         {/* Sidebar */}
         <aside className="space-y-4">
           {/* Source card */}
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
             <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3">Sursă</p>
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: sourceColor }}>
@@ -304,7 +304,7 @@ export default async function StireDetailPage({
           </div>
 
           {/* Info card */}
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
             <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3">Despre</p>
             <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
               Civia agregează știri din surse verificate și generează automat o sinteză AI pentru a facilita înțelegerea rapidă.

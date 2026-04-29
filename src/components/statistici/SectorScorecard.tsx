@@ -40,14 +40,14 @@ export function SectorScorecard() {
   }, []);
 
   if (loading) {
-    return <div className="h-48 bg-[var(--color-surface)] rounded-[12px] animate-pulse" />;
+    return <div className="h-48 bg-[var(--color-surface)] rounded-[var(--radius-md)] animate-pulse" />;
   }
 
   const sorted = [...stats].sort((a, b) => b.percent_rezolvate - a.percent_rezolvate);
   const best = sorted.find((s) => s.total > 0);
 
   return (
-    <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+    <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
       <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
         <div>
           <h3 className="font-[family-name:var(--font-sora)] font-bold text-xl mb-1">
@@ -71,7 +71,7 @@ export function SectorScorecard() {
           return (
             <div
               key={s.sector}
-              className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[12px] p-4"
+              className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4"
             >
               <div className="flex items-center justify-between mb-2">
                 <p className="font-bold text-sm">{s.sector}</p>

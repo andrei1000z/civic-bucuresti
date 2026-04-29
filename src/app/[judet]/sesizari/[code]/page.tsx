@@ -120,13 +120,13 @@ export default async function CountySesizareDetail({
       <div className="grid lg:grid-cols-[1fr_340px] gap-8">
         <div>
           {/* Description */}
-          <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
+          <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 mb-6">
             <h2 className="font-semibold mb-3">Descriere</h2>
             <p className="text-sm leading-relaxed whitespace-pre-wrap">{sesizare.descriere}</p>
           </section>
 
           {sesizare.formal_text && (
-            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6">
+            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 mb-6">
               <h2 className="font-semibold mb-3 flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 text-xs font-medium">
                   ✨ AI
@@ -156,7 +156,7 @@ export default async function CountySesizareDetail({
 
         {/* Sidebar */}
         <aside className="space-y-4">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
             <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3">
               Sprijină sesizarea
             </p>

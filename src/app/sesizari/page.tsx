@@ -59,7 +59,7 @@ export default function SesizariPage() {
       <SesizareForm />
 
       {/* Info */}
-      <div className="mt-8 bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-400 rounded-[12px] p-4 text-sm">
+      <div className="mt-8 bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-400 rounded-[var(--radius-md)] p-4 text-sm">
         <p className="text-blue-900 dark:text-blue-200">
           <strong>Legal — OG 27/2002 art. 8 alin. (1)</strong>: autoritatea are <strong>30 de zile calendaristice</strong> să îți răspundă. Dacă nu primești răspuns, ai drept de plângere la Avocatul Poporului și la instanța de contencios administrativ. Sesizarea generată include temeiul legal complet.
         </p>

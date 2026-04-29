@@ -13,7 +13,7 @@ export function InteractiveOrgChart() {
       <div className="relative">
         {/* Primar General */}
         <div className="flex justify-center mb-2">
-          <div className="bg-gradient-to-br from-[var(--color-primary)] to-indigo-800 text-white rounded-[12px] px-6 py-3 text-center shadow-lg">
+          <div className="bg-gradient-to-br from-[var(--color-primary)] to-indigo-800 text-white rounded-[var(--radius-md)] px-6 py-3 text-center shadow-lg">
             <p className="text-xs opacity-80">Ales direct de cetățeni</p>
             <p className="font-bold">Primar General</p>
           </div>
@@ -60,7 +60,7 @@ export function InteractiveOrgChart() {
           onClick={() => setSelected(null)}
         >
           <div
-            className="w-full max-w-lg bg-[var(--color-surface)] rounded-[12px] shadow-[var(--shadow-xl)] my-8 overflow-hidden"
+            className="w-full max-w-lg bg-[var(--color-surface)] rounded-[var(--radius-md)] shadow-[var(--shadow-xl)] my-8 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-[var(--color-primary)] to-indigo-700 text-white p-5 relative">

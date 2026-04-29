@@ -12,7 +12,7 @@ export function SimilarSesizari({ sesizari }: Props) {
   if (sesizari.length === 0) return null;
 
   return (
-    <aside aria-labelledby="similar-heading" className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+    <aside aria-labelledby="similar-heading" className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
       <p id="similar-heading" className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3">
         Alții au sesizat aceeași problemă
       </p>

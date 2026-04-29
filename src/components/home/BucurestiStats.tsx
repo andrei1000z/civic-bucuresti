@@ -27,7 +27,7 @@ export function BucurestiStats() {
             return (
               <div
                 key={s.label}
-                className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[12px] p-5 text-center"
+                className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 text-center"
               >
                 <Icon size={24} style={{ color: s.color }} className="mx-auto mb-3" />
                 <p className="text-3xl md:text-4xl font-bold" style={{ color: s.color }}>

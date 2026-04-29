@@ -83,7 +83,7 @@ export default async function CountySanatatePage({
             href={`https://dsp${county.slug}.ro`}
             target="_blank"
             rel="noopener noreferrer"
-            className="block p-5 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-[var(--shadow-md)] transition-all"
+            className="block p-5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-[var(--shadow-md)] transition-all"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -97,7 +97,7 @@ export default async function CountySanatatePage({
             href="https://www.ms.ro"
             target="_blank"
             rel="noopener noreferrer"
-            className="block p-5 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-[var(--shadow-md)] transition-all"
+            className="block p-5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-[var(--shadow-md)] transition-all"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -111,7 +111,7 @@ export default async function CountySanatatePage({
             href="https://www.cnas.ro"
             target="_blank"
             rel="noopener noreferrer"
-            className="block p-5 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-[var(--shadow-md)] transition-all"
+            className="block p-5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-[var(--shadow-md)] transition-all"
           >
             <div className="flex items-center justify-between">
               <div>

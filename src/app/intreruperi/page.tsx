@@ -107,7 +107,7 @@ export default function IntreruperiPage() {
           return (
             <div
               key={t}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4"
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4"
             >
               <div className="text-2xl mb-1">{TYPE_ICONS[t]}</div>
               <div className="text-2xl font-bold text-[var(--color-primary)] font-[family-name:var(--font-sora)]">
@@ -175,7 +175,7 @@ export default function IntreruperiPage() {
       </section>
 
       {/* Subscribe bar — ICS + RSS + API */}
-      <section className="mt-10 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+      <section className="mt-10 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
         <h2 className="font-semibold mb-3 flex items-center gap-2">
           <Calendar size={16} aria-hidden="true" /> Rămâi la curent automat
         </h2>
@@ -214,7 +214,7 @@ export default function IntreruperiPage() {
         </p>
       </section>
 
-      <section className="mt-6 bg-[var(--color-primary-soft)] rounded-[12px] p-6">
+      <section className="mt-6 bg-[var(--color-primary-soft)] rounded-[var(--radius-md)] p-6">
         <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2 flex items-center gap-2">
           <MapPin size={18} aria-hidden="true" /> Surse oficiale
         </h2>

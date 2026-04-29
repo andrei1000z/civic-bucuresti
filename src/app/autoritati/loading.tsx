@@ -9,7 +9,7 @@ export default function Loading() {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 h-24"
+            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 h-24"
           />
         ))}
       </div>

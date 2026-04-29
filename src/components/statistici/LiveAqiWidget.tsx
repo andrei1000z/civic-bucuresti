@@ -33,7 +33,7 @@ export function LiveAqiWidget({ compact = false }: { compact?: boolean }) {
 
   if (loading) {
     return (
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 flex items-center justify-center min-h-[80px]">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 flex items-center justify-center min-h-[80px]">
         <Loader2 size={20} className="animate-spin text-[var(--color-text-muted)]" />
       </div>
     );
@@ -54,7 +54,7 @@ export function LiveAqiWidget({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
           Calitate aer acum

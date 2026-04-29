@@ -60,7 +60,7 @@ export function UserMenu() {
         {initial}
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-60 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-lg)] overflow-hidden z-50">
+        <div className="absolute right-0 top-full mt-2 w-60 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-lg)] overflow-hidden z-50">
           <div className="px-4 py-3 border-b border-[var(--color-border)]">
             <p className="text-xs text-[var(--color-text-muted)]">Autentificat ca</p>
             <p className="text-sm font-medium truncate">{user.email}</p>

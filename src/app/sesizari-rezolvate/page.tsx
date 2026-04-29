@@ -61,7 +61,7 @@ export default async function SesizariResolvatePage() {
       </div>
 
       {resolved.length === 0 ? (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-10 text-center">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-10 text-center">
           <CheckCircle2 size={40} className="mx-auto mb-4 text-emerald-500" />
           <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2">
             Galeria se completează în timp
@@ -91,7 +91,7 @@ export default async function SesizariResolvatePage() {
                     <Link
                       key={s.id}
                       href={`/sesizari/${s.code}`}
-                      className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden hover:shadow-[var(--shadow-lg)] transition-all"
+                      className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] overflow-hidden hover:shadow-[var(--shadow-lg)] transition-all"
                     >
                       <div className="grid grid-cols-2">
                         <div className="relative h-48">

@@ -78,7 +78,7 @@ export function FeedbackForm({
         className={
           compact
             ? "flex items-start gap-3 py-3"
-            : "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-[12px] p-5 flex items-start gap-3"
+            : "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-[var(--radius-md)] p-5 flex items-start gap-3"
         }
       >
         <div className="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
@@ -108,7 +108,7 @@ export function FeedbackForm({
       className={
         compact
           ? "space-y-3"
-          : "bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 space-y-4"
+          : "bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 space-y-4"
       }
     >
       <div>

@@ -74,7 +74,7 @@ export default async function SesizariPage({
       </div>
 
       {/* Sesizare type choice */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-8">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 mb-8">
         <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2">
           Fă o sesizare
         </h2>
@@ -87,7 +87,7 @@ export default async function SesizariPage({
       <SesizareForm />
 
       {/* Info */}
-      <div className="mt-8 bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-400 rounded-[12px] p-4 text-sm">
+      <div className="mt-8 bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-400 rounded-[var(--radius-md)] p-4 text-sm">
         <p className="text-blue-900 dark:text-blue-200">
           <strong>Conform OG 27/2002</strong>, autoritățile au obligația să răspundă în 30 de zile calendaristice.
           Sesizarea generată include temei legal și este adresată instituției competente din {countyName}.

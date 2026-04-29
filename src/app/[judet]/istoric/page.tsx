@@ -52,13 +52,13 @@ function BucurestiIstoric() {
 
       {/* Charts overview */}
       <div className="grid lg:grid-cols-2 gap-6 mb-12">
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
           <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
             Durata mandatelor (ani)
           </h3>
           <DurateMandateChart />
         </div>
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
           <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
             Compozitia politica a Consiliului General
           </h3>
@@ -81,7 +81,7 @@ function BucurestiIstoric() {
           {consiliiGenerale.map((cg) => (
             <div
               key={cg.perioada}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5"
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5"
             >
               <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-3 font-semibold">
                 {cg.perioada}
@@ -139,7 +139,7 @@ function CountyIstoric({ countyName, countySlug, countyId }: { countyName: strin
           </div>
           Primar in functie
         </h2>
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 md:p-8">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 md:p-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
               <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider mb-1 font-semibold">
@@ -182,7 +182,7 @@ function CountyIstoric({ countyName, countySlug, countyId }: { countyName: strin
           Despre administratia locala
         </h2>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
             <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-3">
               Consiliul Judetean
             </h3>
@@ -195,7 +195,7 @@ function CountyIstoric({ countyName, countySlug, countyId }: { countyName: strin
               dezvoltare a judetului.
             </p>
           </div>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
             <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-3">
               Prefectura
             </h3>
@@ -215,7 +215,7 @@ function CountyIstoric({ countyName, countySlug, countyId }: { countyName: strin
       <section className="mb-12">
         <Link
           href={`/${countySlug}/autoritati`}
-          className="flex items-center justify-between bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 hover:border-[var(--color-primary)] transition-colors group"
+          className="flex items-center justify-between bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 hover:border-[var(--color-primary)] transition-colors group"
         >
           <div>
             <h3 className="font-semibold mb-1 group-hover:text-[var(--color-primary)] transition-colors">
@@ -230,7 +230,7 @@ function CountyIstoric({ countyName, countySlug, countyId }: { countyName: strin
       </section>
 
       {/* Coming soon */}
-      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[12px] p-6 flex items-start gap-4">
+      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[var(--radius-md)] p-6 flex items-start gap-4">
         <Clock size={20} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
         <div>
           <p className="font-semibold text-sm mb-1">In curand</p>

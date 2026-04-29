@@ -14,12 +14,12 @@ export default function Loading() {
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-8">
         <div className="space-y-6">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 h-64" />
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 h-80" />
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 h-64" />
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 h-80" />
         </div>
         <aside className="space-y-4">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 h-32" />
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 h-32" />
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 h-32" />
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 h-32" />
         </aside>
       </div>
     </div>

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 const LeafletMap = dynamic(() => import("./LeafletMap"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full bg-[var(--color-surface-2)] animate-pulse rounded-[12px] flex items-center justify-center">
+    <div className="w-full h-full bg-[var(--color-surface-2)] animate-pulse rounded-[var(--radius-md)] flex items-center justify-center">
       <p className="text-[var(--color-text-muted)] text-sm">Se încarcă harta...</p>
     </div>
   ),
@@ -25,7 +25,7 @@ export function EvenimentMap({ coords, label, color, zoom = 15, height = "400px"
   return (
     <div
       style={{ height }}
-      className="w-full rounded-[12px] overflow-hidden border border-[var(--color-border)]"
+      className="w-full rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)]"
     >
       <LeafletMap center={coords} zoom={zoom}>
         <EvenimentMarker coords={coords} label={label} color={color} />

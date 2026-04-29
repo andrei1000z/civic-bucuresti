@@ -23,7 +23,7 @@ const LeafletMap = dynamic(() => import("./LeafletMap"), {
     // clickea pe zona goală a hărții, așteptând să se încarce. Acum vede
     // clar o hartă stilizată (grid SVG) + spinner + mesaj cu tip de
     // progres. Blocks clicks on body via absolute cover.
-    <div className="relative w-full h-full bg-[var(--color-surface-2)] overflow-hidden rounded-[12px]">
+    <div className="relative w-full h-full bg-[var(--color-surface-2)] overflow-hidden rounded-[var(--radius-md)]">
       <svg
         className="absolute inset-0 w-full h-full opacity-30"
         xmlns="http://www.w3.org/2000/svg"
@@ -334,7 +334,7 @@ export function HartiMap({
               <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
                 Statistici pe hartă
               </h3>
-              <div className="bg-[var(--color-surface-2)] rounded-[12px] p-4">
+              <div className="bg-[var(--color-surface-2)] rounded-[var(--radius-md)] p-4">
                 <p className="text-xs text-[var(--color-text-muted)] mb-1">Calitate aer per sector</p>
                 <p className="text-2xl font-bold text-amber-600">AQI live</p>
                 <p className="text-xs text-[var(--color-text-muted)] mt-2">

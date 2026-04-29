@@ -127,7 +127,7 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
             Autorități locale
           </h2>
           {grouped.size === 0 ? (
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-8 text-center">
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-8 text-center">
               <Building2 size={32} className="mx-auto mb-3 text-[var(--color-text-muted)]" />
               <p className="text-[var(--color-text-muted)]">
                 Încă nu avem autorități înregistrate pentru acest județ.
@@ -190,7 +190,7 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
             Sesizări recente
           </h2>
           {sesizari.length === 0 ? (
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 text-center">
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 text-center">
               <p className="text-[var(--color-text-muted)] text-sm mb-3">
                 Nicio sesizare încă în {county.name}.
               </p>

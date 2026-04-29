@@ -96,7 +96,7 @@ export function TariffCalculator() {
   const totalCalatorii = calatoriLucru * zileLucru + calatoriWeekend * zileWeekend;
 
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 md:p-8">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 md:p-8">
       <div className="flex items-center gap-3 mb-2">
         <Calculator size={24} className="text-[var(--color-primary)]" />
         <h3 className="font-[family-name:var(--font-sora)] text-2xl font-bold">Calculator tarife</h3>

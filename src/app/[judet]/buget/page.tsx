@@ -87,7 +87,7 @@ export default async function CountyBugetPage({
       </p>
 
       {/* Disclaimer */}
-      <div className="mb-10 p-4 rounded-[12px] border border-amber-500/30 bg-amber-500/5 flex items-start gap-3">
+      <div className="mb-10 p-4 rounded-[var(--radius-md)] border border-amber-500/30 bg-amber-500/5 flex items-start gap-3">
         <Info size={18} className="text-amber-600 shrink-0 mt-0.5" />
         <div className="text-sm text-[var(--color-text-muted)]">
           <strong className="text-[var(--color-text)]">Sunt estimări.</strong> Execuția bugetară

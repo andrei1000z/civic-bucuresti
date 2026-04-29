@@ -28,7 +28,7 @@ import {
 const IntreruperiMap = dynamic(() => import("./IntreruperiMap"), {
   ssr: false,
   loading: () => (
-    <div className="relative w-full h-[500px] md:h-[600px] bg-[var(--color-surface-2)] overflow-hidden rounded-[12px]">
+    <div className="relative w-full h-[500px] md:h-[600px] bg-[var(--color-surface-2)] overflow-hidden rounded-[var(--radius-md)]">
       <svg
         className="absolute inset-0 w-full h-full opacity-30"
         xmlns="http://www.w3.org/2000/svg"
@@ -457,7 +457,7 @@ function InterruptionCard({
   return (
     <Link
       href={`/intreruperi/${item.id}`}
-      className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all min-w-0"
+      className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all min-w-0"
       style={{ borderLeftWidth: "4px", borderLeftColor: TYPE_COLORS[item.type] }}
     >
       <div className="flex items-start justify-between gap-2 mb-3 min-w-0">

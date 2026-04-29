@@ -73,7 +73,7 @@ export default async function JudetePage() {
       <JudeteGrid sesizariStats={sesizariStats} authStats={authStats} />
 
       {/* CTA */}
-      <div className="mt-12 bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 rounded-[12px] p-8 text-white text-center">
+      <div className="mt-12 bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 rounded-[var(--radius-md)] p-8 text-white text-center">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-3">
           Nu-ți găsești județul?
         </h2>

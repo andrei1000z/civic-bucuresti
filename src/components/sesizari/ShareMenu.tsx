@@ -113,7 +113,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
         {open && (
           <div
             role="menu"
-            className="absolute bottom-full right-0 mb-2 w-56 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-xl)] overflow-hidden z-50">
+            className="absolute bottom-full right-0 mb-2 w-56 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-xl)] overflow-hidden z-50">
             <a
               href={whatsappUrl}
               target="_blank"
@@ -192,7 +192,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="qr-modal-title"
-            className="bg-white rounded-[12px] p-6 max-w-sm shadow-2xl animate-modal-pop"
+            className="bg-white rounded-[var(--radius-md)] p-6 max-w-sm shadow-2xl animate-modal-pop"
           >
             <h3 id="qr-modal-title" className="font-semibold text-lg mb-3 text-slate-900 text-center">Scanează codul</h3>
             {/* eslint-disable-next-line @next/next/no-img-element */}

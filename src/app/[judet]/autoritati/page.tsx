@@ -87,7 +87,7 @@ function InstitutionCard({
   contact?: AuthorityContact;
 }) {
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-full bg-[var(--color-primary-soft)] flex items-center justify-center">
           <Icon size={20} className="text-[var(--color-primary)]" />
@@ -240,7 +240,7 @@ export default async function AutoritatiPage({
               <div
                 id={oras.slug}
                 key={oras.slug}
-                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 scroll-mt-24 target:ring-2 target:ring-[var(--color-primary)]"
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 scroll-mt-24 target:ring-2 target:ring-[var(--color-primary)]"
               >
                 <h3 className="font-[family-name:var(--font-sora)] font-semibold text-base mb-1">
                   {oras.name}
@@ -271,7 +271,7 @@ export default async function AutoritatiPage({
       )}
 
       {!hasData && (
-        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[12px] p-4 text-sm mb-6">
+        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[var(--radius-md)] p-4 text-sm mb-6">
           <p className="text-amber-800 dark:text-amber-300">
             <strong>Notă:</strong> Datele de contact (emailuri, telefoane, site-uri web) ale autorităților sunt în curs de colectare.
             Momentan afișăm informații generale.
@@ -279,7 +279,7 @@ export default async function AutoritatiPage({
         </div>
       )}
 
-      <div className="bg-[var(--color-primary-soft)] rounded-[12px] p-6 text-center">
+      <div className="bg-[var(--color-primary-soft)] rounded-[var(--radius-md)] p-6 text-center">
         <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-2">
           Ai o problemă în {county.name}?
         </h2>

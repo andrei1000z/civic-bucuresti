@@ -118,7 +118,7 @@ export default async function BiletePage({
         ))}
 
         {!operator && (
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                 <Bus size={24} className="text-gray-500" />
@@ -212,7 +212,7 @@ export default async function BiletePage({
       {/* Info cards grid */}
       <div className="grid md:grid-cols-2 gap-6 mb-10">
         {/* County info */}
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
               <Info size={24} className="text-amber-600" />
@@ -246,7 +246,7 @@ export default async function BiletePage({
         </div>
 
         {/* Contact / links */}
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
               <Phone size={24} className="text-blue-600" />
@@ -286,7 +286,7 @@ export default async function BiletePage({
       </div>
 
       {/* Note */}
-      <div className="bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-400 rounded-[12px] p-4 text-sm mb-6">
+      <div className="bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-400 rounded-[var(--radius-md)] p-4 text-sm mb-6">
         <p className="text-blue-900 dark:text-blue-200">
           <strong>Notă:</strong> Prețurile sunt orientative (2024-2025) și pot varia. Consultă operatorul local pentru tarife actualizate.
           {operator?.website && (
@@ -337,7 +337,7 @@ function OperatorCard({ op }: { op: TransportOperator }) {
       : "bg-blue-100 dark:bg-blue-900/30";
 
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
       <div className="flex items-center gap-3 mb-4">
         <div className={`w-12 h-12 rounded-full ${iconBg} flex items-center justify-center`}>
           <MainIcon size={24} className={iconColor} />
@@ -410,7 +410,7 @@ function TariffCard({
   description: string;
 }) {
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
       <div className="flex items-center gap-3 mb-3">
         <div className={`w-10 h-10 rounded-full ${iconBg} flex items-center justify-center`}>
           {icon}

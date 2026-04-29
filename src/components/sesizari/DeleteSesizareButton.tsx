@@ -79,7 +79,7 @@ export function DeleteSesizareButton({ code, isAuthor }: Props) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-sesizare-title"
-            className="w-full max-w-sm bg-[var(--color-surface)] rounded-[12px] shadow-[var(--shadow-xl)] overflow-hidden animate-modal-pop"
+            className="w-full max-w-sm bg-[var(--color-surface)] rounded-[var(--radius-md)] shadow-[var(--shadow-xl)] overflow-hidden animate-modal-pop"
           >
             <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-5 relative">
               {!deleting && (

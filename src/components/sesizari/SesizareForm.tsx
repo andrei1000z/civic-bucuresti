@@ -961,7 +961,7 @@ ${today}`;
             face, chiar și fără să citească formularul. Click = set tip +
             scroll la descriere. */}
         {!data.tip && (
-          <div className="mb-2 p-4 rounded-[12px] border border-[var(--color-primary)]/20 bg-[var(--color-primary-soft)]/40">
+          <div className="mb-2 p-4 rounded-[var(--radius-md)] border border-[var(--color-primary)]/20 bg-[var(--color-primary-soft)]/40">
             <p className="text-xs font-semibold text-[var(--color-primary)] mb-3 uppercase tracking-wider">
               Ce fel de problemă raportezi?
             </p>
@@ -1293,7 +1293,7 @@ ${today}`;
           </p>
         )}
 
-        <label className="flex items-center gap-3 p-4 bg-[var(--color-surface-2)] rounded-[12px] cursor-pointer">
+        <label className="flex items-center gap-3 p-4 bg-[var(--color-surface-2)] rounded-[var(--radius-md)] cursor-pointer">
           <input
             type="checkbox"
             checked={data.publica}
@@ -1339,7 +1339,7 @@ ${today}`;
 
       {/* Preview */}
       <div>
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 sticky top-24">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 sticky top-24">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg">Previzualizare</h3>
             {data.formal_text && (

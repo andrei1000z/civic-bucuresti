@@ -80,7 +80,7 @@ export default async function CountyEducatiePage({
             href={`https://isj${county.slug}.ro`}
             target="_blank"
             rel="noopener noreferrer"
-            className="block p-5 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-[var(--shadow-md)] transition-all"
+            className="block p-5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-[var(--shadow-md)] transition-all"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -94,7 +94,7 @@ export default async function CountyEducatiePage({
             href="https://edu.ro"
             target="_blank"
             rel="noopener noreferrer"
-            className="block p-5 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-[var(--shadow-md)] transition-all"
+            className="block p-5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-[var(--shadow-md)] transition-all"
           >
             <div className="flex items-center justify-between">
               <div>

@@ -304,7 +304,7 @@ export function NotificationBell() {
 
       {open && (
         <div
-          className="fixed sm:absolute top-16 sm:top-auto left-2 right-2 sm:left-auto sm:right-0 sm:mt-2 sm:w-80 max-h-[calc(100dvh-5rem)] sm:max-h-[480px] overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-xl z-50 flex flex-col"
+          className="fixed sm:absolute top-16 sm:top-auto left-2 right-2 sm:left-auto sm:right-0 sm:mt-2 sm:w-80 max-h-[calc(100dvh-5rem)] sm:max-h-[480px] overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-xl z-50 flex flex-col"
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
             <div className="text-sm font-semibold">Ce s-a mișcat</div>

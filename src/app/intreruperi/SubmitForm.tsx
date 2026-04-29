@@ -74,7 +74,7 @@ export function SubmitForm() {
       <div
         role="status"
         aria-live="polite"
-        className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-[12px] p-6 text-center"
+        className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-[var(--radius-md)] p-6 text-center"
       >
         <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-3">
           <Check size={24} aria-hidden="true" />
@@ -100,7 +100,7 @@ export function SubmitForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 space-y-4"
+      className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 space-y-4"
     >
       <div>
         <label htmlFor="isub-text" className="block text-sm font-semibold mb-2">

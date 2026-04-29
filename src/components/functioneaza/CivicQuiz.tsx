@@ -46,7 +46,7 @@ export function CivicQuiz() {
 
   if (!started) {
     return (
-      <div className="bg-gradient-to-br from-purple-600 to-pink-700 text-white rounded-[12px] p-8 text-center">
+      <div className="bg-gradient-to-br from-purple-600 to-pink-700 text-white rounded-[var(--radius-md)] p-8 text-center">
         <Brain size={48} className="mx-auto mb-4 opacity-80" aria-hidden="true" />
         <h3 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-2">
           Cât știi despre PMB?
@@ -72,7 +72,7 @@ export function CivicQuiz() {
       <div
         role="region"
         aria-label="Rezultat quiz"
-        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-8 text-center"
+        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-8 text-center"
       >
         <div className="text-6xl mb-4" aria-hidden="true">{medal}</div>
         <h3 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-1">{label}</h3>
@@ -124,7 +124,7 @@ export function CivicQuiz() {
   }
 
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs text-[var(--color-text-muted)] tabular-nums">
           Întrebarea {current + 1} din {QUIZ.length}

@@ -306,7 +306,7 @@ export function CivicAssistant() {
               >
                 <div
                   className={cn(
-                    "max-w-[85%] rounded-[12px] px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap",
+                    "max-w-[85%] rounded-[var(--radius-md)] px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap",
                     msg.role === "user"
                       ? "bg-[var(--color-primary)] text-white rounded-br-sm"
                       : "bg-[var(--color-surface-2)] text-[var(--color-text)] rounded-bl-sm"

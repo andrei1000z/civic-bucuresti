@@ -188,7 +188,7 @@ export default async function InterruptionDetail({
       <div className="grid lg:grid-cols-[1fr_320px] gap-8">
         <div>
           {/* Info block */}
-          <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6 space-y-4">
+          <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 mb-6 space-y-4">
             <div>
               <h2 className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)] mb-2 flex items-center gap-1.5">
                 <Clock size={12} /> Interval
@@ -248,7 +248,7 @@ export default async function InterruptionDetail({
 
         {/* Sidebar */}
         <aside className="space-y-4">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
             <p className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)] mb-3 flex items-center gap-1.5">
               <Building2 size={12} /> Provider
             </p>
@@ -287,7 +287,7 @@ export default async function InterruptionDetail({
             </div>
           </div>
 
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
             <p className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)] mb-3">
               Acțiuni
             </p>
@@ -304,7 +304,7 @@ export default async function InterruptionDetail({
           {item.county && (
             <Link
               href={`/${item.county.toLowerCase()}/intreruperi`}
-              className="block bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[12px] p-5 hover:bg-[var(--color-primary-soft)]/70 transition-colors"
+              className="block bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[var(--radius-md)] p-5 hover:bg-[var(--color-primary-soft)]/70 transition-colors"
             >
               <p className="text-xs uppercase tracking-wider font-semibold text-[var(--color-primary)] mb-1">
                 Vezi toate din {item.county === "B" ? "București" : item.county}
@@ -327,7 +327,7 @@ export default async function InterruptionDetail({
               <Link
                 key={r.id}
                 href={`/intreruperi/${r.id}`}
-                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 hover:border-[var(--color-primary)]/40 transition-all flex gap-3"
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 hover:border-[var(--color-primary)]/40 transition-all flex gap-3"
                 style={{ borderLeftWidth: "3px", borderLeftColor: TYPE_COLORS[r.type] }}
               >
                 <span className="text-2xl shrink-0">{TYPE_ICONS[r.type]}</span>

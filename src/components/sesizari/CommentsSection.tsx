@@ -64,7 +64,7 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
       {/* Compose */}
       <form
         onSubmit={handlePost}
-        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 mb-4"
+        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 mb-4"
       >
         {user ? (
           <>
@@ -108,7 +108,7 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
 
       {/* List */}
       {comments.length === 0 ? (
-        <div className="text-center py-10 px-4 bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[12px]">
+        <div className="text-center py-10 px-4 bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-md)]">
           <MessageSquare
             size={36}
             className="mx-auto mb-3 text-[var(--color-text-muted)] opacity-60"
@@ -134,7 +134,7 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
           {comments.map((c) => (
             <article
               key={c.id}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4"
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4"
             >
               <header className="flex items-center justify-between mb-2">
                 <p className="font-medium text-sm">{c.author_name}</p>

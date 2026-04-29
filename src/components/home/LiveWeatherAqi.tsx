@@ -159,7 +159,7 @@ export function LiveWeatherCard() {
   const wi = weatherIcon(weather?.code ?? null);
 
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
       <div className="flex items-start justify-between mb-3">
         <div>
           <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold">

@@ -94,30 +94,30 @@ export default async function CountyCumFunctioneazaPage({
           {county.name} in cifre
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
             <p className="text-2xl font-bold text-[var(--color-primary)] mb-1">{stats.primarName}</p>
             <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Primar</p>
             <p className="text-xs text-[var(--color-text-muted)] mt-1">{stats.primarPartid}</p>
           </div>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
             <p className="text-2xl font-bold text-[var(--color-primary)] mb-1">
               {stats.populatie.toLocaleString("ro-RO")}
             </p>
             <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Populatie</p>
           </div>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
             <p className="text-2xl font-bold text-[var(--color-primary)] mb-1">
               {stats.suprafataKmp.toLocaleString("ro-RO")}
             </p>
             <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">km²</p>
           </div>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
             <p className="text-2xl font-bold text-[var(--color-primary)] mb-1">
               {stats.densitate.toLocaleString("ro-RO")}
             </p>
             <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">loc/km²</p>
           </div>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5 col-span-2 md:col-span-1">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 col-span-2 md:col-span-1">
             <p className="text-2xl font-bold text-[var(--color-primary)] mb-1">{stats.primarPartid}</p>
             <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Partid</p>
           </div>
@@ -132,7 +132,7 @@ export default async function CountyCumFunctioneazaPage({
           </div>
           Structura administrativa
         </h2>
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 md:p-8">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 md:p-8">
           <div className="space-y-4">
             {[
               {
@@ -184,7 +184,7 @@ export default async function CountyCumFunctioneazaPage({
           Drepturile tale ca cetatean
         </h2>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
             <h3 className="font-semibold mb-3">OG 27/2002 — Dreptul la petitie</h3>
             <ul className="space-y-2 text-sm text-[var(--color-text-muted)]">
               <li className="flex items-start gap-2">
@@ -205,7 +205,7 @@ export default async function CountyCumFunctioneazaPage({
               </li>
             </ul>
           </div>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
             <h3 className="font-semibold mb-3">Participare la sedinte</h3>
             <ul className="space-y-2 text-sm text-[var(--color-text-muted)]">
               <li className="flex items-start gap-2">
@@ -241,7 +241,7 @@ export default async function CountyCumFunctioneazaPage({
           {FAQ_ITEMS.map((item, i) => (
             <details
               key={i}
-              className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden"
+              className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] overflow-hidden"
             >
               <summary className="flex items-center justify-between p-5 cursor-pointer hover:bg-[var(--color-surface-2)] transition-colors">
                 <span className="font-semibold text-sm pr-4">{item.question}</span>
@@ -259,7 +259,7 @@ export default async function CountyCumFunctioneazaPage({
       </section>
 
       {/* CTA */}
-      <section className="bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 rounded-[12px] p-8 md:p-12 text-white text-center">
+      <section className="bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 rounded-[var(--radius-md)] p-8 md:p-12 text-white text-center">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-3">
           Ai o problema in {county.name}?
         </h2>

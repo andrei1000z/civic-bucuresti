@@ -52,7 +52,7 @@ function StatCard({
   const TrendIcon = trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Minus;
   const trendColor = trend === "up" ? "text-emerald-600" : trend === "down" ? "text-red-600" : "text-gray-500";
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
       <div className="flex items-center gap-2 mb-2">
         {Icon && <Icon size={14} className="text-[var(--color-text-muted)]" />}
         <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">{label}</p>
@@ -104,7 +104,7 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
       <h3 className="font-semibold text-sm mb-4 text-[var(--color-text-muted)] uppercase tracking-wider">
         {title}
       </h3>
@@ -248,7 +248,7 @@ export default async function StatisticiPage({
       {/* Calitate aer */}
       <Section title="Calitate aer" subtitle="Sursa: ANPM / calitateaer.ro — medie anuală 2023–2024">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 text-center">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 text-center">
             <Wind size={24} className="mx-auto mb-2 text-[var(--color-text-muted)]" />
             <p className="text-xs text-[var(--color-text-muted)] mb-2">AQI mediu</p>
             <p className="text-4xl font-bold" style={{ color: aqiColor }}>
@@ -258,7 +258,7 @@ export default async function StatisticiPage({
               {stats.aqiQuality}
             </p>
           </div>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 text-center">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 text-center">
             <TreePine size={24} className="mx-auto mb-2 text-[var(--color-text-muted)]" />
             <p className="text-xs text-[var(--color-text-muted)] mb-2">Spații verzi</p>
             <p className="text-4xl font-bold text-emerald-600">
@@ -268,7 +268,7 @@ export default async function StatisticiPage({
               mp / locuitor
             </p>
           </div>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 text-center col-span-2 md:col-span-1">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 text-center col-span-2 md:col-span-1">
             <p className="text-xs text-[var(--color-text-muted)] mb-2">Transport public</p>
             <p className="text-lg font-bold text-[var(--color-text)]">
               {stats.transportPublicOperator}
@@ -279,7 +279,7 @@ export default async function StatisticiPage({
             </p>
           </div>
         </div>
-        <div className="bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-400 rounded-[12px] p-4 text-sm">
+        <div className="bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-400 rounded-[var(--radius-md)] p-4 text-sm">
           <p className="text-blue-900 dark:text-blue-200">
             Pentru date în timp real, consultă{" "}
             <a href={`/${county.slug}/aer`} className="font-medium underline">
@@ -315,7 +315,7 @@ export default async function StatisticiPage({
 
       {/* Cleanliness grade */}
       <Section title="Grad de curățenie" subtitle="Calculat din calitatea aerului + spațiile verzi per locuitor">
-        <div className="flex items-center gap-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6">
+        <div className="flex items-center gap-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6">
           <div
             className="w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-3xl shrink-0"
             style={{ backgroundColor: gradeInfo.color }}
@@ -340,7 +340,7 @@ export default async function StatisticiPage({
       {/* Neighbor comparison */}
       {neighbors.length > 0 && (
         <Section title="Context regional" subtitle="Comparație cu județele vecine">
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
             <div className="space-y-2">
               {[{ name: county.name, populatie: stats.populatie, isCurrent: true }, ...neighbors.map(n => ({ ...n, isCurrent: false }))].map((n) => {
                 const maxPop = Math.max(stats.populatie, ...neighbors.map(v => v.populatie));
@@ -383,7 +383,7 @@ export default async function StatisticiPage({
       />
 
       {/* Footer note */}
-      <div className="mt-8 bg-[var(--color-surface-2)] rounded-[12px] p-4 text-xs text-[var(--color-text-muted)]">
+      <div className="mt-8 bg-[var(--color-surface-2)] rounded-[var(--radius-md)] p-4 text-xs text-[var(--color-text-muted)]">
         <p>
           <strong>Surse:</strong> Institutul Național de Statistică (INS), Direcția Regim Permise de Conducere și Înmatriculare a Vehiculelor (DRPCIV),
           Agenția Națională pentru Protecția Mediului (ANPM), calitateaer.ro.

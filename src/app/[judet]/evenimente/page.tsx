@@ -60,7 +60,7 @@ function EventCard({ ev }: { ev: Eveniment }) {
   return (
     <Link
       href={`/evenimente/${ev.slug}`}
-      className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] transition-all"
+      className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] overflow-hidden hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] transition-all"
     >
       <div className={`relative h-48 bg-gradient-to-br ${ev.gradient} overflow-hidden`}>
         {ev.image ? (

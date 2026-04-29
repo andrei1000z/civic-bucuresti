@@ -49,7 +49,7 @@ export function JudeteGrid({ sesizariStats, authStats }: Props) {
   return (
     <div>
       {savedSlug && (
-        <div className="mb-6 flex flex-wrap items-center gap-3 bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[12px] px-4 py-3">
+        <div className="mb-6 flex flex-wrap items-center gap-3 bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[var(--radius-md)] px-4 py-3">
           <div className="flex items-center gap-2 text-sm">
             <Check size={16} className="text-[var(--color-primary)] shrink-0" />
             <span>
@@ -88,7 +88,7 @@ export function JudeteGrid({ sesizariStats, authStats }: Props) {
               href={`/${county.slug}`}
               onClick={() => persist(county.slug)}
               prefetch
-              className={`group relative bg-[var(--color-surface)] border rounded-[12px] p-4 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all ${
+              className={`group relative bg-[var(--color-surface)] border rounded-[var(--radius-md)] p-4 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all ${
                 isSaved
                   ? "border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20"
                   : "border-[var(--color-border)]"

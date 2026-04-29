@@ -157,7 +157,7 @@ export function SignSesizareButton({
             role="dialog"
             aria-modal="true"
             aria-labelledby="sign-modal-title"
-            className="w-full max-w-lg bg-[var(--color-surface)] rounded-[12px] shadow-[var(--shadow-xl)] my-8 overflow-hidden animate-modal-pop"
+            className="w-full max-w-lg bg-[var(--color-surface)] rounded-[var(--radius-md)] shadow-[var(--shadow-xl)] my-8 overflow-hidden animate-modal-pop"
           >
             <header className="bg-gradient-to-r from-[var(--color-secondary)] to-emerald-700 text-white p-5 relative">
               <button

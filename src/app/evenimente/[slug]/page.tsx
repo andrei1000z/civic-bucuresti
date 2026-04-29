@@ -138,7 +138,7 @@ export default async function EvenimentDetailPage({
             <ChevronLeft size={16} aria-hidden="true" /> Toate evenimentele
           </Link>
           <div className="flex items-start gap-6">
-            <div className="hidden md:flex w-20 h-20 rounded-[12px] bg-white/10 border border-white/20 items-center justify-center backdrop-blur" aria-hidden="true">
+            <div className="hidden md:flex w-20 h-20 rounded-[var(--radius-md)] bg-white/10 border border-white/20 items-center justify-center backdrop-blur" aria-hidden="true">
               <Icon size={44} strokeWidth={1.5} />
             </div>
             <div className="flex-1">
@@ -285,7 +285,7 @@ export default async function EvenimentDetailPage({
             <>
               <h2>Rezumat</h2>
               <p>{eveniment.descriere}</p>
-              <div className="not-prose mt-6 p-4 rounded-[12px] bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+              <div className="not-prose mt-6 p-4 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] border border-[var(--color-border)]">
                 <p className="text-sm text-[var(--color-text-muted)] mb-3">
                   <span aria-hidden="true">📝 </span>Detalii complete (cronologie, cauze, impact, surse) sunt în curs de documentare. Dacă ai informații verificabile despre acest eveniment, <Link href="/#footer-feedback" className="text-[var(--color-primary)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded">scrie-ne</Link>.
                 </p>
@@ -303,7 +303,7 @@ export default async function EvenimentDetailPage({
         {/* Sidebar */}
         <aside className="hidden lg:block">
           <div className="sticky top-24 space-y-4">
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
               <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3">
                 Detalii
               </p>
@@ -353,7 +353,7 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4">
       <Icon size={20} style={{ color }} className="mb-2" />
       <p className="text-xs text-[var(--color-text-muted)] mb-0.5">{label}</p>
       <p className="text-2xl font-bold" style={{ color }}>

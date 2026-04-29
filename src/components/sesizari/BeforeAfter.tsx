@@ -15,7 +15,7 @@ export function BeforeAfter({ beforeUrl, afterUrl, resolvedAt }: Props) {
 
   return (
     <>
-      <section className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-900 rounded-[12px] p-6 mb-6">
+      <section className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-900 rounded-[var(--radius-md)] p-6 mb-6">
         <div className="flex items-center gap-2 mb-4">
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500 text-white text-xs font-semibold">
             ✓ Rezolvat

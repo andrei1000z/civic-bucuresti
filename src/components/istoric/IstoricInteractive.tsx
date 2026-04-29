@@ -94,7 +94,7 @@ export function IstoricInteractive({ primari }: Props) {
       </div>
 
       {/* Filters */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4 mb-6">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 mb-6">
         <div className="flex items-center gap-2 mb-3">
           <Filter size={16} className="text-[var(--color-text-muted)]" />
           <span className="text-sm font-medium">Filtrează</span>
@@ -137,7 +137,7 @@ export function IstoricInteractive({ primari }: Props) {
 
       {/* Compare panel */}
       {compared.length === 2 && (
-        <div className="bg-[var(--color-surface)] border-2 border-[var(--color-primary)] rounded-[12px] p-5 mb-6">
+        <div className="bg-[var(--color-surface)] border-2 border-[var(--color-primary)] rounded-[var(--radius-md)] p-5 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold flex items-center gap-2">
               <GitCompare size={18} className="text-[var(--color-primary)]" />
@@ -184,7 +184,7 @@ export function IstoricInteractive({ primari }: Props) {
           <div
             key={primar.id}
             className={cn(
-              "group relative bg-[var(--color-surface)] border rounded-[12px] p-4 cursor-pointer transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-md)]",
+              "group relative bg-[var(--color-surface)] border rounded-[var(--radius-md)] p-4 cursor-pointer transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-md)]",
               compareIds.includes(primar.id)
                 ? "border-[var(--color-primary)] border-2"
                 : "border-[var(--color-border)]"
@@ -323,7 +323,7 @@ function PrimarModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-[var(--color-surface)] rounded-[12px] shadow-[var(--shadow-xl)] my-8"
+        className="w-full max-w-2xl bg-[var(--color-surface)] rounded-[var(--radius-md)] shadow-[var(--shadow-xl)] my-8"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -339,7 +339,7 @@ function PrimarModal({
           </button>
           <div className="flex items-center gap-4">
             {primar.photo ? (
-              <div className="w-20 h-20 rounded-[12px] overflow-hidden ring-2 ring-white/30">
+              <div className="w-20 h-20 rounded-[var(--radius-md)] overflow-hidden ring-2 ring-white/30">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`/images/primari/${primar.photo}.webp`}
@@ -348,7 +348,7 @@ function PrimarModal({
                 />
               </div>
             ) : (
-              <div className="w-20 h-20 rounded-[12px] bg-white/20 flex items-center justify-center text-3xl font-bold backdrop-blur">
+              <div className="w-20 h-20 rounded-[var(--radius-md)] bg-white/20 flex items-center justify-center text-3xl font-bold backdrop-blur">
                 {primar.initiale}
               </div>
             )}
@@ -443,7 +443,7 @@ function FilterChip({
 
 function StatMini({ label, value, detail }: { label: string; value: string; detail?: string }) {
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-3">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-3">
       <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-1">
         {label}
       </p>

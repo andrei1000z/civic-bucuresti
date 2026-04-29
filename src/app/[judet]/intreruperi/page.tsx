@@ -89,7 +89,7 @@ export default async function JudetIntreruperiPage({
           return (
             <div
               key={t}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-4"
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4"
             >
               <div className="text-2xl mb-1">{TYPE_ICONS[t]}</div>
               <div className="text-2xl font-bold text-[var(--color-primary)] font-[family-name:var(--font-sora)]">
@@ -126,7 +126,7 @@ export default async function JudetIntreruperiPage({
         <IntreruperiFilters items={all} />
       )}
 
-      <section className="mt-12 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-[12px] p-6">
+      <section className="mt-12 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-[var(--radius-md)] p-6">
         <h2 className="font-semibold mb-2 flex items-center gap-2 text-amber-900 dark:text-amber-300">
           <AlertTriangle size={16} /> Lipsește ceva?
         </h2>

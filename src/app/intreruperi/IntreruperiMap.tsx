@@ -173,7 +173,7 @@ export default function IntreruperiMap({ items }: { items: Interruption[] }) {
         }
       `}</style>
 
-      <div className="w-full h-[500px] md:h-[600px] rounded-[12px] overflow-hidden border border-[var(--color-border)] relative z-0">
+      <div className="w-full h-[500px] md:h-[600px] rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] relative z-0">
         <MapContainer
           center={center}
           zoom={zoom}

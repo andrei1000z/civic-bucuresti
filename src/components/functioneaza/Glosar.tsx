@@ -9,7 +9,7 @@ export function Glosar() {
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-5">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
       <div className="flex items-center gap-2 mb-4">
         <BookOpen size={18} className="text-[var(--color-primary)]" />
         <h3 className="font-[family-name:var(--font-sora)] font-semibold">Glosar abrevieri</h3>

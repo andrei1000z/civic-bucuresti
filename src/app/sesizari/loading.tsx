@@ -4,7 +4,7 @@ export default function Loading() {
       <div className="animate-pulse space-y-4" aria-hidden="true">
         <div className="h-8 bg-[var(--color-surface-2)] rounded-[8px] w-1/3" />
         <div className="h-4 bg-[var(--color-surface-2)] rounded-[8px] w-2/3" />
-        <div className="h-64 bg-[var(--color-surface-2)] rounded-[12px]" />
+        <div className="h-64 bg-[var(--color-surface-2)] rounded-[var(--radius-md)]" />
       </div>
       <span className="sr-only">Se încarcă...</span>
     </div>

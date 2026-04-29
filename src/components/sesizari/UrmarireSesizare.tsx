@@ -52,7 +52,7 @@ export function UrmarireSesizare() {
   return (
     <div className="max-w-2xl">
       <form
-        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 mb-6"
+        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 mb-6"
         onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
       >
         <label htmlFor="urm-cod" className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4 block">
@@ -90,7 +90,7 @@ export function UrmarireSesizare() {
       {result && (
         <section
           aria-label="Rezultat căutare"
-          className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] p-6 animate-fade-in-up"
+          className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 animate-fade-in-up"
         >
           <div className="mb-5 pb-5 border-b border-[var(--color-border)]">
             <p className="text-xs text-[var(--color-text-muted)] mb-1">Cod sesizare</p>
