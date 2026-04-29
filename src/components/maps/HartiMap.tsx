@@ -54,13 +54,13 @@ const HartiLayers = dynamic(() => import("./HartiLayers"), { ssr: false });
 
 type Tab = "bicicleta" | "pejos" | "auto" | "transport" | "aer";
 
-// Top-center switcher tabs (icon + short label so the pill stays compact).
+// Top-center switcher tabs.
 const SWITCHER_TABS: ReadonlyArray<SwitcherTab<Tab>> = [
-  { id: "bicicleta", label: "Bicicletă", icon: Bike },
-  { id: "pejos", label: "Pe jos", icon: Footprints },
-  { id: "auto", label: "Mașină", icon: Car },
+  { id: "bicicleta", label: "Piste bicicletă", icon: Bike },
+  { id: "pejos", label: "Pietonale", icon: Footprints },
+  { id: "auto", label: "Drumuri", icon: Car },
   { id: "transport", label: "Transport", icon: Bus },
-  { id: "aer", label: "Aer", icon: Wind },
+  { id: "aer", label: "Calitate aer", icon: Wind },
 ];
 
 // Per-tab canonical URLs — used for pushState when the user switches

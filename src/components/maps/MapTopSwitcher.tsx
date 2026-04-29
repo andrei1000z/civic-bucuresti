@@ -66,33 +66,43 @@ export function MapTopSwitcher<T extends string>({ tabs, active, onChange }: Pro
         aria-label="Selectează tipul de hartă"
         className={cn(
           "pointer-events-auto relative flex items-center gap-1 p-1 rounded-full",
-          // Liquid-glass surface: translucent + heavy backdrop-blur + saturate
-          "backdrop-blur-2xl backdrop-saturate-150",
-          "bg-white/15 dark:bg-white/10",
-          "ring-1 ring-white/30 ring-inset",
-          "shadow-[0_10px_32px_-8px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(0,0,0,0.18)]",
+          // Truly translucent liquid-glass: low alpha bg + heavy blur so
+          // the map color genuinely bleeds through. Multi-layer shadow
+          // gives the floating-glass feel without a solid surface.
+          "backdrop-blur-2xl backdrop-saturate-200",
+          "bg-white/[0.07] dark:bg-white/[0.06]",
+          "ring-1 ring-white/25 ring-inset",
+          "shadow-[0_10px_32px_-8px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-1px_0_rgba(0,0,0,0.18)]",
           "overflow-x-auto no-scrollbar",
         )}
       >
-        {/* Sliding water-drop indicator (renders behind tabs, above bg) */}
+        {/* Sliding water-drop indicator (renders behind tabs, above bg).
+            transform + width animate together with a slow over-shooting
+            cubic-bezier so the drop appears to "flow" between tabs. */}
         {indicator && (
           <span
             aria-hidden="true"
             className={cn(
               "absolute top-1 bottom-1 rounded-full pointer-events-none",
-              "bg-white/35 dark:bg-white/25",
-              "ring-1 ring-white/50 ring-inset",
-              "shadow-[0_4px_14px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.5)]",
-              // Inner highlight to sell the "water drop" curvature
-              "before:absolute before:inset-[1px] before:rounded-full",
-              "before:bg-gradient-to-b before:from-white/40 before:via-transparent before:to-transparent",
-              "before:opacity-80",
+              // Slightly brighter than the rail so the active drop pops
+              "bg-white/40 dark:bg-white/30",
+              "ring-1 ring-white/55 ring-inset",
+              "backdrop-blur-md backdrop-saturate-200",
+              "shadow-[0_6px_18px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.12)]",
+              // Inner crescent highlight — sells the curved water surface
+              "before:absolute before:inset-x-2 before:top-[2px] before:h-1/2 before:rounded-full",
+              "before:bg-gradient-to-b before:from-white/65 before:via-white/15 before:to-transparent",
+              "before:opacity-90 before:pointer-events-none",
             )}
             style={{
               transform: `translateX(${indicator.x}px)`,
               width: `${indicator.w}px`,
+              // Long, slightly over-shooting cubic-bezier — gives the drop a
+              // brief "stretch" feel as it flows between tabs (iOS Liquid
+              // Glass aesthetic). Width and transform share the same easing
+              // so the morph stays in sync.
               transition:
-                "transform 480ms cubic-bezier(0.4, 1.4, 0.5, 1), width 480ms cubic-bezier(0.4, 1.4, 0.5, 1)",
+                "transform 620ms cubic-bezier(0.34, 1.56, 0.45, 1), width 620ms cubic-bezier(0.34, 1.56, 0.45, 1)",
             }}
           />
         )}

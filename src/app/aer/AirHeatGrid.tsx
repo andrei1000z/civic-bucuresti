@@ -7,13 +7,26 @@ import { getAqiColor } from "@/lib/aer/colors";
 
 /**
  * AQI heatmap as a single Canvas ImageOverlay.
- * - 300×300 grid = 90K cells (fast, no freeze)
- * - IDW power 1.5 for smooth spread
- * - Gaussian blur for natural transitions
- * - Async computation with requestAnimationFrame
+ *
+ * Design: high-resolution IDW (Inverse Distance Weighted) interpolation
+ * with a *sharper* falloff than typical heatmaps so localized hotspots
+ * stay localized. Cells with no sensor within 60km go transparent
+ * (instead of being painted "good" by a national-average blend) so the
+ * map honestly reflects where we have coverage and where we don't.
+ *
+ * - 400×400 grid = 160K cells inside the Romania border ring
+ * - IDW power 2.5 — sharp falloff, no global wash-out
+ * - Top-K=8 nearest sensors per cell (sorted), bounded compute
+ * - Cells > 60km from the closest sensor: transparent (no data)
+ * - Light Gaussian blur for natural pixel transitions
+ * - Progressive paint via requestAnimationFrame so the main thread
+ *   never blocks for more than ~6ms.
  */
 
-const GRID = 300;
+const GRID = 400;
+const TOP_K = 8;
+const COVERAGE_RADIUS_KM = 60;
+const IDW_POWER = 2.5;
 // Romania bounds — matched EXACTLY to Leaflet ImageOverlay
 const LAT_S = 43.55;
 const LAT_N = 48.27;
@@ -37,36 +50,49 @@ function pointInRing(lat: number, lng: number, ring: number[][]): boolean {
   return inside;
 }
 
+/**
+ * Returns the IDW-interpolated AQI at (lat, lng), or `null` when the
+ * closest sensor is farther than COVERAGE_RADIUS_KM. The TOP_K-nearest
+ * subset is small enough (~8 sensors) that allocating + sorting is
+ * cheap on a per-cell basis.
+ */
 function idw(
-  lat: number, lng: number,
+  lat: number,
+  lng: number,
   sensors: { lat: number; lng: number; aqi: number }[],
-  nationalAvg: number,
-): number {
-  let num = 0, den = 0, closestDist = Infinity;
-  // Only use nearest 30 sensors for speed
-  const nearby = sensors.filter((s) => {
-    const d = Math.abs(s.lat - lat) + Math.abs(s.lng - lng);
-    return d < 5; // rough filter ~500km
-  });
-  const use = nearby.length > 0 ? nearby : sensors.slice(0, 20);
+): number | null {
+  if (sensors.length === 0) return null;
 
-  for (const s of use) {
+  // First pass: distance for all sensors. We don't bail early on a
+  // distance threshold because we need TOP_K nearest, and a coarse cut
+  // would risk picking a worse subset on sparse-coverage edges.
+  const distances: { aqi: number; dist: number }[] = [];
+  for (const s of sensors) {
     const dLat = (lat - s.lat) * 111;
     const dLng = (lng - s.lng) * 111 * Math.cos((lat * Math.PI) / 180);
     const dist = Math.sqrt(dLat * dLat + dLng * dLng);
-    if (dist < 0.5) return s.aqi;
-    if (dist < closestDist) closestDist = dist;
-    const w = 1 / Math.pow(dist, 1.5);
-    num += w * s.aqi;
+    distances.push({ aqi: s.aqi, dist });
+  }
+  distances.sort((a, b) => a.dist - b.dist);
+
+  const closestDist = distances[0]?.dist ?? Infinity;
+  if (closestDist > COVERAGE_RADIUS_KM) return null;
+
+  // Snap-to-sensor when extremely close (~300m): avoids floating-point
+  // weirdness from huge weights and gives the marker an exact pixel.
+  if (closestDist < 0.3) return distances[0]!.aqi;
+
+  let num = 0;
+  let den = 0;
+  const k = Math.min(TOP_K, distances.length);
+  for (let i = 0; i < k; i++) {
+    const { aqi, dist } = distances[i]!;
+    const w = 1 / Math.pow(Math.max(dist, 0.5), IDW_POWER);
+    num += w * aqi;
     den += w;
   }
-  if (den === 0) return nationalAvg;
-  const val = num / den;
-  if (closestDist > 80) {
-    const blend = Math.min(1, (closestDist - 80) / 150);
-    return Math.round(val * (1 - blend) + nationalAvg * blend);
-  }
-  return Math.round(val);
+  if (den === 0) return null;
+  return Math.round(num / den);
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -99,12 +125,10 @@ export function AirHeatGrid({ sensors }: Props) {
 
     // Progressive compute: split the GRID×GRID loop into row-batches
     // rendered across multiple requestAnimationFrame ticks so the main
-    // thread never blocks for more than ~4ms. At GRID=300 and ROWS_PER_TICK=20
-    // we paint the whole map in ~15 frames (~250ms) while the user can
-    // keep panning/zooming. Each tick we flush intermediate pixels so
-    // the heat colors fade in from the top down.
-    const ROWS_PER_TICK = 20;
-    const nationalAvg = Math.round(valid.reduce((s, v) => s + v.aqi, 0) / valid.length);
+    // thread never blocks for more than ~6ms. At GRID=400 and ROWS_PER_TICK=16
+    // we paint the whole map in ~25 frames (~420ms) while the user can
+    // keep panning/zooming.
+    const ROWS_PER_TICK = 16;
     const latStep = (LAT_N - LAT_S) / GRID;
     const lngStep = (LNG_E - LNG_W) / GRID;
 
@@ -154,14 +178,21 @@ export function AirHeatGrid({ sensors }: Props) {
           const lat = LAT_N - (r + 0.5) * latStep;
           const lng = LNG_W + (col + 0.5) * lngStep;
           if (!pointInRing(lat, lng, border)) continue;
+
+          const aqi = idw(lat, lng, valid);
+          // No sensor within COVERAGE_RADIUS_KM → leave this cell
+          // transparent. Honest map: no data ≠ "good".
+          if (aqi == null) continue;
+
           mask[r * GRID + col] = 1;
-          const aqi = idw(lat, lng, valid, nationalAvg);
           const color = hexToRgb(getAqiColor(aqi));
           const idx = (r * GRID + col) * 4;
           data[idx] = color[0];
           data[idx + 1] = color[1];
           data[idx + 2] = color[2];
-          data[idx + 3] = 140;
+          // Slightly higher alpha (160) so hotspots read clearly without
+          // hiding the underlying map texture.
+          data[idx + 3] = 160;
         }
       }
       row = rowEnd;
