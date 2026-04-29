@@ -16,20 +16,33 @@ export function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Column 1 — Brand */}
           <div>
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div
-                className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 flex items-center justify-center text-white font-[family-name:var(--font-sora)] font-semibold text-2xl leading-none"
+            <Link href="/" className="inline-flex items-center gap-2.5 mb-4 group">
+              <span
                 aria-hidden="true"
-                style={{ paddingRight: "10%", paddingBottom: "8%" }}
+                className="relative w-10 h-10 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 grid place-items-center shadow-[0_4px_14px_-2px_rgba(5,150,105,0.45),inset_0_1px_0_rgba(255,255,255,0.25)] group-hover:scale-105 transition-transform"
               >
-                C
-              </div>
+                <svg viewBox="0 0 32 32" className="w-7 h-7 -mt-px" aria-hidden="true">
+                  <text
+                    x="16"
+                    y="22"
+                    textAnchor="middle"
+                    fontFamily="var(--font-sora), system-ui, sans-serif"
+                    fontWeight="700"
+                    fontSize="22"
+                    fill="white"
+                  >
+                    C
+                  </text>
+                </svg>
+              </span>
               <span className="font-[family-name:var(--font-sora)] font-bold text-lg">
                 {SITE_NAME}
               </span>
             </Link>
-            <p className="text-sm text-[var(--color-text-muted)] mb-4 max-w-xs">
-              Platformă civică independentă. Gratuită, fără politică — pentru cetățenii din România.
+            <p className="text-sm text-[var(--color-text-muted)] mb-4 max-w-xs leading-relaxed">
+              Platformă civică independentă, gratuită.
+              <br />
+              Făcută cu <span className="text-rose-500" aria-label="dragoste">❤️</span> pentru o țară ca afară.
             </p>
           </div>
 
@@ -68,9 +81,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-[var(--color-border)]">
           <p className="text-xs text-[var(--color-text-muted)] text-center">
-            &copy; 2026 Civia.ro — Platformă civică independentă · Făcută cu{" "}
-            <span aria-hidden="true">❤️</span>
-            <span className="sr-only">dragoste</span>
+            &copy; 2026 Civia.ro · Toate drepturile rezervate
           </p>
         </div>
       </div>
