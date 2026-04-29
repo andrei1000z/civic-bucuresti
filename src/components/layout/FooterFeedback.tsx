@@ -97,7 +97,7 @@ export function FooterFeedback() {
           Ce nu-ți place la Civia? Ce lipsește?
         </h4>
         <p className="text-xs text-[var(--color-text-muted)] mb-3 leading-relaxed">
-          Platforma se construiește cu tine. Un bug, o idee, o pagină lipsă — orice feedback ajunge direct la mine. Răspund dacă lași un email.
+          Platforma se construiește cu tine. Un bug, o idee, o pagină lipsă — orice feedback ajunge direct la mine. Răspund dacă lași un mesaj.
         </p>
         <form onSubmit={submitFeedback} className="space-y-2.5">
           <div className="flex gap-1.5">
@@ -171,10 +171,10 @@ export function FooterFeedback() {
       <section>
         <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
           <Mail size={16} className="text-[var(--color-primary)]" />
-          Newsletter săptămânal — vinerea
+          Newsletter săptămânal — lunea
         </h4>
         <p className="text-xs text-[var(--color-text-muted)] mb-3 leading-relaxed">
-          Cele mai votate sesizări rezolvate, deadline-uri civice, evenimente locale — tot ce s-a mișcat în România săptămâna asta, într-un singur email de 2 minute.
+          Cele mai votate sesizări rezolvate, petiții civice noi, deadline-uri și evenimente locale — tot ce s-a mișcat în România săptămâna trecută, într-un singur email de 2 minute.
         </p>
         <form onSubmit={submitNewsletter} className="space-y-2.5">
           <div className="flex flex-col sm:flex-row gap-2">
@@ -200,7 +200,7 @@ export function FooterFeedback() {
           {nlError && <p role="alert" className="text-xs text-red-500">{nlError}</p>}
           {nlDone && (
             <p role="status" className="text-xs text-emerald-600 dark:text-emerald-400">
-              <span aria-hidden="true">✓ </span>Te-am adăugat. Primul newsletter vine vinerea următoare.
+              <span aria-hidden="true">✓ </span>Te-am adăugat. Primul newsletter vine lunea următoare.
             </p>
           )}
           <p className="text-[11px] text-[var(--color-text-muted)]">

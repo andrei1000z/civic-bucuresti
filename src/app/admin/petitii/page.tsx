@@ -18,6 +18,7 @@ import {
   Sparkles,
   Upload,
   Infinity as InfinityIcon,
+  Wand2,
 } from "lucide-react";
 import { useToast } from "@/components/Toast";
 import { cn } from "@/lib/utils";
@@ -301,6 +302,7 @@ function PetitieForm({
   const [restoredBanner, setRestoredBanner] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [aiBusy, setAiBusy] = useState<"slug" | "summary" | null>(null);
+  const [scrapingUrl, setScrapingUrl] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const slugManuallyEditedRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -434,6 +436,59 @@ function PetitieForm({
       toast(e instanceof Error ? e.message : "AI helper a eșuat", "error");
     } finally {
       setAiBusy(null);
+    }
+  };
+
+  // ─── Massive URL scrape ────────────────────────────────────────
+  // Fetches the external petition page, extracts og:* + body text, runs
+  // Groq to produce structured fields (title, summary, body, category,
+  // slug, county, image), then auto-fills the entire form.
+  const scrapeFromUrl = async () => {
+    const url = form.external_url.trim();
+    if (!url) {
+      toast("Pune un URL în câmpul Link extern mai întâi", "error");
+      return;
+    }
+    if (!/^https?:\/\//i.test(url)) {
+      toast("URL-ul trebuie să înceapă cu http:// sau https://", "error");
+      return;
+    }
+    const hasContent =
+      form.title.trim().length > 0 ||
+      form.summary.trim().length > 0 ||
+      form.body.trim().length > 0;
+    if (hasContent && !confirm("Asta va suprascrie câmpurile completate (titlu, sumar, conținut, etc). Continui?")) {
+      return;
+    }
+    setScrapingUrl(true);
+    try {
+      const res = await fetch("/api/admin/petitii/scrape-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Scrape failed");
+      const d = json.data ?? {};
+      setForm((f) => ({
+        ...f,
+        title: d.title || f.title,
+        summary: d.summary || f.summary,
+        body: d.body || f.body,
+        slug: d.slug || f.slug,
+        category: d.category || f.category,
+        county_code: d.county_code || f.county_code,
+        image_url: d.image_url || f.image_url,
+        external_url: url,
+      }));
+      // After auto-fill the slug came from AI — mark as manually edited so
+      // the title typer doesn't overwrite it.
+      if (d.slug) slugManuallyEditedRef.current = true;
+      toast("Auto-completat din URL ✨", "success");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Eroare scrape", "error");
+    } finally {
+      setScrapingUrl(false);
     }
   };
 
@@ -704,17 +759,29 @@ function PetitieForm({
               <ExternalLink size={11} className="inline mr-1" aria-hidden="true" />
               Link extern obligatoriu *
             </label>
-            <input
-              id="p-ext"
-              type="url"
-              value={form.external_url}
-              onChange={(e) => setForm({ ...form, external_url: e.target.value })}
-              placeholder="https://declic.ro/petitii/..."
-              required
-              className={inputCls}
-            />
+            <div className="flex gap-2">
+              <input
+                id="p-ext"
+                type="url"
+                value={form.external_url}
+                onChange={(e) => setForm({ ...form, external_url: e.target.value })}
+                placeholder="https://declic.ro/petitii/..."
+                required
+                className={inputCls}
+              />
+              <button
+                type="button"
+                onClick={scrapeFromUrl}
+                disabled={scrapingUrl || !form.external_url.trim()}
+                className="h-11 inline-flex items-center gap-1.5 px-4 rounded-[var(--radius-xs)] bg-gradient-to-br from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold transition-all whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 shadow-sm"
+                title="Extrage automat titlu, sumar, conținut, categorie, imagine din URL"
+              >
+                {scrapingUrl ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Wand2 size={14} aria-hidden="true" />}
+                {scrapingUrl ? "Scrape..." : "Auto-completează din URL"}
+              </button>
+            </div>
             <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
-              Sursa oficială a petiției (Declic / Avaaz / Change.org / petitie.civica.ro). Cetățenii sunt direcționați acolo să semneze.
+              Sursa oficială (Declic / Avaaz / Change.org / petitie.civica.ro). Apasă <strong>Auto-completează</strong> ca AI-ul să umple titlul, sumarul, conținutul, categoria, imaginea și slug-ul.
             </p>
           </div>
 

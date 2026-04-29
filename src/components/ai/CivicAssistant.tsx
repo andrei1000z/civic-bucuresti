@@ -225,21 +225,28 @@ export function CivicAssistant() {
 
   return (
     <>
-      {/* Launcher button */}
+      {/* Launcher button — liquid-glass: backdrop-blur lets the page show through, with a subtle gradient halo */}
       <button
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          "fixed bottom-6 right-6 z-40 rounded-full shadow-[var(--shadow-xl)] transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-primary)]/40",
-          "bg-gradient-to-br from-[var(--color-primary)] to-indigo-800 text-white",
-          "hover:scale-105 active:scale-95",
+          "fixed bottom-6 right-6 z-40 rounded-full transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-primary)]/40",
+          "backdrop-blur-xl bg-white/20 dark:bg-white/10 border border-white/30 dark:border-white/15",
+          "shadow-[0_8px_32px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.4)]",
+          "text-[var(--color-primary)] dark:text-white",
+          "hover:scale-105 hover:bg-white/30 dark:hover:bg-white/15 active:scale-95",
+          "before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-br before:from-[var(--color-primary)]/30 before:via-transparent before:to-indigo-500/20 before:opacity-60 before:pointer-events-none",
+          "after:absolute after:inset-[1px] after:rounded-full after:bg-gradient-to-br after:from-white/40 after:to-transparent after:opacity-50 after:pointer-events-none",
+          "relative overflow-hidden",
           open ? "w-12 h-12" : "w-14 h-14"
         )}
         aria-label={open ? "Închide asistentul civic" : "Deschide asistentul civic AI"}
         aria-expanded={open}
         aria-haspopup="dialog"
       >
-        {open ? <X size={20} className="m-auto" aria-hidden="true" /> : <Sparkles size={22} className="m-auto" aria-hidden="true" />}
+        <span className="relative z-10 flex items-center justify-center w-full h-full drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]">
+          {open ? <X size={20} aria-hidden="true" /> : <Sparkles size={22} aria-hidden="true" />}
+        </span>
       </button>
 
       {/* Chat window */}
