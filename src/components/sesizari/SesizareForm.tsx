@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { SESIZARE_TIPURI } from "@/lib/constants";
 import { getAuthoritiesFor } from "@/lib/sesizari/authorities";
+import { capitalizeName, formatAddress } from "@/lib/sesizari/format-helpers";
 import { detectSectorFromCoords } from "@/lib/geo/sector-from-coords";
 // Gender-detection helpers are no longer needed — the new email template uses
 // the neutral "Mă numesc X, locuiesc în Y" opening instead of Subsemnatul(a).
@@ -73,21 +74,8 @@ const INITIAL: FormData = {
   publica: true,
 };
 
-/** Capitalize each word: "ion POPESCU" → "Ion Popescu" */
-function capitalizeName(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(" ");
-}
-
-/** Clean up address: trim, capitalize first letter */
-function formatAddress(addr: string): string {
-  const trimmed = addr.trim();
-  if (!trimmed) return trimmed;
-  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
-}
+// capitalizeName + formatAddress extras în lib/sesizari/format-helpers.ts
+// pentru unit-test coverage (componenta-mom de 1485 linii e neftestabilă).
 
 export function SesizareForm() {
   const { user } = useAuth();

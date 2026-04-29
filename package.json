@@ -12,6 +12,8 @@
     "fetch-stiri": "tsx scripts/fetch-stiri.ts",
     "migrate": "tsx scripts/migrate.ts",
     "scrape:intreruperi": "node scripts/scrape-intreruperi.mjs",
+    "verify:populations": "tsx scripts/verify-populations.ts",
+    "verify:emails": "tsx scripts/verify-emails.ts",
     "test": "vitest run || vitest run",
     "test:watch": "vitest",
     "check": "npm run lint && npx tsc --noEmit && npm test"
