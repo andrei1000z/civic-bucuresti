@@ -124,7 +124,7 @@ export function KeyboardShortcuts() {
         aria-modal="true"
         aria-labelledby="kbd-shortcuts-title"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] shadow-[var(--shadow-xl)] overflow-hidden animate-modal-pop"
+        className="w-full max-w-md bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-xl)] overflow-hidden animate-modal-pop"
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
           <div className="flex items-center gap-2">

@@ -320,7 +320,7 @@ export function IntreruperiFilters({ items }: { items: Interruption[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] p-10 text-center">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-10 text-center">
           <div className="text-5xl mb-3 opacity-60" aria-hidden="true">
             🔎
           </div>

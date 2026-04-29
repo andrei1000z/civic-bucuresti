@@ -122,7 +122,7 @@ export default function IntreruperiPage() {
       </div>
 
       {all.length === 0 ? (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] p-8 text-center">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-8 text-center">
           <Calendar
             size={40}
             className="mx-auto mb-3 text-[var(--color-text-muted)]"

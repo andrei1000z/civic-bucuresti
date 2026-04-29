@@ -248,7 +248,7 @@ export function CivicAssistant() {
           role="dialog"
           aria-modal="false"
           aria-labelledby="civic-assistant-title"
-          className="fixed inset-x-3 bottom-24 sm:inset-x-auto sm:right-6 z-40 sm:w-[400px] h-[calc(100dvh-7rem)] sm:h-[600px] max-h-[calc(100dvh-7rem)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[16px] shadow-[var(--shadow-xl)] flex flex-col overflow-hidden animate-fade-in-up"
+          className="fixed inset-x-3 bottom-24 sm:inset-x-auto sm:right-6 z-40 sm:w-[400px] h-[calc(100dvh-7rem)] sm:h-[600px] max-h-[calc(100dvh-7rem)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-xl)] flex flex-col overflow-hidden animate-fade-in-up"
         >
           {/* Header */}
           <header className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)] to-indigo-700 text-white">

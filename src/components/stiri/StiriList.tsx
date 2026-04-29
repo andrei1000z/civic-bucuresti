@@ -117,7 +117,7 @@ export function StiriList() {
                   role="tab"
                   aria-selected={category === cat.id}
                   className={cn(
-                    "px-4 py-2 rounded-[20px] text-xs font-medium whitespace-nowrap transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]",
+                    "px-4 py-2 rounded-[var(--radius-pill)] text-xs font-medium whitespace-nowrap transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]",
                     category === cat.id
                       ? "bg-[var(--color-primary)] text-white"
                       : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"

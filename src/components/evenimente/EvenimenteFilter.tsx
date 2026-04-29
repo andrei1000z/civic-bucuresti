@@ -59,7 +59,7 @@ export function EvenimenteFilter({ evenimente }: { evenimente: Eveniment[] }) {
           onClick={() => setCategory("toate")}
           aria-pressed={category === "toate"}
           className={cn(
-            "px-4 py-2 rounded-[20px] text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
+            "px-4 py-2 rounded-[var(--radius-pill)] text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
             category === "toate"
               ? "bg-[var(--color-primary)] text-white"
               : "bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-surface-2)]"
@@ -78,7 +78,7 @@ export function EvenimenteFilter({ evenimente }: { evenimente: Eveniment[] }) {
               onClick={() => setCategory(cat)}
               aria-pressed={category === cat}
               className={cn(
-                "px-4 py-2 rounded-[20px] text-xs font-medium transition-all inline-flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
+                "px-4 py-2 rounded-[var(--radius-pill)] text-xs font-medium transition-all inline-flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
                 category === cat
                   ? "bg-[var(--color-primary)] text-white"
                   : "bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-surface-2)]"

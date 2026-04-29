@@ -159,7 +159,7 @@ export default async function StireDetailPage({
       {/* Hero */}
       <div className="mb-8">
         {stire.image_url && (
-          <div className="relative h-64 md:h-[420px] rounded-[16px] overflow-hidden mb-6 bg-[var(--color-surface-2)]">
+          <div className="relative h-64 md:h-[420px] rounded-[var(--radius-md)] overflow-hidden mb-6 bg-[var(--color-surface-2)]">
             <Image
               src={stire.image_url}
               alt={stire.title}

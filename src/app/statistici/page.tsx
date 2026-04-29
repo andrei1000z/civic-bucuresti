@@ -181,7 +181,7 @@ export default function StatisticiPage() {
       </div>
 
       {/* CTA */}
-      <div className="bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] rounded-[16px] p-8 md:p-12 text-white text-center">
+      <div className="bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] rounded-[var(--radius-md)] p-8 md:p-12 text-white text-center">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-3">
           Vezi statisticile pentru județul tău
         </h2>

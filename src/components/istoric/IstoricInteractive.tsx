@@ -430,7 +430,7 @@ function FilterChip({
     <button
       onClick={onClick}
       className={cn(
-        "px-3 py-1 rounded-[20px] text-xs font-medium transition-colors",
+        "px-3 py-1 rounded-[var(--radius-pill)] text-xs font-medium transition-colors",
         active
           ? "bg-[var(--color-primary)] text-white"
           : "bg-[var(--color-surface-2)] text-[var(--color-text)] hover:bg-[var(--color-border)]"
