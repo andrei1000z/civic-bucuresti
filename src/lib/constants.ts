@@ -173,4 +173,6 @@ export const SOURCE_COLORS: Record<string, string> = {
   "Știri Suceava": "#14B8A6",
   "Ediția de Dimineață": "#F59E0B",
   "Gazeta BT": "#8B5CF6",
+  "Știri de Cluj": "#A855F7",
+  "Știri din România": "#475569",
 };

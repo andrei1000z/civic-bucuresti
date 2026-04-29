@@ -23,11 +23,11 @@ export default function StiriPage() {
           Știri civice
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-4">
-          Articole agregate și restructurate din surse verificate. Conținutul aparține publicațiilor originale.
+          Doar surse <strong>naționale</strong> verificate — Digi24, HotNews, G4Media, Mediafax, News.ro. Pentru știri locale, deschide pagina județului tău.
         </p>
         <div className="flex flex-wrap gap-2">
-          {Object.entries(SOURCE_COLORS).map(([source, color]) => (
-            <Badge key={source} bgColor={color} color="white">
+          {(["Digi24", "Hotnews", "G4Media", "Mediafax", "News.ro"] as const).map((source) => (
+            <Badge key={source} bgColor={SOURCE_COLORS[source] ?? "#64748b"} color="white">
               {source}
             </Badge>
           ))}

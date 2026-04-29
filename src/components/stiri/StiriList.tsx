@@ -154,7 +154,7 @@ export function StiriList() {
             ? "1 articol găsit"
             : rows.length === 0
               ? "Niciun articol"
-              : `${rows.length} articole${query || category !== "all" ? " (filtrat)" : ""} · sursele: Digi24, B365, Hotnews`}
+              : `${rows.length} articole${query || category !== "all" ? " (filtrat)" : ""}`}
       </p>
 
       {loading && rows.length === 0 ? (
