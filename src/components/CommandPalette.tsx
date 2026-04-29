@@ -278,7 +278,7 @@ export function CommandPalette() {
                       key={link.url}
                       type="button"
                       onClick={() => handleSelect(link.url)}
-                      className="flex flex-col items-center gap-1.5 p-3 rounded-[10px] hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-[var(--radius-sm)] hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     >
                       <Icon size={18} className={link.color} aria-hidden="true" />
                       <span className="text-xs font-medium">{link.label}</span>

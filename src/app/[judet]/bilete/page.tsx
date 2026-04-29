@@ -150,7 +150,7 @@ export default async function BiletePage({
               return (
                 <div
                   key={type}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px]"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)]"
                 >
                   <Icon size={20} className={VEHICLE_COLOR[type] ?? "text-gray-600"} />
                   <span className="font-medium text-sm">{VEHICLE_LABEL[type] ?? type}</span>

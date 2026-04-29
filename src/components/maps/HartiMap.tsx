@@ -406,7 +406,7 @@ export function HartiMap({
             Straturi
           </button>
           {layersOpen && (
-            <div className="absolute top-full right-0 mt-2 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] shadow-xl p-2">
+            <div className="absolute top-full right-0 mt-2 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] shadow-xl p-2">
               <button
                 onClick={() => { setMapStyle("standard"); setLayersOpen(false); }}
                 className={cn(

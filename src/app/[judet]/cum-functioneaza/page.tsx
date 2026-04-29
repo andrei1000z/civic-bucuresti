@@ -88,7 +88,7 @@ export default async function CountyCumFunctioneazaPage({
       {/* Stats cards */}
       <section className="mb-14">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-6 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[10px] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-[var(--radius-sm)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
             <MapPin size={20} />
           </div>
           {county.name} in cifre
@@ -127,7 +127,7 @@ export default async function CountyCumFunctioneazaPage({
       {/* Org structure */}
       <section className="mb-14">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-6 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[10px] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-[var(--radius-sm)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
             <Building2 size={20} />
           </div>
           Structura administrativa
@@ -178,7 +178,7 @@ export default async function CountyCumFunctioneazaPage({
       {/* Key info: sesizare process */}
       <section className="mb-14">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-6 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[10px] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-[var(--radius-sm)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
             <FileText size={20} />
           </div>
           Drepturile tale ca cetatean
@@ -232,7 +232,7 @@ export default async function CountyCumFunctioneazaPage({
       {/* FAQ */}
       <section className="mb-14">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-6 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[10px] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-[var(--radius-sm)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
             <HelpCircle size={20} />
           </div>
           Intrebari frecvente

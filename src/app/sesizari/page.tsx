@@ -25,7 +25,7 @@ export default function SesizariPage() {
       <div className="grid sm:grid-cols-3 gap-3 mb-10">
         <Link
           href="/sesizari-publice"
-          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] p-4 hover:shadow-[var(--shadow-md)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         >
           <Eye size={20} className="text-[var(--color-primary)] shrink-0" />
           <div>
@@ -35,7 +35,7 @@ export default function SesizariPage() {
         </Link>
         <Link
           href="/urmareste"
-          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] p-4 hover:shadow-[var(--shadow-md)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         >
           <FileText size={20} className="text-amber-500 shrink-0" />
           <div>
@@ -45,7 +45,7 @@ export default function SesizariPage() {
         </Link>
         <Link
           href="/sesizari-rezolvate"
-          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] p-4 hover:shadow-[var(--shadow-md)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         >
           <CheckCircle2 size={20} className="text-emerald-500 shrink-0" />
           <div>

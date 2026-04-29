@@ -311,7 +311,7 @@ function Slot({
   const Icon = meta.icon;
 
   return (
-    <div className="border border-[var(--color-border)] rounded-[10px] p-3 bg-[var(--color-surface)]">
+    <div className="border border-[var(--color-border)] rounded-[var(--radius-sm)] p-3 bg-[var(--color-surface)]">
       <div className="flex items-center gap-2 mb-1">
         <Icon size={14} className="text-[var(--color-primary)]" />
         <p className="text-xs font-semibold">

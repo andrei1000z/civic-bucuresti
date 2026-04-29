@@ -130,7 +130,7 @@ export function ParkingHotspotModal({
           </p>
 
           {data.sample.length > 0 && (
-            <div className="rounded-[10px] bg-[var(--color-surface-2)] border border-[var(--color-border)] p-3 space-y-2">
+            <div className="rounded-[var(--radius-sm)] bg-[var(--color-surface-2)] border border-[var(--color-border)] p-3 space-y-2">
               <p className="text-xs font-semibold text-[var(--color-text-muted)]">
                 Sesizări anterioare în această zonă ({data.count} în total):
               </p>
@@ -159,7 +159,7 @@ export function ParkingHotspotModal({
             </div>
           )}
 
-          <div className="rounded-[10px] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 p-3 text-xs text-blue-900 dark:text-blue-300">
+          <div className="rounded-[var(--radius-sm)] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 p-3 text-xs text-blue-900 dark:text-blue-300">
             <p>
               <strong>Cum funcționează:</strong> Cererea generată citează codurile sesizărilor anterioare drept dovadă a problemei sistemice — un argument mult mai puternic decât o cerere individuală.
             </p>

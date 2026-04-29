@@ -60,7 +60,7 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Caută județ (ex: Cluj, Timiș, Argeș)…"
           aria-label="Caută autoritate"
-          className="w-full h-12 pl-10 pr-10 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface)] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          className="w-full h-12 pl-10 pr-10 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         />
         {query && (
           <button
@@ -78,7 +78,7 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
       <div
         role="tablist"
         aria-label="Filtrează după tip"
-        className="inline-flex items-center gap-1 mb-5 p-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[10px]"
+        className="inline-flex items-center gap-1 mb-5 p-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-sm)]"
       >
         <FilterTab
           active={kindFilter === "all"}

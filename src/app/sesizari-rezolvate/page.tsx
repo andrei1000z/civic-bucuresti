@@ -144,7 +144,7 @@ export default async function SesizariResolvatePage() {
                     <Link
                       key={s.id}
                       href={`/sesizari/${s.code}`}
-                      className="flex items-center gap-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all"
+                      className="flex items-center gap-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] p-4 hover:shadow-[var(--shadow-md)] transition-all"
                     >
                       <CheckCircle2 size={20} className="text-emerald-500 shrink-0" />
                       <div className="flex-1 min-w-0">

@@ -14,13 +14,13 @@ export default function Loading() {
         ))}
       </div>
 
-      <div className="h-12 bg-[var(--color-surface-2)] rounded-[10px] mb-6" />
+      <div className="h-12 bg-[var(--color-surface-2)] rounded-[var(--radius-sm)] mb-6" />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {Array.from({ length: 9 }).map((_, i) => (
           <div
             key={i}
-            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 h-40"
+            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] p-4 h-40"
           />
         ))}
       </div>

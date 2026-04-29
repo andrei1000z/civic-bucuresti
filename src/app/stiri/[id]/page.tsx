@@ -320,7 +320,7 @@ export default async function StireDetailPage({
               <Link
                 key={r.id}
                 href={`/stiri/${r.id}`}
-                className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] overflow-hidden hover:shadow-[var(--shadow-md)] transition-all"
+                className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] overflow-hidden hover:shadow-[var(--shadow-md)] transition-all"
               >
                 <div className="relative h-32 bg-gradient-to-br from-slate-600 to-slate-800">
                   {r.image_url ? (

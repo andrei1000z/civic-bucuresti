@@ -43,7 +43,7 @@ export default async function SesizariPage({
       <div className="grid sm:grid-cols-3 gap-3 mb-10">
         <Link
           href="/sesizari-publice"
-          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all"
+          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] p-4 hover:shadow-[var(--shadow-md)] transition-all"
         >
           <Eye size={20} className="text-[var(--color-primary)] shrink-0" />
           <div>
@@ -53,7 +53,7 @@ export default async function SesizariPage({
         </Link>
         <Link
           href="/urmareste"
-          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all"
+          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] p-4 hover:shadow-[var(--shadow-md)] transition-all"
         >
           <FileText size={20} className="text-amber-500 shrink-0" />
           <div>
@@ -63,7 +63,7 @@ export default async function SesizariPage({
         </Link>
         <Link
           href="/sesizari-rezolvate"
-          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[10px] p-4 hover:shadow-[var(--shadow-md)] transition-all"
+          className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] p-4 hover:shadow-[var(--shadow-md)] transition-all"
         >
           <CheckCircle2 size={20} className="text-emerald-500 shrink-0" />
           <div>
