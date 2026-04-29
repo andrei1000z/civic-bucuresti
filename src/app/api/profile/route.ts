@@ -15,6 +15,9 @@ const updateSchema = z.object({
   full_name: z.preprocess(emptyToNull, z.string().min(2).max(120).nullable().optional()),
   address: z.preprocess(emptyToNull, z.string().min(3).max(300).nullable().optional()),
   phone: z.preprocess(emptyToNull, z.string().max(30).nullable().optional()),
+  avatar_url: z.preprocess(emptyToNull, z.string().url().max(500).nullable().optional()),
+  newsletter_email_optin: z.boolean().optional(),
+  newsletter_sms_optin: z.boolean().optional(),
   // Privacy flag — persisted in Redis so it works without a DB migration.
   hide_name: z.boolean().optional(),
 });
@@ -63,7 +66,7 @@ export async function PUT(req: Request) {
     }
 
     // Build DB update — null means "clear field", undefined means "don't change"
-    const updates: Record<string, string | null> = {};
+    const updates: Record<string, string | null | boolean> = {};
     if (parsed.display_name !== undefined) {
       updates.display_name = parsed.display_name ? sanitizeText(parsed.display_name, 80) : null;
     }
@@ -75,6 +78,15 @@ export async function PUT(req: Request) {
     }
     if (parsed.phone !== undefined) {
       updates.phone = parsed.phone ? sanitizeText(parsed.phone, 30) : null;
+    }
+    if (parsed.avatar_url !== undefined) {
+      updates.avatar_url = parsed.avatar_url;
+    }
+    if (parsed.newsletter_email_optin !== undefined) {
+      updates.newsletter_email_optin = parsed.newsletter_email_optin;
+    }
+    if (parsed.newsletter_sms_optin !== undefined) {
+      updates.newsletter_sms_optin = parsed.newsletter_sms_optin;
     }
 
     // If the user only toggled hide_name, there's nothing to UPDATE on

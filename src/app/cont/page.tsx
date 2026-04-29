@@ -1,9 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Save, LogOut, CheckCircle2, Loader2, Plus, ExternalLink, X, AlertTriangle } from "lucide-react";
+import {
+  User,
+  Save,
+  LogOut,
+  CheckCircle2,
+  Loader2,
+  Plus,
+  ExternalLink,
+  X,
+  AlertTriangle,
+  Mail,
+  MessageSquareText,
+  Camera,
+  Trash2,
+  ShieldCheck,
+  EyeOff,
+  Download,
+  Sparkles,
+} from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/components/Toast";
 import { Badge } from "@/components/ui/Badge";
@@ -18,6 +36,9 @@ interface Profile {
   address: string | null;
   phone: string | null;
   email: string;
+  avatar_url: string | null;
+  newsletter_email_optin?: boolean;
+  newsletter_sms_optin?: boolean;
   hide_name?: boolean;
 }
 
@@ -33,6 +54,28 @@ interface SesizareRow {
   publica: boolean;
 }
 
+interface FormState {
+  display_name: string;
+  full_name: string;
+  address: string;
+  phone: string;
+  avatar_url: string;
+  newsletter_email_optin: boolean;
+  newsletter_sms_optin: boolean;
+  hide_name: boolean;
+}
+
+const EMPTY_FORM: FormState = {
+  display_name: "",
+  full_name: "",
+  address: "",
+  phone: "",
+  avatar_url: "",
+  newsletter_email_optin: false,
+  newsletter_sms_optin: false,
+  hide_name: false,
+};
+
 export default function ContPage() {
   const { user, loading: authLoading, signOut, openAuthModal } = useAuth();
   const { toast } = useToast();
@@ -47,7 +90,9 @@ export default function ContPage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [form, setForm] = useState({ display_name: "", full_name: "", address: "", phone: "", hide_name: false });
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
 
   useEffect(() => {
     if (authLoading) return;
@@ -67,7 +112,6 @@ export default function ContPage() {
         fetch("/api/profile"),
         fetch("/api/profile/sesizari"),
       ]);
-      // 401 → sesiune expirată
       if (pRes.status === 401 || sRes.status === 401) {
         setLoadError("Sesiunea a expirat. Te rog autentifică-te din nou.");
         setTimeout(() => {
@@ -89,7 +133,10 @@ export default function ContPage() {
           full_name: p.data.full_name ?? "",
           address: p.data.address ?? "",
           phone: p.data.phone ?? "",
-          hide_name: p.data.hide_name ?? false,
+          avatar_url: p.data.avatar_url ?? "",
+          newsletter_email_optin: !!p.data.newsletter_email_optin,
+          newsletter_sms_optin: !!p.data.newsletter_sms_optin,
+          hide_name: !!p.data.hide_name,
         });
       }
       if (s.data) setSesizari(s.data);
@@ -99,8 +146,74 @@ export default function ContPage() {
       setLoading(false);
     }
   };
+
+  const uploadAvatar = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast("Doar fișiere imagine (jpg, png, webp)", "error");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast("Imagine prea mare. Maxim 5MB.", "error");
+      return;
+    }
+    setAvatarUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("files", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Upload failed");
+      const url = json.data?.urls?.[0];
+      if (!url) throw new Error("Nu am primit URL-ul");
+
+      // Persist immediately so the avatar survives a page reload even
+      // if the user closes without clicking "Salvează modificările".
+      const saveRes = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar_url: url }),
+      });
+      const saveJson = await saveRes.json();
+      if (!saveRes.ok) throw new Error(saveJson.error || "Eroare salvare avatar");
+
+      setForm((f) => ({ ...f, avatar_url: url }));
+      setProfile((p) => (p ? { ...p, avatar_url: url } : p));
+      toast("Poză de profil actualizată", "success");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Eroare upload", "error");
+    } finally {
+      setAvatarUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const removeAvatar = async () => {
+    if (!form.avatar_url) return;
+    setAvatarUploading(true);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar_url: null }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Eroare ștergere avatar");
+      setForm((f) => ({ ...f, avatar_url: "" }));
+      setProfile((p) => (p ? { ...p, avatar_url: null } : p));
+      toast("Poza de profil ștearsă", "info");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Eroare", "error");
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (form.newsletter_sms_optin && !form.phone.trim()) {
+      setSaveError("Pentru newsletter pe SMS, completează numărul de telefon.");
+      return;
+    }
     setSaving(true);
     setSaved(false);
     setSaveError(null);
@@ -114,7 +227,6 @@ export default function ContPage() {
       if (!res.ok) {
         setSaveError(json.error ?? "Eroare salvare");
       } else {
-        // Update local profile so changes persist visually
         if (json.data) setProfile({ ...json.data, email: profile?.email ?? "" });
         setSaved(true);
         setTimeout(() => setSaved(false), 2500);
@@ -156,91 +268,137 @@ export default function ContPage() {
     );
   }
 
-  return (
-    <div className="container-narrow py-12 md:py-16">
-      <div className="mb-10 flex items-start justify-between">
-        <div>
-          <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-2">
-            Contul tău
-          </h1>
-          <p className="text-[var(--color-text-muted)]">
-            Datele salvate aici se completează automat când depui o sesizare nouă.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={async () => {
-            await signOut();
-            toast("Te-ai deconectat. La revedere!", "info");
-            router.push("/");
-          }}
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-        >
-          <LogOut size={14} aria-hidden="true" />
-          Deconectare
-        </button>
-      </div>
+  const initial = ((profile?.display_name ?? profile?.email ?? "C")[0] ?? "C").toUpperCase();
+  const completionChecks = [
+    { ok: !!form.full_name, label: "Nume complet" },
+    { ok: !!form.address, label: "Adresă" },
+    { ok: !!form.phone, label: "Telefon" },
+    { ok: !!form.avatar_url, label: "Poză de profil" },
+  ];
+  const completedCount = completionChecks.filter((c) => c.ok).length;
+  const completionPct = Math.round((completedCount / completionChecks.length) * 100);
 
-      <div className="grid lg:grid-cols-[360px_1fr] gap-8">
-        {/* Profile form */}
-        <aside>
+  return (
+    <div className="container-narrow py-10 md:py-14">
+      {/* ─── Header strip ─────────────────────────────────────────── */}
+      <header className="relative mb-8 overflow-hidden rounded-[var(--radius-lg)] bg-gradient-to-br from-[var(--color-primary)] via-emerald-700 to-indigo-800 p-6 md:p-8 text-white shadow-[var(--shadow-3)]">
+        <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="absolute -bottom-16 -left-8 w-72 h-72 rounded-full bg-indigo-400/20 blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="relative flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              {form.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={form.avatar_url}
+                  alt=""
+                  className="w-20 h-20 rounded-full object-cover ring-4 ring-white/30 shadow-lg"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-white/15 backdrop-blur-sm ring-4 ring-white/30 grid place-items-center text-3xl font-bold shadow-lg">
+                  {initial}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={avatarUploading}
+                className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-white text-[var(--color-primary)] grid place-items-center shadow-md hover:scale-110 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)] disabled:opacity-50"
+                aria-label="Schimbă poza de profil"
+                title="Schimbă poza de profil"
+              >
+                {avatarUploading ? (
+                  <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Camera size={14} aria-hidden="true" />
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadAvatar(file);
+                }}
+                className="hidden"
+              />
+            </div>
+            <div className="min-w-0">
+              <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-extrabold leading-tight">
+                Salut, {profile?.display_name?.split(" ")[0] ?? "Cetățean"}!
+              </h1>
+              <p className="text-sm text-white/80 truncate max-w-[260px] md:max-w-md">
+                {profile?.email}
+              </p>
+              {form.avatar_url && (
+                <button
+                  type="button"
+                  onClick={removeAvatar}
+                  disabled={avatarUploading}
+                  className="text-[11px] text-white/70 hover:text-white underline mt-1 inline-flex items-center gap-1"
+                >
+                  <Trash2 size={10} aria-hidden="true" />
+                  Șterge poza
+                </button>
+              )}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              await signOut();
+              toast("Te-ai deconectat. La revedere!", "info");
+              router.push("/");
+            }}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-full)] bg-white/15 backdrop-blur-sm border border-white/30 text-sm font-medium hover:bg-white/25 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            <LogOut size={14} aria-hidden="true" />
+            Deconectare
+          </button>
+        </div>
+      </header>
+
+      {/* ─── Main grid: Profile (left) + Sesizari (right) ─────────── */}
+      <div className="grid lg:grid-cols-[400px_1fr] gap-6 lg:gap-8">
+        <aside className="lg:sticky lg:top-24 lg:self-start space-y-5">
+          {/* Profile completion nudge */}
+          {completionPct < 100 && (
+            <div className="bg-[var(--color-surface)] border border-amber-500/30 rounded-[var(--radius-md)] p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
+                  Profil {completionPct}% complet
+                </span>
+                <span className="text-xs text-[var(--color-text-muted)] tabular-nums">
+                  {completedCount}/{completionChecks.length}
+                </span>
+              </div>
+              <div className="h-1.5 bg-[var(--color-surface-2)] rounded-full overflow-hidden mb-2">
+                <div
+                  className="h-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all"
+                  style={{ width: `${completionPct}%` }}
+                />
+              </div>
+              <ul className="space-y-1 text-[11px]">
+                {completionChecks
+                  .filter((c) => !c.ok)
+                  .map((c) => (
+                    <li key={c.label} className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                      Lipsește: {c.label}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
+
           <form
             onSubmit={handleSave}
-            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 sticky top-24"
+            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)]"
           >
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-indigo-800 text-white flex items-center justify-center text-lg font-bold">
-                {((profile?.display_name ?? profile?.email ?? "C")[0] ?? "C").toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold truncate">{profile?.display_name ?? "Cetățean"}</p>
-                <p className="text-xs text-[var(--color-text-muted)] truncate">{profile?.email}</p>
-              </div>
-            </div>
-
-            {/* Profile completeness nudge — sesizările se trimit mai ușor
-                când avem full_name + adresă salvate. */}
-            {(() => {
-              const checks: Array<{ ok: boolean; label: string }> = [
-                { ok: !!form.full_name, label: "Nume complet" },
-                { ok: !!form.address, label: "Adresă" },
-                { ok: !!form.phone, label: "Telefon (opțional)" },
-              ];
-              const done = checks.filter((c) => c.ok).length;
-              const pct = Math.round((done / checks.length) * 100);
-              if (pct === 100) return null;
-              return (
-                <div className="mb-5 p-3 rounded-[var(--radius-xs)] bg-amber-500/5 border border-amber-500/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
-                      Profil {pct}% complet
-                    </span>
-                    <span className="text-xs text-[var(--color-text-muted)]">{done}/{checks.length}</span>
-                  </div>
-                  <div className="h-1.5 bg-[var(--color-surface-2)] rounded-full overflow-hidden mb-2">
-                    <div
-                      className="h-full bg-amber-500 transition-all"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <ul className="space-y-1 text-xs">
-                    {checks
-                      .filter((c) => !c.ok)
-                      .map((c) => (
-                        <li key={c.label} className="flex items-center gap-2 text-[var(--color-text-muted)]">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                          Lipsește: {c.label}
-                        </li>
-                      ))}
-                  </ul>
-                  <p className="text-[11px] text-[var(--color-text-muted)] mt-2">
-                    Completează pentru sesizări mai rapide — datele se auto-completează la fiecare trimitere.
-                  </p>
-                </div>
-              );
-            })()}
-
-            <div className="space-y-4">
+            {/* Date personale */}
+            <section className="p-5 space-y-4">
+              <SectionTitle icon={User}>Date personale</SectionTitle>
               <Field label="Nume afișat">
                 <input
                   type="text"
@@ -281,66 +439,75 @@ export default function ContPage() {
                   className={inputClass}
                 />
               </Field>
-            </div>
 
-            {/* Aspect — theme picker mut din navbar la cererea user-ului 2026-04. */}
-            <div className="mt-5 pt-5 border-t border-[var(--color-border)]">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
-                Aspect
-              </p>
+              {/* Newsletter opt-ins — under phone, GDPR-style explicit consent */}
+              <div className="space-y-2 pt-1">
+                <CheckboxRow
+                  icon={Mail}
+                  checked={form.newsletter_email_optin}
+                  onChange={(v) => setForm({ ...form, newsletter_email_optin: v })}
+                  title="Înscrie-mă la newsletter pe email"
+                  description="Săptămânal, lunea — sesizări rezolvate, petiții civice, deadline-uri locale. Dezabonare cu un click."
+                />
+                <CheckboxRow
+                  icon={MessageSquareText}
+                  checked={form.newsletter_sms_optin}
+                  onChange={(v) => setForm({ ...form, newsletter_sms_optin: v })}
+                  title="Înscrie-mă la newsletter pe SMS"
+                  description="Doar alerte civice urgente (1–2 SMS pe lună maxim). Necesită număr de telefon."
+                  disabled={!form.phone.trim()}
+                  disabledHint="Completează telefonul mai sus"
+                />
+              </div>
+            </section>
+
+            {/* Aspect */}
+            <section className="border-t border-[var(--color-border)] p-5 space-y-3">
+              <SectionTitle icon={Sparkles}>Aspect</SectionTitle>
               <ThemeSettings />
-              <p className="text-xs text-[var(--color-text-muted)] mt-2 leading-relaxed">
-                „Sistem" urmează preferința device-ului tău (dark/light auto).
-              </p>
-            </div>
+            </section>
 
             {/* Confidențialitate */}
-            <div className="mt-5 pt-5 border-t border-[var(--color-border)]">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
-                Confidențialitate
-              </p>
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={form.hide_name}
-                  onChange={(e) => setForm({ ...form, hide_name: e.target.checked })}
-                  className="mt-0.5 w-4 h-4 accent-[var(--color-primary)] cursor-pointer"
-                />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Ascunde numele meu pe site</p>
-                  <p className="text-xs text-[var(--color-text-muted)] mt-0.5 leading-relaxed">
-                    Când e bifat, sesizările tale publice apar cu „Cetățean anonim" în loc de numele real.
-                    Numele tău rămâne în email-ul trimis la autorități și în panoul de moderare (e nevoie
-                    pentru identificare legală).
-                  </p>
-                </div>
-              </label>
-            </div>
+            <section className="border-t border-[var(--color-border)] p-5 space-y-3">
+              <SectionTitle icon={ShieldCheck}>Confidențialitate</SectionTitle>
+              <CheckboxRow
+                icon={EyeOff}
+                checked={form.hide_name}
+                onChange={(v) => setForm({ ...form, hide_name: v })}
+                title="Ascunde numele meu pe site"
+                description={
+                  `Sesizările publice apar cu "Cetățean anonim". Numele rămâne în email-ul către autoritate (e nevoie pentru identificare legală).`
+                }
+              />
+            </section>
 
-            {saveError && (
-              <div role="alert" className="mt-3 p-2.5 rounded-[var(--radius-xs)] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-xs text-red-700 dark:text-red-300">
-                {saveError}
-              </div>
-            )}
-            <button
-              type="submit"
-              disabled={saving}
-              aria-busy={saving}
-              className="mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
-            >
-              {saving ? (
-                <Loader2 size={14} className="animate-spin" aria-hidden="true" />
-              ) : saved ? (
-                <CheckCircle2 size={14} aria-hidden="true" />
-              ) : (
-                <Save size={14} aria-hidden="true" />
+            {/* Save button */}
+            <div className="border-t border-[var(--color-border)] p-5">
+              {saveError && (
+                <div role="alert" className="mb-3 p-2.5 rounded-[var(--radius-xs)] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-xs text-red-700 dark:text-red-300">
+                  {saveError}
+                </div>
               )}
-              {saving ? "Se salvează..." : saved ? "Salvat!" : "Salvează modificările"}
-            </button>
+              <button
+                type="submit"
+                disabled={saving}
+                aria-busy={saving}
+                className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              >
+                {saving ? (
+                  <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                ) : saved ? (
+                  <CheckCircle2 size={14} aria-hidden="true" />
+                ) : (
+                  <Save size={14} aria-hidden="true" />
+                )}
+                {saving ? "Se salvează..." : saved ? "Salvat!" : "Salvează modificările"}
+              </button>
+            </div>
           </form>
         </aside>
 
-        {/* Sesizari */}
+        {/* ─── Sesizari column ────────────────────────────────────── */}
         <div>
           {/* Stats */}
           {sesizari.length > 0 && (() => {
@@ -348,7 +515,7 @@ export default function ContPage() {
             const inLucru = sesizari.filter((s) => s.status === "in-lucru").length;
             const procent = Math.round((rezolvate / sesizari.length) * 100);
             return (
-              <div className="grid grid-cols-3 gap-3 mb-5">
+              <div className="grid grid-cols-3 gap-3 mb-6">
                 <StatBox label="Totale" value={sesizari.length.toString()} color="#2563EB" />
                 <StatBox label="Rezolvate" value={rezolvate.toString()} delta={`${procent}%`} color="#059669" />
                 <StatBox label="În lucru" value={inLucru.toString()} color="#EAB308" />
@@ -362,7 +529,7 @@ export default function ContPage() {
             </h2>
             <Link
               href="/sesizari"
-              className="inline-flex items-center gap-2 h-9 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              className="inline-flex items-center gap-2 h-9 px-4 rounded-[var(--radius-full)] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
               <Plus size={14} aria-hidden="true" />
               Sesizare nouă
@@ -380,15 +547,15 @@ export default function ContPage() {
               ))}
             </div>
           ) : sesizari.length === 0 ? (
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-10 text-center">
+            <div className="bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-md)] p-10 text-center">
               <User size={32} className="mx-auto text-[var(--color-text-muted)] mb-3" aria-hidden="true" />
               <p className="text-[var(--color-text-muted)] mb-2 font-medium">Nu ai încă nicio sesizare</p>
               <p className="text-xs text-[var(--color-text-muted)] mb-4 max-w-md mx-auto">
-                Sesizările apar aici după ce le depui — primești cod de urmărire și emailul ajunge automat la primărie.
+                Sesizările apar aici după ce le depui — primești cod de urmărire și emailul ajunge automat la autoritate.
               </p>
               <Link
                 href="/sesizari"
-                className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+                className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-full)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
               >
                 Depune prima sesizare <span aria-hidden="true">→</span>
               </Link>
@@ -401,7 +568,7 @@ export default function ContPage() {
                   <Link
                     key={s.id}
                     href={`/sesizari/${s.code}`}
-                    className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+                    className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-2)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
                   >
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <Badge bgColor={STATUS_COLORS[s.status] ?? "#64748b"} color="white">
@@ -418,10 +585,10 @@ export default function ContPage() {
                     </div>
                     <h3 className="font-semibold mb-1 line-clamp-1">{s.titlu}</h3>
                     <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-2">
-                      <span>{s.locatie}</span>
+                      <span className="truncate min-w-0 flex-1">{s.locatie}</span>
                       <span aria-hidden="true">·</span>
-                      <span>{formatDate(s.created_at)}</span>
-                      <ExternalLink size={10} className="ml-auto" aria-hidden="true" />
+                      <span className="shrink-0">{formatDate(s.created_at)}</span>
+                      <ExternalLink size={10} className="ml-auto shrink-0" aria-hidden="true" />
                     </p>
                   </Link>
                 );
@@ -431,36 +598,40 @@ export default function ContPage() {
         </div>
       </div>
 
-      {/* GDPR */}
-      <div className="mt-16 pt-8 border-t border-[var(--color-border)]">
-        <h3 className="text-sm font-semibold mb-2 text-[var(--color-text-muted)] uppercase tracking-wider">
+      {/* ─── GDPR footer ─────────────────────────────────────────── */}
+      <div className="mt-14 pt-8 border-t border-[var(--color-border)]">
+        <h3 className="text-sm font-semibold mb-2 text-[var(--color-text)] uppercase tracking-wider flex items-center gap-2">
+          <ShieldCheck size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
           Drepturile tale (GDPR)
         </h3>
-        <p className="text-xs text-[var(--color-text-muted)] mb-4 max-w-2xl">
-          Conform GDPR, ai dreptul să primești toate datele tale într-un format portabil sau să
-          ștergi contul. Sesizările tale publice rămân (anonimizate) pentru interesul public.
+        <p className="text-xs text-[var(--color-text-muted)] mb-4 max-w-2xl leading-relaxed">
+          Conform Regulamentului UE 2016/679, ai dreptul de acces, rectificare, ștergere,
+          portabilitate, restricționare și opoziție. Detalii complete în{" "}
+          <Link href="/legal/confidentialitate" className="text-[var(--color-primary)] underline">
+            politica de confidențialitate
+          </Link>
+          .
         </p>
         <div className="flex flex-wrap gap-2">
-          { }
           <a
             href="/api/profile/export"
             download="civia-export.json"
             onClick={(e) => {
-              // Stamp filename cu data click-ului (nu pe render — eviti hydration
-              // mismatch dacă SSR și client cad pe zile diferite cross-midnight).
               const today = new Date().toISOString().slice(0, 10);
               e.currentTarget.setAttribute("download", `civia-export-${today}.json`);
             }}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
-            <span aria-hidden="true">📥</span> Descarcă datele mele (JSON)
+            <Download size={12} aria-hidden="true" />
+            Descarcă datele mele (JSON)
           </a>
           <button
             type="button"
             onClick={() => setDeleteModal(true)}
             className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] border border-red-300 dark:border-red-900 text-red-700 dark:text-red-400 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-950/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
-            🗑️ Șterge contul definitiv
+            <Trash2 size={12} aria-hidden="true" />
+            Șterge contul definitiv
           </button>
         </div>
       </div>
@@ -506,9 +677,10 @@ export default function ContPage() {
                 Toate datele personale din contul tău vor fi șterse definitiv:
               </p>
               <ul className="text-sm text-[var(--color-text-muted)] space-y-1.5 pl-4">
-                <li>• Numele, emailul, adresa, telefonul</li>
+                <li>• Numele, emailul, adresa, telefonul, poza de profil</li>
                 <li>• Voturile și comentariile tale</li>
                 <li>• Sesizările urmărite</li>
+                <li>• Abonamentele la newsletter</li>
               </ul>
               <p className="text-xs text-[var(--color-text-muted)] bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-3">
                 Sesizările publice pe care le-ai depus rămân pe platformă, dar vor fi anonimizate
@@ -568,17 +740,7 @@ export default function ContPage() {
   );
 }
 
-function StatBox({ label, value, delta, color }: { label: string; value: string; delta?: string; color: string }) {
-  return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 text-center">
-      <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-1">
-        {label}
-      </p>
-      <p className="text-2xl font-bold" style={{ color }}>{value}</p>
-      {delta && <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">{delta}</p>}
-    </div>
-  );
-}
+// ─── Helpers ─────────────────────────────────────────────────────
 
 const inputClass =
   "w-full h-10 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]";
@@ -586,10 +748,84 @@ const inputClass =
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs font-medium mb-1 text-[var(--color-text-muted)] uppercase tracking-wider">
+      <label className="block text-[11px] font-semibold mb-1.5 text-[var(--color-text-muted)] uppercase tracking-wider">
         {label}
       </label>
       {children}
+    </div>
+  );
+}
+
+function SectionTitle({
+  icon: Icon,
+  children,
+}: {
+  icon: typeof User;
+  children: React.ReactNode;
+}) {
+  return (
+    <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-1.5">
+      <Icon size={12} className="text-[var(--color-primary)]" aria-hidden="true" />
+      {children}
+    </h2>
+  );
+}
+
+function CheckboxRow({
+  icon: Icon,
+  checked,
+  onChange,
+  title,
+  description,
+  disabled = false,
+  disabledHint,
+}: {
+  icon: typeof User;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  title: string;
+  description: string;
+  disabled?: boolean;
+  disabledHint?: string;
+}) {
+  return (
+    <label
+      className={`flex items-start gap-3 p-3 rounded-[var(--radius-xs)] border transition-colors cursor-pointer ${
+        disabled
+          ? "border-[var(--color-border)] bg-[var(--color-surface-2)]/50 opacity-60 cursor-not-allowed"
+          : checked
+            ? "border-[var(--color-primary)]/40 bg-[var(--color-primary-soft)]"
+            : "border-[var(--color-border)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)]"
+      }`}
+    >
+      <input
+        type="checkbox"
+        checked={checked && !disabled}
+        onChange={(e) => onChange(e.target.checked)}
+        disabled={disabled}
+        className="mt-0.5 w-4 h-4 accent-[var(--color-primary)] cursor-pointer disabled:cursor-not-allowed"
+      />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium flex items-center gap-1.5">
+          <Icon size={12} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
+          {title}
+        </p>
+        <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5 leading-relaxed">
+          {disabled && disabledHint ? disabledHint : description}
+        </p>
+      </div>
+    </label>
+  );
+}
+
+function StatBox({ label, value, delta, color }: { label: string; value: string; delta?: string; color: string }) {
+  return (
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 text-center shadow-[var(--shadow-1)]">
+      <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-1">
+        {label}
+      </p>
+      <p className="text-2xl font-bold tabular-nums" style={{ color }}>{value}</p>
+      {delta && <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">{delta}</p>}
     </div>
   );
 }
