@@ -20,13 +20,14 @@ export default function AppleIcon() {
           alignItems: "center",
           justifyContent: "center",
           color: "white",
-          // Bigger + thinner: weight 600, size 150 (vs 130).
-          // No letter-spacing — single char + flex-center îl decentrează.
           fontSize: 150,
           fontWeight: 600,
           fontFamily: "system-ui, -apple-system, sans-serif",
           borderRadius: "40px",
           lineHeight: 1,
+          // Push spre stânga + sus pentru optical centering.
+          paddingRight: "10%",
+          paddingBottom: "8%",
         }}
       >
         C

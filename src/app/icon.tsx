@@ -23,14 +23,15 @@ export default function Icon() {
           justifyContent: "center",
           color: "white",
           borderRadius: "8px",
-          // Bigger + thinner: weight 600 (semibold), size 28 (vs 24).
-          // No letter-spacing — pe single char + flex-center, negative
-          // letter-spacing taie spațiu dreapta și împinge glyph-ul vizual
-          // la stânga. Default e centrat.
           fontSize: 28,
           fontWeight: 600,
           fontFamily: "system-ui, -apple-system, sans-serif",
           lineHeight: 1,
+          // Push spre stânga + sus: paddingRight bias spre stânga,
+          // paddingBottom bias spre sus (flex-center re-centrează în
+          // zona rămasă, deci shift = padding/2).
+          paddingRight: "10%",
+          paddingBottom: "8%",
         }}
       >
         C

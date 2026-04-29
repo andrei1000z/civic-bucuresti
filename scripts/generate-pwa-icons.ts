@@ -27,8 +27,8 @@ async function makeIcon(size: number, maskable = false): Promise<Buffer> {
       : `<rect width="${size}" height="${size}" rx="${radius}" ry="${radius}" fill="url(#g)"/>`}
     ${maskable ? `<rect x="${padding}" y="${padding}" width="${innerSize}" height="${innerSize}" rx="${innerSize * 0.2}" fill="url(#g)"/>` : ""}
     <text
-      x="50%"
-      y="50%"
+      x="${size * 0.45}"
+      y="${size * 0.46}"
       text-anchor="middle"
       dominant-baseline="central"
       font-family="system-ui, -apple-system, sans-serif"
