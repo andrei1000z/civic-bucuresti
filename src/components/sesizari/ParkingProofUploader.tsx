@@ -118,6 +118,12 @@ interface OcrResult { plate: string | null; box: OcrBox | null }
  * + a bounding box around its line so we can redact it. Best-effort —
  * if anything throws, we fall back to a sane default redaction region.
  */
+/** OCR can hang 30s+ pe device-uri slow (Tesseract.js WASM init + recognize).
+ *  Bound the work to 10s — dacă pică, fallback redaction (bottom-middle band)
+ *  rămâne aplicat în drawRedactionBar() cu box=null. User vede uploadul
+ *  încheiat în max 10s în loc să aștepte indefinit. */
+const OCR_TIMEOUT_MS = 10_000;
+
 async function ocrPlate(canvas: HTMLCanvasElement): Promise<OcrResult> {
   try {
     const worker = (await getOcrWorker()) as {
@@ -125,7 +131,12 @@ async function ocrPlate(canvas: HTMLCanvasElement): Promise<OcrResult> {
         data: { text: string; lines: Array<{ text: string; bbox: { x0: number; y0: number; x1: number; y1: number } }> };
       }>;
     };
-    const result = await worker.recognize(canvas);
+    const result = await Promise.race([
+      worker.recognize(canvas),
+      new Promise<never>((_, rej) =>
+        setTimeout(() => rej(new Error("OCR timeout")), OCR_TIMEOUT_MS),
+      ),
+    ]);
     const plate = extractPlate(result.data.text);
     let box: OcrBox | null = null;
     if (plate) {

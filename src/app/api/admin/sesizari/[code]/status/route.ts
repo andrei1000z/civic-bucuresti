@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
@@ -115,7 +116,10 @@ export async function POST(
           }),
         });
       } catch (emailErr) {
-        console.error("[status] email failed:", emailErr);
+        Sentry.captureException(emailErr, {
+          tags: { kind: "status_email" },
+          extra: { code: sesizare.code, status: parsed.data.status },
+        });
       }
     }
   }

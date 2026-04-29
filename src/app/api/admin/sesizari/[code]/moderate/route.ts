@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
@@ -100,8 +101,12 @@ export async function POST(
         }),
       });
     } catch (emailErr) {
-      // Log dar continuă — DB-ul e deja consistent.
-      console.error("[moderate] email failed:", emailErr);
+      // Log la Sentry dar continuă — DB-ul e deja consistent.
+      // Sentry surface = dashboard alert pentru email delivery failures.
+      Sentry.captureException(emailErr, {
+        tags: { kind: "moderate_email" },
+        extra: { code: sesizare.code, action: parsed.data.action },
+      });
     }
   }
 
