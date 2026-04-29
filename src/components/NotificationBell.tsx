@@ -97,7 +97,12 @@ export function NotificationBell() {
         return data as { code: string; titlu: string } | null;
       }
 
-      const channel = supabase.channel("notifications");
+      // Channel name unique per mount — altfel Strict Mode + remount
+      // re-folosesc același channel name, second init găsește channel-ul
+      // deja subscribed și .on() aruncă „cannot add postgres_changes after
+      // subscribe()". Crypto.randomUUID() e safe pe browser modern.
+      const channelName = `notifications-${user!.id}-${typeof crypto !== "undefined" ? crypto.randomUUID().slice(0, 8) : Date.now()}`;
+      const channel = supabase.channel(channelName);
 
       // Comments — on followed sesizari
       if (followedIds.length > 0) {

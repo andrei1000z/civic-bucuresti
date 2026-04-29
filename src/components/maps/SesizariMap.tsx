@@ -65,8 +65,11 @@ export function SesizariMap({ limit = 15, height = "400px", zoom = 12 }: Sesizar
   // Realtime inserts
   useEffect(() => {
     const supabase = createSupabaseBrowser();
+    // Unique channel name per mount — Strict Mode dev rerun would reuse
+    // a subscribed channel and trigger „cannot add callbacks after subscribe".
+    const channelName = `map-sesizari-realtime-${typeof crypto !== "undefined" ? crypto.randomUUID().slice(0, 8) : Date.now()}`;
     const channel = supabase
-      .channel("map-sesizari-realtime")
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "sesizari" },

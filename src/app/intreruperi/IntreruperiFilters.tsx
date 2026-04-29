@@ -435,8 +435,13 @@ function InterruptionCard({
 }) {
   const isActive = item.status === "in-desfasurare";
   const isUpcoming = item.status === "programat";
-  const startRelative = isUpcoming ? relativeTime(item.startAt) : null;
-  const endRelative = isActive ? `se termină ${relativeTime(item.endAt)}` : null;
+  // Hydration-safe: relativeTime() folosește Date.now() care diferă între
+  // SSR și CSR cu câteva ms → cauzează React #418/#419 în production.
+  // Fix: deferăm până la post-mount, render null pe SSR.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const startRelative = mounted && isUpcoming ? relativeTime(item.startAt) : null;
+  const endRelative = mounted && isActive ? `se termină ${relativeTime(item.endAt)}` : null;
 
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault();

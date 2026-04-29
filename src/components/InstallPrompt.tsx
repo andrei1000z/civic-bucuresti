@@ -9,6 +9,12 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const DISMISS_KEY = "civia_install_dismissed";
+const VISIT_COUNT_KEY = "civia_visit_count";
+// Conversion 1.5% (5 din 335 prompts) — prea agresiv. Strategie nouă:
+// nu mai arătăm prompt-ul la prima vizită, doar de la a 3-a încolo, când
+// userul a demonstrat interes real. Acceptarea ar trebui să crească
+// pentru că oamenii „familiar" cu produsul instalează cu convingere.
+const MIN_VISITS_BEFORE_PROMPT = 3;
 
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -24,6 +30,15 @@ export function InstallPrompt() {
     });
   }, []);
 
+  // Increment visit counter on every mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const count = parseInt(localStorage.getItem(VISIT_COUNT_KEY) ?? "0", 10) + 1;
+      localStorage.setItem(VISIT_COUNT_KEY, String(count));
+    } catch { /* quota ignored */ }
+  }, []);
+
   // Listen for install prompt
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -34,11 +49,16 @@ export function InstallPrompt() {
       if (Date.now() - dismissedAt < 30 * 24 * 60 * 60 * 1000) return;
     }
 
+    // Visit-count gate — don't bother first-time visitors
+    const visitCount = parseInt(localStorage.getItem(VISIT_COUNT_KEY) ?? "0", 10);
+    if (visitCount < MIN_VISITS_BEFORE_PROMPT) return;
+
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // Show after a short delay so it doesn't surprise users on page load
-      setTimeout(() => setVisible(true), 2500);
+      // Show after longer delay (5s) so it doesn't surprise — the user
+      // had time to start engaging cu pagina înainte să apară popup.
+      setTimeout(() => setVisible(true), 5000);
     };
 
     window.addEventListener("beforeinstallprompt", handler);

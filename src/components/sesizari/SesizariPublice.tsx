@@ -104,8 +104,11 @@ export function SesizariPublice() {
   // Realtime subscribe to new sesizari
   useEffect(() => {
     const supabase = createSupabaseBrowser();
+    // Unique channel name per mount — vezi NotificationBell.tsx pentru
+    // explicație (Strict Mode rerun + same name = subscribe error).
+    const channelName = `sesizari-realtime-${typeof crypto !== "undefined" ? crypto.randomUUID().slice(0, 8) : Date.now()}`;
     const channel = supabase
-      .channel("sesizari-realtime")
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "sesizari" },
