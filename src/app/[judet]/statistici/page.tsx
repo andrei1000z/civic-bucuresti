@@ -7,7 +7,7 @@ import { TrendingUp, TrendingDown, Minus, Users, MapPin, Building2, TreePine, Wi
 import { SITE_URL } from "@/lib/constants";
 
 const ChartLoading = () => (
-  <div className="h-[260px] rounded-[8px] bg-[var(--color-surface-2)] animate-pulse" />
+  <div className="h-[260px] rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] animate-pulse" />
 );
 
 const AccidenteLunareCountyChart = dynamic(
@@ -175,7 +175,7 @@ export default async function StatisticiPage({
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-4">
           Date din surse oficiale: INS, DRPCIV, ANPM. Actualizate cu cele mai recente cifre disponibile.
         </p>
-        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[8px] p-4 text-xs text-amber-800 dark:text-amber-300 flex gap-3 items-start">
+        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[var(--radius-xs)] p-4 text-xs text-amber-800 dark:text-amber-300 flex gap-3 items-start">
           <span className="text-base leading-none">⚠️</span>
           <div>
             <strong>Estimări proporționale, nu date reale pe județ.</strong>{" "}
@@ -351,7 +351,7 @@ export default async function StatisticiPage({
                   <Wrapper
                     key={n.name}
                     href={slug ? `/${slug}/statistici` : "#"}
-                    className={`flex items-center gap-3 py-2 px-3 rounded-[8px] ${!n.isCurrent ? "hover:bg-[var(--color-surface-2)]" : "bg-[var(--color-primary-soft)]"} transition-colors`}
+                    className={`flex items-center gap-3 py-2 px-3 rounded-[var(--radius-xs)] ${!n.isCurrent ? "hover:bg-[var(--color-surface-2)]" : "bg-[var(--color-primary-soft)]"} transition-colors`}
                   >
                     <span className="text-sm font-medium w-32 shrink-0 truncate">
                       {n.isCurrent ? `📍 ${n.name}` : n.name}

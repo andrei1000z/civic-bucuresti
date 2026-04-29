@@ -89,7 +89,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
         {isMobile ? (
           <a
             href={buildMailtoLink(input)}
-            className="inline-flex items-center justify-center gap-2 h-12 px-4 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+            className="inline-flex items-center justify-center gap-2 h-12 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             title="Se deschide în aplicația ta de email (Gmail / iOS Mail / Outlook — orice ai setat ca implicit)"
           >
             <Smartphone size={18} aria-hidden="true" />
@@ -101,7 +101,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
               href={buildGmailLink(input)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 h-12 px-4 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              className="inline-flex items-center justify-center gap-2 h-12 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
               <Mail size={18} aria-hidden="true" />
               Deschide în Gmail
@@ -111,7 +111,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
               href={buildOutlookLink(input)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 h-12 px-4 rounded-[8px] bg-[#0078d4] text-white font-semibold hover:brightness-110 shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0078d4]"
+              className="inline-flex items-center justify-center gap-2 h-12 px-4 rounded-[var(--radius-xs)] bg-[#0078d4] text-white font-semibold hover:brightness-110 shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0078d4]"
             >
               <Mail size={18} aria-hidden="true" />
               Deschide în Outlook
@@ -130,7 +130,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
             href={buildGmailLink(input)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
             title="Gmail web (browser) — folosește dacă nu ai aplicația"
           >
             Gmail web
@@ -141,7 +141,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
             href={buildYahooLink(input)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
           >
             Yahoo
           </a>
@@ -149,7 +149,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
         {!isMobile && (
           <a
             href={buildMailtoLink(input)}
-            className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors"
             title="Folosește aplicația ta de email nativă"
           >
             Mail nativ
@@ -158,7 +158,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
         <button
           type="button"
           onClick={copyAll}
-          className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          className="inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         >
           {copied === "all" ? <Check size={12} className="text-emerald-600" aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
           {copied === "all" ? "Copiat în clipboard" : "Copiază emailul"}
@@ -177,7 +177,7 @@ export function EmailChoicePanel({ input, compact }: Props) {
       )}
 
       {!compact && (
-        <details className="bg-[var(--color-surface-2)] rounded-[8px] p-3 text-xs">
+        <details className="bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-3 text-xs">
           <summary className="font-medium cursor-pointer select-none">
             Trimit manual din alt client de email
           </summary>

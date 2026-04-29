@@ -8,7 +8,7 @@ import { primari, consiliiGenerale } from "@/data/primari";
 import { IstoricInteractive } from "@/components/istoric/IstoricInteractive";
 
 const ChartLoading = () => (
-  <div className="h-[260px] rounded-[8px] bg-[var(--color-surface-2)] animate-pulse" />
+  <div className="h-[260px] rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] animate-pulse" />
 );
 const DurateMandateChart = dynamic(
   () => import("@/components/charts/IstoricCharts").then((m) => ({ default: m.DurateMandateChart })),

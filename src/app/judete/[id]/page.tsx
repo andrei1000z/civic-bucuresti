@@ -98,7 +98,7 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-3">
-          <span className="text-2xl font-bold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-3 py-1 rounded-[8px]">
+          <span className="text-2xl font-bold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-3 py-1 rounded-[var(--radius-xs)]">
             {county.id}
           </span>
           <div>
@@ -113,7 +113,7 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
 
         <Link
           href={`/sesizari?county=${county.id}`}
-          className="inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] mt-4"
+          className="inline-flex items-center gap-2 h-11 px-5 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] mt-4"
         >
           <FileText size={16} />
           Fă o sesizare în {county.name}
@@ -146,7 +146,7 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
                     {auths.map((auth) => (
                       <div
                         key={auth.id}
-                        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] p-4"
+                        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xs)] p-4"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
@@ -208,7 +208,7 @@ export default async function CountyDetailPage({ params }: { params: Promise<{ i
                   key={s.code}
                   href={`/sesizari/${s.code}`}
                   aria-label={`Sesizarea ${s.code}: ${s.titlu}`}
-                  className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] p-3 hover:border-[var(--color-primary)]/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                  className="block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xs)] p-3 hover:border-[var(--color-primary)]/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <span

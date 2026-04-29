@@ -62,13 +62,13 @@ export function JudeteGrid({ sesizariStats, authStats }: Props) {
           <div className="flex items-center gap-2 ml-auto">
             <Link
               href={`/${savedSlug}`}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
             >
               Mergi la județ <ArrowRight size={12} />
             </Link>
             <button
               onClick={clear}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-xs font-medium hover:border-[var(--color-primary)]/40 transition-colors"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] text-xs font-medium hover:border-[var(--color-primary)]/40 transition-colors"
             >
               Șterge preferința
             </button>

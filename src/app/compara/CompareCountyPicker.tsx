@@ -43,7 +43,7 @@ export function CompareCountyPicker({ counties }: { counties: CountyOption[] }) 
                 if (alternative) setB(alternative.slug);
               }
             }}
-            className="w-full h-12 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            className="w-full h-12 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
             {counties.map((c) => (
               <option key={c.slug} value={c.slug}>
@@ -65,7 +65,7 @@ export function CompareCountyPicker({ counties }: { counties: CountyOption[] }) 
             id="county-b"
             value={b}
             onChange={(e) => setB(e.target.value)}
-            className="w-full h-12 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            className="w-full h-12 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
             {countiesForB.map((c) => (
               <option key={c.slug} value={c.slug}>

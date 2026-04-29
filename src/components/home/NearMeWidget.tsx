@@ -108,7 +108,7 @@ export function NearMeWidget() {
           onClick={findNearby}
           disabled={loading}
           aria-busy={loading}
-          className="shrink-0 inline-flex items-center gap-2 h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+          className="shrink-0 inline-flex items-center gap-2 h-9 px-3 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
           {loading ? (
             <Loader2 size={14} className="animate-spin" />
@@ -120,7 +120,7 @@ export function NearMeWidget() {
       </div>
 
       {error && (
-        <div role="alert" className="flex items-start gap-2 p-3 rounded-[8px] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-sm text-red-700 dark:text-red-400">
+        <div role="alert" className="flex items-start gap-2 p-3 rounded-[var(--radius-xs)] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-sm text-red-700 dark:text-red-400">
           <AlertCircle size={16} className="shrink-0 mt-0.5" aria-hidden="true" />
           <span>{error}</span>
         </div>
@@ -145,7 +145,7 @@ export function NearMeWidget() {
               <li key={s.id}>
                 <Link
                   href={`/sesizari/${s.code}`}
-                  className="flex items-start gap-3 p-3 -mx-3 rounded-[8px] hover:bg-[var(--color-surface-2)] transition-colors group"
+                  className="flex items-start gap-3 p-3 -mx-3 rounded-[var(--radius-xs)] hover:bg-[var(--color-surface-2)] transition-colors group"
                 >
                   <span
                     className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm"

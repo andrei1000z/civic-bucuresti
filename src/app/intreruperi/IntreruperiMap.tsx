@@ -285,7 +285,7 @@ export default function IntreruperiMap({ items }: { items: Interruption[] }) {
       )}
 
       {/* Legend */}
-      <div className="absolute bottom-3 left-3 z-10 bg-white/95 backdrop-blur-sm border border-slate-300 rounded-[8px] px-3 py-2 shadow-md">
+      <div className="absolute bottom-3 left-3 z-10 bg-white/95 backdrop-blur-sm border border-slate-300 rounded-[var(--radius-xs)] px-3 py-2 shadow-md">
         <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mb-1.5">
           Legendă
         </p>

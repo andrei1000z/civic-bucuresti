@@ -150,7 +150,7 @@ export function TariffCalculator() {
       </label>
 
       {/* Summary */}
-      <div className="bg-[var(--color-primary-soft)] rounded-[8px] p-4 mb-6 flex items-center justify-between">
+      <div className="bg-[var(--color-primary-soft)] rounded-[var(--radius-xs)] p-4 mb-6 flex items-center justify-between">
         <div>
           <p className="text-xs text-[var(--color-text-muted)]">Total călătorii/lună</p>
           <p className="text-2xl font-bold text-[var(--color-primary)]">{totalCalatorii}</p>
@@ -176,7 +176,7 @@ export function TariffCalculator() {
               <div
                 key={r.id}
                 className={cn(
-                  "p-3 rounded-[8px] border-2 relative overflow-hidden transition-all",
+                  "p-3 rounded-[var(--radius-xs)] border-2 relative overflow-hidden transition-all",
                   isBest
                     ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20"
                     : "border-[var(--color-border)] bg-[var(--color-surface)]"
@@ -224,7 +224,7 @@ export function TariffCalculator() {
         href={cheapest.link}
         target="_blank"
         rel="noopener noreferrer"
-        className="block mt-6 w-full h-12 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] transition-colors flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+        className="block mt-6 w-full h-12 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] transition-colors flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
       >
         Cumpără {cheapest.name} →
       </a>

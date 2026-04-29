@@ -101,7 +101,7 @@ export function GhidLayout({
                   key={ch.id}
                   href={`#${ch.id}`}
                   className={cn(
-                    "block px-3 py-2 rounded-[8px] text-sm transition-all border-l-2",
+                    "block px-3 py-2 rounded-[var(--radius-xs)] text-sm transition-all border-l-2",
                     activeChapter === ch.id
                       ? "bg-[var(--color-primary-soft)] text-[var(--color-primary)] font-medium border-[var(--color-primary)]"
                       : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] border-transparent hover:bg-[var(--color-surface-2)]"
@@ -149,7 +149,7 @@ export function GhidLayout({
                     key={ch.id}
                     href={`#${ch.id}`}
                     onClick={() => setSidebarOpen(false)}
-                    className="block px-3 py-2 rounded-[8px] text-sm hover:bg-[var(--color-surface-2)]"
+                    className="block px-3 py-2 rounded-[var(--radius-xs)] text-sm hover:bg-[var(--color-surface-2)]"
                   >
                     <span className="text-[var(--color-text-muted)] text-xs mr-2">{i + 1}.</span>
                     {ch.title}

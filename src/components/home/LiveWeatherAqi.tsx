@@ -172,7 +172,7 @@ export function LiveWeatherCard() {
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mt-1" aria-label="live" />
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-[var(--color-surface-2)] rounded-[8px] p-3">
+        <div className="bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-3">
           <div className="flex items-center gap-2 text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-1">
             <Thermometer size={12} aria-hidden="true" /> Temperatura
           </div>
@@ -185,7 +185,7 @@ export function LiveWeatherCard() {
             </p>
           )}
         </div>
-        <div className="bg-[var(--color-surface-2)] rounded-[8px] p-3">
+        <div className="bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-3">
           <div className="flex items-center gap-2 text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-1">
             <Wind size={12} aria-hidden="true" /> Calitate aer
           </div>
@@ -201,7 +201,7 @@ export function LiveWeatherCard() {
           )}
         </div>
         {weather?.humidity != null && (
-          <div className="bg-[var(--color-surface-2)] rounded-[8px] p-3">
+          <div className="bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-3">
             <div className="flex items-center gap-2 text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-1">
               <Droplets size={12} aria-hidden="true" /> Umiditate
             </div>
@@ -209,7 +209,7 @@ export function LiveWeatherCard() {
           </div>
         )}
         {weather?.wind != null && (
-          <div className="bg-[var(--color-surface-2)] rounded-[8px] p-3">
+          <div className="bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-3">
             <div className="flex items-center gap-2 text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-1">
               <WindIcon size={12} aria-hidden="true" /> Vânt
             </div>

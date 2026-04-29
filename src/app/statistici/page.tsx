@@ -64,7 +64,7 @@ export default function StatisticiPage() {
         <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-4">
           Date agregate din toate cele 42 de județe. Surse: INS, DRPCIV 2023, ANPM.
         </p>
-        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[8px] p-3 text-xs text-amber-800 dark:text-amber-300">
+        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[var(--radius-xs)] p-3 text-xs text-amber-800 dark:text-amber-300">
           <strong>Notă:</strong> Datele despre accidente și sesizări per județ sunt estimări proporționale cu populația,
           bazate pe totaluri naționale DRPCIV 2023.
         </div>
@@ -103,7 +103,7 @@ export default function StatisticiPage() {
           </h2>
           <div className="space-y-2">
             {topByPop.map((c, i) => (
-              <Link key={c.id} href={`/${c.slug}/statistici`} className="flex items-center justify-between py-2 px-3 rounded-[8px] hover:bg-[var(--color-surface-2)] transition-colors">
+              <Link key={c.id} href={`/${c.slug}/statistici`} className="flex items-center justify-between py-2 px-3 rounded-[var(--radius-xs)] hover:bg-[var(--color-surface-2)] transition-colors">
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-[var(--color-text-muted)] w-5 tabular-nums">{i + 1}.</span>
                   <span className="text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-1.5 py-0.5 rounded">{c.id}</span>
@@ -122,7 +122,7 @@ export default function StatisticiPage() {
           </h2>
           <div className="space-y-2">
             {topByAqi.map((c, i) => (
-              <Link key={c.id} href={`/${c.slug}/statistici`} className="flex items-center justify-between py-2 px-3 rounded-[8px] hover:bg-[var(--color-surface-2)] transition-colors">
+              <Link key={c.id} href={`/${c.slug}/statistici`} className="flex items-center justify-between py-2 px-3 rounded-[var(--radius-xs)] hover:bg-[var(--color-surface-2)] transition-colors">
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-[var(--color-text-muted)] w-5 tabular-nums">{i + 1}.</span>
                   <span className="text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-1.5 py-0.5 rounded">{c.id}</span>
@@ -146,7 +146,7 @@ export default function StatisticiPage() {
         </h2>
         <div className="grid sm:grid-cols-2 gap-2">
           {topByAccidents.map((c, i) => (
-            <Link key={c.id} href={`/${c.slug}/statistici`} className="flex items-center justify-between py-2 px-3 rounded-[8px] hover:bg-[var(--color-surface-2)] transition-colors">
+            <Link key={c.id} href={`/${c.slug}/statistici`} className="flex items-center justify-between py-2 px-3 rounded-[var(--radius-xs)] hover:bg-[var(--color-surface-2)] transition-colors">
               <div className="flex items-center gap-3">
                 <span className="text-xs text-[var(--color-text-muted)] w-5 tabular-nums">{i + 1}.</span>
                 <span className="text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-1.5 py-0.5 rounded">{c.id}</span>
@@ -165,7 +165,7 @@ export default function StatisticiPage() {
         </h2>
         <div className="grid sm:grid-cols-2 gap-2">
           {topByGreen.map((c, i) => (
-            <Link key={c.id} href={`/${c.slug}/statistici`} className="flex items-center justify-between py-2 px-3 rounded-[8px] hover:bg-[var(--color-surface-2)] transition-colors">
+            <Link key={c.id} href={`/${c.slug}/statistici`} className="flex items-center justify-between py-2 px-3 rounded-[var(--radius-xs)] hover:bg-[var(--color-surface-2)] transition-colors">
               <div className="flex items-center gap-3">
                 <span className="text-xs text-[var(--color-text-muted)] w-5 tabular-nums">{i + 1}.</span>
                 <span className="text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-1.5 py-0.5 rounded">{c.id}</span>
@@ -190,7 +190,7 @@ export default function StatisticiPage() {
         </p>
         <Link
           href="/#county-picker"
-          className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
+          className="inline-flex items-center gap-2 h-12 px-7 rounded-[var(--radius-xs)] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
         >
           Alege județul <ArrowRight size={18} />
         </Link>

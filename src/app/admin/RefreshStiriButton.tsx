@@ -48,7 +48,7 @@ export function RefreshStiriButton() {
         onClick={refresh}
         disabled={loading}
         aria-busy={loading}
-        className="flex items-center gap-3 p-4 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] text-left w-full"
+        className="flex items-center gap-3 p-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] text-left w-full"
       >
         {loading ? (
           <Loader2 size={20} className="text-emerald-500 animate-spin" aria-hidden="true" />
@@ -66,7 +66,7 @@ export function RefreshStiriButton() {
       </button>
 
       {result && (
-        <div role="status" className="flex items-start gap-2 p-3 rounded-[8px] bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 text-xs">
+        <div role="status" className="flex items-start gap-2 p-3 rounded-[var(--radius-xs)] bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 text-xs">
           <CheckCircle2 size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" aria-hidden="true" />
           <div className="text-emerald-900 dark:text-emerald-300">
             <p className="font-semibold">
@@ -86,7 +86,7 @@ export function RefreshStiriButton() {
       )}
 
       {error && (
-        <div role="alert" className="flex items-start gap-2 p-3 rounded-[8px] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-xs text-red-700 dark:text-red-400">
+        <div role="alert" className="flex items-start gap-2 p-3 rounded-[var(--radius-xs)] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-xs text-red-700 dark:text-red-400">
           <AlertCircle size={14} className="shrink-0 mt-0.5" aria-hidden="true" />
           <span>{error}</span>
         </div>

@@ -24,7 +24,7 @@ export function CalendarMenu({ item }: { item: Interruption }) {
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="w-full inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+        className="w-full inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
       >
         <Calendar size={14} /> Adaugă în calendar
         <ChevronDown

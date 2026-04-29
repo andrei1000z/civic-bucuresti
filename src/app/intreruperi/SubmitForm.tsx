@@ -115,7 +115,7 @@ export function SubmitForm() {
           rows={5}
           aria-describedby="isub-text-hint"
           aria-invalid={text.length > 0 && text.trim().length < 20}
-          className="w-full px-3 py-2 rounded-[8px] bg-[var(--color-bg)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] resize-y min-h-[110px]"
+          className="w-full px-3 py-2 rounded-[var(--radius-xs)] bg-[var(--color-bg)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] resize-y min-h-[110px]"
         />
         <p
           id="isub-text-hint"
@@ -137,7 +137,7 @@ export function SubmitForm() {
           Fotografie dovadă <span className="font-normal text-[var(--color-text-muted)]">(opțional)</span>
         </label>
         {imageUrl ? (
-          <div className="flex items-center gap-3 p-3 rounded-[8px] bg-[var(--color-bg)] border border-[var(--color-border)]">
+          <div className="flex items-center gap-3 p-3 rounded-[var(--radius-xs)] bg-[var(--color-bg)] border border-[var(--color-border)]">
             <ImgIcon size={18} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
             <span className="flex-1 text-xs truncate text-[var(--color-text-muted)]">
               Imagine încărcată ✓
@@ -153,7 +153,7 @@ export function SubmitForm() {
           </div>
         ) : (
           <label
-            className={`flex items-center justify-center gap-2 h-12 rounded-[8px] border-2 border-dashed cursor-pointer text-sm transition-colors ${
+            className={`flex items-center justify-center gap-2 h-12 rounded-[var(--radius-xs)] border-2 border-dashed cursor-pointer text-sm transition-colors ${
               uploading
                 ? "border-[var(--color-primary)] bg-[var(--color-primary-soft)]"
                 : "border-[var(--color-border)] hover:border-[var(--color-primary)]"
@@ -193,7 +193,7 @@ export function SubmitForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="nume@exemplu.ro"
-          className="w-full h-11 px-3 rounded-[8px] bg-[var(--color-bg)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          className="w-full h-11 px-3 rounded-[var(--radius-xs)] bg-[var(--color-bg)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         />
         <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
           Doar dacă vrei să te contactăm pentru detalii / confirmări.
@@ -214,7 +214,7 @@ export function SubmitForm() {
       {error && (
         <p
           role="alert"
-          className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-[8px] px-3 py-2"
+          className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-[var(--radius-xs)] px-3 py-2"
         >
           {error}
         </p>
@@ -224,7 +224,7 @@ export function SubmitForm() {
         type="submit"
         disabled={submitting || text.trim().length < 20}
         aria-busy={submitting}
-        className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+        className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
       >
         {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Send size={14} aria-hidden="true" />}
         {submitting ? "Se trimite..." : "Trimite raport"}

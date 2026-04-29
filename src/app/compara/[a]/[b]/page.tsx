@@ -115,7 +115,7 @@ export default async function ComparePage({
       </div>
 
       {/* Disclaimer */}
-      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[8px] p-3 text-xs text-amber-800 dark:text-amber-300 mb-8 flex gap-2 items-start">
+      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[var(--radius-xs)] p-3 text-xs text-amber-800 dark:text-amber-300 mb-8 flex gap-2 items-start">
         <AlertTriangle size={14} className="shrink-0 mt-0.5" />
         <div>
           Accidentele și sesizările per județ sunt estimări proporționale cu populația (vezi disclaimer pe paginile individuale).

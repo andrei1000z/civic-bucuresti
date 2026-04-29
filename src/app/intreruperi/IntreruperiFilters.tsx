@@ -235,7 +235,7 @@ export function IntreruperiFilters({ items }: { items: Interruption[] }) {
                   onClick={() => setType(t.value)}
                   role="tab"
                   aria-selected={type === t.value}
-                  className={`shrink-0 px-3 h-8 rounded-[8px] text-xs font-medium transition-colors inline-flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
+                  className={`shrink-0 px-3 h-8 rounded-[var(--radius-xs)] text-xs font-medium transition-colors inline-flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
                     type === t.value
                       ? "bg-[var(--color-primary)] text-white shadow-sm"
                       : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg)]"
@@ -253,7 +253,7 @@ export function IntreruperiFilters({ items }: { items: Interruption[] }) {
             value={county}
             onChange={(e) => setCounty(e.target.value)}
             aria-label="Filtrează după județ"
-            className="h-10 px-3 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            className="h-10 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
             <option value="toate">Toate județele</option>
             {counties.map((c) => (
@@ -272,7 +272,7 @@ export function IntreruperiFilters({ items }: { items: Interruption[] }) {
             disabled={locating}
             aria-pressed={sort === "distanta"}
             title={me ? "Sortează după distanța de la tine" : "Localizează-mă"}
-            className={`inline-flex items-center gap-1.5 h-10 px-3 rounded-[8px] border text-xs font-medium transition-colors ${
+            className={`inline-flex items-center gap-1.5 h-10 px-3 rounded-[var(--radius-xs)] border text-xs font-medium transition-colors ${
               sort === "distanta" && me
                 ? "bg-blue-500 text-white border-blue-500"
                 : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-primary)]/40"
@@ -287,7 +287,7 @@ export function IntreruperiFilters({ items }: { items: Interruption[] }) {
           </button>
 
           <div
-            className="ml-auto inline-flex rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] p-0.5"
+            className="ml-auto inline-flex rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] p-0.5"
             role="group"
             aria-label="Mod de afișare"
           >
@@ -336,7 +336,7 @@ export function IntreruperiFilters({ items }: { items: Interruption[] }) {
               setType("toate");
               setCounty("toate");
             }}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
           >
             Resetează filtrele <span aria-hidden="true">→</span>
           </button>
@@ -463,7 +463,7 @@ function InterruptionCard({
       <div className="flex items-start justify-between gap-2 mb-3 min-w-0">
         <div className="flex items-center gap-2 min-w-0">
           <span
-            className="inline-flex items-center justify-center w-8 h-8 rounded-[8px] text-lg shrink-0"
+            className="inline-flex items-center justify-center w-8 h-8 rounded-[var(--radius-xs)] text-lg shrink-0"
             style={{
               backgroundColor: TYPE_COLORS[item.type] + "20",
               color: TYPE_COLORS[item.type],

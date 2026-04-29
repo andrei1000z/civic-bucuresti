@@ -28,7 +28,7 @@ const ParkingProofUploader = nextDynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-48 rounded-[8px] bg-[var(--color-surface-2)] animate-pulse" aria-hidden="true" />
+      <div className="h-48 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] animate-pulse" aria-hidden="true" />
     ),
   },
 );
@@ -921,7 +921,7 @@ ${today}`;
         </div>
 
         {draftRestoredAt && !draftDismissed && (
-          <div className="mb-4 p-3 rounded-[8px] border border-emerald-500/30 bg-emerald-500/5 flex items-start gap-3">
+          <div className="mb-4 p-3 rounded-[var(--radius-xs)] border border-emerald-500/30 bg-emerald-500/5 flex items-start gap-3">
             <span className="text-lg" aria-hidden>📝</span>
             <div className="flex-1 text-xs">
               <p className="font-semibold text-emerald-700 dark:text-emerald-400">
@@ -975,7 +975,7 @@ ${today}`;
                     setTipDetectedByAI(false);
                     trackFunnelStep("sesizare-create", "tip-selected", { tip: t.value });
                   }}
-                  className="group flex flex-col items-center gap-1 p-2 rounded-[8px] hover:bg-[var(--color-surface)] border border-transparent hover:border-[var(--color-primary)]/40 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                  className="group flex flex-col items-center gap-1 p-2 rounded-[var(--radius-xs)] hover:bg-[var(--color-surface)] border border-transparent hover:border-[var(--color-primary)]/40 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   title={t.label}
                 >
                   <span className="text-2xl" aria-hidden="true">{t.icon}</span>
@@ -1101,7 +1101,7 @@ ${today}`;
         </Field>
 
         {recipients && (
-          <div className="rounded-[8px] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 p-3 text-xs">
+          <div className="rounded-[var(--radius-xs)] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 p-3 text-xs">
             <p className="font-semibold text-blue-900 dark:text-blue-300 mb-2 flex items-center gap-1">
               <Mail size={12} aria-hidden="true" /> Emailul tău va ajunge la {recipients.primary.length + recipients.cc.length} destinatari oficiali:
             </p>
@@ -1155,7 +1155,7 @@ ${today}`;
               type="button"
               onClick={getLocation}
               disabled={geoLoading}
-              className="shrink-0 h-11 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors flex items-center gap-2 text-sm disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              className="shrink-0 h-11 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors flex items-center gap-2 text-sm disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               aria-label={geoLoading ? "Se detectează locația" : "Folosește GPS-ul pentru a prinde locația actuală"}
               title="Folosește GPS-ul pentru a prinde locația actuală"
             >
@@ -1219,7 +1219,7 @@ ${today}`;
                   <label
                     key={o.value}
                     className={cn(
-                      "flex gap-3 p-3 rounded-[8px] border cursor-pointer transition-colors",
+                      "flex gap-3 p-3 rounded-[var(--radius-xs)] border cursor-pointer transition-colors",
                       parkingJurisdiction === o.value
                         ? "border-[var(--color-primary)] bg-[var(--color-primary-soft)]"
                         : "border-[var(--color-border)] hover:border-[var(--color-primary)]/50 bg-[var(--color-surface)]",
@@ -1247,7 +1247,7 @@ ${today}`;
                 value={parkingObservedAt}
                 onChange={(e) => setParkingObservedAt(e.target.value)}
                 max={parkingObservedMax || undefined}
-                className="w-full h-11 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                className="w-full h-11 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               />
               <p className="text-xs text-[var(--color-text-muted)] mt-1">
                 Poliția are nevoie de momentul EXACT al constatării — intră direct în procesul-verbal. Completat automat cu acum, poți corecta dacă ai văzut mașina mai devreme.
@@ -1261,7 +1261,7 @@ ${today}`;
               Atașează poze clare, cu rezoluție mare și lumină bună. Ideal: o poză apropiată cu problema + o poză de context mai largă cu un reper vizibil (stâlp, clădire, număr casă). Fotografiază din mai multe unghiuri. Cu cât mai multe poze relevante, cu atât mai bine.
             </p>
             {imagini.length > 0 && (
-              <div className="mt-2 flex items-start gap-2 p-3 rounded-[8px] bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-300">
+              <div className="mt-2 flex items-start gap-2 p-3 rounded-[var(--radius-xs)] bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-300">
                 <span className="shrink-0 mt-0.5">⚠️</span>
                 <p>
                   <strong>Atașează pozele manual în emailul către autorități</strong> — sunt salvate public pe Civia la linkul sesizării tale, dar e mai profesionist să le pui tu direct în email ca atașamente.
@@ -1309,7 +1309,7 @@ ${today}`;
         </label>
 
         {error && (
-          <div role="alert" className="p-3 rounded-[8px] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-sm text-red-700 dark:text-red-300 flex items-start gap-2">
+          <div role="alert" className="p-3 rounded-[var(--radius-xs)] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-sm text-red-700 dark:text-red-300 flex items-start gap-2">
             <AlertCircle size={16} className="shrink-0 mt-0.5" aria-hidden="true" />
             <span>{error}</span>
           </div>
@@ -1319,7 +1319,7 @@ ${today}`;
           type="button"
           disabled={!canSubmit}
           onClick={handleSubmit}
-          className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[8px] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+          className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
           {submitting ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Send size={16} aria-hidden="true" />}
           {submitting ? "Se generează textul și se salvează..." : "Trimite sesizarea la autorități"}
@@ -1348,7 +1348,7 @@ ${today}`;
               </span>
             )}
           </div>
-          <div className="bg-white dark:bg-slate-900 border border-[var(--color-border)] rounded-[8px] p-5 mb-4 text-sm leading-relaxed text-slate-800 dark:text-slate-200 max-h-[420px] overflow-y-auto shadow-inner">
+          <div className="bg-white dark:bg-slate-900 border border-[var(--color-border)] rounded-[var(--radius-xs)] p-5 mb-4 text-sm leading-relaxed text-slate-800 dark:text-slate-200 max-h-[420px] overflow-y-auto shadow-inner">
             {previewText.split(/\n\n+/).map((paragraph, i) => (
               <p key={i} className="mb-3 last:mb-0 whitespace-pre-line">
                 {paragraph}
@@ -1359,7 +1359,7 @@ ${today}`;
             <a
               href={mailtoLink()}
               className={cn(
-                "flex items-center justify-center gap-2 h-10 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
+                "flex items-center justify-center gap-2 h-10 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
                 !recipients && "opacity-40 pointer-events-none"
               )}
               aria-disabled={!recipients}
@@ -1370,7 +1370,7 @@ ${today}`;
             <button
               type="button"
               onClick={copyText}
-              className="flex items-center justify-center gap-2 h-10 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              className="flex items-center justify-center gap-2 h-10 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               aria-live="polite"
             >
               <Copy size={14} aria-hidden="true" />
@@ -1389,7 +1389,7 @@ ${today}`;
   );
 }
 
-const inputClass = "w-full h-11 px-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent";
+const inputClass = "w-full h-11 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus:border-transparent";
 
 function Field({
   label,
@@ -1469,13 +1469,13 @@ function SuccessScreen({
       <div className="flex flex-col gap-3">
         <button
           onClick={() => router.push(`/sesizari/${code}`)}
-          className="h-12 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+          className="h-12 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
         >
           Vezi sesizarea ta →
         </button>
         <button
           onClick={onAnother}
-          className="h-12 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] font-medium hover:bg-[var(--color-surface-2)] transition-colors"
+          className="h-12 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] font-medium hover:bg-[var(--color-surface-2)] transition-colors"
         >
           Altă sesizare
         </button>

@@ -19,7 +19,7 @@ export function PhotoGallery({ urls, title = "Foto" }: Props) {
         {urls.map((_, i) => (
           <div
             key={i}
-            className="aspect-video rounded-[8px] bg-[var(--color-surface-2)] flex items-center justify-center"
+            className="aspect-video rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] flex items-center justify-center"
             aria-hidden="true"
           >
             <ImgIcon size={24} className="text-[var(--color-text-muted)]" />
@@ -40,7 +40,7 @@ export function PhotoGallery({ urls, title = "Foto" }: Props) {
           <div
             key={i}
             role="listitem"
-            className="group relative aspect-video rounded-[8px] bg-[var(--color-surface-2)] overflow-hidden hover:ring-2 hover:ring-[var(--color-primary)] transition-all"
+            className="group relative aspect-video rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] overflow-hidden hover:ring-2 hover:ring-[var(--color-primary)] transition-all"
           >
             <button
               type="button"

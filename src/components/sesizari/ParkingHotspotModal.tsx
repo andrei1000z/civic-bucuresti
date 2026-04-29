@@ -168,7 +168,7 @@ export function ParkingHotspotModal({
           <div className="flex flex-col sm:flex-row gap-2 pt-2">
             <a
               href={mailto}
-              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors flex-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors flex-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
               <Shield size={15} aria-hidden="true" />
               Da, trimite cererea către ASPMB
@@ -176,7 +176,7 @@ export function ParkingHotspotModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[8px] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[var(--radius-xs)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
               Nu, mulțumesc
             </button>

@@ -162,7 +162,7 @@ export function EvenimenteFilter({ evenimente }: { evenimente: Eveniment[] }) {
           <button
             type="button"
             onClick={() => setCategory("toate")}
-            className="inline-flex items-center gap-2 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            className="inline-flex items-center gap-2 h-9 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
             Vezi toate evenimentele
           </button>

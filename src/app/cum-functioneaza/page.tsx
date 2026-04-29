@@ -243,7 +243,7 @@ export default function CumFunctioneazaPage() {
               href={m.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] p-3 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all flex items-center justify-between"
+              className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xs)] p-3 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all flex items-center justify-between"
             >
               <div className="min-w-0">
                 <div className="font-semibold text-sm truncate group-hover:text-[var(--color-primary)] transition-colors">
@@ -514,7 +514,7 @@ export default function CumFunctioneazaPage() {
               <div className="shrink-0 w-10 h-10 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-sm font-bold">
                 {pas.pas}
               </div>
-              <div className="flex-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] p-4">
+              <div className="flex-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xs)] p-4">
                 <p className="font-semibold text-sm mb-0.5">{pas.titlu}</p>
                 <p className="text-xs text-[var(--color-text-muted)]">{pas.descriere}</p>
               </div>

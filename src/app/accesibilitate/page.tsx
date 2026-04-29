@@ -250,7 +250,7 @@ export default function AccesibilitatePage() {
         </p>
         <Link
           href="/sesizari?tip=pietonal"
-          className="inline-flex items-center gap-2 h-10 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
+          className="inline-flex items-center gap-2 h-10 px-5 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
         >
           Raportează obstacolul <ArrowRight size={16} />
         </Link>

@@ -44,11 +44,11 @@ export function TopVotedWidget() {
     };
   }, []);
 
-  // Hide the whole section only when we've confirmed there's nothing
-  // to show. While loading we render skeletons so the page doesn't
-  // shuffle its layout mid-paint, and the hero→CTA flow below stays
-  // in the same place.
-  if (!loading && rows.length === 0) return null;
+  // Layout-stable: when there's nothing to show, we render a slim
+  // placeholder card with min-height that matches a single row.
+  // Returning null caused the layout below (Aer/Coverage) to shift up
+  // by ~600px once the timeout hit, hurting CLS.
+  const isEmpty = !loading && rows.length === 0;
 
   return (
     <section className="py-16">
@@ -89,6 +89,19 @@ export function TopVotedWidget() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {isEmpty && (
+          <div className="flex items-center justify-center min-h-[200px] p-6 bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-md)] text-center">
+            <div>
+              <p className="text-sm font-medium text-[var(--color-text)]">
+                Nicio sesizare votată încă
+              </p>
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                Trimite prima ta sesizare și votează ce contează pentru tine.
+              </p>
+            </div>
           </div>
         )}
 

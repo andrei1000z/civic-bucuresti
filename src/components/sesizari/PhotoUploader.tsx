@@ -221,7 +221,7 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
           aria-label={`Încarcă poze (${totalCount} din ${max} folosite)`}
-          className={`w-full flex flex-col items-center justify-center gap-1.5 h-24 rounded-[8px] border-2 border-dashed cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 ${
+          className={`w-full flex flex-col items-center justify-center gap-1.5 h-24 rounded-[var(--radius-xs)] border-2 border-dashed cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 ${
             dragging
               ? "border-[var(--color-primary)] bg-[var(--color-primary-soft)]"
               : "border-[var(--color-border)] hover:border-[var(--color-primary)]"
@@ -251,7 +251,7 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
           {urls.map((url, i) => (
             <div
               key={url}
-              className="aspect-square rounded-[8px] bg-[var(--color-surface-2)] relative overflow-hidden group"
+              className="aspect-square rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] relative overflow-hidden group"
             >
               <button
                 type="button"
@@ -276,7 +276,7 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
           {pending.map((p) => (
             <div
               key={p.id}
-              className="aspect-square rounded-[8px] bg-[var(--color-surface-2)] relative overflow-hidden"
+              className="aspect-square rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] relative overflow-hidden"
               aria-live="polite"
               aria-label={`Se încarcă poza (${p.progress}%)`}
               role="progressbar"
@@ -348,7 +348,7 @@ export function PhotoUploader({ urls, onChange, max = 5 }: PhotoUploaderProps) {
           <img
             src={urls[lightbox]}
             alt={`Foto ${lightbox + 1} din ${urls.length}`}
-            className="max-w-[90vw] max-h-[85vh] object-contain rounded-[8px]"
+            className="max-w-[90vw] max-h-[85vh] object-contain rounded-[var(--radius-xs)]"
             onClick={(e) => e.stopPropagation()}
           />
 

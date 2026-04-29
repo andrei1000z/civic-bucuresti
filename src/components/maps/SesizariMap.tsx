@@ -103,7 +103,7 @@ export function SesizariMap({ limit = 15, height = "400px", zoom = 12 }: Sesizar
       <LeafletMap center={county?.center} zoom={county ? 10 : zoom}>
         <MarkerLayer data={markers} />
       </LeafletMap>
-      <div className="absolute bottom-3 left-3 z-[400] bg-[var(--color-surface)] backdrop-blur border border-[var(--color-border)] rounded-[8px] p-3 shadow-[var(--shadow-md)]">
+      <div className="absolute bottom-3 left-3 z-[400] bg-[var(--color-surface)] backdrop-blur border border-[var(--color-border)] rounded-[var(--radius-xs)] p-3 shadow-[var(--shadow-md)]">
         <div className="flex flex-col gap-1.5">
           {(["nou", "in-lucru", "rezolvat"] as const).map((status) => (
             <div key={status} className="flex items-center gap-2 text-xs">

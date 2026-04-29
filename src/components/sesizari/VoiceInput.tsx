@@ -117,7 +117,7 @@ export function VoiceInput({
         onClick={toggle}
         aria-label={listening ? "Oprește dictarea" : "Dictează în română"}
         aria-pressed={listening}
-        className={`inline-flex items-center justify-center w-9 h-9 rounded-[8px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
+        className={`inline-flex items-center justify-center w-9 h-9 rounded-[var(--radius-xs)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
           listening
             ? "bg-red-500 text-white animate-pulse"
             : "bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:bg-[var(--color-surface)] text-[var(--color-text-muted)]"

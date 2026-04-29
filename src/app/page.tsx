@@ -43,7 +43,7 @@ export default function HomePage() {
               🇷🇴 Civia — gratuit, open-source, fără politică
             </p>
 
-            <h1 className="font-[family-name:var(--font-sora)] text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.08] tracking-tight">
+            <h1 className="font-[family-name:var(--font-sora)] text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-[1.08] tracking-tight">
               Orașul tău,{" "}
               <span className="bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">
                 rezolvat pe email.
@@ -55,8 +55,10 @@ export default function HomePage() {
               alegem autoritatea corectă și îți dăm codul prin care urmărești răspunsul de 30 de zile.
             </p>
 
-            {/* CTA */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            {/* Single primary CTA + 1 secondary text link.
+                Pillz quick-actions au fost mutate în MobileFab + Navbar Search +
+                footer ca să nu concureze cu CTA-ul principal. */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
               <Link
                 href="/sesizari"
                 className="inline-flex items-center gap-2 h-12 px-7 rounded-[var(--radius-full)] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 active:scale-[0.97] transition-all shadow-[var(--shadow-3)] hover:shadow-[var(--shadow-4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-700"
@@ -65,37 +67,9 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/#county-picker"
-                className="inline-flex items-center gap-2 h-12 px-7 rounded-[var(--radius-full)] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 active:scale-[0.97] backdrop-blur-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                className="inline-flex items-center gap-1.5 text-white/90 hover:text-white text-sm font-medium underline-offset-4 hover:underline transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-[var(--radius-xs)] px-1 py-0.5"
               >
-                Explorează după județ
-              </Link>
-            </div>
-
-            {/* Quick actions pills */}
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-6 text-xs">
-              <Link
-                href="/intreruperi"
-                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-white/5 text-white/80 border border-white/10 hover:bg-white/15 hover:text-white transition-colors"
-              >
-                🚧 Întreruperi apă/caldură
-              </Link>
-              <Link
-                href="/autoritati"
-                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-white/5 text-white/80 border border-white/10 hover:bg-white/15 hover:text-white transition-colors"
-              >
-                🏢 Contacte autorități
-              </Link>
-              <Link
-                href="/urmareste"
-                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-white/5 text-white/80 border border-white/10 hover:bg-white/15 hover:text-white transition-colors"
-              >
-                🔍 Urmărește codul
-              </Link>
-              <Link
-                href="/aer"
-                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-white/5 text-white/80 border border-white/10 hover:bg-white/15 hover:text-white transition-colors"
-              >
-                🌬️ Aer live
+                sau explorează după județ <ArrowRight size={14} aria-hidden="true" />
               </Link>
             </div>
           </div>

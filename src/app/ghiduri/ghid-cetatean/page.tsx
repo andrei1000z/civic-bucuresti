@@ -103,7 +103,7 @@ export default function GhidCetateanPage() {
         </ul>
 
         <h3>Cerere tip</h3>
-        <div className="bg-[var(--color-surface-2)] rounded-[8px] p-4 my-4 text-sm font-mono not-prose">
+        <div className="bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-4 my-4 text-sm font-mono not-prose">
           Către: [Autoritatea]<br/>
           <br/>
           Subsemnatul(a) [nume], CNP [cnp], în temeiul Legii 544/2001 privind<br/>

@@ -41,7 +41,7 @@ export function ShareButton({ code, size = "sm" }: { code: string; size?: "sm" |
       onClick={handleShare}
       aria-live="polite"
       className={cn(
-        "inline-flex items-center gap-1 rounded-[8px] text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
+        "inline-flex items-center gap-1 rounded-[var(--radius-xs)] text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
         px,
         copied
           ? "bg-emerald-500 text-white"

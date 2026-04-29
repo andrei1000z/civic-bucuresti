@@ -187,7 +187,7 @@ export default async function CountyHomePage({
                   className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-4 hover:border-[var(--color-primary)]/30 hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 transition-all text-center"
                 >
                   <div
-                    className="w-10 h-10 rounded-[8px] flex items-center justify-center mx-auto mb-2"
+                    className="w-10 h-10 rounded-[var(--radius-xs)] flex items-center justify-center mx-auto mb-2"
                     style={{ backgroundColor: `${s.color}15` }}
                   >
                     <Icon size={18} style={{ color: s.color }} />

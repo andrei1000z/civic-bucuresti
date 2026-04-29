@@ -83,7 +83,7 @@ export default async function JudetePage() {
         </p>
         <Link
           href="/sesizari"
-          className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors"
+          className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-xs)] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors"
         >
           Fă o sesizare <ArrowRight size={16} />
         </Link>

@@ -290,7 +290,7 @@ export default async function StireDetailPage({
               href={stire.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 w-full justify-center h-10 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              className="inline-flex items-center gap-2 w-full justify-center h-10 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
               aria-label={`Citește articolul complet pe ${stire.source} (deschide în tab nou)`}
             >
               <ExternalLink size={14} aria-hidden="true" />

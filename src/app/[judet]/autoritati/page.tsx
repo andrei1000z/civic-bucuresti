@@ -288,7 +288,7 @@ export default async function AutoritatiPage({
         </p>
         <a
           href={`/${county.slug}/sesizari`}
-          className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+          className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
         >
           Fă o sesizare acum
         </a>

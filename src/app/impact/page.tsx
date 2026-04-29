@@ -299,13 +299,13 @@ export default async function ImpactPage() {
         <div className="flex flex-wrap gap-3 justify-center">
           <Link
             href="/#county-picker"
-            className="inline-flex items-center gap-2 h-12 px-7 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
+            className="inline-flex items-center gap-2 h-12 px-7 rounded-[var(--radius-xs)] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors shadow-lg"
           >
             Fă o sesizare <ArrowRight size={18} />
           </Link>
           <Link
             href="/compara"
-            className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 transition-colors backdrop-blur-sm"
+            className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-xs)] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 transition-colors backdrop-blur-sm"
           >
             ⚖️ Compară județele
           </Link>

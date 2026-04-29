@@ -250,7 +250,7 @@ export function ParkingProofUploader({ value, onChange, plateText, onPlateTextCh
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start gap-2 p-3 rounded-[8px] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 text-xs text-blue-900 dark:text-blue-300">
+      <div className="flex items-start gap-2 p-3 rounded-[var(--radius-xs)] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 text-xs text-blue-900 dark:text-blue-300">
         <Info size={14} className="shrink-0 mt-0.5" />
         <p>
           <strong>Sesizare cu „dovadă aer-tight”.</strong> Poliția respinge sesizările de parcare fără probe clare. Completează cele 3 sloturi de mai jos — fiecare tratează un punct slab în lanțul de probe.
@@ -283,7 +283,7 @@ export function ParkingProofUploader({ value, onChange, plateText, onPlateTextCh
           value={plateText}
           onChange={(e) => onPlateTextChange(e.target.value.toUpperCase().slice(0, 12))}
           placeholder="ex: B 123 ABC"
-          className="w-full h-11 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          className="w-full h-11 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-mono tracking-wider focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         />
         <p className="text-xs text-[var(--color-text-muted)] mt-1">
           Se completează automat când încarci prima poză. Poți corecta manual dacă OCR-ul greșește o literă.
@@ -322,7 +322,7 @@ function Slot({
       <p className="text-[11px] text-[var(--color-text-muted)] mb-2 leading-snug">{meta.hint}</p>
 
       <div
-        className="relative aspect-video rounded-[8px] bg-[var(--color-surface-2)] border border-dashed border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors cursor-pointer overflow-hidden"
+        className="relative aspect-video rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-dashed border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors cursor-pointer overflow-hidden"
         onClick={() => !busy && !url && inputRef.current?.click()}
       >
         {url ? (

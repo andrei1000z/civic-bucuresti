@@ -36,7 +36,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="container-narrow py-8">
       <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[var(--color-border)]">
-        <div className="w-10 h-10 rounded-[8px] bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-white font-bold text-sm">
+        <div className="w-10 h-10 rounded-[var(--radius-xs)] bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-white font-bold text-sm">
           A
         </div>
         <div className="flex-1 min-w-0">
@@ -57,7 +57,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link
             key={t.href}
             href={t.href}
-            className="px-3 py-1.5 rounded-[8px] text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] shrink-0"
+            className="px-3 py-1.5 rounded-[var(--radius-xs)] text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] shrink-0"
           >
             {t.label}
           </Link>

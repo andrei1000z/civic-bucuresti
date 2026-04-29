@@ -21,7 +21,7 @@ export default function AuthErrorPage() {
       </p>
       <Link
         href="/"
-        className="inline-flex h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium items-center"
+        className="inline-flex h-11 px-5 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium items-center"
       >
         Înapoi la pagina principală
       </Link>

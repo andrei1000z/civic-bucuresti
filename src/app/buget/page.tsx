@@ -109,7 +109,7 @@ export default function BugetPage() {
             max={10}
           />
         </Card>
-        <div className="mt-3 p-3 rounded-[8px] bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 text-xs flex gap-2 items-start">
+        <div className="mt-3 p-3 rounded-[var(--radius-xs)] bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 text-xs flex gap-2 items-start">
           <AlertTriangle size={14} className="text-amber-600 mt-0.5 shrink-0" aria-hidden="true" />
           <p className="text-[var(--color-text-muted)]">
             România e singurul stat UE în procedura de deficit excesiv din 2020. Limita Pactului

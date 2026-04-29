@@ -28,7 +28,7 @@ export function UserMenu() {
   }, []);
 
   if (loading) {
-    return <div className="w-10 h-10 rounded-[8px] bg-[var(--color-surface-2)] animate-pulse" />;
+    return <div className="w-10 h-10 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] animate-pulse" />;
   }
 
   if (!user) {
@@ -36,7 +36,7 @@ export function UserMenu() {
       <button
         type="button"
         onClick={openAuthModal}
-        className="hidden sm:inline-flex items-center gap-1.5 h-10 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
+        className="hidden sm:inline-flex items-center gap-1.5 h-10 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
         aria-label="Autentificare"
       >
         <LogIn size={15} aria-hidden="true" />

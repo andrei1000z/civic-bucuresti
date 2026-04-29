@@ -88,7 +88,7 @@ export function VerifyPanel({
           onClick={() => submit(true)}
           disabled={loading || isAuthor}
           aria-busy={loading && choice === true}
-          className={`inline-flex items-center justify-center gap-2 h-10 rounded-[8px] text-sm font-medium transition-all disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${
+          className={`inline-flex items-center justify-center gap-2 h-10 rounded-[var(--radius-xs)] text-sm font-medium transition-all disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${
             choice === true
               ? "bg-emerald-500 text-white"
               : "bg-[var(--color-surface-2)] text-[var(--color-text)] hover:bg-emerald-500/10 hover:text-emerald-600"
@@ -109,7 +109,7 @@ export function VerifyPanel({
           onClick={() => submit(false)}
           disabled={loading || isAuthor}
           aria-busy={loading && choice === false}
-          className={`inline-flex items-center justify-center gap-2 h-10 rounded-[8px] text-sm font-medium transition-all disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 ${
+          className={`inline-flex items-center justify-center gap-2 h-10 rounded-[var(--radius-xs)] text-sm font-medium transition-all disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 ${
             choice === false
               ? "bg-red-500 text-white"
               : "bg-[var(--color-surface-2)] text-[var(--color-text)] hover:bg-red-500/10 hover:text-red-600"

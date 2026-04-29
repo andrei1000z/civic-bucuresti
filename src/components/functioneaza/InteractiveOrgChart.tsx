@@ -24,7 +24,7 @@ export function InteractiveOrgChart() {
           {["Viceprimar 1", "Viceprimar 2"].map((v) => (
             <div
               key={v}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] px-4 py-2 text-center text-sm font-medium"
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xs)] px-4 py-2 text-center text-sm font-medium"
             >
               {v}
             </div>
@@ -38,7 +38,7 @@ export function InteractiveOrgChart() {
               key={d.id}
               onClick={() => setSelected(d)}
               className={cn(
-                "bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[8px] px-3 py-2 text-center text-xs font-medium",
+                "bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-xs)] px-3 py-2 text-center text-xs font-medium",
                 "hover:bg-[var(--color-primary-soft)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-all",
                 "cursor-pointer"
               )}

@@ -103,7 +103,7 @@ export default async function BiletePage({
         {isBucuresti && (
           <Link
             href="/bilete"
-            className="inline-flex items-center gap-2 h-12 px-6 mt-6 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+            className="inline-flex items-center gap-2 h-12 px-6 mt-6 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
           >
             <CreditCard size={18} />
             Pagina completă de tarife STB + Metrorex
@@ -314,7 +314,7 @@ export default async function BiletePage({
             href={op.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+            className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
           >
             <ExternalLink size={18} />
             {op.name}

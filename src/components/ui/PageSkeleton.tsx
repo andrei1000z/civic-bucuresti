@@ -8,10 +8,15 @@
  *   - Import only the variant needed; every KB counts on the navigation critical path.
  */
 
+// Default radius matches real content cards (--radius-md / 16px). For
+// short-text placeholders (h-3, h-4) the browser clamps border-radius to
+// half the smaller side, so 16px renders identically to 8px on tiny boxes.
+// For tall placeholders (h-24, h-40), 16px now matches the real card edge,
+// eliminating the radius "flash" at hydration.
 function Shimmer({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`animate-pulse bg-[var(--color-surface-2)] rounded-[8px] ${className}`}
+      className={`animate-pulse bg-[var(--color-surface-2)] rounded-[var(--radius-md)] ${className}`}
     />
   );
 }

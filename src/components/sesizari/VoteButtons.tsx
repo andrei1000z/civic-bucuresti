@@ -85,7 +85,7 @@ export function VoteButtons({
         disabled={loading}
         aria-pressed={userVote === 1}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 transition-colors font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
+          "inline-flex items-center gap-1.5 rounded-[var(--radius-xs)] px-2.5 py-1.5 transition-colors font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
           userVote === 1
             ? "bg-emerald-500 text-white"
             : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)]",
@@ -103,7 +103,7 @@ export function VoteButtons({
         disabled={loading}
         aria-pressed={userVote === -1}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 transition-colors font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
+          "inline-flex items-center gap-1.5 rounded-[var(--radius-xs)] px-2.5 py-1.5 transition-colors font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
           userVote === -1
             ? "bg-red-500 text-white"
             : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)]",

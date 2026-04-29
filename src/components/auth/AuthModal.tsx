@@ -104,7 +104,7 @@ export function AuthModal() {
           <button
             type="button"
             onClick={handleClose}
-            className="h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            className="h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
             Am înțeles
           </button>
@@ -126,7 +126,7 @@ export function AuthModal() {
                     onClick={() => handleOAuth("google")}
                     disabled={oauthLoading !== null || status === "sending"}
                     aria-busy={oauthLoading === "google"}
-                    className="w-full h-11 rounded-[8px] bg-white dark:bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] dark:hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50 flex items-center justify-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    className="w-full h-11 rounded-[var(--radius-xs)] bg-white dark:bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] dark:hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50 flex items-center justify-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   >
                     {oauthLoading === "google" ? (
                       <Loader2 size={16} className="animate-spin" aria-hidden="true" />
@@ -147,7 +147,7 @@ export function AuthModal() {
                     onClick={() => handleOAuth("apple")}
                     disabled={oauthLoading !== null || status === "sending"}
                     aria-busy={oauthLoading === "apple"}
-                    className="w-full h-11 rounded-[8px] bg-black dark:bg-white text-white dark:text-black text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    className="w-full h-11 rounded-[var(--radius-xs)] bg-black dark:bg-white text-white dark:text-black text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   >
                     {oauthLoading === "apple" ? (
                       <Loader2 size={16} className="animate-spin" aria-hidden="true" />
@@ -190,7 +190,7 @@ export function AuthModal() {
                 aria-invalid={inlineError != null || (status === "error" && errorMsg != null)}
                 aria-describedby={inlineError ? "auth-email-error" : undefined}
                 placeholder="nume@exemplu.ro"
-                className={`w-full h-11 pl-9 pr-4 rounded-[8px] bg-[var(--color-surface-2)] border text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 transition-colors ${
+                className={`w-full h-11 pl-9 pr-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 transition-colors ${
                   inlineError
                     ? "border-red-500 dark:border-red-400"
                     : "border-[var(--color-border)]"
@@ -209,7 +209,7 @@ export function AuthModal() {
             <button
               type="submit"
               disabled={status === "sending" || !email || oauthLoading !== null}
-              className="w-full h-11 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              className="w-full h-11 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
               {status === "sending" ? "Se trimite linkul..." : "Trimite-mi linkul de conectare"}
             </button>

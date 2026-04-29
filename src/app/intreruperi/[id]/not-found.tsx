@@ -15,7 +15,7 @@ export default function NotFound() {
       <div className="flex flex-wrap justify-center gap-3">
         <Link
           href="/intreruperi"
-          className="inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+          className="inline-flex items-center gap-2 h-11 px-5 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
         >
           <ArrowLeft size={16} /> Toate întreruperile
         </Link>

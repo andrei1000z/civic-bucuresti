@@ -61,7 +61,7 @@ export function DeleteSesizareButton({ code, isAuthor }: Props) {
       <button
         type="button"
         onClick={() => setConfirm(true)}
-        className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] border border-red-300 dark:border-red-900 text-red-600 dark:text-red-400 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+        className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] border border-red-300 dark:border-red-900 text-red-600 dark:text-red-400 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
         title="Șterge sesizarea"
       >
         <Trash2 size={14} aria-hidden="true" />
@@ -113,7 +113,7 @@ export function DeleteSesizareButton({ code, isAuthor }: Props) {
                   type="button"
                   onClick={() => setConfirm(false)}
                   disabled={deleting}
-                  className="flex-1 h-11 rounded-[8px] bg-[var(--color-surface-2)] text-sm font-medium hover:bg-[var(--color-border)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                  className="flex-1 h-11 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] text-sm font-medium hover:bg-[var(--color-border)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 >
                   Anulează
                 </button>
@@ -121,7 +121,7 @@ export function DeleteSesizareButton({ code, isAuthor }: Props) {
                   type="button"
                   onClick={handleDelete}
                   disabled={deleting}
-                  className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-red-500"
+                  className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[var(--radius-xs)] bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-red-500"
                 >
                   {deleting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Trash2 size={14} aria-hidden="true" />}
                   Da, șterge

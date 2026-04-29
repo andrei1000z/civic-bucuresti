@@ -250,7 +250,7 @@ function DeviceBreakdown({ total }: { total: Record<string, string | number> }) 
       </div>
       <div className="grid grid-cols-3 gap-2 mb-4">
         {(["mobile", "desktop", "tablet"] as const).map((k) => (
-          <div key={k} className="text-center p-2 bg-[var(--color-surface-2)] rounded-[8px]">
+          <div key={k} className="text-center p-2 bg-[var(--color-surface-2)] rounded-[var(--radius-xs)]">
             <p className="text-xl font-bold">{Math.round((device[k] / sumDev) * 100)}%</p>
             <p className="text-[10px] text-[var(--color-text-muted)] capitalize">{k}</p>
           </div>
@@ -331,7 +331,7 @@ export function AnalyticsDashboard() {
         <p className="text-sm text-[var(--color-text-muted)]">{error}</p>
         <button
           onClick={load}
-          className="mt-4 px-4 py-2 rounded-[8px] bg-[var(--color-primary)] text-white text-sm"
+          className="mt-4 px-4 py-2 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm"
         >
           Reîncearcă
         </button>
@@ -357,7 +357,7 @@ export function AnalyticsDashboard() {
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-2 px-3 py-2 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] text-xs"
+          className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] text-xs"
         >
           <RefreshCw size={14} />
           Refresh
@@ -475,7 +475,7 @@ export function AnalyticsDashboard() {
             if (!d) return null;
             const color = vitalColor(v, d.p75);
             return (
-              <div key={v} className="p-3 bg-[var(--color-surface-2)] rounded-[8px]">
+              <div key={v} className="p-3 bg-[var(--color-surface-2)] rounded-[var(--radius-xs)]">
                 <div className="flex justify-between items-baseline mb-1">
                   <span className="text-xs font-semibold tracking-wider">{v}</span>
                   <span className="text-[10px] text-[var(--color-text-muted)] tabular-nums">n={d.samples}</span>
@@ -625,7 +625,7 @@ export function AnalyticsDashboard() {
             {data.feedback.map((f, i) => (
               <li
                 key={i}
-                className="p-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)]"
+                className="p-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)]"
               >
                 <div className="flex items-center gap-2 mb-2 text-[11px]">
                   <span

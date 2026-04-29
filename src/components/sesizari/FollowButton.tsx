@@ -57,7 +57,7 @@ export function FollowButton({ code, initialFollowing, initialCount }: Props) {
       onClick={toggle}
       disabled={loading}
       className={cn(
-        "inline-flex items-center gap-2 h-10 px-4 rounded-[8px] text-sm font-medium transition-all disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]",
+        "inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] text-sm font-medium transition-all disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]",
         following
           ? "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]"
           : "bg-[var(--color-surface-2)] text-[var(--color-text)] hover:bg-[var(--color-border)]"

@@ -174,7 +174,7 @@ export function IntreruperiSubmissions({ rows: initial }: { rows: Row[] }) {
                     type="button"
                     onClick={() => updateStatus(r.id, "published")}
                     disabled={acting === r.id}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-emerald-500 text-white text-xs font-medium hover:bg-emerald-600 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[var(--radius-xs)] bg-emerald-500 text-white text-xs font-medium hover:bg-emerald-600 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
                   >
                     <Check size={13} aria-hidden="true" /> Publică
                   </button>
@@ -182,7 +182,7 @@ export function IntreruperiSubmissions({ rows: initial }: { rows: Row[] }) {
                     type="button"
                     onClick={() => updateStatus(r.id, "rejected")}
                     disabled={acting === r.id}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-red-500 text-white text-xs font-medium hover:bg-red-600 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[var(--radius-xs)] bg-red-500 text-white text-xs font-medium hover:bg-red-600 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                   >
                     <X size={13} aria-hidden="true" /> Respinge
                   </button>
@@ -190,7 +190,7 @@ export function IntreruperiSubmissions({ rows: initial }: { rows: Row[] }) {
                     type="button"
                     onClick={() => updateStatus(r.id, "duplicate")}
                     disabled={acting === r.id}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   >
                     <AlertCircle size={13} aria-hidden="true" /> Duplicat
                   </button>

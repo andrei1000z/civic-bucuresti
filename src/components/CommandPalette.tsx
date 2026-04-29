@@ -307,7 +307,7 @@ export function CommandPalette() {
                             i === activeIdx ? "bg-[var(--color-primary-soft)]" : "hover:bg-[var(--color-surface-2)]"
                           )}
                         >
-                          <div className={cn("w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0", i === activeIdx ? "bg-[var(--color-primary)]/10" : "bg-[var(--color-surface-2)]")} aria-hidden="true">
+                          <div className={cn("w-8 h-8 rounded-[var(--radius-xs)] flex items-center justify-center shrink-0", i === activeIdx ? "bg-[var(--color-primary)]/10" : "bg-[var(--color-surface-2)]")} aria-hidden="true">
                             <Icon size={14} className={TYPE_COLOR[r.type]} />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -356,7 +356,7 @@ export function CommandPalette() {
                       onClick={askAI}
                       className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-inset"
                     >
-                      <div className="w-8 h-8 rounded-[8px] bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0" aria-hidden="true">
+                      <div className="w-8 h-8 rounded-[var(--radius-xs)] bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0" aria-hidden="true">
                         <Sparkles size={14} className="text-violet-500" />
                       </div>
                       <div className="flex-1 min-w-0">

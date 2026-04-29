@@ -139,7 +139,7 @@ export default function IntreruperiPage() {
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Link
               href="#submit-form"
-              className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
             >
               Raportează una <span aria-hidden="true">↓</span>
             </Link>
@@ -147,7 +147,7 @@ export default function IntreruperiPage() {
               href="/intreruperi/rss"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-bg)] transition-colors"
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-bg)] transition-colors"
             >
               <Rss size={14} aria-hidden="true" /> Subscribe RSS
             </a>
@@ -187,7 +187,7 @@ export default function IntreruperiPage() {
           <a
             href="/api/intreruperi/ics"
             download="civia-intreruperi.ics"
-            className="inline-flex items-center gap-2 h-11 px-4 rounded-[8px] bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors justify-center"
+            className="inline-flex items-center gap-2 h-11 px-4 rounded-[var(--radius-xs)] bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors justify-center"
           >
             <Download size={14} aria-hidden="true" /> Calendar (ICS)
           </a>
@@ -195,7 +195,7 @@ export default function IntreruperiPage() {
             href="/intreruperi/rss"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 h-11 px-4 rounded-[8px] bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 transition-colors justify-center"
+            className="inline-flex items-center gap-2 h-11 px-4 rounded-[var(--radius-xs)] bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 transition-colors justify-center"
           >
             <Rss size={14} aria-hidden="true" /> Flux RSS
           </a>
@@ -203,7 +203,7 @@ export default function IntreruperiPage() {
             href="/api/intreruperi"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 h-11 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-bg)] transition-colors justify-center"
+            className="inline-flex items-center gap-2 h-11 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-bg)] transition-colors justify-center"
           >
             <ExternalLink size={14} aria-hidden="true" /> JSON API
           </a>

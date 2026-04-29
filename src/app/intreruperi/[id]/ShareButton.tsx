@@ -36,7 +36,7 @@ export function ShareButton({
   return (
     <button
       onClick={handle}
-      className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
+      className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
     >
       {copied ? <Check size={14} className="text-emerald-500" /> : <Share2 size={14} />}
       {copied ? "Link copiat" : "Distribuie"}

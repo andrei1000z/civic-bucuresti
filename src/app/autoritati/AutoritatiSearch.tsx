@@ -115,7 +115,7 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
           <button
             type="button"
             onClick={() => setQuery("")}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
             Șterge căutarea
           </button>
@@ -252,7 +252,7 @@ function FilterTab({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`px-3 h-8 rounded-[8px] text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
+      className={`px-3 h-8 rounded-[var(--radius-xs)] text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
         active
           ? "bg-[var(--color-surface)] text-[var(--color-primary)] shadow-sm"
           : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"

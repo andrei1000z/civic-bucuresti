@@ -160,7 +160,7 @@ export default async function CountyCumFunctioneazaPage({
                 <div className="shrink-0 w-10 h-10 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center">
                   {item.icon}
                 </div>
-                <div className="flex-1 bg-[var(--color-surface-2)] rounded-[8px] p-4">
+                <div className="flex-1 bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-4">
                   <p className="font-semibold text-sm mb-1">{item.title}</p>
                   <p className="text-xs text-[var(--color-text-muted)]">{item.desc}</p>
                 </div>
@@ -270,13 +270,13 @@ export default async function CountyCumFunctioneazaPage({
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Link
             href={`/${county.slug}/sesizari`}
-            className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors"
+            className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-xs)] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 transition-colors"
           >
             Fa o sesizare <ArrowRight size={16} />
           </Link>
           <Link
             href={`/${county.slug}/autoritati`}
-            className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] border border-white/30 text-white font-semibold hover:bg-white/10 transition-colors"
+            className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-xs)] border border-white/30 text-white font-semibold hover:bg-white/10 transition-colors"
           >
             Contacte autoritati <ArrowRight size={16} />
           </Link>

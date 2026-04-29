@@ -337,7 +337,7 @@ export function CivicAssistant() {
                         key={a.label}
                         type="button"
                         onClick={() => sendMessage(a.prompt)}
-                        className="text-left text-xs px-2.5 py-2 rounded-[8px] bg-gradient-to-br from-[var(--color-primary-soft)] to-transparent hover:from-[var(--color-primary-soft)] hover:to-[var(--color-primary-soft)]/50 border border-[var(--color-primary)]/20 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                        className="text-left text-xs px-2.5 py-2 rounded-[var(--radius-xs)] bg-gradient-to-br from-[var(--color-primary-soft)] to-transparent hover:from-[var(--color-primary-soft)] hover:to-[var(--color-primary-soft)]/50 border border-[var(--color-primary)]/20 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                         title={a.prompt.slice(0, 100) + "…"}
                       >
                         <div className="text-base mb-0.5" aria-hidden="true">{a.emoji}</div>
@@ -356,7 +356,7 @@ export function CivicAssistant() {
                       key={q}
                       type="button"
                       onClick={() => sendMessage(q)}
-                      className="w-full text-left text-xs px-3 py-2 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] border border-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                      className="w-full text-left text-xs px-3 py-2 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-primary-soft)] border border-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     >
                       {q}
                     </button>
@@ -383,13 +383,13 @@ export function CivicAssistant() {
                 placeholder="Întreabă orice despre București..."
                 aria-label="Mesaj pentru asistentul Civia"
                 disabled={streaming}
-                className="flex-1 h-10 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50"
+                className="flex-1 h-10 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || streaming}
                 aria-busy={streaming}
-                className="w-10 h-10 rounded-[8px] bg-[var(--color-primary)] text-white flex items-center justify-center hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+                className="w-10 h-10 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white flex items-center justify-center hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
                 aria-label="Trimite mesajul"
               >
                 <Send size={16} aria-hidden="true" />

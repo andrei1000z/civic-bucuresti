@@ -57,7 +57,7 @@ export function CivicQuiz() {
         <button
           type="button"
           onClick={() => setStarted(true)}
-          className="inline-flex items-center gap-2 h-12 px-6 rounded-[8px] bg-white text-purple-700 font-semibold hover:bg-purple-50 transition-colors focus:outline-none focus-visible:ring-4 focus-visible:ring-white/40"
+          className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-xs)] bg-white text-purple-700 font-semibold hover:bg-purple-50 transition-colors focus:outline-none focus-visible:ring-4 focus-visible:ring-white/40"
         >
           Începe quiz-ul
         </button>
@@ -88,7 +88,7 @@ export function CivicQuiz() {
               <div
                 key={q.id}
                 className={cn(
-                  "p-3 rounded-[8px] text-xs",
+                  "p-3 rounded-[var(--radius-xs)] text-xs",
                   isCorrect ? "bg-emerald-50 dark:bg-emerald-950/30" : "bg-red-50 dark:bg-red-950/30"
                 )}
               >
@@ -114,7 +114,7 @@ export function CivicQuiz() {
         <button
           type="button"
           onClick={reset}
-          className="mt-6 inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+          className="mt-6 inline-flex items-center gap-2 h-11 px-5 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
           <RefreshCw size={14} aria-hidden="true" />
           Refă quiz-ul
@@ -158,7 +158,7 @@ export function CivicQuiz() {
               onClick={() => handleSelect(i)}
               disabled={selectedAnswer !== null}
               className={cn(
-                "w-full text-left p-3 rounded-[8px] border-2 transition-all text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2",
+                "w-full text-left p-3 rounded-[var(--radius-xs)] border-2 transition-all text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2",
                 !showResult && "border-[var(--color-border)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-soft)]",
                 showResult && isCorrect && "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30",
                 showResult && isSelected && !isCorrect && "border-red-500 bg-red-50 dark:bg-red-950/30",
@@ -184,7 +184,7 @@ export function CivicQuiz() {
         })}
       </div>
       {selectedAnswer !== null && (
-        <div role="region" aria-live="polite" className="p-3 rounded-[8px] bg-blue-50 dark:bg-blue-950/30 text-sm mb-4">
+        <div role="region" aria-live="polite" className="p-3 rounded-[var(--radius-xs)] bg-blue-50 dark:bg-blue-950/30 text-sm mb-4">
           <p className="font-medium mb-1 flex items-center gap-1">
             <Award size={14} className="text-blue-600" aria-hidden="true" />
             Explicație
@@ -196,7 +196,7 @@ export function CivicQuiz() {
         type="button"
         onClick={handleNext}
         disabled={selectedAnswer === null}
-        className="w-full h-11 rounded-[8px] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+        className="w-full h-11 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
       >
         {current + 1 < QUIZ.length ? "Următoarea întrebare" : "Vezi rezultatul"}
         {current + 1 < QUIZ.length && <span aria-hidden="true"> →</span>}

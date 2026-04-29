@@ -21,7 +21,7 @@ export function SimilarSesizari({ sesizari }: Props) {
           <li key={s.id}>
             <Link
               href={`/sesizari/${s.code}`}
-              className="group block p-3 -mx-3 rounded-[8px] hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-inset"
+              className="group block p-3 -mx-3 rounded-[var(--radius-xs)] hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-inset"
               aria-label={`${s.titlu} — ${STATUS_LABELS[s.status] ?? s.status}`}
             >
               <div className="flex items-start gap-2 mb-1">

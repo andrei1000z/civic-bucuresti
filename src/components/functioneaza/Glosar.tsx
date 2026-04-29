@@ -18,7 +18,7 @@ export function Glosar() {
         {GLOSAR.map((g) => {
           const isOpen = openId === g.shortForm;
           return (
-            <div key={g.shortForm} className="border border-[var(--color-border)] rounded-[8px] overflow-hidden">
+            <div key={g.shortForm} className="border border-[var(--color-border)] rounded-[var(--radius-xs)] overflow-hidden">
               <button
                 onClick={() => setOpenId(isOpen ? null : g.shortForm)}
                 className="w-full flex items-center justify-between p-3 hover:bg-[var(--color-surface-2)] transition-colors text-left"

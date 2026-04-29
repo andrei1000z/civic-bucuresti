@@ -193,10 +193,10 @@ export default function AirQualityMap({
         </MapContainer>
 
         {/* Overlay controls */}
-        <div className="absolute top-4 left-14 z-[40] flex gap-2">
+        <div className="absolute top-4 left-14 z-[var(--z-fab)] flex gap-2">
           <button
             onClick={handleLocate}
-            className="h-10 w-10 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex items-center justify-center hover:bg-[var(--color-surface-2)]"
+            className="h-10 w-10 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex items-center justify-center hover:bg-[var(--color-surface-2)]"
             title="Locația mea"
           >
             <Navigation size={16} />
@@ -204,14 +204,14 @@ export default function AirQualityMap({
           <button
             onClick={fetchData}
             disabled={loading}
-            className="h-10 px-3 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex items-center gap-2 text-xs font-medium hover:bg-[var(--color-surface-2)] disabled:opacity-50"
+            className="h-10 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex items-center gap-2 text-xs font-medium hover:bg-[var(--color-surface-2)] disabled:opacity-50"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
             Refresh
           </button>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="h-10 w-10 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex items-center justify-center hover:bg-[var(--color-surface-2)] lg:hidden"
+            className="h-10 w-10 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex items-center justify-center hover:bg-[var(--color-surface-2)] lg:hidden"
           >
             <Layers size={16} />
           </button>

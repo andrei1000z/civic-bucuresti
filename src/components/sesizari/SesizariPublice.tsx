@@ -132,7 +132,7 @@ export function SesizariPublice() {
     <div>
       {/* View toggle */}
       <div className="flex items-center gap-2 mb-4">
-        <div className="inline-flex rounded-[8px] bg-[var(--color-surface-2)] p-1">
+        <div className="inline-flex rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] p-1">
           <button
             onClick={() => setView("list")}
             aria-pressed={view === "list"}
@@ -264,14 +264,14 @@ export function SesizariPublice() {
                       setFilterSector("toate");
                       setSort("recent");
                     }}
-                    className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   >
                     <span aria-hidden="true">🔄</span> Resetează filtrele
                   </button>
                 )}
                 <Link
                   href={county ? `/${county.slug}/sesizari` : "/sesizari"}
-                  className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+                  className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
                 >
                   Fă o sesizare acum →
                 </Link>
@@ -331,7 +331,7 @@ export function SesizariPublice() {
                 {(s.imagini.length > 0 || s.resolved_photo_url) && (
                   <div className="flex gap-1 mb-3">
                     {s.imagini.slice(0, s.resolved_photo_url ? 2 : 3).map((url, i) => (
-                      <div key={i} className="relative w-14 h-14 rounded-[8px] bg-[var(--color-surface-2)] overflow-hidden flex items-center justify-center">
+                      <div key={i} className="relative w-14 h-14 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] overflow-hidden flex items-center justify-center">
                         {url.startsWith("http") ? (
                           <Image src={url} alt={`Fotografie sesizare ${s.code ?? ""}`} fill sizes="56px" className="object-cover" />
                         ) : (
@@ -345,7 +345,7 @@ export function SesizariPublice() {
                       </div>
                     ))}
                     {s.resolved_photo_url && (
-                      <div className="relative w-14 h-14 rounded-[8px] overflow-hidden ring-2 ring-emerald-500">
+                      <div className="relative w-14 h-14 rounded-[var(--radius-xs)] overflow-hidden ring-2 ring-emerald-500">
                         <Image src={s.resolved_photo_url} alt="După" fill sizes="56px" className="object-cover" />
                         <span className="absolute bottom-0 inset-x-0 bg-emerald-500/90 text-white text-[8px] font-bold text-center leading-tight py-0.5">
                           AFTER
@@ -408,7 +408,7 @@ export function SesizariPublice() {
                 }
               }}
               disabled={loadingMore}
-              className="inline-flex items-center gap-2 h-11 px-6 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              className="inline-flex items-center gap-2 h-11 px-6 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
               {loadingMore ? (
                 <><Loader2 size={14} className="animate-spin" /> Se încarcă...</>
@@ -425,7 +425,7 @@ export function SesizariPublice() {
 }
 
 const selectClass = cn(
-  "w-full h-10 px-3 rounded-[8px] bg-[var(--color-surface)]",
+  "w-full h-10 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface)]",
   "border border-[var(--color-border)] text-sm",
-  "focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
 );

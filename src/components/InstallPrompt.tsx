@@ -79,7 +79,7 @@ export function InstallPrompt() {
       className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-[90] animate-fade-in-up"
     >
       <div className="glass-surface-strong rounded-[var(--radius-lg)] shadow-[var(--shadow-4)] p-4 flex items-start gap-3">
-        <div className="shrink-0 w-10 h-10 rounded-[8px] bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 flex items-center justify-center text-white">
+        <div className="shrink-0 w-10 h-10 rounded-[var(--radius-xs)] bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 flex items-center justify-center text-white">
           <Download size={18} aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">
@@ -91,14 +91,14 @@ export function InstallPrompt() {
             <button
               type="button"
               onClick={install}
-              className="h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)] transition-colors"
+              className="h-9 px-3 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)] transition-colors"
             >
               Adaugă pe ecran
             </button>
             <button
               type="button"
               onClick={dismiss}
-              className="h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] text-xs font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-colors"
+              className="h-9 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] text-xs font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-colors"
             >
               Nu acum
             </button>

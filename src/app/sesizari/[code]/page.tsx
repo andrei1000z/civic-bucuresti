@@ -277,7 +277,7 @@ export default async function SesizareDetailPage({
               <h2 className="font-semibold mb-3">
                 Text formal
               </h2>
-              <div className="bg-[var(--color-surface-2)] rounded-[8px] p-4 text-xs font-mono whitespace-pre-wrap">
+              <div className="bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-4 text-xs font-mono whitespace-pre-wrap">
                 {stripPrivateAddress(sesizare.formal_text)}
               </div>
               <p className="text-[10px] text-[var(--color-text-muted)] mt-2 italic">

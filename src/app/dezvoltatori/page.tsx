@@ -81,7 +81,7 @@ export default function ApiDocsPage() {
         </p>
 
         <h3 className="font-bold mb-2">Query params</h3>
-        <div className="rounded-[8px] border border-[var(--color-border)] overflow-x-auto mb-5 -mx-4 sm:mx-0">
+        <div className="rounded-[var(--radius-xs)] border border-[var(--color-border)] overflow-x-auto mb-5 -mx-4 sm:mx-0">
           <table className="w-full text-sm min-w-[560px]">
             <thead className="bg-[var(--color-surface-2)]">
               <tr>
@@ -131,12 +131,12 @@ export default function ApiDocsPage() {
         </div>
 
         <h3 className="font-bold mb-2">Exemplu — toate sesizările rezolvate din Cluj</h3>
-        <pre className="bg-[var(--color-surface-2)] border border-[var(--color-border)] sm:rounded-[8px] p-4 text-xs overflow-x-auto mb-5 -mx-4 sm:mx-0">
+        <pre className="bg-[var(--color-surface-2)] border border-[var(--color-border)] sm:rounded-[var(--radius-xs)] p-4 text-xs overflow-x-auto mb-5 -mx-4 sm:mx-0">
           <code>{`curl "${SITE_URL}/api/v1/sesizari?county=CJ&status=rezolvat&limit=20"`}</code>
         </pre>
 
         <h3 className="font-bold mb-2">Exemplu — Response</h3>
-        <pre className="bg-[var(--color-surface-2)] border border-[var(--color-border)] sm:rounded-[8px] p-4 text-xs overflow-x-auto -mx-4 sm:mx-0">
+        <pre className="bg-[var(--color-surface-2)] border border-[var(--color-border)] sm:rounded-[var(--radius-xs)] p-4 text-xs overflow-x-auto -mx-4 sm:mx-0">
           <code>{`{
   "meta": {
     "version": "v1",
@@ -181,7 +181,7 @@ export default function ApiDocsPage() {
           Statistici agregate naționale. Fără parametri.
         </p>
 
-        <pre className="bg-[var(--color-surface-2)] border border-[var(--color-border)] sm:rounded-[8px] p-4 text-xs overflow-x-auto -mx-4 sm:mx-0">
+        <pre className="bg-[var(--color-surface-2)] border border-[var(--color-border)] sm:rounded-[var(--radius-xs)] p-4 text-xs overflow-x-auto -mx-4 sm:mx-0">
           <code>{`curl "${SITE_URL}/api/v1/stats"
 
 {
@@ -202,7 +202,7 @@ export default function ApiDocsPage() {
         <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-4">
           Exemplu JavaScript
         </h2>
-        <pre className="bg-[var(--color-surface-2)] border border-[var(--color-border)] sm:rounded-[8px] p-4 text-xs overflow-x-auto -mx-4 sm:mx-0">
+        <pre className="bg-[var(--color-surface-2)] border border-[var(--color-border)] sm:rounded-[var(--radius-xs)] p-4 text-xs overflow-x-auto -mx-4 sm:mx-0">
           <code>{`// Works directly in browser — CORS is open
 const res = await fetch("${SITE_URL}/api/v1/sesizari?county=B&status=rezolvat&limit=10");
 const { meta, data } = await res.json();

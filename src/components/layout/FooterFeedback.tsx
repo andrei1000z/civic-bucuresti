@@ -136,7 +136,7 @@ export function FooterFeedback() {
                 ? "Scrie întrebarea ta..."
                 : "Scrie mesajul..."
             }
-            className="w-full min-h-[80px] max-h-60 p-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            className="w-full min-h-[80px] max-h-60 p-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm resize-y focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             required
           />
           <div className="flex flex-col sm:flex-row gap-2">
@@ -146,13 +146,13 @@ export function FooterFeedback() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email@exemplu.ro (opțional)"
               autoComplete="email"
-              className="flex-1 h-10 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              className="flex-1 h-10 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             />
             <button
               type="submit"
               disabled={sending || message.trim().length < 5}
               aria-busy={sending}
-              className="h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              className="h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
               {sending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : done ? <Check size={14} aria-hidden="true" /> : null}
               {sending ? "Se trimite..." : done ? "Mulțumesc!" : "Trimite"}
@@ -184,14 +184,14 @@ export function FooterFeedback() {
               onChange={(e) => setNewsletterEmail(e.target.value)}
               placeholder="email@exemplu.ro"
               autoComplete="email"
-              className="flex-1 h-10 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              className="flex-1 h-10 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               required
             />
             <button
               type="submit"
               disabled={nlSending || !newsletterEmail.trim()}
               aria-busy={nlSending}
-              className="h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-semibold hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              className="h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-semibold hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
               {nlSending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : nlDone ? <Check size={14} aria-hidden="true" /> : null}
               {nlSending ? "Înscriere..." : nlDone ? "Înscris!" : "Înscrie-mă"}

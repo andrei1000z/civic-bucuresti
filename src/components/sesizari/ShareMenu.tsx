@@ -98,7 +98,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
             setOpen(!open);
           }}
           className={cn(
-            "inline-flex items-center gap-1 rounded-[8px] text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
+            "inline-flex items-center gap-1 rounded-[var(--radius-xs)] text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
             px,
             "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text)]"
           )}
@@ -201,7 +201,7 @@ export function ShareMenu({ url, title, size = "sm" }: Props) {
             <button
               type="button"
               onClick={() => setQrOpen(false)}
-              className="mt-4 w-full h-10 rounded-[8px] bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
+              className="mt-4 w-full h-10 rounded-[var(--radius-xs)] bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
             >
               Închide
             </button>

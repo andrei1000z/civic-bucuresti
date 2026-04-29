@@ -65,7 +65,7 @@ export default async function AdminDashboard() {
         <div className="grid md:grid-cols-2 gap-3">
           <Link
             href="/admin/sesizari"
-            className="flex items-center gap-3 p-4 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            className="flex items-center gap-3 p-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
             <Shield size={20} className="text-amber-500" aria-hidden="true" />
             <div>
@@ -77,7 +77,7 @@ export default async function AdminDashboard() {
           </Link>
           <Link
             href="/admin/analytics"
-            className="flex items-center gap-3 p-4 rounded-[8px] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            className="flex items-center gap-3 p-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
             <BarChart3 size={20} className="text-blue-500" aria-hidden="true" />
             <div>

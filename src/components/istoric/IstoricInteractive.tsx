@@ -99,7 +99,7 @@ export function IstoricInteractive({ primari }: Props) {
           <Filter size={16} className="text-[var(--color-text-muted)]" />
           <span className="text-sm font-medium">Filtrează</span>
           {compareIds.length > 0 && (
-            <span className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] bg-[var(--color-primary-soft)] text-[var(--color-primary)] text-xs font-medium">
+            <span className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] text-xs font-medium">
               <GitCompare size={12} />
               {compareIds.length}/2 selectați pentru comparare
               <button onClick={() => setCompareIds([])} className="ml-1 opacity-60 hover:opacity-100">
@@ -152,10 +152,10 @@ export function IstoricInteractive({ primari }: Props) {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             {compared.map((p) => (
-              <div key={p.id} className="bg-[var(--color-surface-2)] rounded-[8px] p-4">
+              <div key={p.id} className="bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div
-                    className="w-12 h-12 rounded-[8px] text-white font-bold flex items-center justify-center"
+                    className="w-12 h-12 rounded-[var(--radius-xs)] text-white font-bold flex items-center justify-center"
                     style={{ background: p.culoarePartid }}
                   >
                     {p.initiale}
@@ -218,7 +218,7 @@ export function IstoricInteractive({ primari }: Props) {
 
             <div className="flex items-start gap-3 mb-3">
               {primar.photo ? (
-                <div className="w-12 h-12 rounded-[8px] overflow-hidden shrink-0 ring-2" style={{ '--tw-ring-color': primar.culoarePartid } as React.CSSProperties}>
+                <div className="w-12 h-12 rounded-[var(--radius-xs)] overflow-hidden shrink-0 ring-2" style={{ '--tw-ring-color': primar.culoarePartid } as React.CSSProperties}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`/images/primari/${primar.photo}.webp`}
@@ -229,7 +229,7 @@ export function IstoricInteractive({ primari }: Props) {
                 </div>
               ) : (
                 <div
-                  className="w-12 h-12 rounded-[8px] text-white font-bold flex items-center justify-center shrink-0"
+                  className="w-12 h-12 rounded-[var(--radius-xs)] text-white font-bold flex items-center justify-center shrink-0"
                   style={{ background: primar.culoarePartid }}
                 >
                   {primar.initiale}
@@ -271,7 +271,7 @@ export function IstoricInteractive({ primari }: Props) {
               setFilterPartid("toate");
               setFilterDecada("toate");
             }}
-            className="inline-flex items-center gap-2 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            className="inline-flex items-center gap-2 h-9 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
             Resetează filtrele
           </button>
@@ -382,7 +382,7 @@ function PrimarModal({
               const isOpen = expandedSection === s.id;
               const Icon = s.icon;
               return (
-                <div key={s.id} className="border border-[var(--color-border)] rounded-[8px] overflow-hidden">
+                <div key={s.id} className="border border-[var(--color-border)] rounded-[var(--radius-xs)] overflow-hidden">
                   <button
                     onClick={() => onExpand(s.id)}
                     className="w-full flex items-center justify-between p-3 hover:bg-[var(--color-surface-2)] transition-colors"

@@ -138,7 +138,7 @@ export function CountyPicker() {
             </div>
             <Link
               href={`/${savedCounty.slug}`}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] transition-colors ml-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] transition-colors ml-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
               Mergi la {savedCounty.name} <ArrowRight size={12} aria-hidden="true" />
             </Link>
@@ -154,14 +154,14 @@ export function CountyPicker() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Caută județul tău..."
               aria-label="Caută județul"
-              className="w-full h-12 pl-10 pr-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              className="w-full h-12 pl-10 pr-4 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             />
           </div>
           <button
             type="button"
             onClick={handleGPS}
             disabled={detecting}
-            className="h-12 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 inline-flex items-center gap-2 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)] transition-colors"
+            className="h-12 px-5 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 inline-flex items-center gap-2 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)] transition-colors"
           >
             {detecting ? (
               <><Loader2 size={16} className="animate-spin" aria-hidden="true" /> Se detectează...</>
@@ -186,7 +186,7 @@ export function CountyPicker() {
               onClick={() => persist(county.slug)}
               onMouseEnter={() => prefetchOnHover(county.slug)}
               onTouchStart={() => prefetchOnHover(county.slug)}
-              className="group flex items-center gap-2 p-3 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all text-left min-w-0"
+              className="group flex items-center gap-2 p-3 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all text-left min-w-0"
             >
               <span className="text-[10px] font-bold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-1.5 py-0.5 rounded shrink-0">
                 {county.id}

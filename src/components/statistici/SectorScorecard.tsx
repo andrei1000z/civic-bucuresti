@@ -58,7 +58,7 @@ export function SectorScorecard() {
           </p>
         </div>
         {best && best.total > 0 && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-[8px] bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-xs)] bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
             <Award size={14} />
             Top: {best.sector} ({best.percent_rezolvate}%)
           </div>

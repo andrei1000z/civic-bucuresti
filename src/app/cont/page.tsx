@@ -147,7 +147,7 @@ export default function ContPage() {
         <button
           type="button"
           onClick={loadData}
-          className="inline-flex items-center gap-2 h-11 px-5 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+          className="inline-flex items-center gap-2 h-11 px-5 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
           Încearcă din nou
         </button>
@@ -173,7 +173,7 @@ export default function ContPage() {
             toast("Te-ai deconectat. La revedere!", "info");
             router.push("/");
           }}
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         >
           <LogOut size={14} aria-hidden="true" />
           Deconectare
@@ -209,7 +209,7 @@ export default function ContPage() {
               const pct = Math.round((done / checks.length) * 100);
               if (pct === 100) return null;
               return (
-                <div className="mb-5 p-3 rounded-[8px] bg-amber-500/5 border border-amber-500/30">
+                <div className="mb-5 p-3 rounded-[var(--radius-xs)] bg-amber-500/5 border border-amber-500/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
                       Profil {pct}% complet
@@ -306,7 +306,7 @@ export default function ContPage() {
             </div>
 
             {saveError && (
-              <div role="alert" className="mt-3 p-2.5 rounded-[8px] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-xs text-red-700 dark:text-red-300">
+              <div role="alert" className="mt-3 p-2.5 rounded-[var(--radius-xs)] bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-xs text-red-700 dark:text-red-300">
                 {saveError}
               </div>
             )}
@@ -314,7 +314,7 @@ export default function ContPage() {
               type="submit"
               disabled={saving}
               aria-busy={saving}
-              className="mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              className="mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
               {saving ? (
                 <Loader2 size={14} className="animate-spin" aria-hidden="true" />
@@ -350,7 +350,7 @@ export default function ContPage() {
             </h2>
             <Link
               href="/sesizari"
-              className="inline-flex items-center gap-2 h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              className="inline-flex items-center gap-2 h-9 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
             >
               <Plus size={14} aria-hidden="true" />
               Sesizare nouă
@@ -376,7 +376,7 @@ export default function ContPage() {
               </p>
               <Link
                 href="/sesizari"
-                className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+                className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
               >
                 Depune prima sesizare <span aria-hidden="true">→</span>
               </Link>
@@ -439,14 +439,14 @@ export default function ContPage() {
               const today = new Date().toISOString().slice(0, 10);
               e.currentTarget.setAttribute("download", `civia-export-${today}.json`);
             }}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
             <span aria-hidden="true">📥</span> Descarcă datele mele (JSON)
           </a>
           <button
             type="button"
             onClick={() => setDeleteModal(true)}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] border border-red-300 dark:border-red-900 text-red-700 dark:text-red-400 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-950/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] border border-red-300 dark:border-red-900 text-red-700 dark:text-red-400 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-950/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             🗑️ Șterge contul definitiv
           </button>
@@ -456,7 +456,7 @@ export default function ContPage() {
       {/* Delete confirmation modal */}
       {deleteModal && (
         <div
-          className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-[var(--z-modal)] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => !deleting && setDeleteModal(false)}
           role="dialog"
           aria-modal="true"
@@ -498,7 +498,7 @@ export default function ContPage() {
                 <li>• Voturile și comentariile tale</li>
                 <li>• Sesizările urmărite</li>
               </ul>
-              <p className="text-xs text-[var(--color-text-muted)] bg-[var(--color-surface-2)] rounded-[8px] p-3">
+              <p className="text-xs text-[var(--color-text-muted)] bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-3">
                 Sesizările publice pe care le-ai depus rămân pe platformă, dar vor fi anonimizate
                 (numele înlocuit cu &ldquo;Cetățean&rdquo;).
               </p>
@@ -514,7 +514,7 @@ export default function ContPage() {
                   autoComplete="off"
                   autoCapitalize="characters"
                   spellCheck={false}
-                  className="w-full h-10 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-mono uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full h-10 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-mono uppercase tracking-wider focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                   disabled={deleting}
                 />
               </div>
@@ -523,7 +523,7 @@ export default function ContPage() {
                   type="button"
                   onClick={() => { setDeleteModal(false); setDeleteConfirmText(""); }}
                   disabled={deleting}
-                  className="flex-1 h-11 rounded-[8px] bg-[var(--color-surface-2)] text-sm font-medium hover:bg-[var(--color-border)] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                  className="flex-1 h-11 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] text-sm font-medium hover:bg-[var(--color-border)] disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 >
                   Anulează
                 </button>
@@ -542,7 +542,7 @@ export default function ContPage() {
                     }
                   }}
                   disabled={deleting || deleteConfirmText.trim().toUpperCase() !== "ȘTERGE"}
-                  className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-red-500"
+                  className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[var(--radius-xs)] bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-red-500"
                 >
                   {deleting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : null}
                   Da, șterge definitiv
@@ -569,7 +569,7 @@ function StatBox({ label, value, delta, color }: { label: string; value: string;
 }
 
 const inputClass =
-  "w-full h-10 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]";
+  "w-full h-10 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

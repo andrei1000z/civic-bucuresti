@@ -229,7 +229,7 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
               onChange={(e) => setReplyBody(e.target.value.slice(0, 2000))}
               rows={2}
               placeholder={`Răspunde lui ${c.author_name}...`}
-              className="w-full p-2 rounded-[var(--radius-sm)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              className="w-full p-2 rounded-[var(--radius-sm)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               disabled={replyPosting}
               autoFocus
             />
@@ -286,7 +286,7 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
               rows={3}
               placeholder="Scrie un comentariu..."
               aria-describedby="comment-count"
-              className="w-full p-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              className="w-full p-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               disabled={posting}
             />
             <div className="flex items-center justify-between mt-2">
@@ -296,7 +296,7 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
               <button
                 type="submit"
                 disabled={!body.trim() || posting}
-                className="inline-flex items-center gap-2 h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+                className="inline-flex items-center gap-2 h-9 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
                 aria-busy={posting}
               >
                 {posting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Send size={14} aria-hidden="true" />}
@@ -309,7 +309,7 @@ export function CommentsSection({ code, initialComments }: CommentsSectionProps)
           <button
             type="button"
             onClick={openAuthModal}
-            className="w-full py-3 text-sm text-center text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] rounded-[8px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            className="w-full py-3 text-sm text-center text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] rounded-[var(--radius-xs)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
             Autentifică-te ca să comentezi <span aria-hidden="true">→</span>
           </button>

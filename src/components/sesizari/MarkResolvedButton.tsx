@@ -87,7 +87,7 @@ export function MarkResolvedButton({ code, status, isAuthor }: Props) {
       <button
         type="button"
         onClick={handleClick}
-        className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] bg-emerald-500 text-white text-sm font-medium hover:brightness-110 transition-all shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+        className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-emerald-500 text-white text-sm font-medium hover:brightness-110 transition-all shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
       >
         <CheckCircle2 size={15} aria-hidden="true" />
         S-a rezolvat — marchează ca rezolvată
@@ -141,7 +141,7 @@ export function MarkResolvedButton({ code, status, isAuthor }: Props) {
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="flex-1 h-11 rounded-[8px] bg-[var(--color-surface-2)] text-sm font-medium hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                  className="flex-1 h-11 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] text-sm font-medium hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 >
                   Anulează
                 </button>
@@ -149,7 +149,7 @@ export function MarkResolvedButton({ code, status, isAuthor }: Props) {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[8px] bg-emerald-500 text-white text-sm font-medium hover:brightness-110 disabled:opacity-50 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-500"
+                  className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-[var(--radius-xs)] bg-emerald-500 text-white text-sm font-medium hover:brightness-110 disabled:opacity-50 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-500"
                 >
                   {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <CheckCircle2 size={14} aria-hidden="true" />}
                   Da, a fost rezolvată

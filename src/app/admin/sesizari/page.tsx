@@ -162,7 +162,7 @@ export default function AdminSesizariPage() {
     <div>
       {polishDiff && (
         <div
-          className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-start md:items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-[var(--z-modal)] bg-black/60 backdrop-blur-sm flex items-start md:items-center justify-center p-4 overflow-y-auto"
           onClick={() => setPolishDiff(null)}
         >
           <div
@@ -190,7 +190,7 @@ export default function AdminSesizariPage() {
                   actually failed (Groq down, quota hit, etc) so they
                   don't confuse "already clean" with "AI didn't run". */}
               {!polishDiff.aiSucceeded && (
-                <div className="p-3 rounded-[8px] border border-red-500/30 bg-red-500/5 text-xs text-red-700 dark:text-red-400">
+                <div className="p-3 rounded-[var(--radius-xs)] border border-red-500/30 bg-red-500/5 text-xs text-red-700 dark:text-red-400">
                   <strong>⚠ AI nu a putut contacta modelul.</strong> Textele au rămas
                   la valoarea din DB. Coordonatele au fost totuși verificate prin
                   geocoder.
@@ -217,11 +217,11 @@ export default function AdminSesizariPage() {
                       )}
                     </p>
                     <div className="grid md:grid-cols-2 gap-2">
-                      <div className="p-3 rounded-[8px] bg-red-500/5 border border-red-500/20">
+                      <div className="p-3 rounded-[var(--radius-xs)] bg-red-500/5 border border-red-500/20">
                         <p className="text-[10px] text-red-600 dark:text-red-400 font-semibold mb-1">ÎNAINTE</p>
                         <p className="whitespace-pre-wrap break-words">{row.before || "—"}</p>
                       </div>
-                      <div className="p-3 rounded-[8px] bg-emerald-500/5 border border-emerald-500/20">
+                      <div className="p-3 rounded-[var(--radius-xs)] bg-emerald-500/5 border border-emerald-500/20">
                         <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mb-1">DUPĂ</p>
                         <p className="whitespace-pre-wrap break-words">{row.after || "—"}</p>
                       </div>
@@ -245,7 +245,7 @@ export default function AdminSesizariPage() {
                         · {moved ? "re-geocodate" : "neschimbate"}
                       </span>
                     </p>
-                    <div className="flex flex-wrap items-center gap-3 p-3 rounded-[8px] bg-[var(--color-surface-2)] font-mono text-xs">
+                    <div className="flex flex-wrap items-center gap-3 p-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] font-mono text-xs">
                       <span className={moved ? "text-red-600 dark:text-red-400" : "text-[var(--color-text-muted)]"}>
                         {polishDiff.before.lat.toFixed(5)}, {polishDiff.before.lng.toFixed(5)}
                       </span>
@@ -268,14 +268,14 @@ export default function AdminSesizariPage() {
                 href={`/sesizari/${polishDiff.code}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 h-9 px-3 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                className="inline-flex items-center gap-1 h-9 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               >
                 <Eye size={12} aria-hidden="true" /> Deschide sesizarea
               </Link>
               <button
                 type="button"
                 onClick={() => setPolishDiff(null)}
-                className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+                className="h-9 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
               >
                 OK, am văzut
               </button>
@@ -286,7 +286,7 @@ export default function AdminSesizariPage() {
 
       {statusEdit && (
         <div
-          className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-start md:items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-[var(--z-modal)] bg-black/60 backdrop-blur-sm flex items-start md:items-center justify-center p-4 overflow-y-auto"
           onClick={() => setStatusEdit(null)}
         >
           <div
@@ -332,7 +332,7 @@ export default function AdminSesizariPage() {
                       role="radio"
                       aria-checked={statusEdit.status === s}
                       onClick={() => setStatusEdit((p) => (p ? { ...p, status: s } : p))}
-                      className={`h-10 px-2 rounded-[8px] text-xs font-medium border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 ${
+                      className={`h-10 px-2 rounded-[var(--radius-xs)] text-xs font-medium border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 ${
                         statusEdit.status === s
                           ? "text-white border-transparent"
                           : "bg-[var(--color-surface-2)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-primary)]/40"
@@ -362,7 +362,7 @@ export default function AdminSesizariPage() {
                   }
                   placeholder="Bună ziua, Vă mulțumim pentru sesizare..."
                   rows={7}
-                  className="w-full px-3 py-2 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 />
                 <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
                   Dacă e completat, se afișează public pe pagina sesizării
@@ -374,7 +374,7 @@ export default function AdminSesizariPage() {
               <button
                 type="button"
                 onClick={() => setStatusEdit(null)}
-                className="h-9 px-4 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                className="h-9 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               >
                 Anulează
               </button>
@@ -382,7 +382,7 @@ export default function AdminSesizariPage() {
                 type="button"
                 onClick={submitStatus}
                 disabled={acting === `status-${statusEdit.code}`}
-                className="h-9 px-4 rounded-[8px] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors inline-flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+                className="h-9 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors inline-flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
               >
                 {acting === `status-${statusEdit.code}` ? (
                   <><Loader2 size={12} className="animate-spin" aria-hidden="true" /> Salvez...</>
@@ -467,7 +467,7 @@ export default function AdminSesizariPage() {
                 <div className="flex items-center gap-1.5 shrink-0">
                   <Link
                     href={`/sesizari/${s.code}`}
-                    className="w-9 h-9 rounded-[8px] bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)] transition-colors"
+                    className="w-9 h-9 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-[var(--color-border)] transition-colors"
                     title="Vezi"
                   >
                     <Eye size={14} />
@@ -475,7 +475,7 @@ export default function AdminSesizariPage() {
                   <button
                     onClick={() => polish(s.code)}
                     disabled={acting === `polish-${s.code}`}
-                    className="w-9 h-9 rounded-[8px] bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center hover:brightness-110 disabled:opacity-50 transition-all"
+                    className="w-9 h-9 rounded-[var(--radius-xs)] bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center hover:brightness-110 disabled:opacity-50 transition-all"
                     title="Rescrie cu AI + re-geocode"
                   >
                     {acting === `polish-${s.code}` ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
@@ -490,7 +490,7 @@ export default function AdminSesizariPage() {
                         response: "",
                       })
                     }
-                    className="w-9 h-9 rounded-[8px] bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center hover:border-[var(--color-primary)]/40 transition-colors"
+                    className="w-9 h-9 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center hover:border-[var(--color-primary)]/40 transition-colors"
                     title="Schimbă status + paste răspuns autoritate"
                   >
                     <Edit3 size={14} />
@@ -499,7 +499,7 @@ export default function AdminSesizariPage() {
                     <button
                       onClick={() => moderate(s.code, "approve")}
                       disabled={acting === s.code}
-                      className="w-9 h-9 rounded-[8px] bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 disabled:opacity-50 transition-colors"
+                      className="w-9 h-9 rounded-[var(--radius-xs)] bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 disabled:opacity-50 transition-colors"
                       title="Aprobă"
                     >
                       {acting === s.code ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
@@ -509,7 +509,7 @@ export default function AdminSesizariPage() {
                     <button
                       onClick={() => moderate(s.code, "reject")}
                       disabled={acting === s.code}
-                      className="w-9 h-9 rounded-[8px] bg-red-500 text-white flex items-center justify-center hover:bg-red-600 disabled:opacity-50 transition-colors"
+                      className="w-9 h-9 rounded-[var(--radius-xs)] bg-red-500 text-white flex items-center justify-center hover:bg-red-600 disabled:opacity-50 transition-colors"
                       title="Respinge"
                     >
                       {acting === s.code ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}

@@ -34,7 +34,7 @@ export function NavProgress() {
   return (
     <div
       aria-hidden
-      className={`fixed top-0 left-0 right-0 h-[2px] z-[200] pointer-events-none transition-opacity duration-200 ${
+      className={`fixed top-0 left-0 right-0 h-[2px] z-[var(--z-toast)] pointer-events-none transition-opacity duration-200 ${
         visible ? "opacity-100" : "opacity-0"
       }`}
     >

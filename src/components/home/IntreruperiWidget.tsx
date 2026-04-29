@@ -59,7 +59,7 @@ export function IntreruperiWidget() {
             >
               <div className="flex items-start justify-between mb-2 gap-2 min-w-0">
                 <span
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-[8px] text-lg shrink-0"
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-[var(--radius-xs)] text-lg shrink-0"
                   style={{
                     background: TYPE_COLORS[i.type] + "20",
                   }}
