@@ -21,6 +21,13 @@ interface HartiLayersProps {
   showPietonal: boolean;
   showTraversari: boolean;
   visibleLines: string[];
+  /** When set, the AQI heatmap clips to this bounding box instead of
+   *  rendering Romania-wide. Used on /[judet]/harti so the heatmap only
+   *  colors the county. */
+  clipBounds?: [[number, number], [number, number]];
+  /** Display name of the county we're clipped to — surfaces in the
+   *  zoom-out CTA when the user pans/zooms outside the box. */
+  countyName?: string;
 }
 
 // All bike paths shown as green — no categories, no "recomandate"
@@ -117,6 +124,8 @@ export default function HartiLayers(props: HartiLayersProps) {
     showParcuri,
     showPietonal,
     visibleLines,
+    clipBounds,
+    countyName,
   } = props;
 
   // Memoize style functions — stable references prevent GeoJSON re-creation on every map pan/zoom
@@ -204,7 +213,13 @@ export default function HartiLayers(props: HartiLayersProps) {
   }
 
   if (activeTab === "aer") {
-    return <NationalAqiLayer key="aqi-national" />;
+    return (
+      <NationalAqiLayer
+        key={clipBounds ? `aqi-county-${clipBounds[0]?.join(",")}` : "aqi-national"}
+        clipBounds={clipBounds}
+        countyName={countyName}
+      />
+    );
   }
 
   return null;

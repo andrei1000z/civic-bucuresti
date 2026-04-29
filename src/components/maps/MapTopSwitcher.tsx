@@ -66,43 +66,41 @@ export function MapTopSwitcher<T extends string>({ tabs, active, onChange }: Pro
         aria-label="Selectează tipul de hartă"
         className={cn(
           "pointer-events-auto relative flex items-center gap-1 p-1 rounded-full",
-          // Truly translucent liquid-glass: low alpha bg + heavy blur so
-          // the map color genuinely bleeds through. Multi-layer shadow
-          // gives the floating-glass feel without a solid surface.
+          // Liquid-glass surface: visible but still translucent — between
+          // the previous "too solid" 0.15 and "barely there" 0.07.
           "backdrop-blur-2xl backdrop-saturate-200",
-          "bg-white/[0.07] dark:bg-white/[0.06]",
-          "ring-1 ring-white/25 ring-inset",
-          "shadow-[0_10px_32px_-8px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-1px_0_rgba(0,0,0,0.18)]",
+          "bg-white/[0.12] dark:bg-white/[0.10]",
+          "ring-1 ring-white/30 ring-inset",
+          "shadow-[0_10px_32px_-8px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(0,0,0,0.18)]",
           "overflow-x-auto no-scrollbar",
         )}
       >
-        {/* Sliding water-drop indicator (renders behind tabs, above bg).
-            transform + width animate together with a slow over-shooting
-            cubic-bezier so the drop appears to "flow" between tabs. */}
+        {/* Sliding water-drop indicator. transform + width share a smooth
+            ease-in-out cubic so the drop *visibly* glides over each tab on
+            the way to its destination. iPhone Liquid Glass aesthetic:
+            slow start → fast middle → graceful settle.  */}
         {indicator && (
           <span
             aria-hidden="true"
             className={cn(
               "absolute top-1 bottom-1 rounded-full pointer-events-none",
-              // Slightly brighter than the rail so the active drop pops
-              "bg-white/40 dark:bg-white/30",
-              "ring-1 ring-white/55 ring-inset",
+              "bg-white/45 dark:bg-white/35",
+              "ring-1 ring-white/60 ring-inset",
               "backdrop-blur-md backdrop-saturate-200",
-              "shadow-[0_6px_18px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.12)]",
+              "shadow-[0_6px_18px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.6),inset_0_-1px_0_rgba(0,0,0,0.12)]",
               // Inner crescent highlight — sells the curved water surface
               "before:absolute before:inset-x-2 before:top-[2px] before:h-1/2 before:rounded-full",
-              "before:bg-gradient-to-b before:from-white/65 before:via-white/15 before:to-transparent",
+              "before:bg-gradient-to-b before:from-white/70 before:via-white/15 before:to-transparent",
               "before:opacity-90 before:pointer-events-none",
             )}
             style={{
               transform: `translateX(${indicator.x}px)`,
               width: `${indicator.w}px`,
-              // Long, slightly over-shooting cubic-bezier — gives the drop a
-              // brief "stretch" feel as it flows between tabs (iOS Liquid
-              // Glass aesthetic). Width and transform share the same easing
-              // so the morph stays in sync.
+              // ease-in-out cubic — slow start, fast middle, slow settle.
+              // No overshoot: the drop GLIDES rather than bounces, which
+              // matches iOS Liquid Glass control transitions more closely.
               transition:
-                "transform 620ms cubic-bezier(0.34, 1.56, 0.45, 1), width 620ms cubic-bezier(0.34, 1.56, 0.45, 1)",
+                "transform 720ms cubic-bezier(0.65, 0, 0.35, 1), width 720ms cubic-bezier(0.65, 0, 0.35, 1)",
             }}
           />
         )}

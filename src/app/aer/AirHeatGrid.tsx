@@ -27,14 +27,22 @@ const GRID = 400;
 const TOP_K = 8;
 const COVERAGE_RADIUS_KM = 60;
 const IDW_POWER = 2.5;
-// Romania bounds — matched EXACTLY to Leaflet ImageOverlay
-const LAT_S = 43.55;
-const LAT_N = 48.27;
-const LNG_W = 20.22;
-const LNG_E = 29.75;
-const BOUNDS: [[number, number], [number, number]] = [[LAT_S, LNG_W], [LAT_N, LNG_E]];
+// Romania bounds — used when no clipBounds is passed.
+const RO_LAT_S = 43.55;
+const RO_LAT_N = 48.27;
+const RO_LNG_W = 20.22;
+const RO_LNG_E = 29.75;
+const RO_BOUNDS: [[number, number], [number, number]] = [
+  [RO_LAT_S, RO_LNG_W],
+  [RO_LAT_N, RO_LNG_E],
+];
 
-interface Props { sensors: UnifiedSensor[]; }
+interface Props {
+  sensors: UnifiedSensor[];
+  /** Optional county-level clipping box. When set, the heatmap is
+   *  rendered for ONLY this rectangle (border ring is ignored). */
+  clipBounds?: [[number, number], [number, number]];
+}
 
 function pointInRing(lat: number, lng: number, ring: number[][]): boolean {
   let inside = false;
@@ -100,11 +108,14 @@ function hexToRgb(hex: string): [number, number, number] {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-export function AirHeatGrid({ sensors }: Props) {
+export function AirHeatGrid({ sensors, clipBounds }: Props) {
   const [border, setBorder] = useState<number[][] | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
+  // Skip the border fetch entirely when we already have explicit clip
+  // bounds — the rectangle replaces the polygon mask.
   useEffect(() => {
+    if (clipBounds) return;
     fetch("/geojson/romania-border.json")
       .then((r) => r.json())
       .then((j) => {
@@ -113,10 +124,15 @@ export function AirHeatGrid({ sensors }: Props) {
         else if (geom.type === "MultiPolygon") setBorder(geom.coordinates[0][0]);
       })
       .catch(() => null);
-  }, []);
+  }, [clipBounds]);
 
   useEffect(() => {
-    if (!border || sensors.length === 0) return;
+    if (sensors.length === 0) return;
+    // National view needs the border ring; county view uses the box only.
+    if (!clipBounds && !border) return;
+
+    const [latMin, lngMin] = clipBounds ? clipBounds[0] : [RO_LAT_S, RO_LNG_W];
+    const [latMax, lngMax] = clipBounds ? clipBounds[1] : [RO_LAT_N, RO_LNG_E];
 
     const valid = sensors
       .filter((s) => s.aqi != null && s.aqi > 0)
@@ -129,8 +145,8 @@ export function AirHeatGrid({ sensors }: Props) {
     // we paint the whole map in ~25 frames (~420ms) while the user can
     // keep panning/zooming.
     const ROWS_PER_TICK = 16;
-    const latStep = (LAT_N - LAT_S) / GRID;
-    const lngStep = (LNG_E - LNG_W) / GRID;
+    const latStep = (latMax - latMin) / GRID;
+    const lngStep = (lngMax - lngMin) / GRID;
 
     const canvas = document.createElement("canvas");
     canvas.width = GRID;
@@ -175,9 +191,11 @@ export function AirHeatGrid({ sensors }: Props) {
       const rowEnd = Math.min(row + ROWS_PER_TICK, GRID);
       for (let r = row; r < rowEnd; r++) {
         for (let col = 0; col < GRID; col++) {
-          const lat = LAT_N - (r + 0.5) * latStep;
-          const lng = LNG_W + (col + 0.5) * lngStep;
-          if (!pointInRing(lat, lng, border)) continue;
+          const lat = latMax - (r + 0.5) * latStep;
+          const lng = lngMin + (col + 0.5) * lngStep;
+          // National view: clip to Romania border ring. County view:
+          // clip to the bounding rectangle (every cell is inside).
+          if (!clipBounds && border && !pointInRing(lat, lng, border)) continue;
 
           const aqi = idw(lat, lng, valid);
           // No sensor within COVERAGE_RADIUS_KM → leave this cell
@@ -209,9 +227,16 @@ export function AirHeatGrid({ sensors }: Props) {
       cancelled = true;
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [sensors, border]);
+  }, [sensors, border, clipBounds]);
 
   if (!imageUrl) return null;
 
-  return <ImageOverlay url={imageUrl} bounds={BOUNDS} opacity={1} zIndex={200} />;
+  return (
+    <ImageOverlay
+      url={imageUrl}
+      bounds={clipBounds ?? RO_BOUNDS}
+      opacity={1}
+      zIndex={200}
+    />
+  );
 }

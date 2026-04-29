@@ -54,13 +54,13 @@ const HartiLayers = dynamic(() => import("./HartiLayers"), { ssr: false });
 
 type Tab = "bicicleta" | "pejos" | "auto" | "transport" | "aer";
 
-// Top-center switcher tabs.
+// Top-center switcher tabs — tuned for tight horizontal pill.
 const SWITCHER_TABS: ReadonlyArray<SwitcherTab<Tab>> = [
-  { id: "bicicleta", label: "Piste bicicletă", icon: Bike },
+  { id: "bicicleta", label: "Bicicletă", icon: Bike },
   { id: "pejos", label: "Pietonale", icon: Footprints },
   { id: "auto", label: "Drumuri", icon: Car },
-  { id: "transport", label: "Transport", icon: Bus },
-  { id: "aer", label: "Calitate aer", icon: Wind },
+  { id: "transport", label: "Transport public", icon: Bus },
+  { id: "aer", label: "Aer", icon: Wind },
 ];
 
 // Per-tab canonical URLs — used for pushState when the user switches
@@ -72,6 +72,36 @@ const TAB_HREF: Record<Tab, string> = {
   transport: "/harti/transport",
   aer: "/harti",
 };
+
+// Half-side (in degrees) of the county's bounding box used to clip the
+// AQI heatmap. Bucharest is tight (~20km), other counties default to
+// ~60km which covers Romania's largest counties. Tuned by eye on a few
+// county centers; not GIS-precise.
+const COUNTY_HALF_EXTENT: Record<string, number> = {
+  B: 0.18,
+  IF: 0.35,
+  CT: 0.65,
+  TM: 0.65,
+  SV: 0.75,
+  CJ: 0.6,
+};
+const DEFAULT_COUNTY_HALF_EXTENT = 0.55;
+
+function boundsForCounty(
+  center: [number, number],
+  countySlug?: string,
+): [[number, number], [number, number]] | undefined {
+  if (!countySlug) return undefined;
+  // ALL_COUNTIES uses uppercase id; the slug is lowercase — best-effort
+  // map by uppercasing the slug. Falls back to the default extent.
+  const key = countySlug.toUpperCase();
+  const half = COUNTY_HALF_EXTENT[key] ?? DEFAULT_COUNTY_HALF_EXTENT;
+  const [lat, lng] = center;
+  return [
+    [lat - half, lng - half * 1.5],
+    [lat + half, lng + half * 1.5],
+  ];
+}
 
 export function HartiMap({
   defaultTab = "bicicleta",
@@ -91,7 +121,8 @@ export function HartiMap({
   scopeName?: string;
   /** When set, nav tabs (Bicicletă / Pe jos / Cu mașina / Transport /
    *  Aer) prepend /{countySlug} so they stay within the county scope
-   *  instead of kicking the user back to the Romania-wide view. */
+   *  instead of kicking the user back to the Romania-wide view. The
+   *  AQI heatmap is also clipped to the county's bounding box. */
   countySlug?: string;
 } = {}) {
   const [activeTab, setActiveTab] = useState<Tab>(defaultTab);
@@ -405,6 +436,8 @@ export function HartiMap({
             showPietonal={showPietonal}
             showTraversari={showTraversari}
             visibleLines={visibleLines}
+            clipBounds={boundsForCounty(center, countySlug)}
+            countyName={scopeName}
           />
         </LeafletMap>
 
