@@ -33,35 +33,29 @@ export const QR_API_BASE_URL = "https://api.qrserver.com/v1/create-qr-code/";
 // ============================================================
 export const NAV_LINKS = [
   { href: "/sesizari", label: "Sesizări" },
+  { href: "/petitii", label: "Petiții" },
   { href: "/harti", label: "Hărți" },
-  { href: "/statistici", label: "Statistici" },
   { href: "/stiri", label: "Știri" },
   { href: "/ghiduri", label: "Ghiduri" },
-  // Evenimente disabled 2026-04-29 (user request: „renunțăm deocamdată").
-  // Pentru a re-activa: uncomment + verifică Navbar/Footer/sitemap.
-  // { href: "/evenimente", label: "Evenimente" },
 ] as const;
 
-// "Mai mult" dropdown — secondary routes.
-// `countyOnly: true` = hidden on the national/homepage dropdown; only appears
-// when the user is inside a county context (prefixed with /{slug}).
-// Bilete, Istoric, Administrația are county-specific (local transport, local
-// mayoral history, local administration) — they make no sense without a
-// county to scope them to.
-// NAV_MORE — golit drastic la cererea user-ului 2026-04. Itemele
-// removate (impact, autoritati, calendar-civic, cum-functioneaza,
-// compara, aer, intreruperi, date publice) erau redundante:
-//   - Impact e accesibil din /sesizari deja
-//   - Autorități contacte se afișează automat la sesizare după ce pui
-//     adresa (resolver-ul găsește autoritatea competentă)
-//   - Aerul + Întreruperile sunt acum pe /harti ca tab-uri
-//   - Date publice (buget/sănătate/educație/siguranță) sunt link-uri
-//     interne; user-ii ajung la ele din statistici/sesizari
+// „Altele" dropdown — items secundare grupate. Fiecare entry poate fi:
+//   - countyOnly: true → ascuns pe homepage național, vizibil doar pe /[judet]
+//   - nationalOnly: true → URL absolut (nu se prepend-ează countySlug)
+//   - default: prepend countySlug dacă e în county-context
 //
-// Rămân doar item-urile pur county-specific care n-au alt loc bun:
-//   - Bilete (transport public local)
-//   - Istoric primari (per-județ)
+// Round 2026-04-29: re-introduse statistici/aer/intreruperi/calendar/impact
+// /autoritati/compara/cum-functioneaza la cererea user-ului — Sesizări +
+// Petiții + Hărți + Știri + Ghiduri rămân top-level, restul intră aici.
 export const NAV_MORE = [
+  { href: "/statistici", label: "Statistici", icon: "📊" },
+  { href: "/aer", label: "Calitatea aerului", icon: "🌬️" },
+  { href: "/intreruperi", label: "Întreruperi programate", icon: "⚠️" },
+  { href: "/autoritati", label: "Autorități publice", icon: "🏛️", nationalOnly: true },
+  { href: "/calendar-civic", label: "Calendar civic", icon: "📅", nationalOnly: true },
+  { href: "/compara", label: "Compară județe", icon: "⚖️", nationalOnly: true },
+  { href: "/impact", label: "Impact local", icon: "🎯" },
+  { href: "/cum-functioneaza", label: "Cum funcționează administrația", icon: "❓" },
   { href: "/bilete", label: "Bilete și abonamente transport", icon: "🎫", countyOnly: true },
   { href: "/istoric", label: "Istoricul primarilor", icon: "📜", countyOnly: true },
 ] as const;

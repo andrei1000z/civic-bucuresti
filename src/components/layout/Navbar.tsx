@@ -3,14 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Menu, X, ChevronDown, AlertCircle, MapPin, Search } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { NAV_LINKS, NAV_MORE, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useCountyOptional } from "@/lib/county-context";
 import { cn } from "@/lib/utils";
-import { LiveWeatherAqi } from "@/components/home/LiveWeatherAqi";
 import { ALL_COUNTIES } from "@/data/counties";
 
 export function Navbar() {
@@ -92,8 +90,8 @@ export function Navbar() {
         <div className="container-narrow flex items-center justify-between h-16">
           <div className="flex items-center gap-2 shrink-0">
             <Link href={countySlug ? `/${countySlug}` : "/"} className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 flex items-center justify-center text-white">
-                <MapPin size={18} strokeWidth={2.5} aria-hidden="true" />
+              <div className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 flex items-center justify-center text-white font-[family-name:var(--font-sora)] font-extrabold text-lg leading-none" aria-hidden="true">
+                C
               </div>
               <span className="font-[family-name:var(--font-sora)] font-bold text-lg text-[var(--color-text)]">
                 {SITE_NAME}
@@ -175,10 +173,8 @@ export function Navbar() {
               );
             })}
 
-            {/* "Mai mult" dropdown — only renders when has visible items.
-                NAV_MORE conține doar items county-scoped (bilete, istoric)
-                care apar doar când user-ul e într-un județ. Pe homepage
-                national, dropdown-ul nu se randează deloc. */}
+            {/* „Altele" dropdown — items secundare. countyOnly e ascuns
+                pe homepage național; nationalOnly păstrează URL absolut. */}
             {(() => {
               const visibleMoreItems = NAV_MORE.filter(
                 (l) => !("countyOnly" in l && l.countyOnly) || countySlug,
@@ -200,7 +196,7 @@ export function Navbar() {
                     aria-expanded={moreDropdown}
                     aria-haspopup="menu"
                   >
-                    Mai mult
+                    Altele
                     <ChevronDown size={14} className={cn("transition-transform", moreDropdown && "rotate-180")} />
                   </button>
                   <div
@@ -235,32 +231,8 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-1 sm:gap-2">
-            {countySlug && (
-              <div className="hidden xl:block">
-                <LiveWeatherAqi />
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                document.dispatchEvent(new CustomEvent("open-command-palette"));
-              }}
-              className="hidden sm:flex w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-              aria-label="Caută (Ctrl+K)"
-              title="Caută (Ctrl+K)"
-            >
-              <Search size={16} />
-            </button>
-            <ThemeToggle />
             <NotificationBell />
             <UserMenu />
-            <Link
-              href={countySlug ? `/${countySlug}/sesizari` : "/sesizari"}
-              className="hidden md:inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-button)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] shadow-md transition-all"
-            >
-              <AlertCircle size={16} />
-              Fă sesizare
-            </Link>
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
@@ -284,8 +256,8 @@ export function Navbar() {
       >
         <div className="container-narrow flex items-center justify-between h-16 border-b border-[var(--color-border)]">
           <Link href="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-            <div className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 flex items-center justify-center text-white">
-              <MapPin size={18} strokeWidth={2.5} aria-hidden="true" />
+            <div className="w-9 h-9 rounded-[var(--radius-button)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 flex items-center justify-center text-white font-[family-name:var(--font-sora)] font-extrabold text-lg leading-none" aria-hidden="true">
+              C
             </div>
             <span className="font-[family-name:var(--font-sora)] font-bold text-lg">{SITE_NAME}</span>
           </Link>
@@ -328,7 +300,7 @@ export function Navbar() {
             return (
               <div className="pt-3 mt-3 border-t border-[var(--color-border)]">
                 <div className="px-4 py-1 text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
-                  Mai mult
+                  Altele
                 </div>
                 {items.map((link) => (
                   <Link
@@ -349,15 +321,8 @@ export function Navbar() {
               </div>
             );
           })()}
-          <div className="pt-4 mt-4 border-t border-[var(--color-border)] space-y-2">
-            <Link
-              href={countySlug ? `/${countySlug}/sesizari` : "/sesizari"}
-              className="flex items-center justify-center gap-2 h-12 rounded-[var(--radius-button)] bg-[var(--color-primary)] text-white font-medium"
-            >
-              <AlertCircle size={18} />
-              Fă sesizare acum
-            </Link>
-            {countySlug && (
+          {countySlug && (
+            <div className="pt-4 mt-4 border-t border-[var(--color-border)]">
               <Link
                 href="/judete"
                 onClick={() => setMobileOpen(false)}
@@ -365,8 +330,8 @@ export function Navbar() {
               >
                 Schimbă județul
               </Link>
-            )}
-          </div>
+            </div>
+          )}
         </nav>
       </div>
     </>

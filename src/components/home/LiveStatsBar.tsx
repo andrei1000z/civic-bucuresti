@@ -1,24 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertCircle, Clock, Activity, Thermometer, Wind, TrendingUp } from "lucide-react";
+import { Activity, Clock, CheckCircle2, Megaphone, Wind } from "lucide-react";
 
 interface LiveData {
-  sesizariAzi: number;
-  sesizariInLucru: number;
+  totalSesizari: number;
+  inLucru: number;
+  rezolvate: number;
+  petitiiActive: number;
   aqi: number;
   aqiQuality: string;
-  totalSesizari: number;
 }
 
+/**
+ * Ticker național — sesizări totale + în lucru + rezolvate (≥3 ca să nu
+ * pară gol) + petiții active + calitatea aerului națională medie.
+ *
+ * Round 2026-04-29: scos AQI prefix-uit (înainte „AQI:"), scoase „Surse"
+ * și „Actualizat realtime" (filler), adăugat petiții (feature nou).
+ */
 export function LiveStatsBar() {
   const [data, setData] = useState<LiveData | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    // Helper: treat 4xx/5xx as failures too, not just network errors.
-    // Returning the fallback object here keeps the ticker from jumping
-    // to "Se încarcă..." forever on a bad backend response.
     const fetchJson = async <T,>(url: string, fallback: T): Promise<T> => {
       try {
         const res = await fetch(url);
@@ -29,17 +34,28 @@ export function LiveStatsBar() {
       }
     };
     Promise.all([
-      fetchJson<{ data: { total: number; today: number; inLucru: number } | null }>("/api/statistici/summary", { data: null }),
-      fetchJson<{ data: { aqi: number; quality: string } | null }>("/api/statistici/aqi", { data: { aqi: 65, quality: "Moderat" } }),
-    ]).then(([summary, aqi]) => {
+      fetchJson<{ data: { total: number; today: number; inLucru: number; rezolvate?: number } | null }>(
+        "/api/statistici/summary",
+        { data: null },
+      ),
+      fetchJson<{ data: { aqi: number; quality: string } | null }>(
+        "/api/statistici/aqi",
+        { data: { aqi: 65, quality: "Moderat" } },
+      ),
+      fetchJson<{ data: { active: number } | null }>(
+        "/api/petitii/count",
+        { data: { active: 0 } },
+      ),
+    ]).then(([summary, aqi, petitii]) => {
       if (cancelled) return;
-      const s = summary.data ?? { total: 0, today: 0, inLucru: 0 };
+      const s = summary.data ?? { total: 0, today: 0, inLucru: 0, rezolvate: 0 };
       setData({
-        sesizariAzi: s.today,
-        sesizariInLucru: s.inLucru,
+        totalSesizari: s.total,
+        inLucru: s.inLucru,
+        rezolvate: s.rezolvate ?? 0,
+        petitiiActive: petitii.data?.active ?? 0,
         aqi: aqi.data?.aqi ?? 65,
         aqiQuality: aqi.data?.quality ?? "Moderat",
-        totalSesizari: s.total,
       });
     });
     return () => {
@@ -47,17 +63,46 @@ export function LiveStatsBar() {
     };
   }, []);
 
+  // Build stats list — rezolvate apare doar la ≥3 ca să nu pară gol.
+  // Petiții active apar doar la ≥1.
   const stats = data
     ? [
-        { icon: AlertCircle, text: `${data.sesizariAzi} sesizări noi astăzi`, color: "text-red-500" },
-        { icon: Clock, text: `${data.sesizariInLucru} în lucru la autorități`, color: "text-amber-500" },
-        { icon: Wind, text: `AQI național mediu: ${data.aqi} — ${data.aqiQuality}`, color: "text-sky-500" },
-        { icon: Activity, text: `${data.totalSesizari.toLocaleString("ro-RO")} sesizări trimise în total`, color: "text-emerald-500" },
-        { icon: TrendingUp, text: "Actualizat în timp real", color: "text-blue-500" },
-        { icon: Thermometer, text: "Date oficiale INS + OpenAQ + Sensor.Community", color: "text-purple-500" },
+        {
+          icon: Activity,
+          text: `${data.totalSesizari.toLocaleString("ro-RO")} sesizări totale`,
+          color: "text-emerald-500",
+        },
+        {
+          icon: Clock,
+          text: `${data.inLucru.toLocaleString("ro-RO")} sesizări în lucru`,
+          color: "text-amber-500",
+        },
+        ...(data.rezolvate >= 3
+          ? [
+              {
+                icon: CheckCircle2,
+                text: `${data.rezolvate.toLocaleString("ro-RO")} sesizări rezolvate`,
+                color: "text-green-600",
+              },
+            ]
+          : []),
+        ...(data.petitiiActive >= 1
+          ? [
+              {
+                icon: Megaphone,
+                text: `${data.petitiiActive.toLocaleString("ro-RO")} petiții active`,
+                color: "text-purple-500",
+              },
+            ]
+          : []),
+        {
+          icon: Wind,
+          text: `Calitatea aerului națională medie: ${data.aqi} — ${data.aqiQuality}`,
+          color: "text-sky-500",
+        },
       ]
     : [
-        { icon: AlertCircle, text: "Se încarcă statisticile live...", color: "text-[var(--color-text-muted)]" },
+        { icon: Activity, text: "Se încarcă statisticile live...", color: "text-[var(--color-text-muted)]" },
       ];
 
   return (
@@ -81,7 +126,6 @@ export function LiveStatsBar() {
             );
           })}
         </div>
-        {/* Screen-reader friendly version — un singur summary, fără ticker repetat */}
         <div className="sr-only">
           {stats.map((s, i) => (
             <span key={i}>

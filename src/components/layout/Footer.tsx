@@ -35,6 +35,7 @@ export function Footer() {
             </h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/sesizari" className={linkCls}>Trimite o sesizare</Link></li>
+              <li><Link href="/petitii" className={linkCls}>Petiții civice</Link></li>
               <li><Link href="/sesizari-publice" className={linkCls}>Sesizări publice</Link></li>
               <li><Link href="/harti" className={linkCls}>Hărți interactive</Link></li>
               <li><Link href="/aer" className={linkCls}>Calitatea aerului — live</Link></li>

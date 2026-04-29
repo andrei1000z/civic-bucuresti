@@ -9,6 +9,7 @@ import { useToast } from "@/components/Toast";
 import { Badge } from "@/components/ui/Badge";
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
+import { ThemeSettings } from "@/components/ThemeSettings";
 
 interface Profile {
   id: string;
@@ -280,6 +281,17 @@ export default function ContPage() {
                   className={inputClass}
                 />
               </Field>
+            </div>
+
+            {/* Aspect — theme picker mut din navbar la cererea user-ului 2026-04. */}
+            <div className="mt-5 pt-5 border-t border-[var(--color-border)]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+                Aspect
+              </p>
+              <ThemeSettings />
+              <p className="text-xs text-[var(--color-text-muted)] mt-2 leading-relaxed">
+                „Sistem" urmează preferința device-ului tău (dark/light auto).
+              </p>
             </div>
 
             {/* Confidențialitate */}

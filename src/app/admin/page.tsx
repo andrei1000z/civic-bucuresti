@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, Users, Newspaper, Shield, BarChart3 } from "lucide-react";
+import { FileText, Users, Newspaper, Shield, BarChart3, Megaphone } from "lucide-react";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { RefreshStiriButton } from "./RefreshStiriButton";
 
@@ -83,6 +83,16 @@ export default async function AdminDashboard() {
             <div>
               <p className="font-medium text-sm">Analytics în timp real</p>
               <p className="text-xs text-[var(--color-text-muted)]">Trafic, dispozitive, țări, erori, performanță</p>
+            </div>
+          </Link>
+          <Link
+            href="/admin/petitii"
+            className="flex items-center gap-3 p-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          >
+            <Megaphone size={20} className="text-purple-500" aria-hidden="true" />
+            <div>
+              <p className="font-medium text-sm">Gestionează petițiile civice</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Postează, editează, închide; vezi semnături</p>
             </div>
           </Link>
           <RefreshStiriButton />
