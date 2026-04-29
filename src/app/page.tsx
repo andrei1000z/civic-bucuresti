@@ -74,12 +74,9 @@ export default function HomePage() {
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[var(--color-bg)] to-transparent" />
       </section>
 
-      {/* LIVE STATS BAR */}
-      <section className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
-        <div className="container-narrow py-6">
-          <LiveStatsBar />
-        </div>
-      </section>
+      {/* LIVE STATS BAR — LiveStatsBar este deja un <section> propriu cu
+          border-b + bg-surface; nu îl învelim a doua oară. */}
+      <LiveStatsBar />
 
       {/* COUNTY PICKER */}
       <section id="county-picker" className="py-12 md:py-16 bg-[var(--color-surface)]">
