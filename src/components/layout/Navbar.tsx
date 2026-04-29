@@ -79,12 +79,14 @@ export function Navbar() {
       <header
         className={cn(
           "sticky top-0 z-50 transition-all duration-300",
+          // Always-glass: tinted backdrop-blur over whatever is behind
+          // (green hero at top, page bg further down). When scrolled past
+          // the hero we strengthen the border + shadow so the navbar
+          // detaches visually from the page content below.
+          "bg-[var(--glass-bg)] [backdrop-filter:blur(var(--glass-blur))_saturate(180%)] [-webkit-backdrop-filter:blur(var(--glass-blur))_saturate(180%)]",
           scrolled
-            // Phase 3 v2 round 3: backdrop-blur 16px + saturate(180%) inline
-            // (folosim glass token-urile direct, NU clasa .glass-surface
-            // care ar adăuga full border conflictual cu border-b sticky).
-            ? "bg-[var(--glass-bg)] [backdrop-filter:blur(var(--glass-blur))_saturate(180%)] [-webkit-backdrop-filter:blur(var(--glass-blur))_saturate(180%)] border-b border-[var(--color-border)] shadow-[var(--shadow-1)]"
-            : "bg-transparent"
+            ? "border-b border-[var(--color-border)] shadow-[var(--shadow-1)]"
+            : "border-b border-transparent",
         )}
       >
         <div className="container-narrow flex items-center justify-between h-16">
