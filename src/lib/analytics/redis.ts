@@ -96,6 +96,19 @@ export const KEY = {
   // (ajută să identificăm broken links pe site-uri externe).
   notFoundPaths: "civia:analytics:404-paths",
   notFoundReferrers: "civia:analytics:404-referrers",
+
+  // ─── Per-visitor session timeline ───────────────────────────────
+  // Sorted set of recent visitors (score = last activity ms) — used pe
+  // /admin/analytics/sessions ca să listăm utilizatorii cu activitate
+  // recentă. Capped la 1000 prin pruning în handleTrack.
+  vidsRecent: "civia:analytics:vids-recent",
+  // Per-visitor metadata snapshot (device fingerprint la prima/ultima vizită).
+  // Hash cu first_seen, last_seen, country, city, device, browser, os, lang,
+  // viewport, screen, color_scheme, connection, utm_source, etc.
+  vidMeta: (vid: string) => `civia:analytics:vid:${vid}:meta`,
+  // Per-visitor event timeline — last 200 events per visitor cu TTL 30 zile.
+  // Lista cu JSON-encoded events: { t, type, pathname?, label?, ...extra }.
+  vidTimeline: (vid: string) => `civia:analytics:vid:${vid}:timeline`,
 } as const;
 
 export const TTL = {
@@ -108,10 +121,19 @@ export const TTL = {
   errors: 60 * 60 * 24 * 30,
   landingMarker: 60 * 60 * 24,
   user: 60 * 60 * 24 * 365,
-  vitalSamples: 60 * 60 * 24 * 14, // 2 weeks rolling window
+  vitalSamples: 60 * 60 * 24 * 14,
   clicks: 60 * 60 * 24 * 30,
   search: 60 * 60 * 24 * 60,
+  // Per-visitor: 30 zile keep timeline + meta. După 30 zile, vizitatorul
+  // dispare automat din /admin/analytics/sessions (păstrăm doar aggregat).
+  vidTimeline: 60 * 60 * 24 * 30,
+  vidMeta: 60 * 60 * 24 * 30,
 } as const;
+
+// Per-visitor event timeline — keep last N events per visitor.
+export const VID_TIMELINE_CAP = 200;
+// Recent visitors cap — only show top-1000 by last activity in /admin.
+export const VIDS_RECENT_CAP = 1000;
 
 // Web Vitals reservoir sampling — keep at most 500 recent samples per
 // metric so we can compute p50/p75/p95 without unbounded list growth.

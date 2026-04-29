@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { analyticsRedis, KEY, TTL, VITAL_SAMPLE_CAP } from "@/lib/analytics/redis";
+import { analyticsRedis, KEY, TTL, VITAL_SAMPLE_CAP, VID_TIMELINE_CAP, VIDS_RECENT_CAP } from "@/lib/analytics/redis";
 import { sanitizeStr, sanitizeKey, sanitizeId } from "@/lib/analytics/sanitize";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
@@ -197,7 +197,60 @@ async function handleTrack(req: NextRequest, body: Record<string, unknown>) {
       pipe.expire(KEY.userDays(userId), TTL.user);
     }
 
+    // ─── Per-visitor session tracking (anonymous, by vid) ──────────
+    // Snapshot device fingerprint pe vidMeta + adaugă pageview în
+    // timeline. Sorted set vidsRecent ține track de cei mai recenți.
+    pipe.hsetnx(KEY.vidMeta(visitorId), "first_seen", String(now));
+    pipe.hset(KEY.vidMeta(visitorId), {
+      last_seen: String(now),
+      country,
+      city: `${city}, ${country}`,
+      device: deviceType,
+      browser,
+      os,
+      language,
+      viewport,
+      screen: sanitizeKey(body.screenSize, 30) || "unknown",
+      color_scheme: colorScheme,
+      connection,
+      orientation,
+      display_mode: displayMode,
+      timezone: sanitizeKey(body.timezone, 50) || "unknown",
+      last_pathname: pathname,
+      last_referrer: referrer,
+    });
+    pipe.hincrby(KEY.vidMeta(visitorId), "pageviews", 1);
+    pipe.hsetnx(KEY.vidMeta(visitorId), "first_referrer", referrer);
+    pipe.hsetnx(KEY.vidMeta(visitorId), "first_pathname", pathname);
+    if (utmSource) {
+      pipe.hsetnx(KEY.vidMeta(visitorId), "first_utm_source", utmSource);
+      pipe.hset(KEY.vidMeta(visitorId), { last_utm_source: utmSource });
+    }
+    if (utmCampaign) {
+      pipe.hsetnx(KEY.vidMeta(visitorId), "first_utm_campaign", utmCampaign);
+    }
+    pipe.expire(KEY.vidMeta(visitorId), TTL.vidMeta);
+
+    // Add la timeline (most-recent-first, capped la VID_TIMELINE_CAP).
+    pipe.lpush(
+      KEY.vidTimeline(visitorId),
+      JSON.stringify({ t: now, type: "pageview", pathname, referrer }),
+    );
+    pipe.ltrim(KEY.vidTimeline(visitorId), 0, VID_TIMELINE_CAP - 1);
+    pipe.expire(KEY.vidTimeline(visitorId), TTL.vidTimeline);
+
+    // Add la sorted set "vids recent". Score = timestamp ms al ultimei activități.
+    pipe.zadd(KEY.vidsRecent, { score: now, member: visitorId });
+
     await pipe.exec();
+
+    // Prune sorted set la max VIDS_RECENT_CAP — păstrăm doar topul recent.
+    try {
+      const total = await analyticsRedis.zcard(KEY.vidsRecent);
+      if (total > VIDS_RECENT_CAP) {
+        await analyticsRedis.zremrangebyrank(KEY.vidsRecent, 0, total - VIDS_RECENT_CAP - 1);
+      }
+    } catch { /* noop */ }
 
     // Landing-page marker — separate SET NX call (not pipelineable with decision)
     try {
@@ -282,6 +335,14 @@ async function handleTrack(req: NextRequest, body: Record<string, unknown>) {
     pipe.expire(KEY.clicks, TTL.clicks);
     pipe.hincrby(KEY.clicksPerRoute, `${path}|${label}`, 1);
     pipe.expire(KEY.clicksPerRoute, TTL.clicks);
+    // Per-visitor timeline
+    pipe.lpush(
+      KEY.vidTimeline(visitorId),
+      JSON.stringify({ t: now, type: "click", label, pathname: path }),
+    );
+    pipe.ltrim(KEY.vidTimeline(visitorId), 0, VID_TIMELINE_CAP - 1);
+    pipe.expire(KEY.vidTimeline(visitorId), TTL.vidTimeline);
+    pipe.zadd(KEY.vidsRecent, { score: now, member: visitorId });
     await pipe.exec();
     return NextResponse.json({ ok: true });
   }
@@ -405,6 +466,25 @@ async function handleTrack(req: NextRequest, body: Record<string, unknown>) {
   );
   pipe.ltrim(KEY.events, 0, 199);
   pipe.expire(KEY.events, TTL.events);
+  // Per-visitor timeline pentru orice event custom — capturăm extra
+  // string/number props (max 4 keys) ca să avem context în timeline view.
+  const extra: Record<string, string | number> = {};
+  let count = 0;
+  for (const [k, v] of Object.entries(body)) {
+    if (k === "action" || k === "visitorId" || k === "eventType") continue;
+    if (typeof v === "string" || typeof v === "number") {
+      extra[k] = typeof v === "string" ? v.slice(0, 80) : v;
+      count++;
+      if (count >= 4) break;
+    }
+  }
+  pipe.lpush(
+    KEY.vidTimeline(visitorId),
+    JSON.stringify({ t: now, type: eventType, ...extra }),
+  );
+  pipe.ltrim(KEY.vidTimeline(visitorId), 0, VID_TIMELINE_CAP - 1);
+  pipe.expire(KEY.vidTimeline(visitorId), TTL.vidTimeline);
+  pipe.zadd(KEY.vidsRecent, { score: now, member: visitorId });
   await pipe.exec();
   return NextResponse.json({ ok: true });
 }
@@ -675,6 +755,146 @@ async function handleUser(body: Record<string, unknown>) {
   return NextResponse.json({ ok: true, userId, meta: meta || {}, routes: routes || {}, countries: countries || {}, days: days || {} });
 }
 
+/**
+ * GET /api/analytics?action=sessions-list&limit=50&offset=0
+ *
+ * Returnează lista vizitatorilor recenți cu meta (device fingerprint).
+ * Sortat descendent după last_seen. Folosit pe /admin/analytics/sessions.
+ */
+async function handleSessionsList(body: Record<string, unknown>) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!analyticsRedis) return NextResponse.json({ error: "Redis not configured" }, { status: 500 });
+  const limit = Math.max(1, Math.min(100, Number(body.limit) || 50));
+  const offset = Math.max(0, Number(body.offset) || 0);
+
+  // ZRANGE descending = most-recent-first.
+  const vids = (await analyticsRedis.zrange(KEY.vidsRecent, offset, offset + limit - 1, {
+    rev: true,
+    withScores: true,
+  })) as Array<string | number>;
+
+  // vids = [vid1, score1, vid2, score2, ...] when withScores
+  const sessions: Array<{ vid: string; lastSeen: number; meta: Record<string, string> }> = [];
+  const fetches: Array<Promise<Record<string, string> | null>> = [];
+  const vidList: string[] = [];
+  const scoreList: number[] = [];
+  for (let i = 0; i < vids.length; i += 2) {
+    const vid = String(vids[i]);
+    const score = Number(vids[i + 1]);
+    vidList.push(vid);
+    scoreList.push(score);
+    fetches.push(analyticsRedis.hgetall<Record<string, string>>(KEY.vidMeta(vid)));
+  }
+  const metas = await Promise.all(fetches);
+  for (let i = 0; i < vidList.length; i++) {
+    sessions.push({
+      vid: vidList[i]!,
+      lastSeen: scoreList[i]!,
+      meta: metas[i] || {},
+    });
+  }
+
+  const totalCount = await analyticsRedis.zcard(KEY.vidsRecent);
+  return NextResponse.json({ ok: true, sessions, totalCount });
+}
+
+/**
+ * GET /api/analytics?action=session-timeline&vid=<vid>
+ *
+ * Returnează timeline-ul complet (ultimele 200 evenimente) pentru un vid +
+ * meta-ul lui. Folosit pe /admin/analytics/sessions/[vid].
+ */
+async function handleSessionTimeline(body: Record<string, unknown>) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!analyticsRedis) return NextResponse.json({ error: "Redis not configured" }, { status: 500 });
+  const vid = sanitizeId(body.vid);
+  if (!vid) return NextResponse.json({ error: "vid required" }, { status: 400 });
+
+  const [rawEvents, meta] = await Promise.all([
+    analyticsRedis.lrange(KEY.vidTimeline(vid), 0, VID_TIMELINE_CAP - 1),
+    analyticsRedis.hgetall<Record<string, string>>(KEY.vidMeta(vid)),
+  ]);
+
+  // Events sunt JSON strings (Upstash Redis returnează deja parsate ca obiect
+  // dacă sunt JSON-valid sau ca string altfel). Normalizez.
+  const events: Array<Record<string, string | number>> = [];
+  for (const raw of rawEvents) {
+    if (!raw) continue;
+    if (typeof raw === "object") {
+      events.push(raw as Record<string, string | number>);
+    } else if (typeof raw === "string") {
+      try {
+        events.push(JSON.parse(raw));
+      } catch { /* skip corrupt entries */ }
+    }
+  }
+
+  return NextResponse.json({ ok: true, vid, meta: meta || {}, events });
+}
+
+/**
+ * GET /api/analytics?action=weekly-compare
+ *
+ * Compară săptămâna asta vs săptămâna trecută:
+ *   - DAU mediu, WAU, total views, top routes, top errors.
+ *   - Pentru fiecare metric: { current, previous, delta, deltaPct }.
+ */
+async function handleWeeklyCompare() {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!analyticsRedis) return NextResponse.json({ error: "Redis not configured" }, { status: 500 });
+
+  // Construct day strings pentru ultimele 14 zile.
+  const days: string[] = [];
+  for (let i = 0; i < 14; i++) {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  const thisWeek = days.slice(0, 7);
+  const lastWeek = days.slice(7, 14);
+
+  async function avgDauForDays(daysList: string[]): Promise<number> {
+    const counts = await Promise.all(daysList.map((d) => analyticsRedis!.scard(KEY.dau(d))));
+    const sum = counts.reduce((a: number, b) => a + (Number(b) || 0), 0);
+    return Math.round(sum / Math.max(1, counts.length));
+  }
+  async function viewsForDays(daysList: string[]): Promise<number> {
+    const dailyViews = await Promise.all(
+      daysList.map(async (d) => {
+        const v = await analyticsRedis!.hget<string | number>(KEY.daily(d), "views");
+        return Number(v) || 0;
+      }),
+    );
+    return dailyViews.reduce((a, b) => a + b, 0);
+  }
+
+  const [dauThis, dauLast, viewsThis, viewsLast] = await Promise.all([
+    avgDauForDays(thisWeek),
+    avgDauForDays(lastWeek),
+    viewsForDays(thisWeek),
+    viewsForDays(lastWeek),
+  ]);
+
+  function delta(curr: number, prev: number) {
+    const d = curr - prev;
+    const pct = prev > 0 ? Math.round((d / prev) * 100) : null;
+    return { current: curr, previous: prev, delta: d, deltaPct: pct };
+  }
+
+  return NextResponse.json({
+    ok: true,
+    weekRange: { thisWeek, lastWeek },
+    avgDau: delta(dauThis, dauLast),
+    totalViews: delta(viewsThis, viewsLast),
+  });
+}
+
 async function handleExclude(body: Record<string, unknown>) {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -711,6 +931,9 @@ export async function POST(req: NextRequest) {
     if (action === "summary") return await handleSummary();
     if (action === "user") return await handleUser(body);
     if (action === "exclude") return await handleExclude(body);
+    if (action === "sessions-list") return await handleSessionsList(body);
+    if (action === "session-timeline") return await handleSessionTimeline(body);
+    if (action === "weekly-compare") return await handleWeeklyCompare();
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });

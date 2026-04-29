@@ -355,14 +355,26 @@ export function AnalyticsDashboard() {
             Actualizare la 5 sec · ultima: {lastFetch ? new Date(lastFetch).toLocaleTimeString() : "-"}
           </p>
         </div>
-        <button
-          onClick={load}
-          className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] text-xs"
-        >
-          <RefreshCw size={14} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href="/admin/analytics/sessions"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-[var(--radius-xs)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white text-xs font-medium transition-colors"
+          >
+            <Users size={14} />
+            Sesiuni vizitatori
+          </a>
+          <button
+            onClick={load}
+            className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] text-xs"
+          >
+            <RefreshCw size={14} />
+            Refresh
+          </button>
+        </div>
       </div>
+
+      {/* Weekly compare */}
+      <WeeklyCompare />
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -755,6 +767,99 @@ export function AnalyticsDashboard() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// WeeklyCompare — săptămâna asta vs săptămâna trecută cu delta-uri
+// ─────────────────────────────────────────────────────────────────
+
+interface WeeklyData {
+  avgDau: { current: number; previous: number; delta: number; deltaPct: number | null };
+  totalViews: { current: number; previous: number; delta: number; deltaPct: number | null };
+}
+
+function WeeklyCompare() {
+  const [data, setData] = useState<WeeklyData | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch("/api/analytics", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "weekly-compare" }),
+        });
+        const json = await res.json();
+        if (!cancelled && res.ok) setData(json);
+      } catch { /* silent */ }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!data) return null;
+
+  return (
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
+      <h3 className="font-semibold text-sm mb-3 inline-flex items-center gap-2">
+        📅 Săptămâna asta vs săptămâna trecută
+      </h3>
+      <div className="grid grid-cols-2 gap-3">
+        <CompareCard
+          label="DAU mediu"
+          current={data.avgDau.current}
+          previous={data.avgDau.previous}
+          deltaPct={data.avgDau.deltaPct}
+        />
+        <CompareCard
+          label="Vizualizări totale"
+          current={data.totalViews.current}
+          previous={data.totalViews.previous}
+          deltaPct={data.totalViews.deltaPct}
+        />
+      </div>
+      <p className="text-[10px] text-[var(--color-text-muted)] mt-3">
+        Calculat pentru ultimele 7 zile vs cele 7 zile anterioare. DAU mediu = media zilnică.
+      </p>
+    </div>
+  );
+}
+
+function CompareCard({
+  label,
+  current,
+  previous,
+  deltaPct,
+}: {
+  label: string;
+  current: number;
+  previous: number;
+  deltaPct: number | null;
+}) {
+  const dir = current >= previous ? "up" : "down";
+  const color = dir === "up" ? "text-emerald-500" : "text-red-500";
+  const arrow = dir === "up" ? "↑" : "↓";
+  return (
+    <div className="bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-3">
+      <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-1">
+        {label}
+      </p>
+      <div className="flex items-baseline gap-2">
+        <span className="font-[family-name:var(--font-sora)] text-2xl font-extrabold tabular-nums">
+          {current.toLocaleString("ro-RO")}
+        </span>
+        {deltaPct !== null && (
+          <span className={`text-xs font-bold ${color} tabular-nums`}>
+            {arrow} {Math.abs(deltaPct)}%
+          </span>
+        )}
+      </div>
+      <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">
+        săpt. trecută: <span className="tabular-nums">{previous.toLocaleString("ro-RO")}</span>
+      </p>
     </div>
   );
 }
