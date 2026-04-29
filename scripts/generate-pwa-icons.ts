@@ -35,7 +35,6 @@ async function makeIcon(size: number, maskable = false): Promise<Buffer> {
       font-weight="600"
       font-size="${size * 0.78}"
       fill="white"
-      letter-spacing="-0.06em"
     >C</text>
   </svg>`;
 

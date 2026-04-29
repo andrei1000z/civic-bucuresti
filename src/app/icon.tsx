@@ -24,11 +24,12 @@ export default function Icon() {
           color: "white",
           borderRadius: "8px",
           // Bigger + thinner: weight 600 (semibold), size 28 (vs 24).
-          // Glyph fills more of the box but stroke is airier.
+          // No letter-spacing — pe single char + flex-center, negative
+          // letter-spacing taie spațiu dreapta și împinge glyph-ul vizual
+          // la stânga. Default e centrat.
           fontSize: 28,
           fontWeight: 600,
           fontFamily: "system-ui, -apple-system, sans-serif",
-          letterSpacing: "-0.06em",
           lineHeight: 1,
         }}
       >

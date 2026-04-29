@@ -20,13 +20,12 @@ export default function AppleIcon() {
           alignItems: "center",
           justifyContent: "center",
           color: "white",
-          // Bigger + thinner: weight 600, size 150 (vs 130). Glyph
-          // umple ~83% din box dar e mai elegant ca semibold decât black.
+          // Bigger + thinner: weight 600, size 150 (vs 130).
+          // No letter-spacing — single char + flex-center îl decentrează.
           fontSize: 150,
           fontWeight: 600,
           fontFamily: "system-ui, -apple-system, sans-serif",
           borderRadius: "40px",
-          letterSpacing: "-0.06em",
           lineHeight: 1,
         }}
       >
