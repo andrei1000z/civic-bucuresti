@@ -23,10 +23,13 @@ export default function Icon() {
           justifyContent: "center",
           color: "white",
           borderRadius: "8px",
-          fontSize: 24,
-          fontWeight: 900,
+          // Bigger + thinner: weight 600 (semibold), size 28 (vs 24).
+          // Glyph fills more of the box but stroke is airier.
+          fontSize: 28,
+          fontWeight: 600,
           fontFamily: "system-ui, -apple-system, sans-serif",
-          letterSpacing: "-0.04em",
+          letterSpacing: "-0.06em",
+          lineHeight: 1,
         }}
       >
         C

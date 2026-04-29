@@ -32,10 +32,10 @@ async function makeIcon(size: number, maskable = false): Promise<Buffer> {
       text-anchor="middle"
       dominant-baseline="central"
       font-family="system-ui, -apple-system, sans-serif"
-      font-weight="900"
-      font-size="${size * 0.58}"
+      font-weight="600"
+      font-size="${size * 0.78}"
       fill="white"
-      letter-spacing="-0.04em"
+      letter-spacing="-0.06em"
     >C</text>
   </svg>`;
 
