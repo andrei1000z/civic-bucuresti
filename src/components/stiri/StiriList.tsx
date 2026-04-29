@@ -67,8 +67,8 @@ export function StiriList() {
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(12);
 
-  const load = useCallback(async (signal?: AbortSignal) => {
-    setLoading(true);
+  const load = useCallback(async (signal?: AbortSignal, opts: { silent?: boolean } = {}) => {
+    if (!opts.silent) setLoading(true);
     setFetchError(null);
     const params = new URLSearchParams();
     if (category !== "all") params.set("category", category);
@@ -83,10 +83,14 @@ export function StiriList() {
       setRows(json.data ?? []);
     } catch (e) {
       if (e instanceof Error && e.name === "AbortError") return;
-      setRows([]);
-      setFetchError(e instanceof Error ? e.message : "Eroare");
+      // Silent refresh: keep showing the last good list instead of wiping
+      // it on a transient hiccup.
+      if (!opts.silent) {
+        setRows([]);
+        setFetchError(e instanceof Error ? e.message : "Eroare");
+      }
     } finally {
-      if (!signal?.aborted) setLoading(false);
+      if (!signal?.aborted && !opts.silent) setLoading(false);
     }
   }, [category, query, county]);
 
@@ -94,6 +98,43 @@ export function StiriList() {
     const ctrl = new AbortController();
     load(ctrl.signal);
     return () => ctrl.abort();
+  }, [load]);
+
+  // Live refresh — re-fetch every 30s so newly-cached articles appear
+  // without a manual reload. Pause polling when the tab is hidden so
+  // we don't burn cycles on background tabs.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    let timer: ReturnType<typeof setInterval> | null = null;
+    let ctrl: AbortController | null = null;
+
+    const start = () => {
+      if (timer) return;
+      timer = setInterval(() => {
+        if (document.visibilityState !== "visible") return;
+        ctrl?.abort();
+        ctrl = new AbortController();
+        load(ctrl.signal, { silent: true });
+      }, 30_000);
+    };
+    const stop = () => {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+      ctrl?.abort();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") start();
+      else stop();
+    };
+
+    if (document.visibilityState === "visible") start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      stop();
+    };
   }, [load]);
 
   // Prefer featured articles with images, then any with images, then first
@@ -146,16 +187,28 @@ export function StiriList() {
         </div>
       </div>
 
-      {/* Results count — plural-aware + reflects filters */}
-      <p className="text-sm text-[var(--color-text-muted)] mb-4" aria-live="polite">
-        {loading
-          ? "Se încarcă..."
-          : rows.length === 1
-            ? "1 articol găsit"
-            : rows.length === 0
-              ? "Niciun articol"
-              : `${rows.length} articole${query || category !== "all" ? " (filtrat)" : ""}`}
-      </p>
+      {/* Results count — plural-aware + reflects filters. Live dot pulses
+          to signal the 30s auto-refresh. */}
+      <div className="text-sm text-[var(--color-text-muted)] mb-4 flex items-center gap-2 flex-wrap" aria-live="polite">
+        <span>
+          {loading
+            ? "Se încarcă..."
+            : rows.length === 1
+              ? "1 articol găsit"
+              : rows.length === 0
+                ? "Niciun articol"
+                : `${rows.length} articole${query || category !== "all" ? " (filtrat)" : ""}`}
+        </span>
+        {!loading && rows.length > 0 && (
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-[var(--color-text-muted)]">
+            <span className="relative flex h-2 w-2" aria-hidden="true">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60 animate-ping" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            Live · refresh la 30s
+          </span>
+        )}
+      </div>
 
       {loading && rows.length === 0 ? (
         <div className="py-20 text-center" role="status" aria-label="Se încarcă știrile">

@@ -3,7 +3,9 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 import { allowedSourcesForView } from "@/lib/stiri/sources";
 
-export const revalidate = 300; // 5 min cache
+// 30s cache — paired with client polling at the same cadence so the
+// /stiri page surfaces freshly-fetched RSS articles within ~30s.
+export const revalidate = 30;
 
 export async function GET(req: Request) {
   const rl = await rateLimitAsync(`stiri:${getClientIp(req)}`, { limit: 120, windowMs: 60_000 });
@@ -36,7 +38,7 @@ export async function GET(req: Request) {
     if (error) throw error;
     return NextResponse.json(
       { data: data ?? [] },
-      { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=120" } },
+      { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } },
     );
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
