@@ -8,8 +8,9 @@ interface LiveData {
   inLucru: number;
   rezolvate: number;
   petitiiActive: number;
-  aqi: number;
-  aqiQuality: string;
+  // null când API returnează „indisponibil" — afișăm doar dacă avem date reale.
+  aqi: number | null;
+  aqiQuality: string | null;
 }
 
 /**
@@ -38,9 +39,9 @@ export function LiveStatsBar() {
         "/api/statistici/summary",
         { data: null },
       ),
-      fetchJson<{ data: { aqi: number; quality: string } | null }>(
+      fetchJson<{ data: { aqi: number | null; quality: string | null } | null }>(
         "/api/statistici/aqi",
-        { data: { aqi: 65, quality: "Moderat" } },
+        { data: null },
       ),
       fetchJson<{ data: { active: number } | null }>(
         "/api/petitii/count",
@@ -49,13 +50,16 @@ export function LiveStatsBar() {
     ]).then(([summary, aqi, petitii]) => {
       if (cancelled) return;
       const s = summary.data ?? { total: 0, today: 0, inLucru: 0, rezolvate: 0 };
+      // Doar dacă AQI-ul e număr valid (nu null) afișăm stat-ul. Altfel
+      // SKIP — preferăm să nu arătăm „Date indisponibile" sau fake fallback.
+      const aqiNum = typeof aqi.data?.aqi === "number" ? aqi.data.aqi : null;
       setData({
         totalSesizari: s.total,
         inLucru: s.inLucru,
         rezolvate: s.rezolvate ?? 0,
         petitiiActive: petitii.data?.active ?? 0,
-        aqi: aqi.data?.aqi ?? 65,
-        aqiQuality: aqi.data?.quality ?? "Moderat",
+        aqi: aqiNum,
+        aqiQuality: aqiNum !== null ? aqi.data?.quality ?? null : null,
       });
     });
     return () => {
@@ -63,8 +67,10 @@ export function LiveStatsBar() {
     };
   }, []);
 
-  // Build stats list — rezolvate apare doar la ≥3 ca să nu pară gol.
-  // Petiții active apar doar la ≥1.
+  // Build stats list — fiecare stat conditional:
+  //   - rezolvate: ≥3 (nu vrem 0/1/2 care arată ca neutilizat)
+  //   - petiții active: ≥1
+  //   - AQI: doar când avem număr valid (nu fake fallback, nu "Date indisponibile")
   const stats = data
     ? [
         {
@@ -95,11 +101,15 @@ export function LiveStatsBar() {
               },
             ]
           : []),
-        {
-          icon: Wind,
-          text: `Calitatea aerului națională medie: ${data.aqi} — ${data.aqiQuality}`,
-          color: "text-sky-500",
-        },
+        ...(data.aqi !== null && data.aqiQuality
+          ? [
+              {
+                icon: Wind,
+                text: `Calitatea aerului națională medie: ${data.aqi} (${data.aqiQuality})`,
+                color: "text-sky-500",
+              },
+            ]
+          : []),
       ]
     : [
         { icon: Activity, text: "Se încarcă statisticile live...", color: "text-[var(--color-text-muted)]" },
