@@ -440,17 +440,18 @@ function PetitieForm({
   // ─── Image upload ──────────────────────────────────────────────
   const uploadImage = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      toast("Doar fișiere imagine (jpg, png, webp)", "error");
+      toast("Doar fișiere imagine (jpg, png, webp, gif)", "error");
       return;
     }
     setImageUploading(true);
     try {
       const fd = new FormData();
-      fd.append("file", file);
+      // /api/upload așteaptă "files" (plural), răspunde cu data.urls array.
+      fd.append("files", file);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Upload failed");
-      const url = json.data?.url ?? json.url ?? "";
+      const url = json.data?.urls?.[0];
       if (!url) throw new Error("No URL returned");
       setForm((f) => ({ ...f, image_url: url }));
       toast("Imagine încărcată", "success");
