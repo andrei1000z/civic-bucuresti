@@ -3,11 +3,47 @@
 import { useEffect, useState, useCallback } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { RefreshCw, Layers, Navigation, X } from "lucide-react";
+import { RefreshCw, Layers, Navigation, X, Flame } from "lucide-react";
 import type { UnifiedSensor, AirDataResponse } from "@/lib/aer/types";
 import { getAqiColor, getAqiLevel, AQI_LEVELS } from "@/lib/aer/colors";
 import { RO_CENTER, DEFAULT_ZOOM, REFRESH_INTERVAL } from "@/lib/aer/constants";
 import { AirHeatGrid } from "./AirHeatGrid";
+
+interface FireDetection {
+  id: string;
+  lat: number;
+  lng: number;
+  brightness: number | null;
+  frp: number | null;
+  confidence: "low" | "nominal" | "high" | "unknown";
+  acquiredAt: string;
+  daynight: "D" | "N" | null;
+  instrument: string;
+  satellite: string;
+}
+
+interface FiresResponse {
+  fires: FireDetection[];
+  meta: {
+    total: number;
+    lastUpdate: string;
+  };
+}
+
+// Confidence → color so the eye separates a stray cooking-fire detection
+// from a likely real wildfire. High = solid red, low = orange-amber.
+function fireColor(c: FireDetection["confidence"]): string {
+  switch (c) {
+    case "high":
+      return "#DC2626";
+    case "nominal":
+      return "#F97316";
+    case "low":
+      return "#EAB308";
+    default:
+      return "#94A3B8";
+  }
+}
 
 function FlyToLocation({ target }: { target: [number, number] | null }) {
   const map = useMap();
@@ -38,15 +74,27 @@ export default function AirQualityMap({
   });
   const [showHeatmap, setShowHeatmap] = useState(true);
   const [showMarkers, setShowMarkers] = useState(true);
+  // Fires from NASA FIRMS (VIIRS, last 24h). Same red flame markers
+  // visible on iqair.com/romania. Loaded in parallel with sensors.
+  const [fires, setFires] = useState<FireDetection[]>([]);
+  const [showFires, setShowFires] = useState(true);
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch("/api/aer");
-      if (!res.ok) return;
-      const data = (await res.json()) as AirDataResponse;
-      setSensors(data.sensors);
-      setMeta(data.meta);
-      setLastFetch(new Date());
+      const [aerRes, firesRes] = await Promise.all([
+        fetch("/api/aer"),
+        fetch("/api/aer/fires").catch(() => null),
+      ]);
+      if (aerRes.ok) {
+        const data = (await aerRes.json()) as AirDataResponse;
+        setSensors(data.sensors);
+        setMeta(data.meta);
+        setLastFetch(new Date());
+      }
+      if (firesRes && firesRes.ok) {
+        const fdata = (await firesRes.json()) as FiresResponse;
+        setFires(fdata.fires);
+      }
     } catch {
       // network — keep stale data visible, next tick will retry
     } finally {
@@ -190,6 +238,91 @@ export default function AirQualityMap({
               }}
             />
           ))}
+
+          {/* Active fires from NASA FIRMS (Suomi NPP / VIIRS, last 24h).
+              Stacked over sensors so a wildfire near a sensor still
+              reads as a wildfire, not as bad PM2.5 ambiguity. */}
+          {showFires &&
+            fires.map((fire) => {
+              const c = fireColor(fire.confidence);
+              return (
+                <CircleMarker
+                  key={fire.id}
+                  center={[fire.lat, fire.lng]}
+                  radius={fire.confidence === "high" ? 9 : 7}
+                  pathOptions={{
+                    color: "#fff",
+                    weight: 2,
+                    fillColor: c,
+                    fillOpacity: 0.85,
+                  }}
+                >
+                  <Popup>
+                    <div className="min-w-[220px]">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span
+                          className="w-7 h-7 rounded-full grid place-items-center text-white shrink-0"
+                          style={{ backgroundColor: c }}
+                          aria-hidden="true"
+                        >
+                          <Flame size={14} />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="font-bold text-sm">Incendiu activ</p>
+                          <p className="text-[10px] uppercase tracking-wider text-slate-500">
+                            Încredere{" "}
+                            {fire.confidence === "high"
+                              ? "ridicată"
+                              : fire.confidence === "nominal"
+                              ? "normală"
+                              : fire.confidence === "low"
+                              ? "scăzută"
+                              : "necunoscută"}
+                          </p>
+                        </div>
+                      </div>
+                      <dl className="text-xs space-y-1 text-slate-700">
+                        {fire.frp !== null && (
+                          <div className="flex justify-between gap-3">
+                            <dt className="text-slate-500">Putere radiată</dt>
+                            <dd className="font-semibold tabular-nums">
+                              {fire.frp.toFixed(1)} MW
+                            </dd>
+                          </div>
+                        )}
+                        {fire.brightness !== null && (
+                          <div className="flex justify-between gap-3">
+                            <dt className="text-slate-500">Temperatură</dt>
+                            <dd className="font-semibold tabular-nums">
+                              {fire.brightness.toFixed(0)} K
+                            </dd>
+                          </div>
+                        )}
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-slate-500">Detectat</dt>
+                          <dd className="font-semibold tabular-nums">
+                            <time dateTime={fire.acquiredAt}>
+                              {new Date(fire.acquiredAt).toLocaleString("ro-RO", {
+                                timeZone: "Europe/Bucharest",
+                                day: "numeric",
+                                month: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </time>{" "}
+                            {fire.daynight === "N" ? "🌙" : "☀️"}
+                          </dd>
+                        </div>
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-slate-500">Sursă</dt>
+                          <dd className="font-semibold">NASA FIRMS · {fire.instrument}</dd>
+                        </div>
+                      </dl>
+                    </div>
+                  </Popup>
+                </CircleMarker>
+              );
+            })}
         </MapContainer>
 
         {/* Overlay controls */}
@@ -210,6 +343,25 @@ export default function AirQualityMap({
             Refresh
           </button>
           <button
+            type="button"
+            onClick={() => setShowFires((v) => !v)}
+            aria-pressed={showFires}
+            className={`h-10 px-3 rounded-[var(--radius-xs)] shadow-md flex items-center gap-2 text-xs font-medium transition-colors ${
+              showFires
+                ? "bg-rose-500 text-white border border-rose-600 hover:bg-rose-600"
+                : "bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-2)]"
+            }`}
+            title={
+              showFires
+                ? `Ascunde incendiile NASA FIRMS · ${fires.length} active`
+                : "Afișează incendiile active din ultimele 24h"
+            }
+          >
+            <Flame size={14} className={showFires ? "" : "text-rose-500"} />
+            <span className="tabular-nums">{fires.length}</span>
+          </button>
+          <button
+            type="button"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="h-10 w-10 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex items-center justify-center hover:bg-[var(--color-surface-2)] lg:hidden"
           >
