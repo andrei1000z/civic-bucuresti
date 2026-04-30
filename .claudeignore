@@ -13,7 +13,6 @@ coverage/
 package-lock.json
 
 # SQL bundles — open by file path when needed (not via crawl)
-supabase/COMBINED.sql
 supabase/RESET_SESIZARI.sql
 supabase/schema.sql
 supabase/migrations/*.sql

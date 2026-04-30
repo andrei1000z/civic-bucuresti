@@ -1,5 +1,10 @@
-// Process raw images: resize + convert to WebP, organize into folders.
+// Process raw images: resize + convert to WebP only, organize into folders.
 // Usage: npx tsx scripts/process-images.ts
+//
+// 2026-04: trecut pe webp-only. Toate browserele pe care țintim suportă
+// WebP (Safari 14+, Chrome/Edge/Firefox de ani de zile). Nu mai
+// dublăm fiecare imagine în .jpg ca fallback — site-ul nu folosea
+// niciodată variantele .jpg, doar webp-urile.
 import sharp from "sharp";
 import { readFileSync, mkdirSync, unlinkSync, existsSync } from "fs";
 import { join } from "path";
@@ -62,32 +67,25 @@ async function processOne(spec: ImageSpec): Promise<void> {
   const input = readFileSync(sourcePath);
   const meta = await sharp(input).metadata();
 
-  // Generate WebP (primary) + JPEG (fallback)
-  for (const format of ["webp", "jpg"] as const) {
-    const outPath = join(outDir, `${spec.outputName}.${format}`);
-    const quality = spec.quality ?? (format === "webp" ? 82 : 85);
-
-    let pipe = sharp(input).resize({
+  const outPath = join(outDir, `${spec.outputName}.webp`);
+  const quality = spec.quality ?? 82;
+  await sharp(input)
+    .resize({
       width: spec.width,
       height: spec.height,
       fit: spec.fit ?? "cover",
       position: "center",
       withoutEnlargement: true,
-    });
-
-    pipe = format === "webp"
-      ? pipe.webp({ quality, effort: 5 })
-      : pipe.jpeg({ quality, progressive: true, mozjpeg: true });
-
-    await pipe.toFile(outPath);
-  }
+    })
+    .webp({ quality, effort: 5 })
+    .toFile(outPath);
 
   const sizeKb = Math.round(input.length / 1024);
   console.log(`✓ ${spec.outputSubdir}/${spec.outputName}.webp — ${meta.width}×${meta.height} → ${spec.width}${spec.height ? `×${spec.height}` : ""} (${sizeKb}KB source)`);
 }
 
 async function run() {
-  console.log("Processing 20 images → webp + jpg\n");
+  console.log(`Processing ${images.length} images → webp\n`);
   for (const spec of images) {
     await processOne(spec);
   }
