@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ChevronLeft, ExternalLink, Calendar, User, Tag } from "lucide-react";
+import { ArrowLeft, ExternalLink, Calendar, User, Tag, Building2, Info } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/Badge";
 import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
@@ -153,9 +153,10 @@ export default async function StireDetailPage({
       />
       <Link
         href="/stiri"
-        className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
       >
-        <ChevronLeft size={16} /> Toate știrile
+        <ArrowLeft size={13} aria-hidden="true" />
+        Toate știrile
       </Link>
 
       {/* Hero */}
@@ -254,12 +255,22 @@ export default async function StireDetailPage({
 
           {/* Original content */}
           {(stire.excerpt || stire.content) && (
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 mb-6">
-              <h2 className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-4">
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5 md:p-6 mb-6">
+              <h2 className="text-[11px] text-[var(--color-text-muted)] uppercase tracking-wider font-bold mb-4 inline-flex items-center gap-2">
+                <span
+                  className="w-5 h-5 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] grid place-items-center"
+                  style={{ color: sourceColor }}
+                  aria-hidden="true"
+                >
+                  <Building2 size={11} />
+                </span>
                 Text original — {stire.source}
               </h2>
               {stire.excerpt && (
-                <p className="text-base leading-relaxed mb-4 font-medium border-l-4 border-[var(--color-border)] pl-4 text-[var(--color-text-muted)]">
+                <p
+                  className="text-base leading-relaxed mb-4 font-medium border-l-4 pl-4 text-[var(--color-text-muted)]"
+                  style={{ borderLeftColor: `${sourceColor}66` }}
+                >
                   {stire.excerpt}
                 </p>
               )}
@@ -273,12 +284,27 @@ export default async function StireDetailPage({
         </div>
 
         {/* Sidebar */}
-        <aside className="space-y-4">
-          {/* Source card */}
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
-            <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3">Sursă</p>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: sourceColor }}>
+        <aside className="space-y-3">
+          {/* Source card — colored ring tinted by the source */}
+          <div
+            className="bg-[var(--color-surface)] border rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-5"
+            style={{ borderColor: `${sourceColor}40` }}
+          >
+            <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-bold mb-3 inline-flex items-center gap-1.5">
+              <span
+                className="w-5 h-5 rounded-[var(--radius-xs)] grid place-items-center"
+                style={{ backgroundColor: `${sourceColor}1a`, color: sourceColor }}
+                aria-hidden="true"
+              >
+                <Building2 size={11} />
+              </span>
+              Sursă
+            </p>
+            <div className="flex items-center gap-3 mb-4">
+              <div
+                className="w-11 h-11 rounded-full flex items-center justify-center overflow-hidden ring-2 ring-white/30 shrink-0"
+                style={{ backgroundColor: sourceColor }}
+              >
                 {SOURCE_LOGOS[stire.source] ? (
                   <Image
                     src={SOURCE_LOGOS[stire.source] ?? ""}
@@ -288,19 +314,22 @@ export default async function StireDetailPage({
                     className="w-7 h-7 object-contain"
                   />
                 ) : (
-                  <span className="text-white font-bold">{stire.source.charAt(0)}</span>
+                  <span className="text-white font-bold text-base">{stire.source.charAt(0)}</span>
                 )}
               </div>
-              <div>
-                <p className="font-semibold text-sm">{stire.source}</p>
-                <p className="text-xs text-[var(--color-text-muted)]">{categoryLabels[stire.category] ?? stire.category}</p>
+              <div className="min-w-0">
+                <p className="font-bold text-sm truncate">{stire.source}</p>
+                <p className="text-[11px] text-[var(--color-text-muted)] truncate">
+                  {categoryLabels[stire.category] ?? stire.category}
+                </p>
               </div>
             </div>
             <a
               href={stire.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 w-full justify-center h-10 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+              className="inline-flex items-center gap-2 w-full justify-center h-11 rounded-[var(--radius-full)] text-white text-sm font-semibold hover:brightness-110 active:scale-[0.97] transition-all shadow-[var(--shadow-1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+              style={{ backgroundColor: sourceColor }}
               aria-label={`Citește articolul complet pe ${stire.source} (deschide în tab nou)`}
             >
               <ExternalLink size={14} aria-hidden="true" />
@@ -308,12 +337,21 @@ export default async function StireDetailPage({
             </a>
           </div>
 
-          {/* Info card */}
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5">
-            <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold mb-3">Despre</p>
-            <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
-              Civia agregează știri din surse verificate și generează automat o sinteză AI pentru a facilita înțelegerea rapidă.
-              Conținutul original aparține publicației {stire.source}.
+          {/* Info card — explains the AI synthesis + source provenance */}
+          <div className="bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-md)] p-4">
+            <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-bold mb-2 inline-flex items-center gap-1.5">
+              <span
+                className="w-5 h-5 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] grid place-items-center"
+                aria-hidden="true"
+              >
+                <Info size={11} />
+              </span>
+              Despre
+            </p>
+            <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+              Civia agregează știri din surse verificate și generează automat o sinteză AI pentru a
+              facilita înțelegerea rapidă. Conținutul original aparține publicației{" "}
+              <strong>{stire.source}</strong>.
             </p>
           </div>
         </aside>
@@ -321,16 +359,25 @@ export default async function StireDetailPage({
 
       {/* Related articles */}
       {related.length > 0 && (
-        <div className="mt-10">
-          <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-5">
+        <div className="mt-12">
+          <h2 className="font-[family-name:var(--font-sora)] text-lg md:text-xl font-bold mb-5 inline-flex items-center gap-2">
+            <span
+              className="w-7 h-7 rounded-[var(--radius-xs)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] grid place-items-center"
+              aria-hidden="true"
+            >
+              <Tag size={13} />
+            </span>
             Știri similare
+            <span className="text-[10px] font-normal text-[var(--color-text-muted)]">
+              ({related.length})
+            </span>
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {related.map((r) => (
               <Link
                 key={r.id}
                 href={`/stiri/${r.id}`}
-                className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] overflow-hidden hover:shadow-[var(--shadow-md)] transition-all"
+                className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] overflow-hidden hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 hover:border-[var(--color-primary)]/30 transition-all"
               >
                 <div className="relative h-32 bg-gradient-to-br from-slate-600 to-slate-800">
                   {r.image_url ? (
@@ -339,7 +386,7 @@ export default async function StireDetailPage({
                       alt={r.title}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                       unoptimized
                       loading="lazy"
                     />
@@ -348,6 +395,7 @@ export default async function StireDetailPage({
                       <span className="text-4xl font-bold text-white/20">{r.source.charAt(0)}</span>
                     </div>
                   )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <div className="absolute top-2 left-2">
                     <Badge bgColor={SOURCE_COLORS[r.source] ?? "#64748b"} color="white" className="text-[9px]">
                       {r.source}
@@ -355,10 +403,11 @@ export default async function StireDetailPage({
                   </div>
                 </div>
                 <div className="p-3">
-                  <h3 className="text-sm font-semibold line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
+                  <h3 className="text-sm font-semibold line-clamp-2 leading-snug group-hover:text-[var(--color-primary)] transition-colors">
                     {r.title}
                   </h3>
-                  <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
+                  <p className="text-[10px] text-[var(--color-text-muted)] mt-1.5 inline-flex items-center gap-1">
+                    <Calendar size={10} aria-hidden="true" />
                     {formatDateTime(r.published_at)}
                   </p>
                 </div>
