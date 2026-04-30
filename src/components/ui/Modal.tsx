@@ -20,6 +20,16 @@ const FOCUSABLE =
 export function Modal({ open, onClose, title, children, size = "md", className }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+  // Stash the latest `onClose` in a ref so the mount-effect doesn't
+  // re-run every time the parent re-renders and produces a new
+  // function reference. Without this, every keystroke in the auth
+  // modal's email field invalidated the effect → cleanup ran →
+  // re-mount put the focus back on the close button → user lost
+  // their input focus mid-typing.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -31,7 +41,7 @@ export function Modal({ open, onClose, title, children, size = "md", className }
 
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        onCloseRef.current();
         return;
       }
       // Focus trap — cycle Tab / Shift+Tab between first and last
@@ -63,11 +73,25 @@ export function Modal({ open, onClose, title, children, size = "md", className }
     document.addEventListener("keydown", handleKey);
     document.body.style.overflow = "hidden";
 
-    // Give focus to the first focusable element (usually the close
-    // button) on the next frame so the dialog is mounted before we try.
+    // Give focus to the first non-close focusable on the next frame.
+    // We deliberately skip the close button — landing on "X" the moment
+    // the dialog opens is hostile UX (one stray Enter and the dialog
+    // closes). Prefer the first input/textarea when available; fall
+    // back to the first focusable, then the dialog itself.
     const raf = requestAnimationFrame(() => {
-      const first = dialogRef.current?.querySelector<HTMLElement>(FOCUSABLE);
-      (first ?? dialogRef.current)?.focus();
+      const dlg = dialogRef.current;
+      if (!dlg) return;
+      const inputLike = dlg.querySelector<HTMLElement>(
+        'input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), select:not([disabled])',
+      );
+      if (inputLike) {
+        inputLike.focus();
+        return;
+      }
+      const all = Array.from(dlg.querySelectorAll<HTMLElement>(FOCUSABLE));
+      const first =
+        all.find((el) => el.getAttribute("aria-label") !== "Închide") ?? all[0];
+      (first ?? dlg).focus();
     });
 
     return () => {
@@ -76,7 +100,11 @@ export function Modal({ open, onClose, title, children, size = "md", className }
       cancelAnimationFrame(raf);
       previouslyFocusedRef.current?.focus?.();
     };
-  }, [open, onClose]);
+    // Intentional: only `open` belongs in the deps. `onClose` is
+    // stashed in a ref above so its identity changes on every parent
+    // render don't re-trigger the focus-trap mount logic — that was
+    // the source of the "focus jumps to X every keystroke" bug.
+  }, [open]);
 
   if (!open) return null;
 

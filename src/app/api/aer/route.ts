@@ -3,11 +3,17 @@ import { fetchSensorCommunity } from "./sources/sensor-community";
 import { fetchSensorCommunityV2 } from "./sources/sensor-community-v2";
 import { fetchOpenAQ } from "./sources/openaq";
 import { fetchWaqi } from "./sources/waqi";
+import { fetchUradMonitor } from "./sources/uradmonitor";
 import type { UnifiedSensor, AirDataResponse } from "@/lib/aer/types";
 import { DEDUP_RADIUS_M } from "@/lib/aer/constants";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
-export const revalidate = 300; // 5 min ISR cache
+// 60s ISR cache. Sensor.Community + uRADMonitor update every ~1 min;
+// OpenAQ + WAQI are pulled hourly upstream but their endpoints are
+// fast. With 60s revalidate the map feels live without blowing
+// through Vercel function-invocation limits — at most 60 cold pulls
+// per hour per route.
+export const revalidate = 60;
 
 /**
  * Distance between two points in meters (Haversine).
@@ -61,19 +67,28 @@ export async function GET(req: Request) {
   if (!rl.success) return NextResponse.json({ error: "Prea multe cereri" }, { status: 429 });
   const startTime = Date.now();
 
-  // Fetch all sources in parallel — don't fail if one is down
+  // Fetch all sources in parallel — don't fail if one is down. Each
+  // pull is timeout-bounded inside its own module so a slow third
+  // party doesn't pin the whole route.
   const results = await Promise.allSettled([
     fetchSensorCommunity(),
     fetchSensorCommunityV2(),
     fetchOpenAQ(),
     fetchWaqi(),
+    fetchUradMonitor(),
   ]);
 
   const allSensors: UnifiedSensor[] = [];
   const bySource: Record<string, number> = {};
   const errors: string[] = [];
 
-  const sourceNames = ["sensor-community", "sensor-community-v2", "openaq", "waqi"] as const;
+  const sourceNames = [
+    "sensor-community",
+    "sensor-community-v2",
+    "openaq",
+    "waqi",
+    "uradmonitor",
+  ] as const;
   for (let i = 0; i < results.length; i++) {
     const result = results[i];
     const name = sourceNames[i];

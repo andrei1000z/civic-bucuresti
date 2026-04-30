@@ -71,6 +71,7 @@ export default function AirQualityMap({
     "sensor-community": true,
     openaq: true,
     waqi: true,
+    uradmonitor: true,
   });
   const [showHeatmap, setShowHeatmap] = useState(true);
   const [showMarkers, setShowMarkers] = useState(true);
