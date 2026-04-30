@@ -11,6 +11,7 @@ import {
 } from "@/data/autoritati-contact";
 import type { AuthorityContact } from "@/data/autoritati-contact";
 import { Building2, Phone, Globe, Mail, MapPin, Users, Bus, Shield } from "lucide-react";
+import { CountyPageHero, COUNTY_HERO_GRADIENT } from "@/components/county/CountyPageHero";
 
 export async function generateMetadata({
   params,
@@ -132,15 +133,27 @@ export default async function AutoritatiPage({
     .map(([slug, c]) => ({ slug, ...c }));
 
   return (
-    <div className="container-narrow py-12 md:py-16">
-      <div className="mb-10">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
-          Autorități — {county.name}
-        </h1>
-        <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">
-          Instituțiile publice responsabile din {county.name}. Contactează-le direct sau trimite o sesizare prin Civia.
-        </p>
-      </div>
+    <div className="container-narrow py-8 md:py-12">
+      <CountyPageHero
+        countyName={county.name}
+        countyId={county.id}
+        countySlug={county.slug}
+        title="Autorități locale"
+        icon={Building2}
+        gradient={COUNTY_HERO_GRADIENT.authority}
+        description={
+          <>
+            Instituțiile publice responsabile din <strong>{county.name}</strong>.
+            Contactează-le direct sau trimite o sesizare prin Civia — alegem
+            instituția competentă pentru tine.
+          </>
+        }
+        tagline={
+          stats
+            ? `${stats.populatie.toLocaleString("ro-RO")} locuitori · primar reședință: ${stats.primarName} (${stats.primarPartid})`
+            : undefined
+        }
+      />
 
       <div className="grid md:grid-cols-2 gap-6 mb-10">
         <InstitutionCard

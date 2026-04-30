@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AlertTriangle, Calendar, ExternalLink, MapPin, ArrowLeft } from "lucide-react";
+import { AlertTriangle, Calendar, ExternalLink } from "lucide-react";
 import {
   getInterruptionsForCounty,
   TYPE_ICONS,
@@ -10,6 +10,10 @@ import {
 import { getCountyBySlug } from "@/data/counties";
 import { SITE_URL } from "@/lib/constants";
 import { IntreruperiFilters } from "../../intreruperi/IntreruperiFilters";
+import {
+  CountyPageHero,
+  COUNTY_HERO_GRADIENT,
+} from "@/components/county/CountyPageHero";
 
 export async function generateMetadata({
   params,
@@ -57,31 +61,32 @@ export default async function JudetIntreruperiPage({
   };
 
   return (
-    <div className="container-narrow py-10 md:py-14">
+    <div className="container-narrow py-8 md:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <Link
-        href="/intreruperi"
-        className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors"
-      >
-        <ArrowLeft size={16} /> Toate județele
-      </Link>
-
-      <header className="mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] text-xs font-semibold mb-4">
-          <MapPin size={12} /> {county.name}
-        </div>
-        <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-5xl font-extrabold mb-3">
-          Întreruperi programate — {county.name}
-        </h1>
-        <p className="text-base md:text-lg text-[var(--color-text-muted)] max-w-3xl leading-relaxed">
-          Apă, caldură, gaz, curent + lucrări de stradă în județul tău.
-          Agregat din surse oficiale. Filtrează după tip sau deschide harta.
-        </p>
-      </header>
+      <CountyPageHero
+        countyName={county.name}
+        countyId={county.id}
+        countySlug={county.slug}
+        title="Întreruperi programate"
+        icon={AlertTriangle}
+        gradient={COUNTY_HERO_GRADIENT.warning}
+        description={
+          <>
+            Apă, caldură, gaz, curent + lucrări de stradă în <strong>{county.name}</strong>.
+            Agregat din surse oficiale ale operatorilor locali. Filtrează după
+            tip sau deschide harta.
+          </>
+        }
+        tagline={
+          all.length > 0
+            ? `${all.length} ${all.length === 1 ? "întrerupere activă" : "întreruperi active"} · catalogul se reîmprospătează la fiecare 30 de minute.`
+            : "Catalogul se reîmprospătează la fiecare 30 de minute."
+        }
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         {(["apa", "caldura", "gaz", "electricitate"] as const).map((t) => {

@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { Newspaper } from "lucide-react";
 import { getCountyBySlug } from "@/data/counties";
 import { StiriList } from "@/components/stiri/StiriList";
 import { Badge } from "@/components/ui/Badge";
 import { SOURCE_COLORS } from "@/lib/constants";
 import { NATIONAL_SOURCES, LOCAL_SOURCES_BY_COUNTY } from "@/lib/stiri/sources";
+import {
+  CountyPageHero,
+  COUNTY_HERO_GRADIENT,
+} from "@/components/county/CountyPageHero";
 
 export async function generateMetadata({
   params,
@@ -27,35 +33,52 @@ export default async function StiriPage({
 }) {
   const { judet } = await params;
   const county = getCountyBySlug(judet);
-  const countyName = county?.name ?? judet;
-  const localSources = county ? LOCAL_SOURCES_BY_COUNTY[county.id] ?? [] : [];
+  if (!county) notFound();
+
+  const localSources = LOCAL_SOURCES_BY_COUNTY[county.id] ?? [];
   const visibleSources = [...NATIONAL_SOURCES, ...localSources];
 
   return (
-    <div className="container-narrow py-12 md:py-16">
-      <div className="mb-8">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
-          Știri civice — {countyName}
-        </h1>
-        <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-2">
-          {localSources.length > 0 ? (
+    <div className="container-narrow py-8 md:py-12">
+      <CountyPageHero
+        countyName={county.name}
+        countyId={county.id}
+        countySlug={county.slug}
+        title="Știri civice"
+        icon={Newspaper}
+        gradient={COUNTY_HERO_GRADIENT.news}
+        description={
+          localSources.length > 0 ? (
             <>
-              Surse <strong>naționale</strong> + <strong>{localSources.length === 1 ? "casa" : "casele"} de știri locală{localSources.length === 1 ? "" : "e"}</strong> din {countyName}.
+              Surse <strong>naționale</strong> verificate + {localSources.length}{" "}
+              {localSources.length === 1 ? "casă" : "case"} de știri locală
+              {localSources.length === 1 ? "" : "e"} din {county.name}. Fiecare
+              articol primește o sinteză AI structurată — citești esența în 30s.
             </>
           ) : (
             <>
-              Surse <strong>naționale</strong> verificate. Casa de știri locală din {countyName} nu e încă în catalog — propune una pe email sau în feedback.
+              Surse <strong>naționale</strong> verificate. Casa de știri locală
+              din {county.name} nu e încă în catalog — propune una din
+              feedback-ul de la subsol.
             </>
-          )}
-        </p>
-        <div className="flex flex-wrap gap-2">
+          )
+        }
+        tagline={`${visibleSources.length} surse active · sinteza AI rulează la fiecare articol cu Llama 3.3 70B + post-processor de gramatică românească.`}
+      >
+        <div className="flex flex-wrap gap-1.5">
           {visibleSources.map((source) => (
-            <Badge key={source} bgColor={SOURCE_COLORS[source] ?? "#64748b"} color="white">
+            <Badge
+              key={source}
+              bgColor={SOURCE_COLORS[source] ?? "#64748b"}
+              color="white"
+              className="text-[10px]"
+            >
               {source}
             </Badge>
           ))}
         </div>
-      </div>
+      </CountyPageHero>
+
       <StiriList />
     </div>
   );

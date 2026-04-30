@@ -18,6 +18,10 @@ import {
   MapPin,
   Route,
 } from "lucide-react";
+import {
+  CountyPageHero,
+  COUNTY_HERO_GRADIENT,
+} from "@/components/county/CountyPageHero";
 
 /* ── vehicle type helpers ── */
 
@@ -88,28 +92,35 @@ export default async function BiletePage({
   ];
 
   return (
-    <div className="container-narrow py-12 md:py-16">
-      {/* Header */}
-      <div className="mb-10">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
-          Transport public — {county.name}
-        </h1>
-        <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">
-          {isBucuresti
+    <div className="container-narrow py-8 md:py-12">
+      <CountyPageHero
+        countyName={county.name}
+        countyId={county.id}
+        countySlug={county.slug}
+        title="Transport public"
+        icon={Ticket}
+        gradient={COUNTY_HERO_GRADIENT.transport}
+        description={
+          isBucuresti
             ? "STB, Metrorex și toate tarifele pentru transportul public din capitală."
-            : `Informații complete despre transportul public local în ${county.name}.`}
-        </p>
-
+            : `Operatori, bilete, abonamente și trasee pentru transportul public local în ${county.name}.`
+        }
+        tagline={
+          stats?.hasMetrou
+            ? `Operator principal: ${operatorName} · cu metrou`
+            : `Operator principal: ${operatorName}`
+        }
+      >
         {isBucuresti && (
           <Link
             href="/bilete"
-            className="inline-flex items-center gap-2 h-12 px-6 mt-6 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-full)] bg-white text-[var(--color-primary)] font-semibold text-sm hover:bg-white/90 active:scale-[0.97] shadow-[var(--shadow-2)] hover:shadow-[var(--shadow-3)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
-            <CreditCard size={18} />
-            Pagina completă de tarife STB + Metrorex
+            <CreditCard size={14} aria-hidden="true" />
+            Pagina completă STB + Metrorex
           </Link>
         )}
-      </div>
+      </CountyPageHero>
 
       {/* Operator cards */}
       <div className={`grid ${allOperators.length > 1 ? "md:grid-cols-2" : "md:grid-cols-1 max-w-2xl"} gap-6 mb-10`}>

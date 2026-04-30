@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Building2, Users, ArrowRight, Clock } from "lucide-react";
-import { getCountyBySlug } from "@/data/counties";
+import { Building2, Users, ArrowRight, Clock, History } from "lucide-react";
+import { getCountyBySlug, ALL_COUNTIES } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
 import { primari, consiliiGenerale } from "@/data/primari";
 import { IstoricInteractive } from "@/components/istoric/IstoricInteractive";
+import {
+  CountyPageHero,
+  COUNTY_HERO_GRADIENT,
+} from "@/components/county/CountyPageHero";
 
 const ChartLoading = () => (
   <div className="h-[260px] rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] animate-pulse" />
@@ -38,17 +42,25 @@ export async function generateMetadata({
 }
 
 function BucurestiIstoric() {
+  const bucCounty = ALL_COUNTIES.find((c) => c.id === "B")!;
   return (
-    <div className="container-narrow py-12 md:py-16">
-      <div className="mb-12">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
-          Istoric administratie Bucuresti
-        </h1>
-        <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">
-          Toti primarii generali ai Capitalei din 1990 pana in prezent — realizarile,
-          controversele si proiectele. Click pe un primar pentru detalii, bifeaza ca sa compari.
-        </p>
-      </div>
+    <div className="container-narrow py-8 md:py-12">
+      <CountyPageHero
+        countyName={bucCounty.name}
+        countyId={bucCounty.id}
+        countySlug={bucCounty.slug}
+        title="Istoric administrație"
+        icon={History}
+        gradient={COUNTY_HERO_GRADIENT.history}
+        description={
+          <>
+            Toți primarii generali ai Capitalei din 1990 până în prezent —
+            realizările, controversele și proiectele. Click pe un primar pentru
+            detalii, bifează ca să compari.
+          </>
+        }
+        tagline={`${primari.length} primari documentați · ${consiliiGenerale.length} mandate de Consiliu General.`}
+      />
 
       {/* Charts overview */}
       <div className="grid lg:grid-cols-2 gap-6 mb-12">
@@ -121,15 +133,23 @@ function CountyIstoric({ countyName, countySlug, countyId }: { countyName: strin
   const stats = getCountyStats(countyId);
 
   return (
-    <div className="container-narrow py-12 md:py-16">
-      <div className="mb-10">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
-          Administratia locala — {countyName}
-        </h1>
-        <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">
-          Informatii despre conducerea si structura administrativa a judetului {countyName}.
-        </p>
-      </div>
+    <div className="container-narrow py-8 md:py-12">
+      <CountyPageHero
+        countyName={countyName}
+        countyId={countyId}
+        countySlug={countySlug}
+        title="Administrație locală"
+        icon={History}
+        gradient={COUNTY_HERO_GRADIENT.history}
+        description={
+          <>
+            Informații despre conducerea și structura administrativă a
+            județului <strong>{countyName}</strong>: primar reședință, consiliu
+            județean, prefectură.
+          </>
+        }
+        tagline={`Primar în funcție: ${stats.primarName} (${stats.primarPartid}) · ${stats.populatie.toLocaleString("ro-RO")} locuitori.`}
+      />
 
       {/* Current mayor */}
       <section className="mb-12">

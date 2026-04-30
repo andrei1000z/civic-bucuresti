@@ -1,12 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Flame, Droplets, Zap, Users as UsersIcon, Building2, Car, ArrowRight } from "lucide-react";
+import {
+  Flame,
+  Droplets,
+  Zap,
+  Users as UsersIcon,
+  Building2,
+  Car,
+  ArrowRight,
+  Calendar as CalendarIcon,
+} from "lucide-react";
 import { getCountyBySlug } from "@/data/counties";
 import { evenimente } from "@/data/evenimente";
 import { Badge } from "@/components/ui/Badge";
 import { formatDate } from "@/lib/utils";
 import type { Eveniment, EvenimentCategory, EvenimentSeverity } from "@/types";
+import {
+  CountyPageHero,
+  COUNTY_HERO_GRADIENT,
+} from "@/components/county/CountyPageHero";
 
 const categoryIcons: Record<EvenimentCategory, React.ElementType> = {
   accident: Car,
@@ -141,59 +154,59 @@ export default async function CountyEvenimentePage({
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
 
   return (
-    <>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-800 via-stone-900 to-zinc-950 text-white">
-        <div className="absolute inset-0 bg-grid-pattern opacity-10" />
-        <div className="container-narrow relative z-10 py-16 md:py-20">
-          <Badge className="mb-4 bg-white/10 text-white border border-white/20">
-            Arhivă cronologică
-          </Badge>
-          <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
-            Evenimente — {county.name}
-          </h1>
-          <p className="text-lg text-white/80 max-w-2xl">
-            Accidente, incendii, inundatii, cutremure si proteste — o arhiva documentata a
-            incidentelor importante din {county.name} și din România.
-          </p>
-        </div>
-      </section>
+    <div className="container-narrow py-8 md:py-12">
+      <CountyPageHero
+        countyName={county.name}
+        countyId={county.id}
+        countySlug={county.slug}
+        title="Evenimente"
+        icon={CalendarIcon}
+        gradient={COUNTY_HERO_GRADIENT.events}
+        description={
+          <>
+            Accidente, incendii, inundații, cutremure și proteste — arhivă
+            documentată a incidentelor importante din <strong>{county.name}</strong> și
+            din România.
+          </>
+        }
+        tagline={
+          localEvents.length > 0
+            ? `${localEvents.length} ${localEvents.length === 1 ? "eveniment local" : "evenimente locale"} · ${nationalEvents.length} naționale.`
+            : `${nationalEvents.length} evenimente naționale · arhiva locală pentru ${county.name} se completează manual.`
+        }
+      />
 
       {/* Local events */}
       {localEvents.length > 0 && (
-        <section className="py-16">
-          <div className="container-narrow">
-            <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-6">
-              Evenimente în {county.name}
-              <span className="ml-2 text-base font-normal text-[var(--color-text-muted)]">
-                ({localEvents.length})
-              </span>
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {localEvents.map((ev) => (
-                <EventCard key={ev.id} ev={ev} />
-              ))}
-            </div>
+        <section className="mb-10">
+          <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold mb-5">
+            Evenimente în {county.name}
+            <span className="ml-2 text-base font-normal text-[var(--color-text-muted)]">
+              ({localEvents.length})
+            </span>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {localEvents.map((ev) => (
+              <EventCard key={ev.id} ev={ev} />
+            ))}
           </div>
         </section>
       )}
 
       {/* National events */}
-      <section className={localEvents.length > 0 ? "pb-16" : "py-16"}>
-        <div className="container-narrow">
-          <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-6">
-            {localEvents.length > 0 ? "Evenimente naționale" : `Evenimente din România`}
-            <span className="ml-2 text-base font-normal text-[var(--color-text-muted)]">
-              ({nationalEvents.length})
-            </span>
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {nationalEvents.map((ev) => (
-              <EventCard key={ev.id} ev={ev} />
-            ))}
-          </div>
+      <section>
+        <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold mb-5">
+          {localEvents.length > 0 ? "Evenimente naționale" : "Evenimente din România"}
+          <span className="ml-2 text-base font-normal text-[var(--color-text-muted)]">
+            ({nationalEvents.length})
+          </span>
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {nationalEvents.map((ev) => (
+            <EventCard key={ev.id} ev={ev} />
+          ))}
         </div>
       </section>
-    </>
+    </div>
   );
 }

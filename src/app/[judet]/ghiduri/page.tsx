@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { BookOpen, Clock, ArrowRight } from "lucide-react";
 import { getCountyBySlug } from "@/data/counties";
 import { ghiduri } from "@/data/ghiduri";
 import { Badge } from "@/components/ui/Badge";
+import { CountyPageHero } from "@/components/county/CountyPageHero";
 
 export async function generateMetadata({
   params,
@@ -33,30 +35,31 @@ export default async function GhiduriPage({
 }) {
   const { judet } = await params;
   const county = getCountyBySlug(judet);
-  const countyName = county?.name ?? judet;
+  if (!county) notFound();
 
   return (
-    <>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-fuchsia-700 to-pink-800 text-white">
-        <div className="absolute inset-0 bg-grid-pattern opacity-20" />
-        <div className="container-narrow relative z-10 py-20 md:py-28">
-          <Badge className="mb-4 bg-white/10 text-white border border-white/20">
-            📚 Ghiduri practice
-          </Badge>
-          <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-6xl font-extrabold mb-4">
-            Ghiduri pentru cetățeni
-          </h1>
-          <p className="text-lg md:text-xl text-white/85 max-w-2xl">
-            Informații clare, structurate și verificate pentru a naviga mai ușor prin {countyName} — de la bicicletă la cutremur.
-          </p>
-        </div>
-      </section>
+    <div className="container-narrow py-8 md:py-12">
+      <CountyPageHero
+        countyName={county.name}
+        countyId={county.id}
+        countySlug={county.slug}
+        title="Ghiduri pentru cetățeni"
+        icon={BookOpen}
+        // Purple flavor — kept the original mood of the page, just
+        // pulled into the same hero shape used by the rest of the
+        // /[judet] surfaces.
+        gradient="from-purple-600 via-fuchsia-700 to-pink-800"
+        description={
+          <>
+            Informații clare, structurate și verificate pentru a naviga mai
+            ușor prin <strong>{county.name}</strong> — de la bicicletă la
+            cutremur.
+          </>
+        }
+        tagline={`${ghiduri.length} ghiduri publicate · informația ajunge la tine în 5–15 min de citit.`}
+      />
 
-      {/* Grid */}
-      <section className="py-16">
-        <div className="container-narrow">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {ghiduri.map((ghid) => (
               <Link
                 key={ghid.id}
@@ -111,9 +114,7 @@ export default async function GhiduriPage({
                 </div>
               </Link>
             ))}
-          </div>
-        </div>
-      </section>
-    </>
+      </div>
+    </div>
   );
 }
