@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,43 +20,127 @@ interface Props<T extends string> {
  * Floating top-center segmented switcher — liquid-glass pill that holds
  * a smoothly-sliding "water-drop" indicator behind the active tab.
  *
- * The indicator is a single absolutely-positioned span. We measure each
- * tab's offsetLeft + offsetWidth via refs and animate `transform` +
- * `width` with a long cubic-bezier so it feels like a droplet flowing
- * across the surface (iOS Liquid Glass aesthetic). The bezier
- * (0.4, 1.4, 0.5, 1) overshoots slightly for the squish, then settles.
+ * Animation strategy: we drive the indicator with the Web Animations
+ * API rather than CSS transitions. CSS transitions get collapsed when
+ * React commits two state updates inside a single layout-effect tick
+ * (the browser only paints the final position, so the indicator
+ * teleports instead of glides). WAAPI runs the animation explicitly,
+ * regardless of React's render timing.
+ *
+ * Each slide also threads a mid-keyframe with a slight horizontal
+ * scale (1.18) so the drop visibly *stretches* in the direction of
+ * travel and settles back to scaleX(1) at the destination — the iOS
+ * Liquid Glass "morph" feel.
  */
 export function MapTopSwitcher<T extends string>({ tabs, active, onChange }: Props<T>) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const indicatorRef = useRef<HTMLSpanElement | null>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [indicator, setIndicator] = useState<{ x: number; w: number } | null>(null);
+  const prevActiveRef = useRef<T | null>(null);
+  const prevPosRef = useRef<{ x: number; w: number } | null>(null);
 
-  const measure = () => {
+  const moveIndicator = () => {
     const btn = tabRefs.current[active];
     const wrap = containerRef.current;
-    if (!btn || !wrap) return;
+    const ind = indicatorRef.current;
+    if (!btn || !wrap || !ind) return;
     const wrapRect = wrap.getBoundingClientRect();
     const btnRect = btn.getBoundingClientRect();
-    setIndicator({
-      x: btnRect.left - wrapRect.left,
-      w: btnRect.width,
-    });
+    const newX = btnRect.left - wrapRect.left;
+    const newW = btnRect.width;
+
+    const prev = prevPosRef.current;
+    const isFirst = prevActiveRef.current === null || !prev;
+
+    if (isFirst) {
+      // First mount: snap to position with no animation.
+      ind.style.transform = `translateX(${newX}px)`;
+      ind.style.width = `${newW}px`;
+      prevPosRef.current = { x: newX, w: newW };
+      prevActiveRef.current = active;
+      return;
+    }
+
+    // Skip if nothing moved (e.g. resize but same active tab and same
+    // measurements).
+    if (prev.x === newX && prev.w === newW) return;
+
+    // Mid-frame: slight scaleX stretch in the direction of travel,
+    // averaged position. Sells the "water drop morphing across glass"
+    // effect from iOS Liquid Glass controls.
+    const midX = (prev.x + newX) / 2;
+    const midW = Math.max(prev.w, newW) * 1.05;
+
+    // Cancel any in-flight animation so rapid clicks don't queue up.
+    ind.getAnimations?.().forEach((a) => a.cancel());
+
+    ind.animate(
+      [
+        {
+          transform: `translateX(${prev.x}px) scaleX(1)`,
+          width: `${prev.w}px`,
+          easing: "cubic-bezier(0.65, 0, 0.35, 1)",
+        },
+        {
+          transform: `translateX(${midX}px) scaleX(1.18)`,
+          width: `${midW}px`,
+          offset: 0.5,
+          easing: "cubic-bezier(0.65, 0, 0.35, 1)",
+        },
+        {
+          transform: `translateX(${newX}px) scaleX(1)`,
+          width: `${newW}px`,
+        },
+      ],
+      {
+        duration: 720,
+        easing: "cubic-bezier(0.65, 0, 0.35, 1)",
+        fill: "forwards",
+      },
+    );
+
+    // Mirror end-state on the element so subsequent measurements + the
+    // post-animation static rendering land on the right values.
+    ind.style.transform = `translateX(${newX}px)`;
+    ind.style.width = `${newW}px`;
+
+    prevPosRef.current = { x: newX, w: newW };
+    prevActiveRef.current = active;
   };
 
-  // Measure right after layout so the indicator never lags one frame.
+  // useLayoutEffect for the *initial* mount — measures synchronously so
+  // the indicator never paints at the wrong position. The animation
+  // path uses WAAPI which doesn't depend on the React render cadence,
+  // so layout vs effect timing doesn't matter once we're past first
+  // paint.
   useLayoutEffect(() => {
-    measure();
+    moveIndicator();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, tabs.length]);
 
-  // Re-measure on resize so the pill stays glued during viewport changes.
+  // Re-position on resize so the pill stays glued during viewport
+  // changes. We call the static "snap" path (cancel + style assign)
+  // directly to avoid re-running the slide animation on every resize
+  // pixel.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const onResize = () => measure();
+    const onResize = () => {
+      const btn = tabRefs.current[active];
+      const wrap = containerRef.current;
+      const ind = indicatorRef.current;
+      if (!btn || !wrap || !ind) return;
+      const wrapRect = wrap.getBoundingClientRect();
+      const btnRect = btn.getBoundingClientRect();
+      const newX = btnRect.left - wrapRect.left;
+      const newW = btnRect.width;
+      ind.getAnimations?.().forEach((a) => a.cancel());
+      ind.style.transform = `translateX(${newX}px)`;
+      ind.style.width = `${newW}px`;
+      prevPosRef.current = { x: newX, w: newW };
+    };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [active]);
 
   return (
     <div className="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 z-30 max-w-[calc(100%-1rem)]">
@@ -66,8 +150,7 @@ export function MapTopSwitcher<T extends string>({ tabs, active, onChange }: Pro
         aria-label="Selectează tipul de hartă"
         className={cn(
           "pointer-events-auto relative flex items-center gap-1 p-1 rounded-full",
-          // Liquid-glass surface: visible but still translucent — between
-          // the previous "too solid" 0.15 and "barely there" 0.07.
+          // Liquid-glass surface: visible but still translucent.
           "backdrop-blur-2xl backdrop-saturate-200",
           "bg-white/[0.12] dark:bg-white/[0.10]",
           "ring-1 ring-white/30 ring-inset",
@@ -75,35 +158,32 @@ export function MapTopSwitcher<T extends string>({ tabs, active, onChange }: Pro
           "overflow-x-auto no-scrollbar",
         )}
       >
-        {/* Sliding water-drop indicator. transform + width share a smooth
-            ease-in-out cubic so the drop *visibly* glides over each tab on
-            the way to its destination. iPhone Liquid Glass aesthetic:
-            slow start → fast middle → graceful settle.  */}
-        {indicator && (
-          <span
-            aria-hidden="true"
-            className={cn(
-              "absolute top-1 bottom-1 rounded-full pointer-events-none",
-              "bg-white/45 dark:bg-white/35",
-              "ring-1 ring-white/60 ring-inset",
-              "backdrop-blur-md backdrop-saturate-200",
-              "shadow-[0_6px_18px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.6),inset_0_-1px_0_rgba(0,0,0,0.12)]",
-              // Inner crescent highlight — sells the curved water surface
-              "before:absolute before:inset-x-2 before:top-[2px] before:h-1/2 before:rounded-full",
-              "before:bg-gradient-to-b before:from-white/70 before:via-white/15 before:to-transparent",
-              "before:opacity-90 before:pointer-events-none",
-            )}
-            style={{
-              transform: `translateX(${indicator.x}px)`,
-              width: `${indicator.w}px`,
-              // ease-in-out cubic — slow start, fast middle, slow settle.
-              // No overshoot: the drop GLIDES rather than bounces, which
-              // matches iOS Liquid Glass control transitions more closely.
-              transition:
-                "transform 720ms cubic-bezier(0.65, 0, 0.35, 1), width 720ms cubic-bezier(0.65, 0, 0.35, 1)",
-            }}
-          />
-        )}
+        {/* Sliding water-drop indicator. WAAPI drives transform + width
+            through a 3-keyframe slide that stretches mid-flight (iOS
+            Liquid Glass aesthetic). Initial inline style avoids a flash
+            at translateX(0) on first paint. */}
+        <span
+          ref={indicatorRef}
+          aria-hidden="true"
+          className={cn(
+            "absolute top-1 bottom-1 rounded-full pointer-events-none",
+            "bg-white/45 dark:bg-white/35",
+            "ring-1 ring-white/60 ring-inset",
+            "backdrop-blur-md backdrop-saturate-200",
+            "shadow-[0_6px_18px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.6),inset_0_-1px_0_rgba(0,0,0,0.12)]",
+            "before:absolute before:inset-x-2 before:top-[2px] before:h-1/2 before:rounded-full",
+            "before:bg-gradient-to-b before:from-white/70 before:via-white/15 before:to-transparent",
+            "before:opacity-90 before:pointer-events-none",
+            "will-change-transform",
+          )}
+          style={{
+            transform: "translateX(0)",
+            width: "0",
+            // Origin set explicitly so scaleX stretches symmetrically
+            // around the drop's center instead of the left edge.
+            transformOrigin: "center",
+          }}
+        />
 
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -119,10 +199,10 @@ export function MapTopSwitcher<T extends string>({ tabs, active, onChange }: Pro
               aria-selected={isActive}
               onClick={() => onChange(tab.id)}
               className={cn(
-                "shrink-0 relative z-10 inline-flex items-center justify-center gap-1.5 h-10 px-3 sm:px-4 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white",
+                "shrink-0 relative z-10 inline-flex items-center justify-center gap-1.5 h-10 px-3 sm:px-4 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white",
                 isActive
                   ? "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]"
-                  : "text-white/75 hover:text-white",
+                  : "text-white/70 hover:text-white",
               )}
             >
               <Icon size={15} aria-hidden="true" />
