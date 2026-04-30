@@ -16,6 +16,38 @@ import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 export const revalidate = 60;
 
 /**
+ * Citizen-network sensors occasionally drift out of calibration and
+ * report nonsense values (PM2.5 ≈ PM10 ≈ 1320 µg/m³ from a single
+ * Bistrița sensor blew up our heatmap by anchoring an entire region
+ * red). Real-world PM2.5 ceiling outdoors is ~500 µg/m³ even during
+ * the worst wildfire smoke; PM10 ~600. Anything past those is sensor
+ * failure, not air quality. Hide such readings entirely so the
+ * heatmap + dot rendering stays trustworthy.
+ */
+const PM25_MAX_PLAUSIBLE = 500;
+const PM10_MAX_PLAUSIBLE = 600;
+
+function isPlausible(s: UnifiedSensor): boolean {
+  if (s.pm25 != null && s.pm25 > PM25_MAX_PLAUSIBLE) return false;
+  if (s.pm10 != null && s.pm10 > PM10_MAX_PLAUSIBLE) return false;
+  if (s.pm25 != null && s.pm25 < 0) return false;
+  if (s.pm10 != null && s.pm10 < 0) return false;
+  // A common stuck-sensor signature: PM2.5 == PM10 to 2 decimals AND
+  // both are very high. Real readings always have PM10 > PM2.5 (PM10
+  // is a superset). When they're identical AND elevated, the sensor
+  // is broadcasting the same broken value across both channels.
+  if (
+    s.pm25 != null &&
+    s.pm10 != null &&
+    s.pm25 > 200 &&
+    Math.abs(s.pm25 - s.pm10) < 0.01
+  ) {
+    return false;
+  }
+  return true;
+}
+
+/**
  * Distance between two points in meters (Haversine).
  */
 function distanceM(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -103,8 +135,14 @@ export async function GET(req: Request) {
     }
   }
 
+  // Filter implausible readings BEFORE dedup so a broken sensor
+  // doesn't shadow the real one nearby just because it ranked higher
+  // in the dedup sort (more non-null fields).
+  const plausible = allSensors.filter(isPlausible);
+  const droppedOutliers = allSensors.length - plausible.length;
+
   // Deduplicate
-  const deduplicated = dedup(allSensors);
+  const deduplicated = dedup(plausible);
 
   // Calculate average AQI
   const aqiValues = deduplicated.map((s) => s.aqi).filter((v): v is number => v != null);
@@ -122,8 +160,9 @@ export async function GET(req: Request) {
 
   return NextResponse.json(response, {
     headers: {
-      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
+      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=60",
       "X-Fetch-Time": `${Date.now() - startTime}ms`,
+      "X-Outliers-Dropped": String(droppedOutliers),
       ...(errors.length > 0 ? { "X-Errors": errors.join("; ") } : {}),
     },
   });

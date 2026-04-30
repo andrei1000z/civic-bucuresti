@@ -1,4 +1,5 @@
-import { getGroqClient, GROQ_MODEL } from "@/lib/groq/client";
+import * as Sentry from "@sentry/nextjs";
+import { getGroqClient, GROQ_MODEL, GROQ_MODEL_FAST } from "@/lib/groq/client";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { polishSynthesis } from "@/lib/ai/polish-synthesis";
 import { AI_SUMMARY_VERSION } from "@/lib/ai/synthesis-version";
@@ -92,27 +93,78 @@ export async function getOrGenerateAiSummary(
   }
 }
 
+/** True for Groq 429 (rate limit / token budget exhausted). */
+function isRateLimited(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const e = err as { status?: number; message?: string };
+  if (e.status === 429) return true;
+  return typeof e.message === "string" && /rate.?limit|429/i.test(e.message);
+}
+
+async function callGroqWithFallback(
+  prompt: string,
+  rawText: string,
+  source: string,
+): Promise<{ raw: string; modelUsed: string } | null> {
+  const groq = getGroqClient();
+  const userMsg = `Sintetizează acest articol de la ${source}:\n\n${rawText.slice(0, 3000)}`;
+  const messages = [
+    { role: "system" as const, content: prompt },
+    { role: "user" as const, content: userMsg },
+  ];
+
+  // First try the strict-grammar 70B model. Falls back to the
+  // faster/cheaper 8B-instant when 70B is rate-limited (Groq free
+  // tier caps 70B at 100K tokens/day; 8B has a much larger daily
+  // budget). The polishSynthesis post-processor smooths over the
+  // grammar quality gap.
+  const candidates: { model: string; max_tokens: number }[] = [
+    { model: GROQ_MODEL, max_tokens: 900 },
+    { model: GROQ_MODEL_FAST, max_tokens: 900 },
+  ];
+
+  for (const cand of candidates) {
+    try {
+      const completion = await groq.chat.completions.create({
+        model: cand.model,
+        messages,
+        temperature: 0.2,
+        max_tokens: cand.max_tokens,
+      });
+      const raw = completion.choices[0]?.message?.content?.trim() ?? "";
+      return { raw, modelUsed: cand.model };
+    } catch (err) {
+      if (isRateLimited(err) && cand.model !== GROQ_MODEL_FAST) {
+        Sentry.captureMessage("stiri AI fell back to fast model (70B 429)", {
+          level: "info",
+          tags: { kind: "stiri_ai_fallback" },
+          extra: { source, fromModel: cand.model, toModel: GROQ_MODEL_FAST },
+        });
+        continue; // try the fast model
+      }
+      // Non-429 error or both models rate-limited — bubble up.
+      throw err;
+    }
+  }
+  return null;
+}
+
 async function generate(
   stire: SummarizableStire,
   rawText: string
 ): Promise<string | null> {
   try {
-    const groq = getGroqClient();
-    const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: `Sintetizează acest articol de la ${stire.source}:\n\n${rawText.slice(0, 3000)}`,
-        },
-      ],
-      temperature: 0.2,
-      max_tokens: 1200,
-    });
-
-    const raw = completion.choices[0]?.message?.content?.trim() ?? "";
+    const result = await callGroqWithFallback(SYSTEM_PROMPT, rawText, stire.source);
+    if (!result) {
+      return stire.excerpt || stire.content || stire.title || null;
+    }
+    const { raw } = result;
     if (raw.length <= 20) {
+      Sentry.captureMessage("stiri AI summary returned too-short response", {
+        level: "warning",
+        tags: { kind: "stiri_ai_short" },
+        extra: { stireId: stire.id, source: stire.source, rawLength: raw.length },
+      });
       return stire.excerpt || stire.content || stire.title || null;
     }
     const summary = polishSynthesis(raw);
@@ -122,17 +174,37 @@ async function generate(
     // instance see it.
     try {
       const admin = createSupabaseAdmin();
-      await admin
+      const { error: dbErr } = await admin
         .from("stiri_cache")
         .update({ ai_summary: summary, ai_summary_version: AI_SUMMARY_VERSION })
         .eq("id", stire.id);
-    } catch {
-      // Persisting is best-effort; the generation itself is still useful
-      // for the current request. Next request will retry.
+      if (dbErr) {
+        Sentry.captureException(dbErr, {
+          tags: { kind: "stiri_ai_persist" },
+          extra: { stireId: stire.id, source: stire.source },
+        });
+      }
+    } catch (persistErr) {
+      Sentry.captureException(persistErr, {
+        tags: { kind: "stiri_ai_persist" },
+        extra: { stireId: stire.id, source: stire.source },
+      });
     }
 
     return summary;
-  } catch {
+  } catch (err) {
+    // Surface the real reason (Groq rate limit, network timeout, model
+    // rejection, etc.) so we stop silently falling back to the article
+    // excerpt without anyone noticing in production.
+    Sentry.captureException(err, {
+      tags: { kind: "stiri_ai_generate" },
+      extra: {
+        stireId: stire.id,
+        source: stire.source,
+        model: GROQ_MODEL,
+        rawTextLength: rawText.length,
+      },
+    });
     return stire.excerpt || stire.content || stire.title || null;
   }
 }
