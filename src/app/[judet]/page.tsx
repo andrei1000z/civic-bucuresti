@@ -70,6 +70,14 @@ export default async function CountyHomePage({
   const stats = getCountyStats(county.id);
   const isBucharest = county.id === "B";
 
+  // Genitive form of the county name to plug into "Ajută la schimbarea X."
+  // București is a municipiu de capitală, not a județ — the right form is
+  // „Bucureștiului". Every other county sounds natural with the
+  // explicit „județului {Name}" prefix and works grammatically.
+  const heroGenitiveTarget = isBucharest
+    ? "Bucureștiului."
+    : `județului ${county.name}.`;
+
   return (
     <>
       <BreadcrumbJsonLd
@@ -92,15 +100,15 @@ export default async function CountyHomePage({
               </p>
 
               <h1 className="font-[family-name:var(--font-sora)] text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-extrabold leading-[1.05] tracking-tight mb-6">
-                {county.name},{" "}
-                <br className="hidden sm:block" />
+                Ajută la schimbarea
+                <br className="hidden sm:block" />{" "}
                 <span className="bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">
-                  mai ușor de înțeles.
+                  {heroGenitiveTarget}
                 </span>
               </h1>
 
               <p className="text-lg md:text-xl text-emerald-100/85 max-w-xl leading-relaxed mb-8">
-                Hărți, sesizări, ghiduri, știri și statistici despre {isBucharest ? "Bucureștiul tău" : `județul ${county.name}`} — într-un singur loc.
+                Hărți, sesizări, ghiduri, știri și statistici despre {isBucharest ? "Bucureștiul tău" : `județul ${county.name}`} — într-un singur loc, gratuit, fără reclame.
               </p>
 
               <div className="flex flex-wrap gap-3">
