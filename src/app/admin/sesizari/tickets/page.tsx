@@ -13,6 +13,7 @@ import {
   ImageOff,
   MessageCircle,
   AlertTriangle,
+  FileText,
 } from "lucide-react";
 import { useToast } from "@/components/Toast";
 import { timeAgo } from "@/lib/utils";
@@ -58,6 +59,14 @@ const FILTERS: Array<{ value: Decision | "all"; label: string }> = [
   { value: "rejected", label: "Respinse" },
   { value: "all", label: "Toate" },
 ];
+
+function isPdfUrl(url: string): boolean {
+  try {
+    return new URL(url).pathname.toLowerCase().endsWith(".pdf");
+  } catch {
+    return url.toLowerCase().includes(".pdf");
+  }
+}
 
 export default function AdminTicketsPage() {
   const { toast } = useToast();
@@ -231,25 +240,46 @@ export default function AdminTicketsPage() {
                     )}
                   </div>
 
-                  {/* Proof preview */}
+                  {/* Proof preview — image renders as a thumbnail, PDF as
+                      a labeled card (browsers can't easily inline-render
+                      PDFs in a small frame, and the admin will open it
+                      anyway via the link). */}
                   <div className="w-full md:w-40 shrink-0">
                     {t.proof_url ? (
-                      <a
-                        href={t.proof_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block aspect-square rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-                        title="Deschide dovada în tab nou"
-                      >
-                        <Image
-                          src={t.proof_url}
-                          alt="Dovadă propusă de cetățean"
-                          width={160}
-                          height={160}
-                          className="w-full h-full object-cover"
-                          unoptimized
-                        />
-                      </a>
+                      isPdfUrl(t.proof_url) ? (
+                        <a
+                          href={t.proof_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex aspect-square rounded-[var(--radius-xs)] bg-rose-500/10 border border-rose-500/30 flex-col items-center justify-center gap-1.5 text-rose-700 dark:text-rose-400 hover:bg-rose-500/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+                          title="Deschide PDF-ul în tab nou"
+                        >
+                          <FileText size={28} aria-hidden="true" />
+                          <span className="text-[10px] uppercase tracking-wider font-bold">
+                            PDF
+                          </span>
+                          <span className="text-[10px] text-rose-700/80 dark:text-rose-400/80">
+                            click pentru deschidere
+                          </span>
+                        </a>
+                      ) : (
+                        <a
+                          href={t.proof_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block aspect-square rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                          title="Deschide dovada în tab nou"
+                        >
+                          <Image
+                            src={t.proof_url}
+                            alt="Dovadă propusă de cetățean"
+                            width={160}
+                            height={160}
+                            className="w-full h-full object-cover"
+                            unoptimized
+                          />
+                        </a>
+                      )
                     ) : (
                       <div className="aspect-square rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-dashed border-[var(--color-border)] grid place-items-center text-[var(--color-text-muted)]">
                         <div className="text-center text-[10px] uppercase tracking-wider">

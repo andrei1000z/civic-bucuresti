@@ -142,6 +142,8 @@ create table if not exists public.stiri_cache (
   image_url text,
   published_at timestamptz not null,
   fetched_at timestamptz default now(),
+  ai_summary text,
+  ai_summary_version int not null default 0,
   featured boolean default false
 );
 

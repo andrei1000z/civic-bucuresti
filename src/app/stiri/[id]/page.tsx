@@ -41,6 +41,9 @@ interface StireRow {
   image_url: string | null;
   published_at: string;
   ai_summary: string | null;
+  /** Version stamp matched against AI_SUMMARY_VERSION; older values
+   *  trigger transparent regeneration. */
+  ai_summary_version: number | null;
 }
 
 const getSupabase = createSupabaseAnon;

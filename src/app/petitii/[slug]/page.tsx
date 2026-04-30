@@ -84,6 +84,7 @@ export default async function PetitiePage({
     body: petitie.body,
     category: petitie.category,
     ai_summary: petitie.ai_summary ?? null,
+    ai_summary_version: petitie.ai_summary_version ?? 0,
   });
 
   const isActive = petitie.status === "active";

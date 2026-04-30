@@ -1,5 +1,7 @@
-import { getGroqClient, GROQ_MODEL_FAST } from "@/lib/groq/client";
+import { getGroqClient, GROQ_MODEL } from "@/lib/groq/client";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { polishSynthesis } from "@/lib/ai/polish-synthesis";
+import { AI_SUMMARY_VERSION } from "@/lib/ai/synthesis-version";
 
 export interface SummarizablePetitie {
   id: string;
@@ -8,34 +10,53 @@ export interface SummarizablePetitie {
   body: string | null;
   category: string | null;
   ai_summary: string | null;
+  /** Version stamp written alongside `ai_summary`. When < AI_SUMMARY_VERSION
+   *  we regenerate transparently so quality fixes propagate. */
+  ai_summary_version?: number | null;
 }
 
-const SYSTEM_PROMPT = `Ești un analist civic care sintetizează petiții pentru o platformă civică din România (Civia).
+const SYSTEM_PROMPT = `Ești un analist civic senior care sintetizează petiții pentru Civia, o platformă civică românească cu standarde editoriale înalte.
 
-INSTRUCȚIUNI DE FORMATARE:
-- Folosește markdown: **bold** pentru cifre + nume + termene importante; secțiuni cu titlu pe linie separată terminat cu ":".
-- Începe cu un paragraf "Pe scurt" (1–2 propoziții) — esența cererii și beneficiarul.
-- Apoi secțiunea "Ce cere petiția:" cu o listă de bullet-uri scurte (cu "- ").
-- Apoi "De ce contează:" — 2–3 propoziții cu impactul concret asupra cetățenilor.
-- Dacă din text rezultă un termen / o lege / un articol legal, evidențiază-l cu **bold**.
-- Dacă există un public-țintă specific (părinți, șoferi, pacienți etc.), menționează-l clar.
-- Tonul: factual, civic, fără sloganuri sau retorică. Limba română corectă cu diacritice.
-- Lungime totală: 200–350 cuvinte.
-- NU inventa fapte. Dacă o secțiune nu poate fi compusă din text, omite-o.
-- NU repeta titlul cuvânt cu cuvânt în primul paragraf.`;
+CORECTITUDINE GRAMATICALĂ — OBLIGATORIE:
+- Limba română corectă, cu diacritice complete (ă, â, î, ș, ț) — fără excepții.
+- Acord perfect: subiect–predicat (numerice incluse: „două instituții sunt", nu „este"), articol hotărât/nehotărât, gen + număr la adjective.
+- Folosește articulat corect: „primarul Bucureștiului", „ministrul Sănătății".
+- Cifrele cu separatorul corect românesc (80.000 nu 80,000).
+- Numele proprii și instituțiile cu majusculă: „Primăria Capitalei", „Curtea Constituțională".
 
-// Per-instance request coalescing — same lambda, same petition: one call.
+STRUCTURĂ — RESPECTĂ EXACT:
+1. Secțiunea „Pe scurt:" — 1–2 propoziții cu esența cererii și beneficiarul. NU repeta titlul cuvânt cu cuvânt.
+2. Secțiunea „Ce cere petiția:" — listă de bullet-uri cu „- ", una cerere per bullet, fiecare începând cu majusculă.
+3. Secțiunea „De ce contează:" — 2–3 propoziții cu impactul concret asupra cetățenilor.
+4. Fiecare titlu de secțiune e pe linie separată, terminat cu „:".
+
+FORMATARE:
+- Prima literă din fiecare paragraf, bullet și secțiune E ÎNTOTDEAUNA majusculă.
+- **Bold** pe cifre, termene, articole de lege („Legea 544/2001"), public-țintă, instituții.
+- Tonul: factual, civic, fără sloganuri sau retorică.
+
+INTERZIS:
+- NU inventa fapte, cifre sau termene care nu sunt în textul sursă.
+- Dacă o secțiune nu poate fi compusă din text, omite-o complet.
+- NU folosi emoji-uri sau adjective evaluative.
+
+LUNGIME: 200–340 cuvinte total.`;
+
 const inFlight = new Map<string, Promise<string | null>>();
 
 /**
- * Returns the cached AI synthesis if present, otherwise generates one,
- * persists it to the DB, and returns it. Mirrors getOrGenerateAiSummary
- * for stiri.
+ * Returns the cached AI synthesis if present AND at the current version,
+ * otherwise generates one, persists it, and returns it.
  */
 export async function getOrGeneratePetitieAiSummary(
   petitie: SummarizablePetitie,
 ): Promise<string | null> {
-  if (petitie.ai_summary && petitie.ai_summary.length > 20) {
+  const cacheValid =
+    petitie.ai_summary &&
+    petitie.ai_summary.length > 20 &&
+    (petitie.ai_summary_version ?? 0) >= AI_SUMMARY_VERSION;
+
+  if (cacheValid) {
     return petitie.ai_summary;
   }
 
@@ -67,7 +88,7 @@ async function generate(
   try {
     const groq = getGroqClient();
     const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL_FAST,
+      model: GROQ_MODEL,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         {
@@ -75,22 +96,22 @@ async function generate(
           content: `Sintetizează această petiție civică${petitie.category ? ` (categorie: ${petitie.category})` : ""}:\n\n${rawText.slice(0, 4000)}`,
         },
       ],
-      temperature: 0.3,
+      temperature: 0.2,
       max_tokens: 900,
     });
 
-    const summary = completion.choices[0]?.message?.content?.trim() ?? "";
-    if (summary.length <= 20) {
+    const raw = completion.choices[0]?.message?.content?.trim() ?? "";
+    if (raw.length <= 20) {
       return petitie.summary || petitie.body || petitie.title || null;
     }
+    const summary = polishSynthesis(raw);
 
     try {
       const admin = createSupabaseAdmin();
       await admin
         .from("petitii")
-        .update({ ai_summary: summary })
-        .eq("id", petitie.id)
-        .is("ai_summary", null);
+        .update({ ai_summary: summary, ai_summary_version: AI_SUMMARY_VERSION })
+        .eq("id", petitie.id);
     } catch {
       // Best-effort; next request will retry the persist.
     }

@@ -18,7 +18,7 @@ import {
   SESIZARE_TICKET_PROPOSABLE,
   type SesizareStatus,
 } from "@/lib/sesizari/status";
-import { PhotoUploader } from "./PhotoUploader";
+import { DocumentUploader } from "./DocumentUploader";
 
 interface Props {
   /** Sesizare code, used in API URLs. */
@@ -53,7 +53,7 @@ export function StatusTicketButton({ code, currentStatus }: Props) {
     () => SESIZARE_TICKET_PROPOSABLE.find((s) => s !== currentStatus) ?? "inregistrata",
   );
   const [note, setNote] = useState("");
-  const [proof, setProof] = useState<string[]>([]);
+  const [proof, setProof] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<TicketRow[] | null>(null);
 
@@ -108,7 +108,7 @@ export function StatusTicketButton({ code, currentStatus }: Props) {
         body: JSON.stringify({
           proposed_status: proposed,
           note: note.trim(),
-          proof_url: proof[0] ?? null,
+          proof_url: proof,
         }),
       });
       const json = await res.json();
@@ -120,7 +120,7 @@ export function StatusTicketButton({ code, currentStatus }: Props) {
       );
       setOpen(false);
       setNote("");
-      setProof([]);
+      setProof(null);
       setHistory(null); // bust so reopen reloads
       router.refresh();
     } catch (e) {
@@ -249,9 +249,10 @@ export function StatusTicketButton({ code, currentStatus }: Props) {
                 <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-2">
                   Dovadă (opțional, dar puternic)
                 </p>
-                <PhotoUploader urls={proof} onChange={setProof} max={1} />
+                <DocumentUploader url={proof} onChange={setProof} />
                 <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
-                  Captură de ecran cu emailul, foto cu intervenția, etc.
+                  Poză cu intervenția, captură cu emailul, sau PDF cu
+                  răspunsul oficial al instituției.
                 </p>
               </div>
 

@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
-import { isValidImage } from "@/lib/sanitize";
+import { isValidImage, isValidPdf } from "@/lib/sanitize";
 import { MAX_UPLOAD_BYTES as MAX_FILE_SIZE } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_DOC_TYPES = [...ALLOWED_IMAGE_TYPES, "application/pdf"];
+// PDFs are allowed up to a higher cap because scanned official letters
+// often run 2–10 MB, but only when the caller opts in via `kind=document`.
+const PDF_MAX_BYTES = 15 * 1024 * 1024;
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
@@ -18,6 +22,13 @@ export async function POST(req: Request) {
       { status: 429 }
     );
   }
+
+  // `kind=document` opts in to PDF uploads (status-ticket evidence,
+  // official-response receipts). The default flow stays image-only so
+  // sesizari photo uploads can't accidentally accept arbitrary PDFs.
+  const url = new URL(req.url);
+  const kind = url.searchParams.get("kind") === "document" ? "document" : "image";
+  const allowedTypes = kind === "document" ? ALLOWED_DOC_TYPES : ALLOWED_IMAGE_TYPES;
 
   try {
     const formData = await req.formData();
@@ -32,16 +43,25 @@ export async function POST(req: Request) {
 
     // Validate each file — MIME + size + magic number
     for (const file of files) {
-      if (!ALLOWED_TYPES.includes(file.type)) {
+      if (!allowedTypes.includes(file.type)) {
         return NextResponse.json({ error: `Tip invalid: ${file.type}` }, { status: 400 });
       }
-      if (file.size > MAX_FILE_SIZE) {
+      const sizeCap = file.type === "application/pdf" ? PDF_MAX_BYTES : MAX_FILE_SIZE;
+      if (file.size > sizeCap) {
         return NextResponse.json({ error: `Fișier prea mare: ${file.name}` }, { status: 400 });
       }
-      const validMagic = await isValidImage(file);
+      const validMagic =
+        file.type === "application/pdf"
+          ? await isValidPdf(file)
+          : await isValidImage(file);
       if (!validMagic) {
         return NextResponse.json(
-          { error: `Fișier corupt sau nu e imagine reală: ${file.name}` },
+          {
+            error:
+              file.type === "application/pdf"
+                ? `Fișier PDF corupt: ${file.name}`
+                : `Fișier corupt sau nu e imagine reală: ${file.name}`,
+          },
           { status: 400 }
         );
       }
@@ -58,6 +78,7 @@ export async function POST(req: Request) {
       "image/png": "png",
       "image/webp": "webp",
       "image/gif": "gif",
+      "application/pdf": "pdf",
     };
 
     for (const file of files) {

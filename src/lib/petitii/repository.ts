@@ -18,6 +18,9 @@ export interface PetitieRow {
   created_at: string;
   updated_at: string;
   ai_summary?: string | null;
+  /** Version stamp matched against AI_SUMMARY_VERSION; older values
+   *  trigger transparent regeneration. NULL on legacy rows. */
+  ai_summary_version?: number | null;
 }
 
 export interface PetitieWithCount extends PetitieRow {

@@ -22,6 +22,21 @@ export function sanitizeText(input: string, maxLength = 2000): string {
     .trim();
 }
 
+// Verify PDF magic number — `%PDF-` followed by version digits.
+export async function isValidPdf(file: File): Promise<boolean> {
+  if (file.size === 0 || file.size > 15 * 1024 * 1024) return false;
+  const buf = await file.slice(0, 5).arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  // %PDF-  → 25 50 44 46 2D
+  return (
+    bytes[0] === 0x25 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x44 &&
+    bytes[3] === 0x46 &&
+    bytes[4] === 0x2d
+  );
+}
+
 // Verify image file magic numbers (first bytes)
 export async function isValidImage(file: File): Promise<boolean> {
   if (file.size === 0 || file.size > 10 * 1024 * 1024) return false;
