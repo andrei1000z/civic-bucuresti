@@ -33,9 +33,17 @@ export function CountyPickerInline() {
   const handleChange = (slug: string) => {
     if (typeof window === "undefined") return;
     if (!slug) {
-      // "Niciun județ" — clear so the user goes back to national defaults.
+      // "Național" — clear localStorage and the cookie so the
+      // src/proxy.ts "come home to your county" redirect on / stops
+      // bouncing the user to /[slug]. We use BOTH max-age=0 and
+      // expires=epoch defensively because some browsers/CDN caches
+      // ignore one but not the other, and we set both with-and-
+      // without SameSite so we don't accidentally write a different
+      // cookie attribute set than the original.
       localStorage.removeItem(COUNTY_LS_KEY);
-      document.cookie = `county=; path=/; max-age=0; SameSite=Lax`;
+      const expired = "Thu, 01 Jan 1970 00:00:00 GMT";
+      document.cookie = `county=; path=/; max-age=0; expires=${expired}; SameSite=Lax`;
+      document.cookie = `county=; path=/; max-age=0; expires=${expired}`;
       setSavedSlug(null);
     } else {
       localStorage.setItem(COUNTY_LS_KEY, slug);
@@ -72,7 +80,7 @@ export function CountyPickerInline() {
             onChange={(e) => handleChange(e.target.value)}
             className="w-full h-10 pl-9 pr-8 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm appearance-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           >
-            <option value="">— niciun județ (vezi tot ce e național) —</option>
+            <option value="">🇷🇴 Național</option>
             {sortedCounties.map((c) => (
               <option key={c.id} value={c.slug}>
                 {c.name} ({c.id})
@@ -100,7 +108,12 @@ export function CountyPickerInline() {
             </Link>
           </>
         ) : (
-          <>Fără județ selectat — vei vedea conținut național implicit.</>
+          <>
+            Vei vedea conținutul național.{" "}
+            <Link href="/" className="text-[var(--color-primary)] hover:underline">
+              Mergi pe homepage →
+            </Link>
+          </>
         )}
       </p>
     </div>
