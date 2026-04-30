@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Megaphone, ArrowRight, ExternalLink } from "lucide-react";
+import { Megaphone, ArrowRight, ExternalLink, Sparkles } from "lucide-react";
 import { listPetitii } from "@/lib/petitii/repository";
 import { CollectionPageJsonLd } from "@/components/JsonLd";
 import { SITE_URL, PETITIE_CATEGORII } from "@/lib/constants";
@@ -25,25 +25,41 @@ export default async function PetitiiPage() {
   const closed = petitii.filter((p) => p.status === "closed");
 
   return (
-    <div className="container-narrow py-12 md:py-16">
+    <div className="container-narrow py-8 md:py-12">
       <CollectionPageJsonLd
         name="Petiții civice — Civia"
         description="Catalog cu petiții civice active. Click → semnează pe site-ul oficial. Mai multe voci = autoritățile răspund."
         url={`${SITE_URL}/petitii`}
       />
 
-      <header className="mb-10 max-w-3xl">
-        <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400 text-xs font-semibold mb-4">
-          <Megaphone size={12} aria-hidden="true" /> Acțiuni colective
-        </p>
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3 tracking-tight">
-          Petiții civice
-        </h1>
-        <p className="text-lg text-[var(--color-text-muted)] leading-relaxed">
-          Curatat de Civia. Click pe petiție → vezi argumentele și sursa oficială (Declic /
-          Avaaz / etc.) unde semnezi. Spre deosebire de o sesizare individuală, petiția
-          adună <strong>multe voci pentru aceeași cauză</strong>.
-        </p>
+      {/* Hero — purple gradient distinguishes the petition surface from the
+          green sesizari surface, while keeping the same layout pattern. */}
+      <header className="relative mb-8 overflow-hidden rounded-[var(--radius-lg)] bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-900 p-6 md:p-8 text-white shadow-[var(--shadow-3)]">
+        <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="absolute -bottom-16 -left-8 w-72 h-72 rounded-full bg-fuchsia-400/20 blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="relative flex items-start gap-4">
+          <div
+            className="w-12 h-12 rounded-[var(--radius-xs)] bg-white/15 backdrop-blur-sm ring-2 ring-white/30 grid place-items-center shrink-0"
+            aria-hidden="true"
+          >
+            <Megaphone size={22} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-4xl font-extrabold leading-tight mb-2">
+              Petiții civice
+            </h1>
+            <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-2xl">
+              Curatat de Civia. Click pe petiție → vezi argumentele, sinteza AI și sursa oficială
+              (Declic / Avaaz / etc.) unde semnezi. Spre deosebire de o sesizare individuală,
+              petiția adună <strong>multe voci pentru aceeași cauză</strong>.
+            </p>
+            <p className="text-[11px] text-white/70 mt-3 inline-flex items-center gap-1.5">
+              <Sparkles size={11} aria-hidden="true" />
+              {active.length} {active.length === 1 ? "petiție activă" : "petiții active"}
+              {closed.length > 0 && ` · ${closed.length} încheiate`}
+            </p>
+          </div>
+        </div>
       </header>
 
       {petitii.length === 0 ? (
@@ -53,8 +69,17 @@ export default async function PetitiiPage() {
           {active.length > 0 && (
             <section className="mb-12">
               <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold mb-5 flex items-center gap-2">
+                <span
+                  className="w-7 h-7 rounded-[var(--radius-xs)] bg-purple-500/15 text-purple-600 dark:text-purple-400 grid place-items-center"
+                  aria-hidden="true"
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-60 animate-ping" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500" />
+                  </span>
+                </span>
                 Active
-                <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] text-xs font-bold tabular-nums">
+                <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full bg-purple-500/15 text-purple-700 dark:text-purple-400 text-xs font-bold tabular-nums">
                   {active.length}
                 </span>
               </h2>
@@ -68,8 +93,17 @@ export default async function PetitiiPage() {
 
           {closed.length > 0 && (
             <section>
-              <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold mb-5 text-[var(--color-text-muted)]">
+              <h2 className="font-[family-name:var(--font-sora)] text-lg md:text-xl font-bold mb-5 text-[var(--color-text-muted)] flex items-center gap-2">
+                <span
+                  className="w-7 h-7 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] grid place-items-center"
+                  aria-hidden="true"
+                >
+                  <span className="w-2 h-2 rounded-full bg-[var(--color-text-muted)]/50" />
+                </span>
                 Încheiate
+                <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text-muted)] text-xs font-bold tabular-nums">
+                  {closed.length}
+                </span>
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 opacity-80">
                 {closed.map((p) => (

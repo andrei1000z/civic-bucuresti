@@ -115,9 +115,10 @@ export default async function PetitiePage({
 
       <Link
         href="/petitii"
-        className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-4 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
       >
-        <ChevronLeft size={16} aria-hidden="true" /> Toate petițiile
+        <ChevronLeft size={13} aria-hidden="true" />
+        Toate petițiile
       </Link>
 
       <div className="grid lg:grid-cols-[1fr_340px] gap-6 lg:gap-8 items-start">
@@ -225,14 +226,22 @@ export default async function PetitiePage({
             </section>
           )}
 
-          {/* Body — paragraph spacing reală pe mobile (whitespace-pre-line +
-              line-height generos) */}
-          <details className="group" {...(aiSummary ? {} : { open: true })}>
-            <summary className="cursor-pointer list-none mb-4 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text)] inline-flex items-center gap-1.5 transition-colors">
-              <span className="group-open:rotate-90 transition-transform" aria-hidden="true">▸</span>
+          {/* Body — collapsed by default when AI synthesis exists (the
+              synthesis is the better read); open by default otherwise */}
+          <details
+            className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5 md:p-6"
+            {...(aiSummary ? {} : { open: true })}
+          >
+            <summary className="cursor-pointer list-none text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text)] inline-flex items-center gap-2 transition-colors">
+              <span
+                className="w-5 h-5 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] grid place-items-center text-[var(--color-text-muted)] group-open:bg-[var(--color-primary-soft)] group-open:text-[var(--color-primary)] transition-colors"
+                aria-hidden="true"
+              >
+                <span className="group-open:rotate-90 transition-transform inline-block">▸</span>
+              </span>
               Text original al petiției
             </summary>
-            <div className="text-[15px] sm:text-base text-[var(--color-text-muted)] leading-[1.7] whitespace-pre-line">
+            <div className="text-[15px] sm:text-base text-[var(--color-text)] leading-[1.7] whitespace-pre-line mt-4 pt-4 border-t border-[var(--color-border)]">
               {petitie.body}
             </div>
           </details>
@@ -291,15 +300,21 @@ export default async function PetitiePage({
             inline în main content pentru fiecare touchpoint vizibil din scroll). */}
         <aside className="hidden lg:block lg:sticky lg:top-24 space-y-3">
           {petitie.external_url && isActive && (
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 shadow-[var(--shadow-1)]">
-              <p className="text-[10px] uppercase tracking-wider font-bold text-[var(--color-text-muted)] mb-3">
+            <div className="bg-[var(--color-surface)] border border-purple-500/30 rounded-[var(--radius-md)] p-5 shadow-[var(--shadow-2)]">
+              <p className="text-[10px] uppercase tracking-wider font-bold text-purple-700 dark:text-purple-400 mb-3 inline-flex items-center gap-1.5">
+                <span
+                  className="w-5 h-5 rounded-[var(--radius-xs)] bg-purple-500/15 grid place-items-center"
+                  aria-hidden="true"
+                >
+                  <Megaphone size={11} />
+                </span>
                 Semnează aici
               </p>
               <a
                 href={petitie.external_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[var(--radius-full)] bg-purple-600 hover:bg-purple-700 active:scale-[0.97] text-white text-sm font-semibold transition-all shadow-[var(--shadow-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+                className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[var(--radius-full)] bg-gradient-to-br from-purple-600 to-fuchsia-700 hover:from-purple-700 hover:to-fuchsia-800 active:scale-[0.97] text-white text-sm font-semibold transition-all shadow-[var(--shadow-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
               >
                 <Megaphone size={16} aria-hidden="true" />
                 Mergi pe {externalHost}
@@ -312,7 +327,13 @@ export default async function PetitiePage({
           )}
 
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-5 shadow-[var(--shadow-1)]">
-            <p className="text-[10px] uppercase tracking-wider font-bold text-[var(--color-text-muted)] mb-3">
+            <p className="text-[10px] uppercase tracking-wider font-bold text-[var(--color-text-muted)] mb-3 inline-flex items-center gap-1.5">
+              <span
+                className="w-5 h-5 rounded-[var(--radius-xs)] bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 grid place-items-center"
+                aria-hidden="true"
+              >
+                <Share2 size={11} />
+              </span>
               Distribuie petiția
             </p>
             <SharePetitie url={shareUrl} title={petitie.title} summary={petitie.summary} />
@@ -321,6 +342,14 @@ export default async function PetitiePage({
             </p>
           </div>
 
+          {/* About the petition surface — small info card to balance the sidebar */}
+          <div className="bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-md)] p-4">
+            <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+              <strong className="text-[var(--color-text)]">Cum funcționează?</strong> Civia
+              curătă petițiile civice de pe Declic / Avaaz / petitie.civica.ro. Click → site-ul
+              oficial unde semnezi. Datele tale rămân la ei, nu la noi.
+            </p>
+          </div>
         </aside>
       </div>
     </article>
