@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, MapPin, Calendar, User, Clock, UserPlus } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, User, Clock, UserPlus, FileText, Image as ImageIcon, Map as MapIcon, Scroll } from "lucide-react";
 import {
   getSesizareByCode,
   getTimeline,
@@ -122,79 +122,104 @@ export default async function SesizareDetailPage({
       />
       <Link
         href="/sesizari-publice"
-        className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-6 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
+        className="inline-flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
       >
-        <ChevronLeft size={16} aria-hidden="true" /> Toate sesizările publice
+        <ArrowLeft size={13} aria-hidden="true" />
+        Toate sesizările publice
       </Link>
 
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3 flex-wrap">
-          <Badge bgColor={STATUS_COLORS[sesizare.status] ?? "#64748B"} color="white">
-            {STATUS_LABELS[sesizare.status] ?? sesizare.status}
-          </Badge>
-          <Badge variant="neutral">
-            <span className="mr-1" aria-hidden="true">{tipIcon}</span>
-            {tipLabel}
-          </Badge>
-          <Badge variant="neutral">{sesizare.sector}</Badge>
-          <span
-            className="font-mono text-xs text-[var(--color-text-muted)] ml-auto"
-            aria-label={`Cod sesizare ${sesizare.code}`}
+      {/* Hero header — glass card tinted by status color so the page leads
+          with the most important signal: where this sesizare stands now. */}
+      {(() => {
+        const statusColor = STATUS_COLORS[sesizare.status] ?? "#64748B";
+        const statusLabel = STATUS_LABELS[sesizare.status] ?? sesizare.status;
+        return (
+          <header
+            className="relative mb-6 overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-2)] p-5 md:p-6"
+            style={{
+              backgroundImage: `linear-gradient(135deg, ${statusColor}1f, transparent 55%)`,
+            }}
           >
-            {sesizare.code}
-          </span>
-        </div>
-        <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-extrabold mb-3">
-          {sesizare.titlu}
-        </h1>
-        <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-muted)] mb-4">
-          <span className="flex items-center gap-1.5">
-            <MapPin size={14} aria-hidden="true" />
-            {sesizare.locatie}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <User size={14} aria-hidden="true" />
-            {sesizare.author_name}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Calendar size={14} aria-hidden="true" />
-            <time dateTime={sesizare.created_at}>{formatDate(sesizare.created_at)}</time>
-          </span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <SignSesizareButton
-            tip={sesizare.tip}
-            titlu={sesizare.titlu}
-            locatie={sesizare.locatie}
-            sector={sesizare.sector}
-            descriere={sesizare.descriere}
-            formal_text={sesizare.formal_text}
-            imagini={sesizare.imagini}
-            code={sesizare.code}
-            variant="primary"
-          />
-          <MarkResolvedButton
-            code={sesizare.code}
-            status={sesizare.status}
-            isAuthor={isAuthor}
-          />
-          <FollowButton
-            code={sesizare.code}
-            initialFollowing={userFollowing}
-            initialCount={sesizare.nr_followers ?? 0}
-          />
-          <ShareMenu
-            url={`${SITE_URL}/sesizari/${sesizare.code}`}
-            title={sesizare.titlu}
-            size="md"
-          />
-          <DeleteSesizareButton
-            code={sesizare.code}
-            isAuthor={isAuthor}
-          />
-        </div>
-      </div>
+            <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="neutral" className="inline-flex items-center gap-1">
+                  <span aria-hidden="true">{tipIcon}</span>
+                  {tipLabel}
+                </Badge>
+                <Badge variant="neutral">{sesizare.sector}</Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider"
+                  style={{ backgroundColor: `${statusColor}1a`, color: statusColor }}
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: statusColor }}
+                    aria-hidden="true"
+                  />
+                  {statusLabel}
+                </span>
+                <span
+                  className="font-mono text-[11px] font-bold text-[var(--color-text-muted)] tabular-nums"
+                  aria-label={`Cod sesizare ${sesizare.code}`}
+                >
+                  {sesizare.code}
+                </span>
+              </div>
+            </div>
+            <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-4xl font-extrabold leading-tight mb-3">
+              {sesizare.titlu}
+            </h1>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--color-text-muted)] mb-5">
+              <span className="inline-flex items-center gap-1.5">
+                <MapPin size={12} aria-hidden="true" />
+                {sesizare.locatie}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <User size={12} aria-hidden="true" />
+                {sesizare.author_name}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Calendar size={12} aria-hidden="true" />
+                <time dateTime={sesizare.created_at}>{formatDate(sesizare.created_at)}</time>
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <SignSesizareButton
+                tip={sesizare.tip}
+                titlu={sesizare.titlu}
+                locatie={sesizare.locatie}
+                sector={sesizare.sector}
+                descriere={sesizare.descriere}
+                formal_text={sesizare.formal_text}
+                imagini={sesizare.imagini}
+                code={sesizare.code}
+                variant="primary"
+              />
+              <MarkResolvedButton
+                code={sesizare.code}
+                status={sesizare.status}
+                isAuthor={isAuthor}
+              />
+              <FollowButton
+                code={sesizare.code}
+                initialFollowing={userFollowing}
+                initialCount={sesizare.nr_followers ?? 0}
+              />
+              <ShareMenu
+                url={`${SITE_URL}/sesizari/${sesizare.code}`}
+                title={sesizare.titlu}
+                size="md"
+              />
+              <DeleteSesizareButton
+                code={sesizare.code}
+                isAuthor={isAuthor}
+              />
+            </div>
+          </header>
+        );
+      })()}
 
       <div className="grid lg:grid-cols-[1fr_340px] gap-8">
         <div>
@@ -208,9 +233,19 @@ export default async function SesizareDetailPage({
           )}
 
           {/* Description */}
-          <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6 mb-6">
-            <h2 className="font-semibold mb-3">Descriere</h2>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">{sesizare.descriere}</p>
+          <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-5 md:p-6 mb-6">
+            <h2 className="font-semibold mb-3 inline-flex items-center gap-2">
+              <span
+                className="w-7 h-7 rounded-[var(--radius-xs)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] grid place-items-center"
+                aria-hidden="true"
+              >
+                <FileText size={13} />
+              </span>
+              Descriere
+            </h2>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap text-[var(--color-text)]">
+              {sesizare.descriere}
+            </p>
           </section>
 
           {/* Official response from authority — when admin pastes
@@ -257,11 +292,17 @@ export default async function SesizareDetailPage({
 
           {/* Formal text — address stripped for privacy */}
           {sesizare.formal_text && (
-            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6 mb-6">
-              <h2 className="font-semibold mb-3">
+            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-5 md:p-6 mb-6">
+              <h2 className="font-semibold mb-3 inline-flex items-center gap-2">
+                <span
+                  className="w-7 h-7 rounded-[var(--radius-xs)] bg-violet-500/15 text-violet-600 dark:text-violet-400 grid place-items-center"
+                  aria-hidden="true"
+                >
+                  <Scroll size={13} />
+                </span>
                 Text formal
               </h2>
-              <div className="bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] p-4 text-xs font-mono whitespace-pre-wrap">
+              <div className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-xs)] p-4 text-xs font-mono whitespace-pre-wrap text-[var(--color-text-muted)] leading-relaxed">
                 {stripPrivateAddress(sesizare.formal_text)}
               </div>
               <p className="text-[10px] text-[var(--color-text-muted)] mt-2 italic">
@@ -272,25 +313,46 @@ export default async function SesizareDetailPage({
 
           {/* Photos */}
           {sesizare.imagini.length > 0 && (
-            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6 mb-6">
-              <h2 className="font-semibold mb-3">Fotografii</h2>
+            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-5 md:p-6 mb-6">
+              <h2 className="font-semibold mb-3 inline-flex items-center gap-2">
+                <span
+                  className="w-7 h-7 rounded-[var(--radius-xs)] bg-amber-500/15 text-amber-600 dark:text-amber-400 grid place-items-center"
+                  aria-hidden="true"
+                >
+                  <ImageIcon size={13} />
+                </span>
+                Fotografii
+                <span className="text-[10px] font-normal text-[var(--color-text-muted)] ml-1">
+                  ({sesizare.imagini.length})
+                </span>
+              </h2>
               <PhotoGallery urls={sesizare.imagini} title="Fotografie" />
             </section>
           )}
 
           {/* Map */}
-          <section className="mb-6">
-            <h2 className="font-semibold mb-3">Localizare</h2>
-            <EvenimentMap
-              coords={[sesizare.lat, sesizare.lng]}
-              label={sesizare.titlu}
-              color={STATUS_COLORS[sesizare.status] ?? "#64748B"}
-              zoom={16}
-              height="320px"
-            />
+          <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-5 md:p-6 mb-6">
+            <h2 className="font-semibold mb-3 inline-flex items-center gap-2">
+              <span
+                className="w-7 h-7 rounded-[var(--radius-xs)] bg-rose-500/15 text-rose-600 dark:text-rose-400 grid place-items-center"
+                aria-hidden="true"
+              >
+                <MapIcon size={13} />
+              </span>
+              Localizare
+            </h2>
+            <div className="rounded-[var(--radius-xs)] overflow-hidden border border-[var(--color-border)]">
+              <EvenimentMap
+                coords={[sesizare.lat, sesizare.lng]}
+                label={sesizare.titlu}
+                color={STATUS_COLORS[sesizare.status] ?? "#64748B"}
+                zoom={16}
+                height="320px"
+              />
+            </div>
           </section>
 
-          {/* Comments */}
+          {/* Comments — component renders its own heading already */}
           <CommentsSection code={sesizare.code} initialComments={comments} />
         </div>
 
