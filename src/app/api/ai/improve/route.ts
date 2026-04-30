@@ -41,8 +41,27 @@ const PARAGRAPH_STARTS = [
   /^Cu (respect|stimă)/i,
 ];
 
+function stripMarkdown(text: string): string {
+  // Sesizările pleacă ca text simplu — markdown apare literal în mail
+  // și arată neprofesional. Llama strecoară uneori **bold:** sau __italic__
+  // în pofida promptului; aici curățăm last-mile.
+  let t = text;
+  // **bold** și __bold__ → bold
+  t = t.replace(/\*\*([^*\n]+?)\*\*/g, "$1");
+  t = t.replace(/__([^_\n]+?)__/g, "$1");
+  // *italic* și _italic_ (doar când e clar emphasis, nu math/cod)
+  t = t.replace(/(^|\s)\*([^*\n]+?)\*(?=\s|[.,;:!?)]|$)/g, "$1$2");
+  t = t.replace(/(^|\s)_([^_\n]+?)_(?=\s|[.,;:!?)]|$)/g, "$1$2");
+  // ## titluri la început de linie
+  t = t.replace(/^#{1,6}\s+/gm, "");
+  // `cod inline`
+  t = t.replace(/`([^`\n]+?)`/g, "$1");
+  return t;
+}
+
 function normalizeFormatting(text: string): string {
-  let t = text.replace(/\r\n/g, "\n");
+  let t = stripMarkdown(text);
+  t = t.replace(/\r\n/g, "\n");
   // Collapse 3+ newlines → exactly 2
   t = t.replace(/\n{3,}/g, "\n\n");
   const lines = t.split("\n").map((l) => l.trim());

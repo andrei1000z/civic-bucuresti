@@ -16,7 +16,7 @@ Mă numesc {NUMELE}, locuiesc în {ADRESA} și doresc să vă aduc la cunoștin�
 
 Pentru a rezolva această situație, vă solicit respectuos să luați următoarele măsuri:
 
-{NUMEROTARE 2-4 acțiuni concrete. Formatul EXACT — label bold cu ":", apoi explicație 1 propoziție:
+{NUMEROTARE 2-4 acțiuni concrete. Formatul EXACT — titlu scurt urmat de ":", apoi explicație 1 propoziție. SCRIE TOTUL CA TEXT SIMPLU, FĂRĂ MARKDOWN:
 1. {Titlu acțiune}: {detaliu scurt}.
 2. {Titlu acțiune}: {detaliu scurt}.
 ...}
@@ -68,7 +68,16 @@ ATENȚIE CRITICĂ — VALIDITATE JSON:
 
 Dacă sunt atașate fotografii și descrierea cetățeanului e inexactă față de ce vezi (ex: spune "blocat complet" dar în poză se vede loc de trecere), poți include opțional "descriere_rafinata" cu o propoziție scurtă care descrie faptele observabile. Bazează TOT textul pe ce vezi, nu pe clișee generice.
 
-NU folosi markdown. NU include alte câmpuri în afară de formal_text (și opțional descriere_rafinata).`;
+INTERZIS COMPLET MARKDOWN. NU folosi NICIODATĂ:
+- ** sau __ pentru bold (ex: **Titlu:** → scrie pur și simplu Titlu:)
+- * sau _ pentru italic
+- # pentru titluri
+- \`\`\` sau \` pentru cod
+- [text](link) pentru link-uri
+
+Sesizarea este trimisă ca EMAIL TEXT SIMPLU către o primărie — orice asterisc, liniuță de subliniere sau alt caracter de formatare apare LITERAL în mail și arată neprofesional. Scrie tot textul ca proză curată, fără niciun caracter special de formatare.
+
+NU include alte câmpuri în afară de formal_text (și opțional descriere_rafinata).`;
 
 export const SYSTEM_PROMPT_CLASSIFIER = `Ești un sistem de clasificare automată pentru sesizări urbane din București.
 
