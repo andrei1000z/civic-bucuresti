@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/Badge";
 import { CivicQuiz } from "@/components/functioneaza/CivicQuiz";
 import { Glosar } from "@/components/functioneaza/Glosar";
 import { FaqJsonLd } from "@/components/FaqJsonLd";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 import {
   PRESEDINTE,
   GUVERN,
@@ -131,23 +132,17 @@ function InstitutieCard({
 
 export default function CumFunctioneazaPage() {
   return (
-    <div className="container-narrow py-12 md:py-16">
+    <div className="container-narrow py-8 md:py-12">
       <FaqJsonLd items={FAQ_ITEMS} />
 
-      {/* Header */}
-      <div className="mb-16">
-        <Badge className="mb-4" variant="primary">
-          🇷🇴 Educațional
-        </Badge>
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4">
-          Cum funcționează România
-        </h1>
-        <p className="text-lg text-[var(--color-text-muted)] max-w-3xl leading-relaxed">
-          Un ghid clar despre instituțiile statului român: cine conduce, cum se iau deciziile,
-          cum intră o lege și cum te poți implica ca cetățean. Separația puterilor e la baza
-          democrației — iată cum arată concret.
-        </p>
-      </div>
+      <PageHero
+        title="Cum funcționează România"
+        icon={Landmark}
+        gradient={HERO_GRADIENT.authority}
+        description="Un ghid clar despre instituțiile statului român: cine conduce, cum se iau deciziile, cum intră o lege și cum te poți implica ca cetățean."
+        tagline="Separația puterilor e la baza democrației — iată cum arată concret"
+      />
+      <div className="mb-8" />
 
       {/* Section 1: Președinte */}
       <section className="mb-16">

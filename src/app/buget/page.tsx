@@ -3,11 +3,11 @@ import Link from "next/link";
 import { Wallet, TrendingUp, AlertTriangle, ExternalLink, ArrowRight } from "lucide-react";
 import { BUGET_NATIONAL, BUGET_CHELTUIELI_2025, DATE_PUBLICE_SNAPSHOT } from "@/data/date-publice";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
 import { formatDecimal } from "@/lib/utils";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
   title: "Bugetul României — unde merg banii din taxele noastre",
@@ -26,21 +26,20 @@ export default function BugetPage() {
   const deficitTrend = latest.deficitProcPib - prev.deficitProcPib;
 
   return (
-    <div className="container-narrow py-12 md:py-16">
+    <div className="container-narrow py-8 md:py-12">
       <DatasetJsonLd
         name="Buget național România"
         description="Execuție bugetară România: venituri, cheltuieli, deficit % PIB, evoluție 2020-2026. Surse: Ministerul Finanțelor, INS."
         url="https://civia.ro/buget"
         keywords={["buget", "romania", "fisc", "deficit", "pib", "transparenta"]}
       />
-      <Badge className="mb-4">Transparență fiscală</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
-        <Wallet size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
-        Banii tăi, pe românește
-      </h1>
-      <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Din fiecare leu plătit la taxe, unde ajunge? Cât strânge statul, cât cheltuie, cât împrumută. Cifre oficiale de la Ministerul Finanțelor și INS, explicate fără jargon financiar.
-      </p>
+      <PageHero
+        title="Banii tăi, pe românește"
+        icon={Wallet}
+        gradient={HERO_GRADIENT.data}
+        description="Din fiecare leu plătit la taxe, unde ajunge? Cât strânge statul, cât cheltuie, cât împrumută. Cifre oficiale de la Ministerul Finanțelor și INS, explicate fără jargon financiar."
+        tagline={`Buget ${latest.year}: ${formatDecimal(latest.venituri, 1)} mld lei venituri · ${formatDecimal(latest.cheltuieli, 1)} mld lei cheltuieli`}
+      />
 
       {/* KEY NUMBERS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">

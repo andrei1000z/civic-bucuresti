@@ -5,6 +5,7 @@ import { getNationalTotals, DATE_VERIFIED } from "@/data/statistici-judete";
 import { ALL_COUNTIES } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
 import { LastUpdated } from "@/components/data/LastUpdated";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
   title: "Statistici România",
@@ -56,18 +57,20 @@ export default function StatisticiPage() {
   };
 
   return (
-    <div className="container-narrow py-12 md:py-16">
-      <div className="mb-10">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
-          Statistici România
-        </h1>
-        <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-4">
-          Date agregate din toate cele 42 de județe. Surse: INS, DRPCIV 2023, ANPM.
-        </p>
-        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-[var(--radius-xs)] p-3 text-xs text-amber-800 dark:text-amber-300">
-          <strong>Notă:</strong> Datele despre accidente și sesizări per județ sunt estimări proporționale cu populația,
+    <div className="container-narrow py-8 md:py-12">
+      <PageHero
+        title="Statistici România"
+        icon={BarChart3}
+        gradient={HERO_GRADIENT.data}
+        description="Date agregate din toate cele 42 de județe. Surse: INS, DRPCIV 2023, ANPM."
+        tagline="Date deschise, licență CC BY 4.0 — reutilizează cu atribuire"
+      />
+      <div className="mb-8 bg-[var(--color-surface)] border border-amber-500/30 rounded-[var(--radius-xs)] p-3 text-xs text-amber-800 dark:text-amber-300 inline-flex items-start gap-2">
+        <span className="font-bold">Notă:</span>
+        <span>
+          Datele despre accidente și sesizări per județ sunt estimări proporționale cu populația,
           bazate pe totaluri naționale DRPCIV 2023.
-        </div>
+        </span>
       </div>
 
       {/* National totals */}

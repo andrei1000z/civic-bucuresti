@@ -10,6 +10,8 @@ import {
 import { SITE_URL } from "@/lib/constants";
 import { AutoritatiSearch, type Row } from "./AutoritatiSearch";
 import { GovernmentOrganizationJsonLd } from "@/components/JsonLd";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
+import { Building2 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Autorități publice în România — Civia",
@@ -109,7 +111,7 @@ export default function AutoritatiIndexPage() {
   };
 
   return (
-    <div className="container-narrow py-12 md:py-16">
+    <div className="container-narrow py-8 md:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -120,15 +122,13 @@ export default function AutoritatiIndexPage() {
         url={`${SITE_URL}/autoritati`}
         areaServed="România"
       />
-      <header className="mb-10">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
-          Autorități publice — România
-        </h1>
-        <p className="text-lg text-[var(--color-text-muted)] max-w-3xl">
-          Catalog național cu date de contact verificate: primării, Poliție Locală,
-          prefecturi. Trimite sesizarea la adresa corectă — fără ghiceli.
-        </p>
-      </header>
+      <PageHero
+        title="Autorități publice — România"
+        icon={Building2}
+        gradient={HERO_GRADIENT.authority}
+        description="Catalog național cu date de contact verificate: primării, Poliție Locală, prefecturi. Trimite sesizarea la adresa corectă — fără ghiceli."
+        tagline={`${counties.length} județe · ${Object.keys(PRIMARII).length} primării · ${plCount} secții Poliție Locală · ${cityCount} orașe non-capitale`}
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         <Stat label="Județe acoperite" value={counties.length.toString()} />

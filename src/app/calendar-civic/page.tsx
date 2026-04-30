@@ -10,6 +10,7 @@ import {
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { EventListJsonLd } from "@/components/FaqJsonLd";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
   title: "Calendar civic — date importante pentru cetățeni",
@@ -97,7 +98,7 @@ export default function CalendarCivicPage() {
   }
 
   return (
-    <div className="container-narrow py-12 md:py-16">
+    <div className="container-narrow py-8 md:py-12">
       <EventListJsonLd
         events={upcoming.slice(0, 15).map((e) => ({
           name: e.title,
@@ -108,15 +109,13 @@ export default function CalendarCivicPage() {
           location: e.location,
         }))}
       />
-      <Badge className="mb-4">Calendar civic</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
-        <CalendarDays size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
-        Date care contează pentru tine
-      </h1>
-      <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Deadline-uri de plată, alegeri viitoare, ședințe publice ale consiliilor, consultări.
-        Toate într-un singur loc, cu surse oficiale. Actualizat manual.
-      </p>
+      <PageHero
+        title="Date care contează pentru tine"
+        icon={CalendarDays}
+        gradient={HERO_GRADIENT.primary}
+        description="Deadline-uri de plată, alegeri viitoare, ședințe publice ale consiliilor, consultări. Toate într-un singur loc, cu surse oficiale."
+        tagline={`${upcoming.length} ${upcoming.length === 1 ? "eveniment viitor" : "evenimente viitoare"} · actualizat manual cu surse oficiale`}
+      />
 
       {/* Upcoming section — top 8 */}
       <section className="mb-12">

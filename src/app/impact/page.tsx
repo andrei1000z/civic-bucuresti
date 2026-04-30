@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Clock, TrendingUp, Users, MapPin, ThumbsUp } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, TrendingUp, Users, MapPin, ThumbsUp, Target } from "lucide-react";
 import { SITE_NAME, STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
 import { ALL_COUNTIES } from "@/data/counties";
 import { Card } from "@/components/ui/Card";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { CountUp } from "@/components/home/CountUp";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { getImpactDataCached } from "@/lib/cached-queries";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const revalidate = 600; // 10 minutes
 
@@ -67,30 +68,25 @@ export default async function ImpactPage() {
   const nowMs = Date.now();
 
   return (
-    <div className="container-narrow py-12 md:py-16">
+    <div className="container-narrow py-8 md:py-12">
       <DatasetJsonLd
         name="Civia — Sesizări civice România"
         description="Dataset cu sesizări civice depuse prin platforma Civia: total, rezolvate, în lucru, pe tipuri, pe județe. Actualizat live."
         url="https://civia.ro/impact"
         keywords={["sesizari", "romania", "date publice", "transparenta", "administratie"]}
       />
-      {/* HERO */}
-      <div className="mb-10 md:mb-14">
-        <Badge className="mb-4">Dashboard public</Badge>
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-          Impactul platformei{" "}
-          <span className="text-[var(--color-primary)]">Civia</span>
-        </h1>
-        <p className="text-lg md:text-xl text-[var(--color-text-muted)] max-w-3xl leading-relaxed">
-          Fiecare sesizare e un pas către un oraș mai bun. Iată ce s-a schimbat
-          datorită cetățenilor care au ales să acționeze.
-        </p>
-        <p className="mt-4 text-xs text-[var(--color-text-muted)] max-w-3xl">
-          Sursa datelor: sesizări trimise direct prin platforma Civia de către cetățeni, agregate automat.
-          Datele sunt publice, anonimizate unde e cazul (conform GDPR) și disponibile și prin API la{" "}
-          <Link href="/dezvoltatori" className="text-[var(--color-primary)] hover:underline">/dezvoltatori</Link>.
-        </p>
-      </div>
+      <PageHero
+        title={`Impactul platformei ${SITE_NAME}`}
+        icon={Target}
+        gradient={HERO_GRADIENT.success}
+        description="Fiecare sesizare e un pas către un oraș mai bun. Iată ce s-a schimbat datorită cetățenilor care au ales să acționeze."
+        tagline={
+          <>
+            Date publice, anonimizate (GDPR) — disponibile și prin API la{" "}
+            <Link href="/dezvoltatori" className="underline">/dezvoltatori</Link>
+          </>
+        }
+      />
 
       {/* BIG NUMBERS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">

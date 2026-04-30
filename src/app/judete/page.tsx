@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { JudeteGrid } from "./JudeteGrid";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
   title: "Alege sau schimbă județul — Civia",
@@ -54,21 +55,14 @@ export default async function JudetePage() {
   ]);
 
   return (
-    <div className="container-narrow py-12 md:py-16">
-      {/* Hero */}
-      <div className="mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] text-xs font-semibold mb-4">
-          <MapPin size={14} /> 42 JUDEȚE
-        </div>
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-3">
-          Alege sau schimbă județul
-        </h1>
-        <p className="text-lg text-[var(--color-text-muted)] max-w-2xl">
-          Civia reține județul tău la următoarea vizită și te duce direct acolo.
-          De aici îl poți schimba oricând — click pe alt județ ca să-l
-          salvezi în loc.
-        </p>
-      </div>
+    <div className="container-narrow py-8 md:py-12">
+      <PageHero
+        title="Alege sau schimbă județul"
+        icon={MapPin}
+        gradient={HERO_GRADIENT.primary}
+        description="Civia reține județul tău la următoarea vizită și te duce direct acolo. De aici îl poți schimba oricând — click pe alt județ ca să-l salvezi în loc."
+        tagline="42 de județe · sesizările, hărțile, calitatea aerului și știrile se filtrează automat după județ"
+      />
 
       <JudeteGrid sesizariStats={sesizariStats} authStats={authStats} />
 

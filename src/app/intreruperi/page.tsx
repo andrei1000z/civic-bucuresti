@@ -16,6 +16,7 @@ import {
 import { SITE_URL } from "@/lib/constants";
 import { IntreruperiFilters } from "./IntreruperiFilters";
 import { SubmitForm } from "./SubmitForm";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
   title: "Întreruperi programate — apă, caldură, gaz, curent, lucrări stradă",
@@ -80,25 +81,26 @@ export default function IntreruperiPage() {
   };
 
   return (
-    <div className="container-narrow py-10 md:py-14">
+    <div className="container-narrow py-8 md:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <header className="mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-xs font-semibold mb-4">
-          <AlertTriangle size={12} aria-hidden="true" /> În test — scraper live în v2
-        </div>
-        <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-5xl font-extrabold mb-3">
-          Întreruperi programate
-        </h1>
-        <p className="text-base md:text-lg text-[var(--color-text-muted)] max-w-3xl leading-relaxed">
-          Află din timp când ți se oprește apa, caldura, gazul sau curentul +
-          lucrările de stradă în curs. Agregat din surse oficiale (Apa Nova,
-          Termoenergetica, Distrigaz, E-Distribuție, PMB, RADP).
-        </p>
-      </header>
+      <PageHero
+        title="Întreruperi programate"
+        icon={AlertTriangle}
+        gradient={HERO_GRADIENT.warning}
+        description={
+          <>
+            Află din timp când ți se oprește apa, caldura, gazul sau curentul + lucrările de
+            stradă în curs. Agregat din surse oficiale (<strong>Apa Nova</strong>,{" "}
+            <strong>Termoenergetica</strong>, <strong>Distrigaz</strong>,{" "}
+            <strong>E-Distribuție</strong>, <strong>PMB</strong>, <strong>RADP</strong>).
+          </>
+        }
+        tagline={`${all.length} ${all.length === 1 ? "întrerupere activă" : "întreruperi active"} în catalog · subscribe RSS / iCal pentru update automat`}
+      />
 
       {/* Stats quick */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">

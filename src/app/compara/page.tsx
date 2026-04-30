@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Scale } from "lucide-react";
 import { ALL_COUNTIES } from "@/data/counties";
-import { Badge } from "@/components/ui/Badge";
 import { CompareCountyPicker } from "./CompareCountyPicker";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
   title: "Compară județele — side-by-side",
@@ -17,17 +17,14 @@ export default function CompareLandingPage() {
   // Sort by population desc for default picks
   const sorted = [...ALL_COUNTIES].sort((a, b) => b.population - a.population);
   return (
-    <div className="container-narrow py-12 md:py-16">
-      <Badge className="mb-4">Instrument</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
-        <Scale size={40} className="text-[var(--color-primary)]" />
-        Compară județele
-      </h1>
-      <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Alege două județe și vezi cifrele lor alăturate: populație, sesizări civice,
-        accidente rutiere, calitate aer, promovabilitate BAC și primarul în funcție.
-        Un instrument util pentru jurnaliști, cercetători sau cetățeni curioși.
-      </p>
+    <div className="container-narrow py-8 md:py-12">
+      <PageHero
+        title="Compară județele"
+        icon={Scale}
+        gradient={HERO_GRADIENT.data}
+        description="Alege două județe și vezi cifrele lor alăturate: populație, sesizări civice, accidente rutiere, calitate aer, promovabilitate BAC și primarul în funcție."
+        tagline="Util pentru jurnaliști, cercetători și cetățeni curioși · 42 de județe disponibile"
+      />
 
       <CompareCountyPicker counties={sorted.map((c) => ({ id: c.id, name: c.name, slug: c.slug }))} />
     </div>
