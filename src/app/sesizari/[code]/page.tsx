@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, MapPin, Calendar, User, Clock, CheckCircle2, UserPlus, Send, XCircle, FileCheck, MapPinned, Route as RouteIcon } from "lucide-react";
+import { ChevronLeft, MapPin, Calendar, User, Clock, UserPlus } from "lucide-react";
 import {
   getSesizareByCode,
   getTimeline,
@@ -30,30 +30,14 @@ import { PhotoGallery } from "@/components/sesizari/PhotoGallery";
 import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
 import { GovernmentServiceJsonLd } from "@/components/JsonLd";
 import { getAuthoritiesFor } from "@/lib/sesizari/authorities";
+import { getSesizareEventMeta, isRedundantEventDescription } from "@/lib/sesizari/events";
 import { stripPrivateAddress } from "@/lib/privacy";
 import { SITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
-const EVENT_LABELS: Record<string, string> = {
-  depusa: "Sesizare depusă",
-  inregistrata: "Înregistrată la registratură",
-  rutata: "Trimisă la direcția de resort",
-  in_teren: "Inspector pe teren",
-  rezolvat: "Problemă rezolvată",
-  respins: "Sesizare respinsă",
-  cosemnat: "Un alt cetățean a trimis și el această sesizare",
-};
-
-const EVENT_ACCENT: Record<string, string> = {
-  depusa: "#2563EB",
-  inregistrata: "#6366F1",
-  rutata: "#8B5CF6",
-  in_teren: "#F59E0B",
-  rezolvat: "#059669",
-  respins: "#DC2626",
-  cosemnat: "#0891B2",
-};
+// Event labels + icons + colors live in src/lib/sesizari/events.ts so
+// /urmareste, this page, and any future surface stay in sync.
 
 export async function generateMetadata(
   { params }: { params: Promise<{ code: string }> }
@@ -343,17 +327,18 @@ export default async function SesizareDetailPage({
           {/* Similar sesizari (cine a mai sesizat) */}
           <SimilarSesizari sesizari={similar} />
 
-          {/* Timeline */}
+          {/* Timeline — shares the same EVENT_META catalog as /urmareste so
+              labels, icons and colors stay consistent across surfaces. */}
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-5">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold">
-                Status & activitate
+            <div className="flex items-center justify-between mb-5">
+              <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-bold">
+                Status &amp; activitate
               </p>
               {(() => {
                 const cosemneNr = timeline.filter((e) => e.event_type === "cosemnat").length;
                 return cosemneNr > 0 ? (
                   <span
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 tabular-nums"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 tabular-nums"
                     aria-label={`${cosemneNr} ${cosemneNr === 1 ? "cetățean a co-semnat" : "cetățeni au co-semnat"}`}
                   >
                     <UserPlus size={10} aria-hidden="true" />
@@ -363,44 +348,41 @@ export default async function SesizareDetailPage({
               })()}
             </div>
             {timeline.length === 0 ? (
-              <p className="text-sm text-[var(--color-text-muted)]">Nu există evenimente încă.</p>
+              <div className="bg-[var(--color-surface-2)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-xs)] p-4 text-center">
+                <p className="text-sm text-[var(--color-text-muted)] italic">
+                  Nu există evenimente încă.
+                </p>
+              </div>
             ) : (
-              <ol className="relative border-l-2 border-[var(--color-border)] ml-3 space-y-4">
+              <ol className="relative space-y-5 ml-1">
+                {/* Vertical rail behind the dots */}
+                <span
+                  aria-hidden="true"
+                  className="absolute left-3 top-3 bottom-3 w-px bg-[var(--color-border)]"
+                />
                 {timeline.map((step, i) => {
                   const isLast = i === timeline.length - 1;
-                  const accent = EVENT_ACCENT[step.event_type] ?? "#64748B";
-                  const Icon =
-                    step.event_type === "cosemnat"
-                      ? UserPlus
-                      : step.event_type === "rezolvat"
-                      ? CheckCircle2
-                      : step.event_type === "respins"
-                      ? XCircle
-                      : step.event_type === "inregistrata"
-                      ? FileCheck
-                      : step.event_type === "rutata"
-                      ? RouteIcon
-                      : step.event_type === "in_teren"
-                      ? MapPinned
-                      : Send;
+                  const meta = getSesizareEventMeta(step.event_type);
+                  const Icon = meta.icon;
+                  const showDescription = !isRedundantEventDescription(step.event_type, step.description);
                   return (
-                    <li key={step.id} className="ml-6">
+                    <li key={step.id} className="relative pl-10">
                       <span
-                        className="absolute -left-[13px] w-6 h-6 rounded-full flex items-center justify-center text-white ring-2 ring-[var(--color-surface)]"
-                        style={{ backgroundColor: accent }}
+                        className={`absolute left-0 top-0 w-7 h-7 rounded-full grid place-items-center ring-4 ring-[var(--color-surface)] ${isLast ? "animate-pulse" : ""}`}
+                        style={{ backgroundColor: `${meta.color}1a`, color: meta.color }}
                         aria-hidden="true"
                       >
-                        <Icon size={12} />
+                        <Icon size={13} />
                       </span>
-                      <p className={`text-sm ${isLast ? "font-semibold" : "font-medium"}`}>
-                        {EVENT_LABELS[step.event_type] ?? step.event_type}
+                      <p className={`text-sm leading-tight ${isLast ? "font-bold" : "font-semibold"}`}>
+                        {meta.label}
                       </p>
-                      {step.description && step.event_type !== "cosemnat" && (
-                        <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                      {showDescription && step.description && (
+                        <p className="text-xs text-[var(--color-text-muted)] mt-1 leading-relaxed">
                           {step.description}
                         </p>
                       )}
-                      <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-1 mt-0.5">
+                      <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5 inline-flex items-center gap-1 tabular-nums">
                         <Clock size={10} aria-hidden="true" />
                         <time dateTime={step.created_at}>{formatDateTime(step.created_at)}</time>
                       </p>
