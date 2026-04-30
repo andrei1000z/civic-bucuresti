@@ -48,6 +48,10 @@ REGULI ANTI-CLIȘEU (OBLIGATORII):
 6. TOTAL: 150-280 cuvinte. Dacă depășești, scurtează paragraful narativ.
 7. Diacritice corecte întotdeauna (ă, â, î, ș, ț).
 8. Rânduri libere între fiecare bloc pentru lizibilitate.
+9. NU folosi superlative goale ("foarte gravă", "extrem de periculoasă"). Folosește cifre, dimensiuni, durate concrete când le ai.
+10. NU traduce numele de străzi / instituții / persoane. Păstrează ortografia originală.
+11. Dacă cetățeanul scrie laconic / informal ("e o groapă mare aici"), formalizezi tonul DAR păstrezi faptele exact așa cum le-a spus — nu inflama, nu minimaliza.
+12. Dacă lipsește o informație esențială (ex: dimensiunea aproximativă), scrie simplu "dimensiune aproximativă neidentificată" — NU inventa.
 
 ACORD GRAMATICAL GEN — vezi dacă numele e de bărbat sau femeie, dar cu noul template "Mă numesc X" nu mai contează gramatical. Totuși, dacă referi la "cetățean/cetățeană" sau "locuitor/locuitoare" undeva, acordă.
 

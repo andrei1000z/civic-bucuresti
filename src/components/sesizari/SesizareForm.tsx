@@ -979,12 +979,12 @@ ${today}`;
                     setTipDetectedByAI(false);
                     trackFunnelStep("sesizare-create", "tip-selected", { tip: t.value });
                   }}
-                  className="group flex flex-col items-center gap-1 p-2 rounded-[var(--radius-xs)] hover:bg-[var(--color-surface)] border border-transparent hover:border-[var(--color-primary)]/40 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                  className="group flex flex-col items-center justify-start gap-1 p-2 rounded-[var(--radius-xs)] bg-[var(--color-surface)]/50 hover:bg-[var(--color-surface)] border border-transparent hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-1)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] min-h-[68px]"
                   title={t.label}
                 >
-                  <span className="text-2xl" aria-hidden="true">{t.icon}</span>
-                  <span className="text-[10px] text-center leading-tight text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] line-clamp-2">
-                    {t.label.split(" ").slice(0, 2).join(" ")}
+                  <span className="text-2xl leading-none" aria-hidden="true">{t.icon}</span>
+                  <span className="text-[10px] text-center leading-tight text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] break-words">
+                    {t.short}
                   </span>
                 </button>
               ))}

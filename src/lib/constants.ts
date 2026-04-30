@@ -109,23 +109,25 @@ export const GHID_DROPDOWN = [
 // ============================================================
 // SESIZARE TYPES + SECTORS (sectors = București only)
 // ============================================================
+// `short` fits in tight chip-grid layouts (4-col on xs); `label` is the
+// full name shown in selects, headers, and emails.
 export const SESIZARE_TIPURI = [
-  { value: "groapa", label: "Groapă în asfalt", icon: "🕳️" },
-  { value: "trotuar", label: "Trotuar degradat", icon: "🧱" },
-  { value: "iluminat", label: "Iluminat public defect", icon: "💡" },
-  { value: "copac", label: "Copac căzut/periculos", icon: "🌳" },
-  { value: "gunoi", label: "Gunoi necolectat", icon: "🗑️" },
-  { value: "parcare", label: "Parcare ilegală", icon: "🚗" },
-  { value: "stalpisori", label: "Montare stâlpișori anti-parcare", icon: "🪧" },
-  { value: "canalizare", label: "Canalizare/inundație", icon: "💧" },
-  { value: "semafor", label: "Semafor/semnalizare defect", icon: "🚦" },
-  { value: "pietonal", label: "Traversare pietoni periculoasă", icon: "🚸" },
-  { value: "graffiti", label: "Graffiti/vandalism", icon: "🎨" },
-  { value: "mobilier", label: "Mobilier stradal stricat", icon: "🪑" },
-  { value: "zgomot", label: "Zgomot excesiv/deranj", icon: "🔊" },
-  { value: "animale", label: "Câini periculoși/animale", icon: "🐕" },
-  { value: "transport", label: "Problemă transport public", icon: "🚌" },
-  { value: "altele", label: "Altele", icon: "📝" },
+  { value: "groapa", label: "Groapă în asfalt", short: "Groapă", icon: "🕳️" },
+  { value: "trotuar", label: "Trotuar degradat", short: "Trotuar", icon: "🧱" },
+  { value: "iluminat", label: "Iluminat public defect", short: "Iluminat", icon: "💡" },
+  { value: "copac", label: "Copac căzut/periculos", short: "Copac", icon: "🌳" },
+  { value: "gunoi", label: "Gunoi necolectat", short: "Gunoi", icon: "🗑️" },
+  { value: "parcare", label: "Parcare ilegală", short: "Parcare", icon: "🚗" },
+  { value: "stalpisori", label: "Montare stâlpișori anti-parcare", short: "Stâlpișori", icon: "🪧" },
+  { value: "canalizare", label: "Canalizare/inundație", short: "Canalizare", icon: "💧" },
+  { value: "semafor", label: "Semafor/semnalizare defect", short: "Semafor", icon: "🚦" },
+  { value: "pietonal", label: "Traversare pietoni periculoasă", short: "Pietonal", icon: "🚸" },
+  { value: "graffiti", label: "Graffiti/vandalism", short: "Graffiti", icon: "🎨" },
+  { value: "mobilier", label: "Mobilier stradal stricat", short: "Mobilier", icon: "🪑" },
+  { value: "zgomot", label: "Zgomot excesiv/deranj", short: "Zgomot", icon: "🔊" },
+  { value: "animale", label: "Câini periculoși/animale", short: "Animale", icon: "🐕" },
+  { value: "transport", label: "Problemă transport public", short: "Transport", icon: "🚌" },
+  { value: "altele", label: "Altele", short: "Altele", icon: "📝" },
 ] as const;
 
 // Sectoare — doar pentru municipiul București
