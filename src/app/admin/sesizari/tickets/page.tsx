@@ -14,11 +14,14 @@ import {
   MessageCircle,
   AlertTriangle,
   FileText,
+  Eye,
 } from "lucide-react";
 import { useToast } from "@/components/Toast";
 import { timeAgo } from "@/lib/utils";
 import { SESIZARE_STATUS_META, type SesizareStatus } from "@/lib/sesizari/status";
 import { STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
+import { Lightbox } from "@/components/ui/Lightbox";
+import { ApproveTicketDialog, type ApproveTicketPayload } from "./ApproveTicketDialog";
 
 type Decision = "pending" | "approved" | "rejected";
 
@@ -74,6 +77,11 @@ export default function AdminTicketsPage() {
   const [tickets, setTickets] = useState<TicketRow[] | null>(null);
   const [acting, setActing] = useState<string | null>(null);
   const [decisionNote, setDecisionNote] = useState<Record<string, string>>({});
+  // Lightbox preview for the proof attachment.
+  const [preview, setPreview] = useState<{ url: string; title: string } | null>(null);
+  // Approve dialog: which ticket is being reviewed + submit state.
+  const [approving, setApproving] = useState<TicketRow | null>(null);
+  const [approveSubmitting, setApproveSubmitting] = useState(false);
 
   const load = useCallback(async () => {
     setTickets(null);
@@ -90,22 +98,24 @@ export default function AdminTicketsPage() {
     load();
   }, [load]);
 
-  const decide = async (id: string, decision: "approved" | "rejected") => {
+  // Reject path stays inline — the admin types a quick note and clicks
+  // Respinge. Approve path now goes through ApproveTicketDialog where the
+  // admin can edit status / event date / timeline note before applying.
+  const reject = async (id: string) => {
     const noteForId = decisionNote[id]?.trim();
-    setActing(`${id}-${decision}`);
+    setActing(`${id}-rejected`);
     try {
       const res = await fetch(`/api/admin/status-tickets/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          decision,
+          decision: "rejected",
           ...(noteForId ? { decision_note: noteForId } : {}),
         }),
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "Eroare");
-      toast(decision === "approved" ? "Propunere aprobată" : "Propunere respinsă", "success");
-      // Drop the row from local state so the queue lights down immediately.
+      toast("Propunere respinsă", "success");
       setTickets((prev) => (prev ? prev.filter((t) => t.id !== id) : prev));
       setDecisionNote((p) => {
         const next = { ...p };
@@ -116,6 +126,37 @@ export default function AdminTicketsPage() {
       toast(e instanceof Error ? e.message : "Eroare", "error");
     } finally {
       setActing(null);
+    }
+  };
+
+  const submitApprove = async (payload: ApproveTicketPayload) => {
+    if (!approving) return;
+    setApproveSubmitting(true);
+    try {
+      const res = await fetch(`/api/admin/status-tickets/${approving.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          decision: "approved",
+          applied_status: payload.applied_status,
+          applied_note: payload.applied_note,
+          event_at: payload.event_at,
+          ...(payload.decision_note ? { decision_note: payload.decision_note } : {}),
+        }),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || "Eroare");
+      toast(
+        `Aprobat ca „${SESIZARE_STATUS_META[payload.applied_status].label}"`,
+        "success",
+      );
+      const id = approving.id;
+      setTickets((prev) => (prev ? prev.filter((t) => t.id !== id) : prev));
+      setApproving(null);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Eroare", "error");
+    } finally {
+      setApproveSubmitting(false);
     }
   };
 
@@ -179,6 +220,7 @@ export default function AdminTicketsPage() {
             const proposerName =
               t.proposer?.display_name || t.proposer?.full_name || "Cetățean";
             const isPending = t.decision === "pending";
+            const proofIsPdf = t.proof_url ? isPdfUrl(t.proof_url) : false;
 
             return (
               <li
@@ -188,7 +230,6 @@ export default function AdminTicketsPage() {
                 <div className="p-4 flex items-start gap-4 flex-wrap md:flex-nowrap">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                      {/* Badge: proposed status */}
                       <span
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
                         style={{
@@ -240,36 +281,36 @@ export default function AdminTicketsPage() {
                     )}
                   </div>
 
-                  {/* Proof preview — image renders as a thumbnail, PDF as
-                      a labeled card (browsers can't easily inline-render
-                      PDFs in a small frame, and the admin will open it
-                      anyway via the link). */}
+                  {/* Proof preview — clicking opens an in-tab Lightbox
+                      (image inline, PDF embedded). Both formats keep the
+                      same 160x160 frame so the queue layout stays
+                      uniform; PDF gets a labeled rose card, images get a
+                      thumbnail. */}
                   <div className="w-full md:w-40 shrink-0">
                     {t.proof_url ? (
-                      isPdfUrl(t.proof_url) ? (
-                        <a
-                          href={t.proof_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex aspect-square rounded-[var(--radius-xs)] bg-rose-500/10 border border-rose-500/30 flex-col items-center justify-center gap-1.5 text-rose-700 dark:text-rose-400 hover:bg-rose-500/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
-                          title="Deschide PDF-ul în tab nou"
-                        >
-                          <FileText size={28} aria-hidden="true" />
-                          <span className="text-[10px] uppercase tracking-wider font-bold">
-                            PDF
-                          </span>
-                          <span className="text-[10px] text-rose-700/80 dark:text-rose-400/80">
-                            click pentru deschidere
-                          </span>
-                        </a>
-                      ) : (
-                        <a
-                          href={t.proof_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block aspect-square rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-                          title="Deschide dovada în tab nou"
-                        >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPreview({
+                            url: t.proof_url!,
+                            title: `Dovadă · ${t.sesizare?.code ?? ""} · ${proposerName}`,
+                          })
+                        }
+                        className="group relative block aspect-square w-full rounded-[var(--radius-xs)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface-2)] hover:border-[var(--color-primary)]/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                        title="Previzualizează dovada"
+                      >
+                        {proofIsPdf ? (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-rose-500/10 text-rose-700 dark:text-rose-400">
+                            <FileText size={28} aria-hidden="true" />
+                            <span className="text-[10px] uppercase tracking-wider font-bold">
+                              PDF
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-[10px] text-rose-700/80 dark:text-rose-400/80">
+                              <Eye size={10} aria-hidden="true" />
+                              click pentru deschidere
+                            </span>
+                          </div>
+                        ) : (
                           <Image
                             src={t.proof_url}
                             alt="Dovadă propusă de cetățean"
@@ -278,8 +319,17 @@ export default function AdminTicketsPage() {
                             className="w-full h-full object-cover"
                             unoptimized
                           />
-                        </a>
-                      )
+                        )}
+                        <span
+                          className="absolute inset-0 grid place-items-center bg-black/0 group-hover:bg-black/30 transition-colors"
+                          aria-hidden="true"
+                        >
+                          <span className="opacity-0 group-hover:opacity-100 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-black/60 text-white text-[10px] font-medium transition-opacity">
+                            <Eye size={10} aria-hidden="true" />
+                            Previzualizează
+                          </span>
+                        </span>
+                      </button>
                     ) : (
                       <div className="aspect-square rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-dashed border-[var(--color-border)] grid place-items-center text-[var(--color-text-muted)]">
                         <div className="text-center text-[10px] uppercase tracking-wider">
@@ -311,14 +361,14 @@ export default function AdminTicketsPage() {
                         onChange={(e) =>
                           setDecisionNote((p) => ({ ...p, [t.id]: e.target.value }))
                         }
-                        placeholder="Notă opțională (apare în email-ul către propunător)"
+                        placeholder="Motiv respingere (opțional, merge în email)"
                         maxLength={500}
                         className="flex-1 min-w-[180px] h-8 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] text-[11px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                       />
                       <button
                         type="button"
-                        onClick={() => decide(t.id, "rejected")}
-                        disabled={acting?.startsWith(t.id) ?? false}
+                        onClick={() => reject(t.id)}
+                        disabled={acting === `${t.id}-rejected` || approveSubmitting}
                         className="inline-flex items-center gap-1 h-8 px-3 rounded-[var(--radius-xs)] bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/30 text-[11px] font-semibold hover:bg-rose-500/20 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
                       >
                         {acting === `${t.id}-rejected` ? (
@@ -330,15 +380,11 @@ export default function AdminTicketsPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => decide(t.id, "approved")}
-                        disabled={acting?.startsWith(t.id) ?? false}
+                        onClick={() => setApproving(t)}
+                        disabled={approveSubmitting || acting === `${t.id}-rejected`}
                         className="inline-flex items-center gap-1 h-8 px-3 rounded-[var(--radius-xs)] bg-emerald-500 text-white text-[11px] font-semibold hover:bg-emerald-600 disabled:opacity-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-500"
                       >
-                        {acting === `${t.id}-approved` ? (
-                          <Loader2 size={11} className="animate-spin" aria-hidden="true" />
-                        ) : (
-                          <CheckCircle2 size={11} aria-hidden="true" />
-                        )}
+                        <CheckCircle2 size={11} aria-hidden="true" />
                         Aprobă & aplică
                       </button>
                     </>
@@ -368,6 +414,23 @@ export default function AdminTicketsPage() {
           })}
         </ul>
       )}
+
+      {/* In-tab proof preview */}
+      <Lightbox
+        open={!!preview}
+        onClose={() => setPreview(null)}
+        url={preview?.url ?? ""}
+        title={preview?.title}
+      />
+
+      {/* Approve & apply modal — editable status / date / note + AI assist */}
+      <ApproveTicketDialog
+        open={!!approving}
+        ticket={approving}
+        submitting={approveSubmitting}
+        onClose={() => !approveSubmitting && setApproving(null)}
+        onSubmit={submitApprove}
+      />
     </div>
   );
 }

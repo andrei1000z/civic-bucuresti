@@ -8,6 +8,7 @@ import { sendEmail, emailTemplate } from "@/lib/email/resend";
 import { rateLimitAsync } from "@/lib/ratelimit";
 import {
   SESIZARE_STATUS_META,
+  SESIZARE_STATUS_VALUES,
   timelineEventForStatus,
   type SesizareStatus,
 } from "@/lib/sesizari/status";
@@ -19,6 +20,15 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://civia.ro";
 const schema = z.object({
   decision: z.enum(["approved", "rejected"]),
   decision_note: z.string().trim().max(500).optional(),
+  /** Admin-applied overrides (only consumed on `approved`). When omitted
+   *  we fall back to the ticket's proposed values. */
+  applied_status: z.enum(SESIZARE_STATUS_VALUES).optional(),
+  applied_note: z.string().trim().min(1).max(500).optional(),
+  /** ISO 8601 timestamp at which the event actually happened in the
+   *  real world. Used as the timeline row's `created_at` so the
+   *  citizen-visible chronology reflects reality, not "moment of
+   *  approval". When omitted the trigger uses now(). */
+  event_at: z.string().datetime().optional(),
 });
 
 /**
@@ -111,14 +121,21 @@ export async function POST(
   const authorEmail = sesizare?.author_email ?? null;
   const previousStatus = sesizare?.status ?? null;
 
-  // Approve path — apply the proposed status to the sesizare.
-  if (parsed.data.decision === "approved" && sesizare) {
-    const newStatus = ticket.proposed_status as SesizareStatus;
+  // Approve path — apply the (possibly admin-edited) status to the sesizare.
+  // The admin can override the proposed status, the description that ends
+  // up in the timeline, and the timestamp at which the event happened in
+  // the real world. Defaults preserve the original proposer's intent.
+  const appliedStatus = (parsed.data.applied_status ?? ticket.proposed_status) as SesizareStatus;
+  const appliedNote = parsed.data.applied_note?.trim() || ticket.note;
+  const eventAt = parsed.data.event_at ?? decidedAt;
 
-    if (newStatus !== sesizare.status) {
-      const updatePayload: Record<string, unknown> = { status: newStatus };
-      if (newStatus === "rezolvat" && !sesizare.resolved_at) {
-        updatePayload.resolved_at = decidedAt;
+  if (parsed.data.decision === "approved" && sesizare) {
+    if (appliedStatus !== sesizare.status) {
+      const updatePayload: Record<string, unknown> = { status: appliedStatus };
+      if (appliedStatus === "rezolvat" && !sesizare.resolved_at) {
+        // Mirror the admin-stamped event time, not the moment of click,
+        // so /sesizari-rezolvate ranks by when it actually got fixed.
+        updatePayload.resolved_at = eventAt;
       }
       const { error: sErr } = await admin
         .from("sesizari")
@@ -131,17 +148,21 @@ export async function POST(
         });
       }
 
-      const eventType = timelineEventForStatus(newStatus);
+      const eventType = timelineEventForStatus(appliedStatus);
       if (eventType) {
-        const description = ticket.note?.trim()
-          ? ticket.note
-          : `Status actualizat la: ${newStatus}`;
+        const description = appliedNote?.trim()
+          ? appliedNote
+          : `Status actualizat la: ${appliedStatus}`;
         await admin
           .from("sesizare_timeline")
           .insert({
             sesizare_id: sesizare.id,
             event_type: eventType,
             description,
+            // Stamp the row at the real-world event time so the
+            // citizen-facing timeline reads chronologically — not "all
+            // events at moment of approval click".
+            created_at: eventAt,
           });
       }
 
@@ -176,12 +197,12 @@ export async function POST(
     sesizare &&
     authorEmail &&
     authorEmail !== proposerEmail &&
-    previousStatus !== ticket.proposed_status
+    previousStatus !== appliedStatus
   ) {
-    const meta = SESIZARE_STATUS_META[ticket.proposed_status as SesizareStatus];
+    const meta = SESIZARE_STATUS_META[appliedStatus];
     const sesizareUrl = `${SITE_URL}/sesizari/${sesizare.code}`;
-    const noteBlock = ticket.note?.trim()
-      ? `<p style="color:#64748b;font-size:13px;margin:12px 0 0">Update raportat de comunitate: <em>${escapeHtml(ticket.note)}</em></p>`
+    const noteBlock = appliedNote?.trim()
+      ? `<p style="color:#64748b;font-size:13px;margin:12px 0 0">Update raportat de comunitate: <em>${escapeHtml(appliedNote)}</em></p>`
       : "";
     try {
       await sendEmail({
@@ -210,7 +231,12 @@ export async function POST(
 
   if (proposerEmail && sesizare) {
     const approved = parsed.data.decision === "approved";
-    const meta = SESIZARE_STATUS_META[ticket.proposed_status as SesizareStatus];
+    // Email the proposer with the FINAL applied status — if the admin
+    // overrode the proposal, the proposer should see what actually
+    // landed, not what they guessed.
+    const meta = SESIZARE_STATUS_META[
+      (approved ? appliedStatus : ticket.proposed_status) as SesizareStatus
+    ];
     const sesizareUrl = `${SITE_URL}/sesizari/${sesizare.code}`;
     const decisionNoteBlock = parsed.data.decision_note
       ? `<p style="color:#64748b;font-size:13px;margin:12px 0 0">Notă admin: <em>${escapeHtml(parsed.data.decision_note)}</em></p>`
