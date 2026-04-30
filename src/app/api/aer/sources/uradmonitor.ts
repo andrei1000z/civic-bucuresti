@@ -1,19 +1,21 @@
 /**
- * uRADMonitor — open European citizen sensor network with strong
- * Romania coverage (the project was started in Cluj). Ground-level
- * stations report PM2.5, PM10, ozone, gamma, noise, formaldehyde and
- * more. Public dashboard URL: https://www.uradmonitor.com — JSON API
- * lives at /api/v1/devices and is anon-readable.
+ * uRADMonitor — European citizen sensor network with strong Romania
+ * coverage (project founded in Cluj). Reads PM2.5, PM10, ozone, NOx,
+ * temperature, humidity, pressure, noise.
  *
- * No API key for the public list endpoint. Each device returns its
- * latest reading; we filter to Romania bbox at fetch time.
+ * Their dashboard at https://www.uradmonitor.com is publicly browsable,
+ * but the data API requires per-account credentials — `X-User-Id` +
+ * `X-User-Hash` headers tied to a registered uRADMonitor account.
+ * Set `URADMONITOR_USER_ID` + `URADMONITOR_USER_HASH` env vars to
+ * activate; without them this source is a graceful no-op so the rest
+ * of the aggregator keeps working.
  */
 
 import type { UnifiedSensor } from "@/lib/aer/types";
 import { calculateAqi } from "@/lib/aer/aqi-calculator";
 import { RO_BOUNDS } from "@/lib/aer/constants";
 
-const ENDPOINT = "https://data.uradmonitor.com/api/v1/all";
+const ENDPOINT = "https://data.uradmonitor.com/api/v1/devices";
 
 // uRADMonitor returns an object map keyed by device id. Values include
 // telemetry like `pm25`, `pm10`, `o3_ppb`, `temperature`, `humidity`,
@@ -37,10 +39,18 @@ interface UradDevice {
 }
 
 export async function fetchUradMonitor(): Promise<UnifiedSensor[]> {
+  const userId = process.env.URADMONITOR_USER_ID;
+  const userHash = process.env.URADMONITOR_USER_HASH;
+  if (!userId || !userHash) return [];
+
   let res: Response;
   try {
     res = await fetch(ENDPOINT, {
-      headers: { "User-Agent": "civia.ro/1.0 (https://civia.ro)" },
+      headers: {
+        "X-User-Id": userId,
+        "X-User-Hash": userHash,
+        "User-Agent": "civia.ro/1.0 (https://civia.ro)",
+      },
       next: { revalidate: 120 },
       signal: AbortSignal.timeout(8000),
     });
