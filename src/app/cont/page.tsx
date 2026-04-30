@@ -94,6 +94,33 @@ export default function ContPage() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [newsletterSavedAt, setNewsletterSavedAt] = useState<number | null>(null);
+
+  /**
+   * Auto-save just the newsletter opt-ins. Used by the per-checkbox onChange
+   * handlers so the user doesn't have to click "Salvează" for newsletter
+   * toggles. Other profile fields keep the existing explicit Save flow
+   * because they need validation (length / format checks).
+   */
+  const autoSaveNewsletter = async (patch: {
+    newsletter_email_optin?: boolean;
+    newsletter_sms_optin?: boolean;
+  }) => {
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      if (!res.ok) return;
+      setNewsletterSavedAt(Date.now());
+      setTimeout(() => {
+        setNewsletterSavedAt((t) => (t && Date.now() - t >= 1500 ? null : t));
+      }, 1700);
+    } catch {
+      // Silent — user can hit Save to retry, or change the toggle again.
+    }
+  };
 
   useEffect(() => {
     if (authLoading) return;
@@ -446,24 +473,41 @@ export default function ContPage() {
                   CountyPickerInline used elsewhere. */}
               <CountyPickerInline />
 
-              {/* Newsletter opt-ins — under phone, GDPR-style explicit consent */}
+              {/* Newsletter opt-ins — under phone, GDPR-style explicit consent.
+                  Auto-save on toggle so users don't have to click "Salvează"
+                  for the most common subscribe action. */}
               <div className="space-y-2 pt-1">
                 <CheckboxRow
                   icon={Mail}
                   checked={form.newsletter_email_optin}
-                  onChange={(v) => setForm({ ...form, newsletter_email_optin: v })}
+                  onChange={(v) => {
+                    setForm({ ...form, newsletter_email_optin: v });
+                    autoSaveNewsletter({ newsletter_email_optin: v });
+                  }}
                   title="Înscrie-mă la newsletter pe email"
                   description="Săptămânal, lunea — sesizări rezolvate, petiții civice, deadline-uri locale. Dezabonare cu un click."
                 />
                 <CheckboxRow
                   icon={MessageSquareText}
                   checked={form.newsletter_sms_optin}
-                  onChange={(v) => setForm({ ...form, newsletter_sms_optin: v })}
+                  onChange={(v) => {
+                    setForm({ ...form, newsletter_sms_optin: v });
+                    autoSaveNewsletter({ newsletter_sms_optin: v });
+                  }}
                   title="Înscrie-mă la newsletter pe SMS"
                   description="Doar alerte civice urgente (1–2 SMS pe lună maxim). Necesită număr de telefon."
                   disabled={!form.phone.trim()}
                   disabledHint="Completează telefonul mai sus"
                 />
+                {newsletterSavedAt && (
+                  <p
+                    role="status"
+                    className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium pt-1 inline-flex items-center gap-1"
+                  >
+                    <CheckCircle2 size={11} aria-hidden="true" />
+                    Preferința de newsletter a fost salvată
+                  </p>
+                )}
               </div>
             </section>
 
