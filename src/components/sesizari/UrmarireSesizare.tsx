@@ -16,6 +16,8 @@ import {
   Building2,
   XCircle,
   PauseCircle,
+  UserPlus,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/utils";
@@ -30,6 +32,10 @@ interface EventVisual {
 
 const EVENT_META: Record<string, EventVisual> = {
   depusa: { label: "Sesizare depusă", icon: FileText, color: "#2563EB" },
+  // Co-sign: another citizen submitted the same problem to the same
+  // authority via /api/sesizari/[code]/cosign. Each one gets a row so
+  // the timeline shows every reinforcement chronologically.
+  cosemnat: { label: "Și un alt cetățean a depus sesizarea", icon: UserPlus, color: "#0891B2" },
   inregistrata: { label: "Înregistrată la registratură", icon: Building2, color: "#7C3AED" },
   rutata: { label: "Trimisă la direcție", icon: Megaphone, color: "#0891B2" },
   in_teren: { label: "Inspector pe teren", icon: Wrench, color: "#F59E0B" },
@@ -80,6 +86,9 @@ export function UrmarireSesizare() {
   const statusLabel = result
     ? STATUS_LABELS[result.sesizare.status as keyof typeof STATUS_LABELS] ?? result.sesizare.status
     : null;
+  const cosignCount = result
+    ? result.timeline.filter((e) => e.event_type === "cosemnat").length
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -188,6 +197,16 @@ export function UrmarireSesizare() {
                       {formatDateTime(result.sesizare.created_at)}
                     </span>
                   )}
+                  {cosignCount > 0 && (
+                    <span
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold"
+                      style={{ backgroundColor: "#0891B21a", color: "#0891B2" }}
+                      title="Și alți cetățeni au depus aceeași sesizare"
+                    >
+                      <Users size={10} aria-hidden="true" />
+                      +{cosignCount} {cosignCount === 1 ? "co-semnătură" : "co-semnături"}
+                    </span>
+                  )}
                 </div>
               </div>
               {statusColor && statusLabel && (
@@ -258,7 +277,10 @@ export function UrmarireSesizare() {
                         <Icon size={13} />
                       </span>
                       <p className="font-semibold text-sm leading-tight">{meta.label}</p>
-                      {step.description && (
+                      {/* Skip the description on cosemnat events — label already
+                          says everything; the API stores a longer redundant
+                          string that would just duplicate. */}
+                      {step.description && step.event_type !== "cosemnat" && (
                         <p className="text-xs text-[var(--color-text-muted)] mt-1 leading-relaxed">
                           {step.description}
                         </p>
