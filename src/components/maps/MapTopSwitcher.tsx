@@ -150,11 +150,15 @@ export function MapTopSwitcher<T extends string>({ tabs, active, onChange }: Pro
         aria-label="Selectează tipul de hartă"
         className={cn(
           "pointer-events-auto relative flex items-center gap-1 p-1 rounded-full",
-          // Liquid-glass surface: visible but still translucent.
+          // Tile maps render on light OSM rasters in both site themes,
+          // so the switcher is sized for that backdrop, not the site
+          // theme. Earlier white-on-glass version was invisible on
+          // light tiles. Now: frosted-white container with dark text
+          // for inactive tabs + emerald pill with white text for the
+          // active one — readable on both light and dark map styles.
           "backdrop-blur-2xl backdrop-saturate-200",
-          "bg-white/[0.12] dark:bg-white/[0.10]",
-          "ring-1 ring-white/30 ring-inset",
-          "shadow-[0_10px_32px_-8px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(0,0,0,0.18)]",
+          "bg-white/85 ring-1 ring-slate-900/10 ring-inset",
+          "shadow-[0_10px_32px_-8px_rgba(15,23,42,0.35),0_2px_6px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.7)]",
           "overflow-x-auto no-scrollbar",
         )}
       >
@@ -167,12 +171,12 @@ export function MapTopSwitcher<T extends string>({ tabs, active, onChange }: Pro
           aria-hidden="true"
           className={cn(
             "absolute top-1 bottom-1 rounded-full pointer-events-none",
-            "bg-white/45 dark:bg-white/35",
-            "ring-1 ring-white/60 ring-inset",
-            "backdrop-blur-md backdrop-saturate-200",
-            "shadow-[0_6px_18px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.6),inset_0_-1px_0_rgba(0,0,0,0.12)]",
+            // Solid emerald accent so the active tab stands out as
+            // "selected" against the frosted-white container.
+            "bg-[var(--color-primary)]",
+            "shadow-[0_6px_16px_rgba(5,150,105,0.45),inset_0_1px_0_rgba(255,255,255,0.35)]",
             "before:absolute before:inset-x-2 before:top-[2px] before:h-1/2 before:rounded-full",
-            "before:bg-gradient-to-b before:from-white/70 before:via-white/15 before:to-transparent",
+            "before:bg-gradient-to-b before:from-white/35 before:via-white/10 before:to-transparent",
             "before:opacity-90 before:pointer-events-none",
             "will-change-transform",
           )}
@@ -199,10 +203,10 @@ export function MapTopSwitcher<T extends string>({ tabs, active, onChange }: Pro
               aria-selected={isActive}
               onClick={() => onChange(tab.id)}
               className={cn(
-                "shrink-0 relative z-10 inline-flex items-center justify-center gap-1.5 h-10 px-3 sm:px-4 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white",
+                "shrink-0 relative z-10 inline-flex items-center justify-center gap-1.5 h-10 px-3 sm:px-4 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
                 isActive
-                  ? "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]"
-                  : "text-white/70 hover:text-white",
+                  ? "text-white drop-shadow-[0_1px_2px_rgba(5,95,70,0.45)]"
+                  : "text-slate-700 hover:text-slate-900",
               )}
             >
               <Icon size={15} aria-hidden="true" />
