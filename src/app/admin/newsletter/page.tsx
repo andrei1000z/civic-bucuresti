@@ -19,11 +19,14 @@ interface SubscriberRow {
 async function loadSubscribers(): Promise<SubscriberRow[]> {
   const admin = createSupabaseAdmin();
 
+  // profiles only has created_at — no updated_at column. Ordering by it
+  // would fail silently with PostgREST error 42703 and the page would
+  // render zero subscribers despite real opt-ins existing.
   const { data: profiles } = await admin
     .from("profiles")
-    .select("id, display_name, full_name, phone, newsletter_email_optin, newsletter_sms_optin, updated_at")
+    .select("id, display_name, full_name, phone, newsletter_email_optin, newsletter_sms_optin, created_at")
     .or("newsletter_email_optin.eq.true,newsletter_sms_optin.eq.true")
-    .order("updated_at", { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (!profiles || profiles.length === 0) return [];
 
