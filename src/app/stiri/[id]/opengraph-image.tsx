@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { createClient } from "@supabase/supabase-js";
+import { createSupabaseAnon } from "@/lib/supabase/admin";
 import { SOURCE_COLORS } from "@/lib/constants";
 
 export const runtime = "nodejs";
@@ -16,10 +16,7 @@ interface StireRow {
 
 async function getStire(id: string): Promise<StireRow | null> {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    );
+    const supabase = createSupabaseAnon();
     const { data } = await supabase
       .from("stiri_cache")
       .select("title, source, category, published_at")

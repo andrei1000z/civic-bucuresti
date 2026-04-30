@@ -5,6 +5,7 @@ import { ENV } from "@/lib/env";
 // NEVER import this from client components.
 
 let cached: SupabaseClient | null = null;
+let cachedAnon: SupabaseClient | null = null;
 
 export function createSupabaseAdmin(): SupabaseClient {
   // Runtime tripwire: if this factory is ever called from a browser
@@ -30,4 +31,30 @@ export function createSupabaseAdmin(): SupabaseClient {
     },
   });
   return cached;
+}
+
+/**
+ * Server-side ANON client, no cookies. Folosit pentru SSG pages și
+ * OG image generators care citesc date publice (cu RLS open la anon)
+ * și nu au nevoie de session/cookies. Diferă de createSupabaseServer()
+ * care e cookie-aware (pentru SSR auth) și de createSupabaseBrowser()
+ * care e doar pe client.
+ */
+export function createSupabaseAnon(): SupabaseClient {
+  if (typeof window !== "undefined") {
+    // În browser folosește createSupabaseBrowser — nu expune service-key,
+    // dar tot e o greșeală de wiring să apelezi factory-ul anon server-only.
+    throw new Error(
+      "[supabase/anon] Called from a browser context. " +
+      "Use @/lib/supabase/client → createSupabaseBrowser() in client components.",
+    );
+  }
+  if (cachedAnon) return cachedAnon;
+  cachedAnon = createClient(ENV.SUPABASE_URL(), ENV.SUPABASE_ANON_KEY(), {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+  return cachedAnon;
 }

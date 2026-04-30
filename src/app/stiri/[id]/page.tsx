@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Calendar, User, Tag, Building2, Info } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
+import { createSupabaseAnon } from "@/lib/supabase/admin";
 import { Badge } from "@/components/ui/Badge";
 import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
@@ -43,12 +43,7 @@ interface StireRow {
   ai_summary: string | null;
 }
 
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-}
+const getSupabase = createSupabaseAnon;
 
 async function getRelatedArticles(stire: StireRow): Promise<StireRow[]> {
   try {
