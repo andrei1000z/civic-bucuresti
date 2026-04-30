@@ -5,7 +5,15 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
 import { invalidateSesizariCache } from "@/lib/cached-queries";
-import { sendEmail, emailTemplate } from "@/lib/email/resend";
+import {
+  sendEmail,
+  emailTemplate,
+  emailGreeting,
+  emailNoteCallout,
+  emailStatusPill,
+  escapeEmailHtml,
+} from "@/lib/email/resend";
+import { buildSalutation } from "@/lib/email/format";
 import { rateLimitAsync } from "@/lib/ratelimit";
 import {
   SESIZARE_STATUS_META,
@@ -130,12 +138,26 @@ export async function POST(
   if (recipient && statusChanged) {
     const sesizareUrl = `${SITE_URL}/sesizari/${sesizare.code}`;
     const meta = SESIZARE_STATUS_META[newStatus];
-    const responseBlock = parsed.data.official_response
-      ? `<p><strong>Răspunsul autorității:</strong></p>
-         <blockquote style="margin:0;padding:12px 16px;background:#f8fafc;border-left:3px solid #059669;color:#475569;font-size:14px;line-height:1.6;white-space:pre-wrap">${escapeHtml(parsed.data.official_response)}</blockquote>`
+    const salutation = buildSalutation({
+      // The submitted name is the cleanest signal for the author's
+      // first name. `email` is passed so we can drop a display value
+      // that's actually just the email's local part.
+      fullName: sesizare.author_name,
+      email: recipient,
+    });
+    const responseCallout = parsed.data.official_response
+      ? emailNoteCallout({
+          label: "Răspunsul autorității",
+          text: parsed.data.official_response,
+          tone: "primary",
+        })
       : "";
-    const noteBlock = parsed.data.note
-      ? `<p style="color:#64748b;font-size:13px;margin:12px 0 0">${escapeHtml(parsed.data.note)}</p>`
+    const noteCallout = parsed.data.note
+      ? emailNoteCallout({
+          label: "Notă",
+          text: parsed.data.note,
+          tone: "muted",
+        })
       : "";
     try {
       await sendEmail({
@@ -146,11 +168,15 @@ export async function POST(
           preheader: sesizare.titlu,
           kicker: `STATUS · ${meta.label.toUpperCase()}`,
           icon: meta.emoji,
-          body: `<p>Bună,</p>
-                 <p>Statusul sesizării tale <strong>${sesizare.code}</strong> a fost actualizat.</p>
-                 <p><strong>${sesizare.titlu}</strong></p>
-                 ${noteBlock}
-                 ${responseBlock}`,
+          body: `${emailGreeting(
+            salutation,
+            `Statusul sesizării tale <strong>${escapeEmailHtml(sesizare.code)}</strong> a fost actualizat.`,
+          )}
+                 <p style="margin:0 0 6px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;font-weight:600">Status nou</p>
+                 <p style="margin:0 0 16px">${emailStatusPill({ label: meta.label, emoji: meta.emoji, color: meta.color })}</p>
+                 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#0f172a"><strong>${escapeEmailHtml(sesizare.titlu)}</strong></p>
+                 ${noteCallout}
+                 ${responseCallout}`,
           ctaText: "Vezi sesizarea",
           ctaUrl: sesizareUrl,
         }),
@@ -164,13 +190,4 @@ export async function POST(
   }
 
   return NextResponse.json({ ok: true });
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }

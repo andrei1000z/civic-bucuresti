@@ -5,7 +5,13 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSesizareByCode } from "@/lib/sesizari/repository";
 import { invalidateSesizariCache } from "@/lib/cached-queries";
-import { sendEmail, emailTemplate } from "@/lib/email/resend";
+import {
+  sendEmail,
+  emailTemplate,
+  emailGreeting,
+  escapeEmailHtml,
+} from "@/lib/email/resend";
+import { buildSalutation } from "@/lib/email/format";
 import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
@@ -73,15 +79,20 @@ export async function POST(
     const approved = parsed.data.action === "approve";
     const sesizareUrl = `${SITE_URL}/sesizari/${sesizare.code}`;
     const trackUrl = `${SITE_URL}/urmareste?code=${sesizare.code}`;
+    const salutation = buildSalutation({
+      fullName: sesizare.author_name,
+      email: recipient,
+    });
+    const lead = approved
+      ? `Sesizarea ta <strong>${escapeEmailHtml(sesizare.code)}</strong> a fost aprobată și este acum vizibilă public pe Civia.`
+      : `Sesizarea ta <strong>${escapeEmailHtml(sesizare.code)}</strong> a fost respinsă de moderare.`;
     const body = approved
-      ? `<p>Bună,</p>
-         <p>Sesizarea ta <strong>${sesizare.code}</strong> a fost aprobată și este acum vizibilă public pe Civia.</p>
-         <p><strong>${sesizare.titlu}</strong></p>
-         <p>Poți urmări statusul, votul comunității și comentariile oricând.</p>`
-      : `<p>Bună,</p>
-         <p>Sesizarea ta <strong>${sesizare.code}</strong> a fost respinsă de moderare.</p>
-         <p><strong>${sesizare.titlu}</strong></p>
-         <p>Motive frecvente: limbaj inadecvat, conținut duplicat, date personale sensibile sau informații insuficiente. Poți trimite o sesizare nouă cu detalii clare.</p>`;
+      ? `${emailGreeting(salutation, lead)}
+         <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#0f172a"><strong>${escapeEmailHtml(sesizare.titlu)}</strong></p>
+         <p style="margin:0;color:#64748b;font-size:14px;line-height:1.6">Poți urmări statusul, votul comunității și comentariile oricând.</p>`
+      : `${emailGreeting(salutation, lead)}
+         <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#0f172a"><strong>${escapeEmailHtml(sesizare.titlu)}</strong></p>
+         <p style="margin:0;color:#64748b;font-size:14px;line-height:1.6">Motive frecvente: limbaj inadecvat, conținut duplicat, date personale sensibile sau informații insuficiente. Poți trimite o sesizare nouă cu detalii clare.</p>`;
     // sendEmail e best-effort — Resend down nu trebuie să blocheze
     // răspunsul către admin (DB update deja a avut succes).
     try {

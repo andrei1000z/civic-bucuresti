@@ -4,7 +4,15 @@ import * as Sentry from "@sentry/nextjs";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { invalidateSesizariCache } from "@/lib/cached-queries";
-import { sendEmail, emailTemplate } from "@/lib/email/resend";
+import {
+  sendEmail,
+  emailTemplate,
+  emailGreeting,
+  emailNoteCallout,
+  emailStatusPill,
+  escapeEmailHtml,
+} from "@/lib/email/resend";
+import { buildSalutation } from "@/lib/email/format";
 import { rateLimitAsync } from "@/lib/ratelimit";
 import {
   SESIZARE_STATUS_META,
@@ -109,10 +117,12 @@ export async function POST(
     .eq("id", ticket.id);
   if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
 
-  // Pre-fetch the sesizare for emails + status side-effect.
+  // Pre-fetch the sesizare for emails + status side-effect. Pull
+  // `author_name` so the status-change email to the author has a
+  // proper salutation („Salut, Eduard,") instead of „Bună,".
   const { data: sesizare } = await admin
     .from("sesizari")
-    .select("id, code, titlu, status, author_email, resolved_at")
+    .select("id, code, titlu, status, author_email, author_name, resolved_at")
     .eq("id", ticket.sesizare_id)
     .maybeSingle();
 
@@ -173,10 +183,12 @@ export async function POST(
 
   // Notify the proposer (best-effort). The author of the parent
   // sesizare gets a separate email through the status-change flow if
-  // they're not the same person.
+  // they're not the same person. Pull `full_name` too so the
+  // salutation prefers a real name over the auto-generated email
+  // local-part display_name.
   const { data: proposerProfile } = await admin
     .from("profiles")
-    .select("id, display_name")
+    .select("id, display_name, full_name")
     .eq("id", ticket.user_id)
     .maybeSingle();
 
@@ -202,8 +214,18 @@ export async function POST(
   ) {
     const meta = SESIZARE_STATUS_META[appliedStatus];
     const sesizareUrl = `${SITE_URL}/sesizari/${sesizare.code}`;
-    const noteBlock = appliedNote?.trim()
-      ? `<p style="color:#64748b;font-size:13px;margin:12px 0 0">Update raportat de comunitate: <em>${escapeHtml(appliedNote)}</em></p>`
+    const authorSalutation = buildSalutation({
+      // sesizare.author_name is what the citizen typed at submit time
+      // — the most reliable signal of their actual first name.
+      fullName: (sesizare as { author_name?: string | null }).author_name ?? null,
+      email: authorEmail,
+    });
+    const noteCallout = appliedNote?.trim()
+      ? emailNoteCallout({
+          label: "Update raportat de comunitate",
+          text: appliedNote,
+          tone: "primary",
+        })
       : "";
     try {
       await sendEmail({
@@ -214,10 +236,14 @@ export async function POST(
           preheader: sesizare.titlu,
           kicker: `STATUS · ${meta.label.toUpperCase()}`,
           icon: meta.emoji,
-          body: `<p>Bună,</p>
-                 <p>Statusul sesizării tale <strong>${sesizare.code}</strong> a fost actualizat în urma unei propuneri verificate de comunitate.</p>
-                 <p><strong>${sesizare.titlu}</strong></p>
-                 ${noteBlock}`,
+          body: `${emailGreeting(
+            authorSalutation,
+            `Statusul sesizării tale <strong>${escapeEmailHtml(sesizare.code)}</strong> a fost actualizat în urma unei propuneri verificate de comunitate.`,
+          )}
+                 <p style="margin:0 0 6px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;font-weight:600">Status nou</p>
+                 <p style="margin:0 0 16px">${emailStatusPill({ label: meta.label, emoji: meta.emoji, color: meta.color })}</p>
+                 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#0f172a"><strong>${escapeEmailHtml(sesizare.titlu)}</strong></p>
+                 ${noteCallout}`,
           ctaText: "Vezi sesizarea",
           ctaUrl: sesizareUrl,
         }),
@@ -239,16 +265,33 @@ export async function POST(
       (approved ? appliedStatus : ticket.proposed_status) as SesizareStatus
     ];
     const sesizareUrl = `${SITE_URL}/sesizari/${sesizare.code}`;
-    const decisionNoteBlock = parsed.data.decision_note
-      ? `<p style="color:#64748b;font-size:13px;margin:12px 0 0">Notă admin: <em>${escapeHtml(parsed.data.decision_note)}</em></p>`
+    const proposerSalutation = buildSalutation({
+      fullName:
+        (proposerProfile as { full_name?: string | null } | null)?.full_name ?? null,
+      displayName:
+        (proposerProfile as { display_name?: string | null } | null)?.display_name ?? null,
+      email: proposerEmail,
+    });
+    const decisionNoteCallout = parsed.data.decision_note
+      ? emailNoteCallout({
+          label: "Notă admin",
+          text: parsed.data.decision_note,
+          tone: approved ? "primary" : "muted",
+        })
       : "";
-    const body = approved
-      ? `<p>Salut${proposerProfile?.display_name ? ` ${escapeHtml(proposerProfile.display_name)}` : ""},</p>
-         <p>Propunerea ta de status (<strong>${meta?.label ?? ticket.proposed_status}</strong>) pentru sesizarea <strong>${sesizare.code}</strong> a fost <strong>aprobată</strong>. Mulțumim că ții comunitatea informată!</p>
-         ${decisionNoteBlock}`
-      : `<p>Salut${proposerProfile?.display_name ? ` ${escapeHtml(proposerProfile.display_name)}` : ""},</p>
-         <p>Propunerea ta de status (<strong>${meta?.label ?? ticket.proposed_status}</strong>) pentru sesizarea <strong>${sesizare.code}</strong> a fost respinsă de admin. Asta nu înseamnă că nu te credem — pur și simplu nu am putut verifica suficient.</p>
-         ${decisionNoteBlock}`;
+    const lead = approved
+      ? `Propunerea ta pentru sesizarea <strong>${escapeEmailHtml(sesizare.code)}</strong> a fost aprobată. Mulțumim că ții comunitatea informată.`
+      : `Propunerea ta pentru sesizarea <strong>${escapeEmailHtml(sesizare.code)}</strong> nu a fost aprobată — nu am putut verifica suficient datele primite. Poți încerca din nou cu o dovadă mai clară.`;
+    const statusLabel = approved
+      ? "Status aplicat"
+      : "Status propus de tine";
+    const body = `
+      ${emailGreeting(proposerSalutation, lead)}
+      <p style="margin:0 0 6px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;font-weight:600">${statusLabel}</p>
+      <p style="margin:0 0 16px">${emailStatusPill({ label: meta?.label ?? ticket.proposed_status, emoji: meta?.emoji ?? "🏷️", color: meta?.color ?? "#64748b" })}</p>
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#0f172a"><strong>${escapeEmailHtml(sesizare.titlu)}</strong></p>
+      ${decisionNoteCallout}
+    `;
     try {
       await sendEmail({
         to: proposerEmail,
@@ -274,13 +317,4 @@ export async function POST(
   }
 
   return NextResponse.json({ ok: true });
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }

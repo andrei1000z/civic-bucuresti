@@ -8,6 +8,7 @@ import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 import { sanitizeText, escapeHtml } from "@/lib/sanitize";
 import { humanizeSupabaseError } from "@/lib/supabase/errors";
 import { sendEmail, emailTemplate } from "@/lib/email/resend";
+import { buildSalutation, formatRecipientName } from "@/lib/email/format";
 import { invalidateSesizariCache } from "@/lib/cached-queries";
 import { polishSesizare } from "@/lib/sesizari/polish";
 import { forwardGeocode } from "@/lib/sesizari/geocoding";
@@ -192,7 +193,16 @@ export async function POST(req: Request) {
       const authorEmail = parsed.author_email;
       if (authorEmail) {
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://civia.ro";
-        const firstName = (parsed.author_name ?? "").split(/\s+/)[0] ?? "Cetățean";
+        // Use the polished salutation helper so a missing /
+        // placeholder / email-local-part name falls through to a
+        // clean „Bună!" instead of „Salut, Cetățean 👋".
+        const cleanFirstName = formatRecipientName({
+          fullName: parsed.author_name,
+          email: authorEmail,
+        });
+        const salutation = cleanFirstName
+          ? `Salut, ${cleanFirstName} 👋`
+          : buildSalutation({ withEmoji: true });
         const cleanTitle = sanitizeText(parsed.titlu, 120);
         const cleanLocation = sanitizeText(parsed.locatie, 120);
         sendEmail({
@@ -204,8 +214,8 @@ export async function POST(req: Request) {
             icon: "✓",
             preheader: `Codul tău de urmărire: ${code}. Răspunsul oficial vine în max 30 de zile.`,
             body: `
-              <p style="font-size:16px;margin:0 0 8px">Salut, <strong>${escapeHtml(firstName)}</strong> 👋</p>
-              <p style="margin:0 0 24px;color:#64748b">Mulțumim că te implici. Am înregistrat-o — iată ce urmează.</p>
+              <p style="font-size:16px;margin:0 0 8px;font-weight:600;color:#0f172a">${escapeHtml(salutation)}</p>
+              <p style="margin:0 0 24px;color:#64748b;font-size:14px;line-height:1.6">Mulțumim că te implici. Am înregistrat-o — iată ce urmează.</p>
 
               <!-- Cod unic — hero element -->
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%);border:1px solid #a7f3d0;border-radius:14px;padding:24px;margin:0 0 20px">

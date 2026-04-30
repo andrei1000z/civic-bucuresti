@@ -79,6 +79,56 @@ function escapeAttr(s: string): string {
     .replace(/'/g, "&#039;");
 }
 
+/** Public alias — callers compose body HTML and need the same
+ *  escaper for any user-supplied substring they paste in. */
+export const escapeEmailHtml = escapeAttr;
+
+/**
+ * Bold + clean salutation paragraph used at the top of every
+ * transactional email. `salutation` should already be the polished
+ * line from `buildSalutation()` (e.g. „Salut, Eduard," or „Bună!").
+ */
+export function emailGreeting(salutation: string, sub?: string): string {
+  return `<p style="font-size:16px;margin:0 0 8px;font-weight:600;color:#0f172a">${escapeAttr(salutation)}</p>${
+    sub
+      ? `<p style="margin:0 0 24px;color:#64748b;font-size:14px;line-height:1.6">${sub}</p>`
+      : ""
+  }`;
+}
+
+/**
+ * Render a structured "Notă admin" / "Notă propunător" callout block.
+ * Use a small left-border accent so the note is visually distinct from
+ * regular paragraphs — clearer than the previous inline „<em>…</em>"
+ * which read as throwaway commentary.
+ */
+export function emailNoteCallout(opts: {
+  label: string;
+  text: string;
+  /** "primary" → emerald accent (default); "muted" → slate. */
+  tone?: "primary" | "muted";
+}): string {
+  const tone = opts.tone ?? "primary";
+  const accent = tone === "primary" ? "#059669" : "#94a3b8";
+  const bg = tone === "primary" ? "#ecfdf5" : "#f1f5f9";
+  return `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0 8px">
+      <tr><td style="background:${bg};border-left:3px solid ${accent};border-radius:0 8px 8px 0;padding:12px 16px">
+        <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:${accent};letter-spacing:0.6px;text-transform:uppercase">${escapeAttr(opts.label)}</p>
+        <p style="margin:0;font-size:14px;line-height:1.6;color:#334155;white-space:pre-wrap">${escapeAttr(opts.text)}</p>
+      </td></tr>
+    </table>`;
+}
+
+/**
+ * A small status pill showing the live status of a sesizare. Inlined
+ * styles so Gmail/Outlook render correctly without external CSS.
+ */
+export function emailStatusPill(opts: { label: string; emoji: string; color: string }): string {
+  const tint = `${opts.color}1a`;
+  return `<span style="display:inline-block;padding:4px 10px;border-radius:999px;background:${tint};color:${opts.color};font-size:12px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase">${escapeAttr(opts.emoji)} ${escapeAttr(opts.label)}</span>`;
+}
+
 /**
  * HTML email template with Civia branding.
  *
