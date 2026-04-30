@@ -55,8 +55,8 @@ Platformă civică independentă, gratuită, pentru cetățenii din România. Se
 ## Setup local
 
 ```bash
-git clone https://github.com/<your-org>/civic-bucuresti.git
-cd civic-bucuresti
+git clone https://github.com/<your-org>/civia.git
+cd civia
 npm install
 cp .env.local.example .env.local
 # Editează .env.local cu valorile reale

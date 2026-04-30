@@ -179,7 +179,7 @@ export async function reverseGeocode(lat: number, lng: number): Promise<Geocodin
   try {
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=ro`;
     const res = await fetch(url, {
-      headers: { "User-Agent": "CivicBucuresti/1.0 (.)" },
+      headers: GEOCODE_HEADERS,
       // Reverse geocode results are stable — cache 24h to cut Nominatim load.
       next: { revalidate: 86400 },
       signal: AbortSignal.timeout(3000),

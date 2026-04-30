@@ -1,5 +1,5 @@
 -- ============================================================
--- Civic București — Supabase schema
+-- Civia — Supabase schema
 -- ============================================================
 -- Run this file in the Supabase SQL Editor.
 -- Idempotent: safe to re-run (drop + recreate pattern).

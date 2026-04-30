@@ -35,4 +35,4 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-key-for-build
           SUPABASE_SERVICE_ROLE_KEY: dummy-service-key
           GROQ_API_KEY: dummy-key
-          NEXT_PUBLIC_SITE_URL: https://civic-bucuresti.ro
+          NEXT_PUBLIC_SITE_URL: https://civia.ro
