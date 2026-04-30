@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Accessibility, ArrowRight, CheckCircle2, XCircle, Info } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
   title: "Accesibilitate — ghid pentru persoane cu dizabilități",
@@ -13,17 +13,14 @@ export const metadata: Metadata = {
 
 export default function AccesibilitatePage() {
   return (
-    <div className="container-narrow py-12 md:py-16">
-      <Badge className="mb-4">Ghid cetățenesc</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
-        <Accessibility size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
-        Accesibilitate
-      </h1>
-      <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Peste <strong className="tabular-nums">800.000</strong> de cetățeni români au o dizabilitate oficial recunoscută. Accesibilitatea
-        nu e un bonus — e un drept garantat prin lege. Aici găsești drepturi, facilități,
-        adrese utile și declarația noastră de accesibilitate.
-      </p>
+    <div className="container-narrow py-8 md:py-12">
+      <PageHero
+        title="Accesibilitate"
+        icon={Accessibility}
+        gradient={HERO_GRADIENT.primary}
+        description="Peste 800.000 de cetățeni români au o dizabilitate oficial recunoscută. Accesibilitatea nu e un bonus — e un drept garantat prin lege. Aici găsești drepturi, facilități, adrese utile și declarația noastră de accesibilitate."
+        tagline="Ghid cetățenesc · Legea 448/2006 · WCAG 2.1 AA · Directiva UE 2016/2102"
+      />
 
       {/* Quick links */}
       <div className="grid md:grid-cols-3 gap-4 mb-12">

@@ -4,10 +4,10 @@ import { GraduationCap, ArrowRight, ExternalLink, TrendingUp } from "lucide-reac
 import { BAC_STATS, TOP_LICEE_2025, DATE_PUBLICE_SNAPSHOT } from "@/data/date-publice";
 import { ALL_COUNTIES } from "@/data/counties";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 import { formatDecimal, formatNumber } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -33,21 +33,20 @@ export default function EducatiePage() {
   const promovTrend = prev ? latest.promovabilitate - prev.promovabilitate : 0;
 
   return (
-    <div className="container-narrow py-12 md:py-16">
+    <div className="container-narrow py-8 md:py-12">
       <DatasetJsonLd
         name="Educație România — BAC + top licee"
         description="Promovabilitate Bacalaureat pe ani, top 10 licee, abandon școlar, context comparativ UE."
         url="https://civia.ro/educatie"
         keywords={["educatie", "bac", "licee", "romania", "invatamant"]}
       />
-      <Badge className="mb-4">Educație</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
-        <GraduationCap size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
-        Școala pe care o plătim
-      </h1>
-      <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Rezultatele Bacalaureatului, topul liceelor, abandonul școlar — cât de bine îi pregătește sistemul public pe copiii noștri și cum stăm comparat cu restul Uniunii Europene. Cifre oficiale de la Ministerul Educației și INS.
-      </p>
+      <PageHero
+        title="Școala pe care o plătim"
+        icon={GraduationCap}
+        gradient={HERO_GRADIENT.data}
+        description="Rezultatele Bacalaureatului, topul liceelor, abandonul școlar — cât de bine îi pregătește sistemul public pe copiii noștri și cum stăm comparat cu restul Uniunii Europene."
+        tagline={`Cifre oficiale Ministerul Educației + INS · BAC ${latest.year}: ${formatDecimal(latest.promovabilitate, 1)}% promovabilitate`}
+      />
 
       {/* KEY NUMBERS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">

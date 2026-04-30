@@ -3,8 +3,8 @@ import Link from "next/link";
 import { ArrowRight, Code, Database, Shield, Zap } from "lucide-react";
 import { SITE_URL } from "@/lib/constants";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
   title: "API public pentru dezvoltatori — Civia",
@@ -15,30 +15,20 @@ export const metadata: Metadata = {
 
 export default function ApiDocsPage() {
   return (
-    <div className="container-narrow py-12 md:py-16">
+    <div className="container-narrow py-8 md:py-12">
       <DatasetJsonLd
         name="Civia — Sesizări civice România (API public)"
         description="Toate sesizările publice și aprobate trimise prin civia.ro către primării și autorități. Date civice deschise: tip problemă, locație, status (nou/în-lucru/rezolvat), județ/sector, data depunerii. Acces JSON CORS-enabled, fără autentificare. Licență CC BY 4.0."
         url={`${SITE_URL}/dezvoltatori`}
         keywords={["api", "open-data", "sesizari", "romania", "civic-tech", "transparenta", "cc-by-4.0"]}
       />
-      <Badge className="mb-4">v1 · stabil</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4">
-        API public Civia
-      </h1>
-      <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Toate sesizările publice și aprobate sunt accesibile prin API deschis, fără autentificare.
-        CORS complet deschis, rate-limit generos (120 req/min per IP). Licență{" "}
-        <a
-          href="https://creativecommons.org/licenses/by/4.0/deed.ro"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[var(--color-primary)] hover:underline"
-        >
-          CC BY 4.0
-        </a>{" "}
-        — folosește cum vrei, cită-ne ca sursă.
-      </p>
+      <PageHero
+        title="API public Civia"
+        icon={Code}
+        gradient={HERO_GRADIENT.primary}
+        description="Toate sesizările publice și aprobate sunt accesibile prin API deschis, fără autentificare. CORS complet deschis, rate-limit generos (120 req/min per IP). Folosește cum vrei, cită-ne ca sursă."
+        tagline="v1 · stabil · Licență CC BY 4.0 · CORS deschis · zero înregistrare"
+      />
 
       <div className="grid md:grid-cols-2 gap-4 mb-12">
         <Card accentColor="#1C4ED8">

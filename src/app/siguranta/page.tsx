@@ -4,10 +4,10 @@ import { ShieldAlert, ExternalLink } from "lucide-react";
 import { CRIMINALITATE, TOP_SIGURANTA_JUDETE, DATE_PUBLICE_SNAPSHOT } from "@/data/date-publice";
 import { ALL_COUNTIES } from "@/data/counties";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 import { formatDecimal, formatNumber } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -27,21 +27,20 @@ export default function SigurantaPage() {
   const latest = CRIMINALITATE[CRIMINALITATE.length - 1]!;
 
   return (
-    <div className="container-narrow py-12 md:py-16">
+    <div className="container-narrow py-8 md:py-12">
       <DatasetJsonLd
         name="Criminalitate România — statistici oficiale"
         description="Date oficiale Poliția Română: tipuri de infracțiuni, evoluție temporală, rate pe județe."
         url="https://civia.ro/siguranta"
         keywords={["criminalitate", "politie", "siguranta", "romania", "statistici"]}
       />
-      <Badge className="mb-4">Siguranță publică</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
-        <ShieldAlert size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
-        Cât de sigură e România
-      </h1>
-      <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Infracțiunile înregistrate de Poliția Română, defalcate pe tipuri și județe. Sunt doar cele <em>sesizate</em> oficial — „cifra neagră” a celor neraportate se estimează la 30–50% în funcție de categorie, deci realitatea pe teren e puțin mai gravă.
-      </p>
+      <PageHero
+        title="Cât de sigură e România"
+        icon={ShieldAlert}
+        gradient={HERO_GRADIENT.warning}
+        description={`Infracțiunile înregistrate de Poliția Română, defalcate pe tipuri și județe. Sunt doar cele sesizate oficial — "cifra neagră" a celor neraportate se estimează la 30–50% în funcție de categorie, deci realitatea pe teren e puțin mai gravă.`}
+        tagline={`Date Poliția Română + MAI + INS · ${latest.year}: ${formatDecimal(latest.totalInfractiuni / 1000, 0)} mii infracțiuni înregistrate`}
+      />
 
       {/* KEY NUMBERS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">

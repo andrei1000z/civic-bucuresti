@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ExternalLink, MapPin, CheckCircle2, XCircle } from "lucide-react";
+import { ExternalLink, MapPin, CheckCircle2, XCircle, Ticket } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { BileteTabs } from "@/components/bilete/BileteTabs";
 import { TariffCalculator } from "@/components/bilete/TariffCalculator";
 import { LastUpdated } from "@/components/data/LastUpdated";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 import { bilete, linii, DATE_VERIFIED } from "@/data/bilete";
 import { formatCurrency } from "@/lib/utils";
 
@@ -68,17 +69,17 @@ function OperatorSection({ operator }: { operator: "stb" | "metrorex" | "ilfov" 
 
 export default function BiletePage() {
   return (
-    <div className="container-narrow py-12 md:py-16">
-      {/* Header */}
+    <div className="container-narrow py-8 md:py-12">
+      <PageHero
+        title={`Bilete & Abonamente transport ${new Date().getFullYear()}`}
+        icon={Ticket}
+        gradient={HERO_GRADIENT.primary}
+        description="Tarife, abonamente și puncte de vânzare pentru STB, Metrorex și operatorii din Ilfov. Cardul Activ, calculator personalizat și liniile principale, într-un singur loc."
+        tagline="Date verificate stb.ro + metrorex.ro + ctp-ploiesti.ro · prețurile pot suferi modificări — verifică sursa oficială înainte de cumpărare"
+      />
       <div className="mb-10">
-        <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4">
-          Bilete & Abonamente STB / Metrorex {new Date().getFullYear()}
-        </h1>
-        <p className="text-lg text-[var(--color-text-muted)] mb-3">
-          Tarife, abonamente și puncte de vânzare pentru toate operatorii de transport public.
-        </p>
         <p className="text-xs text-[var(--color-text-muted)] mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
-          ⚠️ Prețurile se pot modifica. Verifică pe{" "}
+          ⚠️ Verifică pe{" "}
           <a href="https://stbsa.ro/tarife" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:underline font-medium">stbsa.ro/tarife</a>
           {" "}/{" "}
           <a href="https://metrorex.ro" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:underline font-medium">metrorex.ro</a>

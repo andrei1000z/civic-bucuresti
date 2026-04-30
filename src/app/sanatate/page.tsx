@@ -3,11 +3,11 @@ import Link from "next/link";
 import { Heart, ExternalLink, ArrowRight, TrendingDown } from "lucide-react";
 import { SANATATE_NATIONALA, TOP_SPITALE_PUBLICE, DATE_PUBLICE_SNAPSHOT } from "@/data/date-publice";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { SimpleBar } from "@/components/date-publice/SimpleBar";
 import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { LastUpdated } from "@/components/data/LastUpdated";
 import { formatDecimal } from "@/lib/utils";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
   title: "Sistemul medical românesc — în cifre reale",
@@ -22,21 +22,20 @@ export default function SanatatePage() {
   const latest = SANATATE_NATIONALA[SANATATE_NATIONALA.length - 1]!;
 
   return (
-    <div className="container-narrow py-12 md:py-16">
+    <div className="container-narrow py-8 md:py-12">
       <DatasetJsonLd
         name="Sănătate România — statistici sistem medical"
         description="Speranță viață, mortalitate infantilă, medici per capita, top spitale publice, context UE."
         url="https://civia.ro/sanatate"
         keywords={["sanatate", "medicina", "spitale", "romania", "statistici"]}
       />
-      <Badge className="mb-4">Sănătate publică</Badge>
-      <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
-        <Heart size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
-        Cât trăim și cum trăim
-      </h1>
-      <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mb-10 leading-relaxed">
-        Speranța de viață, accesul la medici, topul spitalelor publice și cum se compară sistemul nostru cu restul UE. Date agregate de la INS, Ministerul Sănătății și Eurostat — fără filtre, fără ascunzișuri.
-      </p>
+      <PageHero
+        title="Cât trăim și cum trăim"
+        icon={Heart}
+        gradient={HERO_GRADIENT.health}
+        description="Speranța de viață, accesul la medici, topul spitalelor publice și cum se compară sistemul nostru cu restul UE. Fără filtre, fără ascunzișuri."
+        tagline={`Date INS + Ministerul Sănătății + Eurostat · Speranță viață ${latest.year}: ${formatDecimal(latest.sperantaViataAni, 1)} ani`}
+      />
 
       {/* KEY NUMBERS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
