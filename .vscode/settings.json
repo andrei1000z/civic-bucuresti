@@ -1,0 +1,97 @@
+{
+  // ──────────────────────────────────────────────────────────────────
+  // Editor — formatare la save via ESLint, fără Prettier (proiectul nu îl folosește)
+  // ──────────────────────────────────────────────────────────────────
+  "editor.formatOnSave": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "files.trimFinalNewlines": true,
+
+  // ──────────────────────────────────────────────────────────────────
+  // ESLint — pe TS/TSX, JS/JSX, JSON
+  // ──────────────────────────────────────────────────────────────────
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+
+  // ──────────────────────────────────────────────────────────────────
+  // Tailwind v4 + design tokens (var(--color-*))
+  // Detectează classes în cn() / clsx() / cva() helpers
+  // ──────────────────────────────────────────────────────────────────
+  "tailwindCSS.experimental.classRegex": [
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["class:\\s*[\"']([^\"']*)[\"']"]
+  ],
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  "css.customData": [".vscode/css-custom-data.json"],
+
+  // ──────────────────────────────────────────────────────────────────
+  // TypeScript — folosește versiunea proiectului, nu cea built-in din VS Code
+  // ──────────────────────────────────────────────────────────────────
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
+
+  // ──────────────────────────────────────────────────────────────────
+  // Search — exclude artefacte build/test/vendor
+  // ──────────────────────────────────────────────────────────────────
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/.vercel": true,
+    "**/coverage": true,
+    "**/package-lock.json": true,
+    "**/.git": true,
+    "supabase/COMBINED.sql": true
+  },
+  "files.watcherExclude": {
+    "**/.next/**": true,
+    "**/node_modules/**": true,
+    "**/.git/objects/**": true
+  },
+
+  // ──────────────────────────────────────────────────────────────────
+  // File associations
+  // ──────────────────────────────────────────────────────────────────
+  "files.associations": {
+    "*.css": "tailwindcss",
+    ".env.local": "dotenv",
+    ".env.local.example": "dotenv"
+  },
+
+  // ──────────────────────────────────────────────────────────────────
+  // Per-language overrides
+  // ──────────────────────────────────────────────────────────────────
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  }
+}
