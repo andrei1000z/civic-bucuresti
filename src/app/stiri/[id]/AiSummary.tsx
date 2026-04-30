@@ -194,7 +194,7 @@ export function AiSummary({ initialSummary, fallbackText, synthesizeUrl }: AiSum
     }
 
     // Section headers like "De ce contează:"
-    if (line.match(/^(De ce contează|Context|Cifre cheie|Ce urmează|Programul|Detalii)/i)) {
+    if (line.match(/^(Pe scurt|De ce contează|Context|Cifre cheie|Ce urmează|Programul|Detalii|Ce cere petiția)/i)) {
       blocks.push(
         <h3
           key={i}

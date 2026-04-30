@@ -12,6 +12,7 @@ import { CookieBanner } from "@/components/CookieBanner";
 import { AlertBanner } from "@/components/AlertBanner";
 import { Analytics } from "@/components/Analytics";
 import { NavProgress } from "@/components/NavProgress";
+import { ScrollRestoration } from "@/components/ScrollRestoration";
 import { DeferredClientMount } from "@/components/DeferredClientMount";
 import { ToastProvider } from "@/components/Toast";
 import { BackToTop } from "@/components/BackToTop";
@@ -163,6 +164,7 @@ export default function RootLayout({
         <WebsiteJsonLd />
         <Analytics />
         <NavProgress />
+        <ScrollRestoration />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[var(--z-toast)] focus:px-4 focus:py-2 focus:bg-[var(--color-primary)] focus:text-white focus:rounded-[var(--radius-xs)] focus:shadow-lg"

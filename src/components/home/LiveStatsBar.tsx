@@ -122,8 +122,23 @@ export function LiveStatsBar() {
       style={{ minHeight: "44px" }}
     >
       <div className="relative">
-        <div className="flex animate-ticker whitespace-nowrap" aria-hidden="true">
-          {[...stats, ...stats].map((stat, i) => {
+        {/*
+          The ticker math: animation translates the inner row by -50%,
+          so the second copy lands exactly where the first one was —
+          seamless loop. That math only works when the row's own width
+          equals the SUM of its children, not the parent. Without
+          `w-max`, a default `display:flex` block takes the parent's
+          width (≈ viewport), so `-50%` equals half a viewport — and
+          when the content is shorter than 2× viewport you get a
+          visible gap between sets that "teleports" back. Setting the
+          flex row to `w-max` (= width: max-content) pins its width to
+          its content, so -50% lines up perfectly with one set's
+          width. The list is duplicated 4× as a safety belt for very
+          wide screens / very few stats — the loop still uses -50%
+          (= halfway through 4 sets, identical to start).
+        */}
+        <div className="flex w-max animate-ticker whitespace-nowrap" aria-hidden="true">
+          {[...stats, ...stats, ...stats, ...stats].map((stat, i) => {
             const Icon = stat.icon;
             return (
               <div

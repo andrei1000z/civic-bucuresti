@@ -225,6 +225,17 @@ body {
   text-size-adjust: 100%;
 }
 
+/* Long Romanian compounds („Bistrița-Năsăud"), brand names
+   („Strasbourg") and URLs in body copy can blow past a 360px viewport
+   when rendered at hero font sizes. `overflow-wrap: anywhere` lets the
+   browser proactively break inside words rather than only at spaces
+   — fixes the "text cut off on the right edge" reports on every page
+   without affecting wider viewports. */
+h1, h2, h3, h4, p, li {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 /* Mobile-first: tap targets min 44px, smooth scrolling */
 @media (max-width: 640px) {
   button, a, select, input, textarea {
@@ -233,7 +244,16 @@ body {
   }
   h1 { font-size: 1.875rem !important; line-height: 1.15 !important; } /* 30px */
   h2 { font-size: 1.5rem !important; }
+  p, li { hyphens: auto; -webkit-hyphens: auto; }
   .container-narrow { padding-left: 0.75rem; padding-right: 0.75rem; }
+}
+
+/* Tighten H1 further on very narrow viewports (older phones / split
+   view). 1.5rem keeps multi-word titles within 1–3 lines instead of
+   spilling onto 6+ and overflowing fixed-height hero panels. */
+@media (max-width: 380px) {
+  h1 { font-size: 1.5rem !important; line-height: 1.2 !important; }
+  h2 { font-size: 1.25rem !important; }
 }
 
 /* Smooth scroll for anchor links */

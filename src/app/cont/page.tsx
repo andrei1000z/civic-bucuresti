@@ -266,7 +266,12 @@ export default function ContPage() {
     }
   };
 
-  if (authLoading || (!user && !authLoading)) {
+  // Wait for both auth AND profile fetch to resolve before rendering.
+  // Without the `loading || !profile` check, we briefly render the page
+  // with `profile=null`, which falls through to „Salut, Cetățean!" and
+  // then snaps to the real name when the fetch resolves — exactly the
+  // flicker users complained about.
+  if (authLoading || !user || loading || !profile) {
     return (
       <div className="container-narrow py-20 text-center">
         <Loader2 size={28} className="animate-spin mx-auto text-[var(--color-text-muted)]" />

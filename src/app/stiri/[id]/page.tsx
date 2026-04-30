@@ -157,43 +157,73 @@ export default async function StireDetailPage({
         Toate știrile
       </Link>
 
-      {/* Hero */}
+      {/* Hero — on mobile the image stacks above the title (so long
+          Romanian titles don't get clipped over a fixed-height image
+          card). On md+ we keep the cinematic overlay with the title
+          floating bottom-left. */}
       <div className="mb-8">
         {stire.image_url && (
-          <div className="relative h-64 md:h-[420px] rounded-[var(--radius-md)] overflow-hidden mb-6 bg-[var(--color-surface-2)]">
-            <Image
-              src={stire.image_url}
-              alt={stire.title}
-              fill
-              sizes="(max-width: 768px) 100vw, 896px"
-              className="object-cover"
-              priority
-              unoptimized
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6">
-              <div className="flex gap-2 mb-3">
+          <>
+            {/* Mobile: image on top, title below — no clipping. */}
+            <div className="md:hidden">
+              <div className="relative aspect-[16/9] rounded-[var(--radius-md)] overflow-hidden mb-4 bg-[var(--color-surface-2)]">
+                <Image
+                  src={stire.image_url}
+                  alt={stire.title}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                  priority
+                  unoptimized
+                />
+              </div>
+              <div className="flex gap-2 mb-3 flex-wrap">
                 <Badge bgColor={sourceColor} color="white">{stire.source}</Badge>
-                <Badge className="bg-white/20 text-white border border-white/30 uppercase text-[10px] backdrop-blur-sm">
+                <Badge variant="neutral" className="uppercase text-[10px]">
                   {categoryLabels[stire.category] ?? stire.category}
                 </Badge>
               </div>
-              <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-4xl font-extrabold text-white leading-tight drop-shadow-lg">
+              <h1 className="font-[family-name:var(--font-sora)] text-2xl font-extrabold leading-tight">
                 {stire.title}
               </h1>
             </div>
-          </div>
+
+            {/* Desktop: full-bleed image with floating title overlay. */}
+            <div className="relative h-[420px] rounded-[var(--radius-md)] overflow-hidden mb-6 bg-[var(--color-surface-2)] hidden md:block">
+              <Image
+                src={stire.image_url}
+                alt={stire.title}
+                fill
+                sizes="896px"
+                className="object-cover"
+                priority
+                unoptimized
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6">
+                <div className="flex gap-2 mb-3 flex-wrap">
+                  <Badge bgColor={sourceColor} color="white">{stire.source}</Badge>
+                  <Badge className="bg-white/20 text-white border border-white/30 uppercase text-[10px] backdrop-blur-sm">
+                    {categoryLabels[stire.category] ?? stire.category}
+                  </Badge>
+                </div>
+                <h1 className="font-[family-name:var(--font-sora)] text-4xl font-extrabold text-white leading-tight drop-shadow-lg">
+                  {stire.title}
+                </h1>
+              </div>
+            </div>
+          </>
         )}
 
         {!stire.image_url && (
           <>
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-2 mb-4 flex-wrap">
               <Badge bgColor={sourceColor} color="white">{stire.source}</Badge>
               <Badge variant="neutral" className="uppercase text-[10px]">
                 {categoryLabels[stire.category] ?? stire.category}
               </Badge>
             </div>
-            <h1 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-extrabold leading-tight mb-4">
+            <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-4xl font-extrabold leading-tight mb-4">
               {stire.title}
             </h1>
           </>
