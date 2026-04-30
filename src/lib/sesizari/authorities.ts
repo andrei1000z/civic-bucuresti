@@ -50,7 +50,12 @@ export const PRIMARII_SECTOR: Record<string, Authority> = {
 // Poliția Locală per sector
 export const POLITIA_LOCALA_SECTOR: Record<string, Authority> = {
   S1: { id: "pl-s1", name: "Poliția Locală Sector 1", email: "registratura@primarias1.ro", phone: "021 9540" },
-  S2: { id: "pl-s2", name: "Poliția Locală Sector 2", email: "office@politialocalas2.ro", phone: "021 9941" },
+  // Sector 2 routes both Primăria + Poliția Locală pe aceeași adresă —
+  // `infopublice@ps2.ro` e singura inbox publică PS2 confirmată; restul
+  // (office@politialocalas2.ro, contact@…) bounce sau sunt simboluri.
+  // Dedup-ul din `addTo` previne dublarea când ambele se adaugă la
+  // aceeași sesizare.
+  S2: { id: "pl-s2", name: "Poliția Locală Sector 2", email: "infopublice@ps2.ro", phone: "021 9941" },
   S3: { id: "pl-s3", name: "Poliția Locală Sector 3", email: "secretariat.dgpl@primarie3.ro", phone: "021 9543" },
   S4: { id: "pl-s4", name: "Poliția Locală Sector 4", email: "sesizari@politialocala4.ro", phone: "021 9441" },
   // S5: office@politialocalasector5.ro used to bounce. The working
