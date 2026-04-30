@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import {
@@ -14,16 +15,46 @@ import {
   History,
   HelpCircle,
   Ticket,
+  AlertTriangle,
+  Mail,
+  Phone,
+  Globe,
+  Inbox,
+  ShieldCheck,
+  Megaphone,
+  Users as UsersIcon,
+  TreePine,
+  Car,
+  Gauge,
+  ExternalLink,
+  Compass,
+  Scale,
 } from "lucide-react";
 import { ALL_COUNTIES, getCountyBySlug } from "@/data/counties";
 import { getCountyStats } from "@/data/statistici-judete";
-import { CountyStatCards } from "@/components/county/CountyStatCards";
+import {
+  PRIMARII,
+  PREFECTURI,
+  POLITIA_LOCALA_JUDET,
+} from "@/data/autoritati-contact";
+import type { AuthorityContact } from "@/data/autoritati-contact";
+import {
+  getInterruptionsForCounty,
+  TYPE_ICONS as INTRERUPERI_ICONS,
+  TYPE_LABELS as INTRERUPERI_LABELS,
+} from "@/data/intreruperi";
+import { CountyStatCards, aqiColor } from "@/components/county/CountyStatCards";
 import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
-import { SITE_URL } from "@/lib/constants";
+import { SITE_URL, STATUS_COLORS, STATUS_LABELS, SOURCE_COLORS } from "@/lib/constants";
+import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
 export async function generateStaticParams() {
   return ALL_COUNTIES.map((c) => ({ judet: c.slug }));
 }
+
+// Live data — sesizări + știri + interruptions counts. ISR 5 min keeps
+// the page fresh without ballooning Vercel function-invocation costs.
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,
@@ -40,22 +71,561 @@ export async function generateMetadata({
   };
 }
 
-// `prefetch: true` doar pe top-3 destinații (sesizari/aer/harti). Restul
-// au prefetch=false ca să nu trigger-uim 12 fetches simultan la viewport
-// entry. Userul prefetch-uiește on-hover natural prin Next-Link.
-const sections = [
+interface RecentSesizare {
+  code: string;
+  titlu: string;
+  status: string;
+  tip: string;
+  created_at: string;
+}
+
+interface RecentStire {
+  id: string;
+  title: string;
+  source: string;
+  image_url: string | null;
+  published_at: string;
+}
+
+async function fetchRecentSesizari(countyId: string): Promise<{
+  rows: RecentSesizare[];
+  totalCount: number;
+}> {
+  try {
+    const admin = createSupabaseAdmin();
+    const [list, count] = await Promise.all([
+      admin
+        .from("sesizari")
+        .select("code, titlu, status, tip, created_at")
+        .eq("county", countyId)
+        .eq("moderation_status", "approved")
+        .eq("publica", true)
+        .order("created_at", { ascending: false })
+        .limit(4),
+      admin
+        .from("sesizari")
+        .select("*", { count: "exact", head: true })
+        .eq("county", countyId)
+        .eq("moderation_status", "approved")
+        .eq("publica", true),
+    ]);
+    return {
+      rows: (list.data ?? []) as RecentSesizare[],
+      totalCount: count.count ?? 0,
+    };
+  } catch {
+    return { rows: [], totalCount: 0 };
+  }
+}
+
+async function fetchRecentStiri(countyId: string): Promise<RecentStire[]> {
+  try {
+    const admin = createSupabaseAdmin();
+    const { data } = await admin
+      .from("stiri_cache")
+      .select("id, title, source, image_url, published_at")
+      .contains("counties", [countyId])
+      .order("published_at", { ascending: false })
+      .limit(4);
+    return (data ?? []) as RecentStire[];
+  } catch {
+    return [];
+  }
+}
+
+const COUNTY_TIP_LABEL: Record<string, string> = {
+  groapa: "Groapă",
+  trotuar: "Trotuar",
+  iluminat: "Iluminat",
+  copac: "Copac",
+  gunoi: "Gunoi",
+  parcare: "Parcare",
+  stalpisori: "Stâlpișori",
+  canalizare: "Canalizare",
+  semafor: "Semafor",
+  pietonal: "Pietonal",
+  graffiti: "Graffiti",
+  mobilier: "Mobilier",
+  zgomot: "Zgomot",
+  animale: "Animale",
+  transport: "Transport",
+  altele: "Altele",
+};
+
+// Hero quick-tiles below the headline. 4 hand-picked because that's
+// the count that fits nicely without horizontal scroll on tablets.
+function HeroQuickTiles({
+  judet,
+  totalSesizari,
+  intreruperiCount,
+  primarName,
+  aqi,
+  aqiQuality,
+}: {
+  judet: string;
+  totalSesizari: number;
+  intreruperiCount: number;
+  primarName: string;
+  aqi: number;
+  aqiQuality: string;
+}) {
+  const tiles = [
+    {
+      href: `/${judet}/aer`,
+      label: "Calitate aer",
+      value: `AQI ${aqi}`,
+      hint: aqiQuality,
+      icon: Wind,
+      color: aqiColor(aqi),
+    },
+    {
+      href: `/${judet}/sesizari`,
+      label: "Sesizări active",
+      value: totalSesizari.toLocaleString("ro-RO"),
+      hint: totalSesizari === 0 ? "fii primul care raportează" : "depuse public",
+      icon: AlertCircle,
+      color: "#DC2626",
+    },
+    {
+      href: `/${judet}/intreruperi`,
+      label: "Întreruperi azi",
+      value: intreruperiCount.toLocaleString("ro-RO"),
+      hint: intreruperiCount === 0 ? "nimic activ" : "apă/curent/gaz",
+      icon: AlertTriangle,
+      color: "#F59E0B",
+    },
+    {
+      href: `/${judet}/istoric`,
+      label: "Primar reședință",
+      value: primarName,
+      hint: "vezi istoricul",
+      icon: ShieldCheck,
+      color: "#6366F1",
+    },
+  ] as const;
+
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {tiles.map((t) => {
+        const Icon = t.icon;
+        return (
+          <Link
+            key={t.label}
+            href={t.href}
+            className="group bg-white/10 backdrop-blur-md border border-white/15 rounded-[var(--radius-md)] p-4 hover:bg-white/15 hover:-translate-y-0.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            <div className="flex items-center gap-2 mb-1.5">
+              <span
+                className="w-7 h-7 rounded-[var(--radius-xs)] grid place-items-center shrink-0"
+                style={{ backgroundColor: `${t.color}25`, color: t.color }}
+                aria-hidden="true"
+              >
+                <Icon size={13} />
+              </span>
+              <p className="text-[10px] uppercase tracking-wider text-emerald-100/80 font-semibold">
+                {t.label}
+              </p>
+            </div>
+            <p
+              className="text-base lg:text-xl font-extrabold leading-tight tabular-nums truncate"
+              title={String(t.value)}
+            >
+              {t.value}
+            </p>
+            <p className="text-[11px] text-emerald-100/70 mt-0.5 truncate">
+              {t.hint}
+            </p>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+// Recent-sesizari column — server-rendered with live DB data. Empty
+// state CTAs back to the sesizare flow so the page is always actionable.
+function RecentSesizariColumn({
+  countyName,
+  countySlug,
+  rows,
+}: {
+  countyName: string;
+  countySlug: string;
+  rows: RecentSesizare[];
+}) {
+  return (
+    <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h3 className="font-[family-name:var(--font-sora)] font-extrabold text-base inline-flex items-center gap-2">
+          <span
+            className="w-7 h-7 rounded-[var(--radius-xs)] bg-rose-500/15 text-rose-600 grid place-items-center"
+            aria-hidden="true"
+          >
+            <AlertCircle size={14} />
+          </span>
+          Sesizări recente
+        </h3>
+        <Link
+          href={`/${countySlug}/sesizari`}
+          className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors inline-flex items-center gap-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
+        >
+          Toate <ArrowRight size={11} aria-hidden="true" />
+        </Link>
+      </div>
+      {rows.length === 0 ? (
+        <div className="bg-[var(--color-surface-2)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-xs)] p-5 text-center">
+          <p className="text-xs text-[var(--color-text-muted)] leading-relaxed mb-2">
+            Nicio sesizare publică încă în {countyName}.
+          </p>
+          <Link
+            href={`/${countySlug}/sesizari`}
+            className="text-xs text-[var(--color-primary)] hover:underline font-medium"
+          >
+            Fii primul care raportează →
+          </Link>
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {rows.map((s) => {
+            const dot = STATUS_COLORS[s.status] ?? "#64748b";
+            const tipLabel = COUNTY_TIP_LABEL[s.tip] ?? s.tip;
+            return (
+              <li key={s.code}>
+                <Link
+                  href={`/sesizari/${s.code}`}
+                  className="block bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 rounded-[var(--radius-xs)] p-3 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                >
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: dot }}
+                      aria-hidden="true"
+                    />
+                    <span
+                      className="text-[10px] font-semibold uppercase tracking-wider"
+                      style={{ color: dot }}
+                    >
+                      {STATUS_LABELS[s.status] ?? s.status}
+                    </span>
+                    <span className="text-[10px] text-[var(--color-text-muted)] tabular-nums">
+                      · {tipLabel}
+                    </span>
+                    <span className="font-mono text-[10px] text-[var(--color-text-muted)] ml-auto">
+                      {s.code}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium line-clamp-2 leading-snug">
+                    {s.titlu}
+                  </p>
+                  <p className="text-[10px] text-[var(--color-text-muted)] mt-1.5 tabular-nums">
+                    <time dateTime={s.created_at}>
+                      {new Date(s.created_at).toLocaleDateString("ro-RO", {
+                        timeZone: "Europe/Bucharest",
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </time>
+                  </p>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function RecentStiriColumn({
+  countyName,
+  countySlug,
+  rows,
+}: {
+  countyName: string;
+  countySlug: string;
+  rows: RecentStire[];
+}) {
+  return (
+    <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h3 className="font-[family-name:var(--font-sora)] font-extrabold text-base inline-flex items-center gap-2">
+          <span
+            className="w-7 h-7 rounded-[var(--radius-xs)] bg-sky-500/15 text-sky-600 grid place-items-center"
+            aria-hidden="true"
+          >
+            <Newspaper size={14} />
+          </span>
+          Știri locale
+        </h3>
+        <Link
+          href={`/${countySlug}/stiri`}
+          className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors inline-flex items-center gap-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
+        >
+          Toate <ArrowRight size={11} aria-hidden="true" />
+        </Link>
+      </div>
+      {rows.length === 0 ? (
+        <div className="bg-[var(--color-surface-2)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-xs)] p-5 text-center">
+          <p className="text-xs text-[var(--color-text-muted)] leading-relaxed mb-2">
+            Nicio știre indexată pentru {countyName} în catalogul local.
+          </p>
+          <Link
+            href={`/${countySlug}/stiri`}
+            className="text-xs text-[var(--color-primary)] hover:underline font-medium"
+          >
+            Vezi sursele naționale →
+          </Link>
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {rows.map((s) => {
+            const tint = SOURCE_COLORS[s.source] ?? "#64748b";
+            return (
+              <li key={s.id}>
+                <Link
+                  href={`/stiri/${s.id}`}
+                  className="flex items-start gap-3 bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 rounded-[var(--radius-xs)] p-2.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                >
+                  {s.image_url ? (
+                    <Image
+                      src={s.image_url}
+                      alt=""
+                      width={56}
+                      height={56}
+                      className="w-14 h-14 rounded-[var(--radius-xs)] object-cover shrink-0"
+                      unoptimized
+                    />
+                  ) : (
+                    <div
+                      className="w-14 h-14 rounded-[var(--radius-xs)] grid place-items-center shrink-0"
+                      style={{ backgroundColor: `${tint}1a`, color: tint }}
+                      aria-hidden="true"
+                    >
+                      <Newspaper size={18} />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span
+                        className="text-[9px] font-bold uppercase tracking-wider"
+                        style={{ color: tint }}
+                      >
+                        {s.source}
+                      </span>
+                      <span className="text-[10px] text-[var(--color-text-muted)] tabular-nums">
+                        ·{" "}
+                        <time dateTime={s.published_at}>
+                          {new Date(s.published_at).toLocaleDateString("ro-RO", {
+                            timeZone: "Europe/Bucharest",
+                            day: "numeric",
+                            month: "short",
+                          })}
+                        </time>
+                      </span>
+                    </div>
+                    <p className="text-sm font-medium leading-snug line-clamp-2">
+                      {s.title}
+                    </p>
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function ActiveInterruperiColumn({
+  countyName,
+  countySlug,
+  rows,
+}: {
+  countyName: string;
+  countySlug: string;
+  rows: ReturnType<typeof getInterruptionsForCounty>;
+}) {
+  return (
+    <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h3 className="font-[family-name:var(--font-sora)] font-extrabold text-base inline-flex items-center gap-2">
+          <span
+            className="w-7 h-7 rounded-[var(--radius-xs)] bg-amber-500/15 text-amber-600 grid place-items-center"
+            aria-hidden="true"
+          >
+            <AlertTriangle size={14} />
+          </span>
+          Întreruperi active
+        </h3>
+        <Link
+          href={`/${countySlug}/intreruperi`}
+          className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors inline-flex items-center gap-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
+        >
+          Toate <ArrowRight size={11} aria-hidden="true" />
+        </Link>
+      </div>
+      {rows.length === 0 ? (
+        <div className="bg-[var(--color-surface-2)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-xs)] p-5 text-center">
+          <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+            Nicio întrerupere activă în {countyName}. 🎉
+          </p>
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {rows.slice(0, 4).map((i) => {
+            const startsAt = new Date(i.startAt);
+            const endsAt = new Date(i.endAt);
+            return (
+              <li
+                key={i.id}
+                className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-xs)] p-3"
+              >
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <span aria-hidden="true">{INTRERUPERI_ICONS[i.type] ?? "⚠️"}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                    {INTRERUPERI_LABELS[i.type] ?? i.type}
+                  </span>
+                  <span className="text-[10px] text-[var(--color-text-muted)] truncate">
+                    · {i.locality}
+                  </span>
+                </div>
+                <p className="text-sm font-medium leading-snug line-clamp-2">
+                  {i.sourceEntryTitle ?? i.reason ?? "Întrerupere planificată"}
+                </p>
+                <p className="text-[10px] text-[var(--color-text-muted)] mt-1.5 tabular-nums">
+                  <time dateTime={i.startAt}>
+                    {startsAt.toLocaleString("ro-RO", {
+                      timeZone: "Europe/Bucharest",
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </time>{" "}
+                  →{" "}
+                  <time dateTime={i.endAt}>
+                    {endsAt.toLocaleString("ro-RO", {
+                      timeZone: "Europe/Bucharest",
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </time>
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function AuthorityCard({
+  name,
+  role,
+  icon: Icon,
+  iconColor,
+  contact,
+  href,
+}: {
+  name: string;
+  role: string;
+  icon: typeof Building2;
+  iconColor: string;
+  contact?: AuthorityContact;
+  href?: string;
+}) {
+  const inner = (
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 rounded-[var(--radius-md)] shadow-[var(--shadow-1)] hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 p-5 transition-all">
+      <div className="flex items-center gap-3 mb-3">
+        <span
+          className="w-10 h-10 rounded-[var(--radius-xs)] grid place-items-center shrink-0"
+          style={{ backgroundColor: `${iconColor}15`, color: iconColor }}
+          aria-hidden="true"
+        >
+          <Icon size={18} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold leading-tight truncate">{name}</p>
+          <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5">{role}</p>
+        </div>
+      </div>
+      {contact ? (
+        <ul className="space-y-1.5 text-xs">
+          {contact.phone && (
+            <li className="inline-flex items-center gap-1.5 text-[var(--color-text-muted)] mr-3">
+              <Phone size={10} aria-hidden="true" />
+              <span className="tabular-nums">{contact.phone}</span>
+            </li>
+          )}
+          {contact.email && (
+            <li>
+              <a
+                href={`mailto:${contact.email}`}
+                className="inline-flex items-center gap-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
+              >
+                <Mail size={10} aria-hidden="true" />
+                {contact.email}
+              </a>
+            </li>
+          )}
+          {contact.website && (
+            <li>
+              <a
+                href={contact.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
+              >
+                <Globe size={10} aria-hidden="true" />
+                Site
+                <ExternalLink size={9} aria-hidden="true" />
+              </a>
+            </li>
+          )}
+        </ul>
+      ) : (
+        <p className="text-[11px] text-[var(--color-text-muted)] italic">
+          Contact în curs de colectare.
+        </p>
+      )}
+    </div>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded-[var(--radius-md)]">
+        {inner}
+      </Link>
+    );
+  }
+  return inner;
+}
+
+const PRIMARY_SECTIONS = [
   { path: "/sesizari", icon: AlertCircle, label: "Sesizări", color: "#DC2626", prefetch: true },
-  { path: "/impact", icon: BarChart3, label: "Impact local", color: "#1C4ED8", prefetch: false },
   { path: "/aer", icon: Wind, label: "Calitate aer", color: "#059669", prefetch: true },
-  { path: "/harti", icon: MapIcon, label: "Hărți", color: "#2563EB", prefetch: true },
-  { path: "/statistici", icon: BarChart3, label: "Statistici", color: "#8B5CF6", prefetch: false },
-  { path: "/stiri", icon: Newspaper, label: "Știri", color: "#0EA5E9", prefetch: false },
-  { path: "/ghiduri", icon: BookOpen, label: "Ghiduri", color: "#F59E0B", prefetch: false },
-  { path: "/autoritati", icon: Building2, label: "Autorități", color: "#64748B", prefetch: false },
-  { path: "/evenimente", icon: Calendar, label: "Evenimente", color: "#EC4899", prefetch: false },
-  { path: "/istoric", icon: History, label: "Istoric", color: "#6366F1", prefetch: false },
-  { path: "/cum-functioneaza", icon: HelpCircle, label: "Administrația", color: "#14B8A6", prefetch: false },
-  { path: "/bilete", icon: Ticket, label: "Bilete", color: "#F97316", prefetch: false },
+  { path: "/harti", icon: MapIcon, label: "Hărți mobilitate", color: "#2563EB", prefetch: true },
+  { path: "/stiri", icon: Newspaper, label: "Știri locale", color: "#0EA5E9", prefetch: false },
+];
+
+const SECONDARY_SECTIONS = [
+  { path: "/impact", icon: BarChart3, label: "Impact local", color: "#1C4ED8" },
+  { path: "/statistici", icon: Gauge, label: "Statistici", color: "#8B5CF6" },
+  { path: "/intreruperi", icon: AlertTriangle, label: "Întreruperi", color: "#F59E0B" },
+  { path: "/autoritati", icon: Building2, label: "Autorități", color: "#64748B" },
+  { path: "/ghiduri", icon: BookOpen, label: "Ghiduri", color: "#A855F7" },
+  { path: "/evenimente", icon: Calendar, label: "Evenimente", color: "#EC4899" },
+  { path: "/istoric", icon: History, label: "Istoric admin.", color: "#6366F1" },
+  { path: "/cum-functioneaza", icon: HelpCircle, label: "Cum funcționează", color: "#14B8A6" },
+  { path: "/bilete", icon: Ticket, label: "Bilete & abonamente", color: "#F97316" },
+  { path: "/buget", icon: Inbox, label: "Buget local", color: "#0891B2" },
+  { path: "/educatie", icon: BookOpen, label: "Educație", color: "#0EA5E9" },
+  { path: "/sanatate", icon: Compass, label: "Sănătate", color: "#E11D48" },
+  { path: "/siguranta", icon: ShieldCheck, label: "Siguranță", color: "#4F46E5" },
 ];
 
 export default async function CountyHomePage({
@@ -70,13 +640,38 @@ export default async function CountyHomePage({
   const stats = getCountyStats(county.id);
   const isBucharest = county.id === "B";
 
-  // Genitive form of the county name to plug into "Ajută la schimbarea X."
-  // București is a municipiu de capitală, not a județ — the right form is
-  // „Bucureștiului". Every other county sounds natural with the
-  // explicit „județului {Name}" prefix and works grammatically.
+  // Genitive form for the hero headline.
   const heroGenitiveTarget = isBucharest
     ? "Bucureștiului."
     : `județului ${county.name}.`;
+
+  // Live data — sesizari + stiri DB-fan-out, intreruperi from static
+  // bundle. All in parallel so the slowest dependency paces the page.
+  const allInterruptions = getInterruptionsForCounty(county.id);
+  // Server component re-evaluated on each ISR regeneration (revalidate=300),
+  // so `Date.now()` is fine here — the value is stable during render and
+  // refreshes on the next regeneration.
+  // eslint-disable-next-line react-hooks/purity -- ISR Server Component, Date.now() captured per regeneration
+  const nowMs = Date.now();
+  const activeInterruptions = allInterruptions.filter(
+    (i) =>
+      i.status !== "anulat" &&
+      i.status !== "finalizat" &&
+      new Date(i.endAt).getTime() > nowMs,
+  );
+
+  const [{ rows: recentSesizari, totalCount: sesizariTotalCount }, recentStiri] =
+    await Promise.all([
+      fetchRecentSesizari(county.id),
+      fetchRecentStiri(county.id),
+    ]);
+
+  // Authority lookups — static data file, sync access. Bucharest uses
+  // its own dedicated detail elsewhere; the home hub still surfaces a
+  // top-3 trio (primărie + prefectură + poliție locală).
+  const primarie = PRIMARII[county.id];
+  const prefectura = PREFECTURI[county.id];
+  const politialocala = POLITIA_LOCALA_JUDET[county.id];
 
   return (
     <>
@@ -86,17 +681,20 @@ export default async function CountyHomePage({
           { name: county.name, url: `${SITE_URL}/${county.slug}` },
         ]}
       />
-      {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] text-white min-h-[70vh] flex flex-col justify-center">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.3),transparent)]" />
-        <div className="absolute inset-0 bg-grid-pattern opacity-10" />
 
-        <div className="container-narrow relative z-10 py-16 md:py-20">
+      {/* ─── HERO ─── */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] text-white">
+        <div
+          className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.3),transparent)]"
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 bg-grid-pattern opacity-10" aria-hidden="true" />
+
+        <div className="container-narrow relative z-10 py-14 md:py-20">
           <div className="grid lg:grid-cols-[1fr_auto] gap-8 items-center">
-            {/* Left — county title */}
             <div>
               <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white border border-white/20 text-xs font-semibold mb-6 backdrop-blur-sm">
-                🇷🇴 Platformă civică independentă
+                🇷🇴 Platformă civică independentă · gratuit · fără reclame
               </p>
 
               <h1 className="font-[family-name:var(--font-sora)] text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-extrabold leading-[1.05] tracking-tight mb-6">
@@ -108,17 +706,10 @@ export default async function CountyHomePage({
               </h1>
 
               <p className="text-lg md:text-xl text-emerald-100/85 max-w-xl leading-relaxed mb-8">
-                Hărți, sesizări, ghiduri, știri și statistici despre {isBucharest ? "Bucureștiul tău" : `județul ${county.name}`} — într-un singur loc, gratuit, fără reclame.
+                Tot ce ține de {isBucharest ? "Bucureștiul tău" : `județul ${county.name}`} într-un singur loc — sesizări, hărți, calitate aer, știri locale, autorități, întreruperi.
               </p>
 
               <div className="flex flex-wrap gap-3">
-                <Link
-                  href={`/${judet}/harti`}
-                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-full)] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 active:scale-[0.97] backdrop-blur-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                >
-                  <MapIcon size={18} aria-hidden="true" />
-                  Explorează harta
-                </Link>
                 <Link
                   href={`/${judet}/sesizari`}
                   className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-full)] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 active:scale-[0.97] shadow-[var(--shadow-3)] hover:shadow-[var(--shadow-4)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-700"
@@ -126,89 +717,209 @@ export default async function CountyHomePage({
                   <AlertCircle size={18} aria-hidden="true" />
                   Fă o sesizare
                 </Link>
+                <Link
+                  href={`/${judet}/harti`}
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-full)] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 active:scale-[0.97] backdrop-blur-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                >
+                  <MapIcon size={18} aria-hidden="true" />
+                  Explorează harta
+                </Link>
               </div>
             </div>
 
-            {/* Right — floating info cards (lg+ only). Mobile vede grid mai jos. */}
             <CountyStatCards countyName={county.name} stats={stats} variant="floating" />
           </div>
         </div>
 
-        {/* Bottom ticker — visual only, sr-only summary mai jos */}
-        <div
-          className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden"
-          aria-hidden="true"
-        >
-          <div className="flex animate-ticker whitespace-nowrap py-3 text-xs text-emerald-200/80 gap-8">
-            {[
-              `📊 AQI: ${stats.aqiMediu} — ${stats.aqiQuality}`,
-              `🗳️ ${stats.sesizariTotal.toLocaleString("ro-RO")} sesizări estimate`,
-              `✅ ${Math.round((stats.sesizariRezolvate / Math.max(stats.sesizariTotal, 1)) * 100)}% rezolvate`,
-              `🚗 ${stats.accidenteTotal.toLocaleString("ro-RO")} accidente rutiere 2023`,
-              `🌳 ${stats.spatiiVerziMpPerLocuitor} m² spații verzi/locuitor`,
-              `👤 Primar: ${stats.primarName} (${stats.primarPartid})`,
-              `🚌 ${stats.transportPublicOperator}`,
-              `📊 AQI: ${stats.aqiMediu} — ${stats.aqiQuality}`,
-              `🗳️ ${stats.sesizariTotal.toLocaleString("ro-RO")} sesizări estimate`,
-              `✅ ${Math.round((stats.sesizariRezolvate / Math.max(stats.sesizariTotal, 1)) * 100)}% rezolvate`,
-            ].map((text, i) => (
-              <span key={i} className="flex items-center gap-2 shrink-0">
-                {text}
-                <span className="text-white/20">·</span>
-              </span>
-            ))}
-          </div>
-        </div>
-        {/* Sr-only summary — un singur set, fără duplicări pentru ticker animation */}
-        <div className="sr-only">
-          Statistici {county.name}: AQI mediu {stats.aqiMediu}, {stats.aqiQuality}.
-          {stats.sesizariTotal.toLocaleString("ro-RO")} sesizări estimate, din care {Math.round((stats.sesizariRezolvate / Math.max(stats.sesizariTotal, 1)) * 100)}% rezolvate.
-          {stats.accidenteTotal.toLocaleString("ro-RO")} accidente rutiere în 2023.
-          Primar: {stats.primarName} ({stats.primarPartid}). Transport public: {stats.transportPublicOperator}.
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[var(--color-bg)] to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[var(--color-bg)] to-transparent pointer-events-none" />
       </section>
 
-      {/* ─── Mobile stat cards (hidden on lg, visible on mobile) ─── */}
+      {/* ─── Live signal strip — overlaps the hero bottom edge ─── */}
+      <section className="relative -mt-6 z-10">
+        <div className="container-narrow">
+          <HeroQuickTiles
+            judet={judet}
+            totalSesizari={sesizariTotalCount}
+            intreruperiCount={activeInterruptions.length}
+            primarName={stats.primarName}
+            aqi={stats.aqiMediu}
+            aqiQuality={stats.aqiQuality}
+          />
+        </div>
+      </section>
+
+      {/* ─── Mobile stat cards (lg- only) ─── */}
       <section className="lg:hidden py-6">
         <div className="container-narrow">
           <CountyStatCards countyName={county.name} stats={stats} variant="grid" />
         </div>
       </section>
 
-      {/* ─── Sections grid ─── */}
+      {/* ─── Live activity row — three columns ─── */}
       <section className="py-10 md:py-14">
         <div className="container-narrow">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-bold">
-              Explorează {county.name}
-            </h2>
+          <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+            <div>
+              <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-extrabold">
+                Ce se întâmplă acum în {county.name}
+              </h2>
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                Date live — sesizări depuse de cetățeni, știri din presa locală, întreruperi
+                programate ale operatorilor.
+              </p>
+            </div>
             <Link
-              href="/"
-              className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+              href="/judete"
+              className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors inline-flex items-center gap-1"
             >
-              ← Schimbă județul
+              <ArrowRight size={11} className="rotate-180" aria-hidden="true" />
+              Schimbă județul
             </Link>
           </div>
+          <div className="grid lg:grid-cols-3 gap-5">
+            <RecentSesizariColumn
+              countyName={county.name}
+              countySlug={county.slug}
+              rows={recentSesizari}
+            />
+            <RecentStiriColumn
+              countyName={county.name}
+              countySlug={county.slug}
+              rows={recentStiri}
+            />
+            <ActiveInterruperiColumn
+              countyName={county.name}
+              countySlug={county.slug}
+              rows={activeInterruptions}
+            />
+          </div>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {sections.map((s) => {
+      {/* ─── Authorities preview ─── */}
+      <section className="pb-10 md:pb-14">
+        <div className="container-narrow">
+          <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+            <div>
+              <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-extrabold">
+                Cu cine vorbești în {county.name}
+              </h2>
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                Top 3 autorități cu contact direct. Lista completă în{" "}
+                <Link
+                  href={`/${judet}/autoritati`}
+                  className="text-[var(--color-primary)] hover:underline"
+                >
+                  autorități
+                </Link>
+                .
+              </p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AuthorityCard
+              name={
+                isBucharest
+                  ? "Primăria Municipiului București"
+                  : `Primăria ${county.name}`
+              }
+              role={
+                stats
+                  ? `Primar: ${stats.primarName} (${stats.primarPartid})`
+                  : "Autoritate executivă locală"
+              }
+              icon={Building2}
+              iconColor="#059669"
+              contact={primarie}
+              href={`/${judet}/autoritati`}
+            />
+            <AuthorityCard
+              name={
+                isBucharest ? "Prefectura București" : `Prefectura ${county.name}`
+              }
+              role="Reprezentantul Guvernului"
+              icon={ShieldCheck}
+              iconColor="#6366F1"
+              contact={prefectura}
+              href={`/${judet}/autoritati`}
+            />
+            <AuthorityCard
+              name={
+                isBucharest
+                  ? "Poliția Locală București"
+                  : `Poliția Locală ${county.name}`
+              }
+              role="Subordine primărie · 24/7"
+              icon={UsersIcon}
+              iconColor="#DC2626"
+              contact={politialocala}
+              href={`/${judet}/autoritati`}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Primary actions grid ─── */}
+      <section className="pb-8">
+        <div className="container-narrow">
+          <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-extrabold mb-5">
+            Acțiunile principale
+          </h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {PRIMARY_SECTIONS.map((s) => {
               const Icon = s.icon;
               return (
                 <Link
                   key={s.path}
                   href={`/${judet}${s.path}`}
                   prefetch={s.prefetch}
+                  className="group relative overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5 hover:border-[var(--color-primary)]/30 hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 transition-all"
+                >
+                  <div
+                    className="w-10 h-10 rounded-[var(--radius-xs)] flex items-center justify-center mb-3"
+                    style={{ backgroundColor: `${s.color}15`, color: s.color }}
+                    aria-hidden="true"
+                  >
+                    <Icon size={18} />
+                  </div>
+                  <p className="text-sm font-bold group-hover:text-[var(--color-primary)] transition-colors">
+                    {s.label}
+                  </p>
+                  <ArrowRight
+                    size={12}
+                    className="absolute top-4 right-4 text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-hidden="true"
+                  />
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Secondary sections grid ─── */}
+      <section className="py-6">
+        <div className="container-narrow">
+          <h2 className="font-[family-name:var(--font-sora)] text-base font-bold mb-4 text-[var(--color-text-muted)] uppercase tracking-wider">
+            Tot despre {county.name}
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {SECONDARY_SECTIONS.map((s) => {
+              const Icon = s.icon;
+              return (
+                <Link
+                  key={s.path}
+                  href={`/${judet}${s.path}`}
                   className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-4 hover:border-[var(--color-primary)]/30 hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 transition-all text-center"
                 >
                   <div
-                    className="w-10 h-10 rounded-[var(--radius-xs)] flex items-center justify-center mx-auto mb-2"
-                    style={{ backgroundColor: `${s.color}15` }}
+                    className="w-9 h-9 rounded-[var(--radius-xs)] flex items-center justify-center mx-auto mb-2"
+                    style={{ backgroundColor: `${s.color}15`, color: s.color }}
+                    aria-hidden="true"
                   >
-                    <Icon size={18} style={{ color: s.color }} />
+                    <Icon size={16} />
                   </div>
-                  <p className="text-xs font-semibold group-hover:text-[var(--color-primary)] transition-colors">
+                  <p className="text-xs font-semibold group-hover:text-[var(--color-primary)] transition-colors leading-tight">
                     {s.label}
                   </p>
                 </Link>
@@ -218,32 +929,154 @@ export default async function CountyHomePage({
         </div>
       </section>
 
+      {/* ─── County identity row — facts panel + accidents + green spaces ─── */}
+      <section className="pt-6 pb-10">
+        <div className="container-narrow">
+          <h2 className="font-[family-name:var(--font-sora)] text-xl md:text-2xl font-extrabold mb-5">
+            Profilul județului
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <Link
+              href={`/${judet}/statistici`}
+              className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 hover:border-[var(--color-primary)]/30 hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 transition-all"
+            >
+              <div className="flex items-center gap-2 mb-1.5">
+                <UsersIcon size={14} className="text-indigo-500" aria-hidden="true" />
+                <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
+                  Populație
+                </p>
+              </div>
+              <p className="text-2xl font-extrabold tabular-nums leading-none">
+                {county.population.toLocaleString("ro-RO")}
+              </p>
+              <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5">
+                locuitori (Recensământ INS 2021)
+              </p>
+            </Link>
+            <Link
+              href={`/${judet}/siguranta`}
+              className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 hover:border-[var(--color-primary)]/30 hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 transition-all"
+            >
+              <div className="flex items-center gap-2 mb-1.5">
+                <Car size={14} className="text-rose-500" aria-hidden="true" />
+                <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
+                  Accidente 2023
+                </p>
+              </div>
+              <p className="text-2xl font-extrabold tabular-nums leading-none">
+                {stats.accidenteTotal.toLocaleString("ro-RO")}
+              </p>
+              <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5">
+                {stats.accidenteDecedati} decedați · {stats.accidenteRaniti} răniți
+              </p>
+            </Link>
+            <Link
+              href={`/${judet}/aer`}
+              className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 hover:border-[var(--color-primary)]/30 hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 transition-all"
+            >
+              <div className="flex items-center gap-2 mb-1.5">
+                <TreePine size={14} className="text-emerald-500" aria-hidden="true" />
+                <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
+                  Spații verzi
+                </p>
+              </div>
+              <p className="text-2xl font-extrabold tabular-nums leading-none">
+                {stats.spatiiVerziMpPerLocuitor} m²
+              </p>
+              <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5">
+                per locuitor · OMS recomandă 9+
+              </p>
+            </Link>
+            <Link
+              href={`/${judet}/bilete`}
+              className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 hover:border-[var(--color-primary)]/30 hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 transition-all"
+            >
+              <div className="flex items-center gap-2 mb-1.5">
+                <Ticket size={14} className="text-orange-500" aria-hidden="true" />
+                <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
+                  Transport public
+                </p>
+              </div>
+              <p className="text-base font-extrabold leading-tight truncate" title={stats.transportPublicOperator}>
+                {stats.transportPublicOperator}
+              </p>
+              <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5">
+                {stats.hasMetrou ? "🚇 Cu metrou" : "fără metrou"}
+                {stats.hasSTB ? " · STB" : ""}
+              </p>
+            </Link>
+          </div>
+
+          <div className="mt-6 grid sm:grid-cols-2 gap-3">
+            <Link
+              href={`/${judet}/buget`}
+              className="group flex items-center justify-between bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 hover:border-[var(--color-primary)]/30 transition-colors"
+            >
+              <div>
+                <p className="text-sm font-semibold group-hover:text-[var(--color-primary)] transition-colors">
+                  Bugetul local
+                </p>
+                <p className="text-[11px] text-[var(--color-text-muted)]">
+                  Pe ce se cheltuiesc taxele tale în {county.name}
+                </p>
+              </div>
+              <ArrowRight size={14} className="text-[var(--color-text-muted)] group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
+            </Link>
+            <Link
+              href={`/${judet}/cum-functioneaza`}
+              className="group flex items-center justify-between bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4 hover:border-[var(--color-primary)]/30 transition-colors"
+            >
+              <div>
+                <p className="text-sm font-semibold group-hover:text-[var(--color-primary)] transition-colors">
+                  Cum funcționează administrația
+                </p>
+                <p className="text-[11px] text-[var(--color-text-muted)]">
+                  Primărie / consiliu județean / prefectură explicate
+                </p>
+              </div>
+              <ArrowRight size={14} className="text-[var(--color-text-muted)] group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ─── CTA ─── */}
       <section className="pb-14">
         <div className="container-narrow">
-          <div className="relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] rounded-[var(--radius-lg)] shadow-[var(--shadow-4)] p-8 md:p-12 text-white text-center">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_110%,rgba(120,119,198,0.2),transparent)]" />
-            <div className="relative z-10">
-              <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-3">
-                Ai o problemă în {county.name}?
-              </h2>
-              <p className="text-emerald-100/80 mb-8 max-w-lg mx-auto leading-relaxed">
-                Depune o sesizare formală — AI-ul generează textul cu temei legal,
-                detectăm autoritățile, tu doar apeși trimite.
-              </p>
-              <div className="flex flex-wrap gap-3 justify-center">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] rounded-[var(--radius-lg)] shadow-[var(--shadow-4)] p-8 md:p-12 text-white">
+            <div
+              className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_110%,rgba(120,119,198,0.2),transparent)]"
+              aria-hidden="true"
+            />
+            <div className="relative z-10 grid lg:grid-cols-[1fr_auto] items-center gap-6">
+              <div>
+                <p className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-emerald-100/90 bg-white/10 border border-white/15 px-2 py-0.5 rounded-full backdrop-blur-sm mb-3">
+                  <Megaphone size={10} aria-hidden="true" />
+                  Pentru orice cetățean din {county.name}
+                </p>
+                <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-extrabold mb-2 leading-tight">
+                  Ai o problemă în {county.name}?
+                </h2>
+                <p className="text-emerald-100/80 leading-relaxed text-sm md:text-base max-w-xl">
+                  Depune o sesizare formală — AI-ul generează textul cu temei legal,
+                  detectăm autoritățile competente, tu doar apeși trimite.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3 lg:justify-end">
                 <Link
                   href={`/${judet}/sesizari`}
-                  className="inline-flex items-center gap-2 h-12 px-7 rounded-[var(--radius-full)] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 active:scale-[0.97] shadow-[var(--shadow-3)] hover:shadow-[var(--shadow-4)] transition-all"
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-full)] bg-white text-[var(--color-primary)] font-semibold hover:bg-white/90 active:scale-[0.97] shadow-[var(--shadow-3)] hover:shadow-[var(--shadow-4)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-700"
                 >
-                  <AlertCircle size={18} aria-hidden="true" />
-                  Fă o sesizare <ArrowRight size={16} aria-hidden="true" />
+                  <AlertCircle size={16} aria-hidden="true" />
+                  Fă o sesizare
+                  <ArrowRight size={14} aria-hidden="true" />
                 </Link>
                 <Link
-                  href={`/compara/${judet}/b`}
-                  className="inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-full)] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 active:scale-[0.97] backdrop-blur-sm transition-all"
+                  href={`/compara/${judet}/${isBucharest ? "cj" : "b"}`}
+                  className="inline-flex items-center gap-2 h-12 px-5 rounded-[var(--radius-full)] bg-white/10 text-white border border-white/20 font-semibold hover:bg-white/20 active:scale-[0.97] backdrop-blur-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
-                  <span aria-hidden="true">⚖️</span> Compară cu alt județ
+                  <Scale size={14} aria-hidden="true" />
+                  Compară cu {isBucharest ? "Cluj" : "București"}
                 </Link>
               </div>
             </div>
