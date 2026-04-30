@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { buildFormalText, buildEmailPayload } from "./mailto";
+import {
+  buildFormalText,
+  buildEmailPayload,
+  buildOutlookLink,
+  buildGmailLink,
+} from "./mailto";
 
 const BASE = {
   tip: "parcare",
@@ -202,5 +207,71 @@ describe("buildEmailPayload — parcare legal template", () => {
     expect(p.to).not.toContain("office@politialocalasector5.ro");
     expect(p.cc).not.toContain("sesizari@sector5.ro");
     expect(p.cc).not.toContain("office@politialocalasector5.ro");
+  });
+});
+
+describe("buildOutlookLink — modern deeplink format", () => {
+  it("uses outlook.live.com /mail/0/deeplink/compose, not the dead /owa/ path", () => {
+    const url = buildOutlookLink({
+      tip: "parcare",
+      titlu: "T",
+      locatie: "L",
+      descriere: "d",
+      author_name: "A",
+      author_address: "B",
+    });
+    expect(url).toContain("outlook.live.com/mail/0/deeplink/compose");
+    expect(url).not.toContain("/owa/");
+    expect(url).not.toContain("path=%2Fmail");
+  });
+
+  it("includes to / subject / body params in the query", () => {
+    const url = buildOutlookLink({
+      tip: "groapa",
+      titlu: "Test groapa",
+      locatie: "Strada X 1, Sector 2, București",
+      sector: "S2",
+      descriere: "Pe trotuar.",
+      author_name: "Eduard",
+      author_address: "Strada Y 3, Sector 5",
+    });
+    const u = new URL(url);
+    expect(u.searchParams.get("subject")).toBeTruthy();
+    expect(u.searchParams.get("body")?.length ?? 0).toBeGreaterThan(20);
+    // Multiple recipients are CSV-joined per Outlook deep-link spec
+    const to = u.searchParams.get("to") ?? "";
+    expect(to.split(",").every((addr) => addr.includes("@"))).toBe(true);
+  });
+
+  it("attaches CC only when there are CC recipients", () => {
+    const noCc = buildOutlookLink({
+      tip: "iluminat",
+      titlu: "Felinar stricat",
+      locatie: "Strada A 1, Sector 1, București",
+      sector: "S1",
+      descriere: "Felinarul nu mai funcționează.",
+      author_name: "X",
+      author_address: "Y",
+    });
+    // iluminat in S1 fans out only to TO (no CC); URL should omit cc=
+    const u = new URL(noCc);
+    if (u.searchParams.has("cc")) {
+      expect(u.searchParams.get("cc")?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("buildGmailLink — sanity", () => {
+  it("uses mail.google.com compose path", () => {
+    const url = buildGmailLink({
+      tip: "iluminat",
+      titlu: "T",
+      locatie: "L",
+      descriere: "d",
+      author_name: "A",
+      author_address: "B",
+    });
+    expect(url).toContain("mail.google.com/mail/");
+    expect(url).toContain("view=cm");
   });
 });

@@ -292,15 +292,20 @@ export function buildGmailLink(input: MailtoInput): string {
 }
 
 export function buildOutlookLink(input: MailtoInput): string {
+  // Modern Outlook web deep-link. The legacy `/owa/?path=/mail/action/compose`
+  // URL we used before lands users on a "page not found" / empty inbox
+  // depending on account type — Microsoft deprecated that path in 2023.
+  // The `/mail/0/deeplink/compose` route is what Outlook's own mailto
+  // handler resolves to today on outlook.live.com and works for personal
+  // accounts; Office 365 business accounts get auto-redirected across.
   const p = buildEmailPayload(input);
   const params = new URLSearchParams({
-    path: "/mail/action/compose",
     to: p.to.join(","),
     subject: p.subject,
     body: p.body,
   });
   if (p.cc.length > 0) params.set("cc", p.cc.join(","));
-  return `https://outlook.live.com/owa/?${params.toString()}`;
+  return `https://outlook.live.com/mail/0/deeplink/compose?${params.toString()}`;
 }
 
 export function buildYahooLink(input: MailtoInput): string {
