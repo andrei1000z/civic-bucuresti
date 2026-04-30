@@ -1,5 +1,6 @@
 import { SESIZARE_TIPURI } from "@/lib/constants";
 import { getAuthoritiesFor, type ResolvedRecipients } from "./authorities";
+import { normalizeRoLocation } from "./format-helpers";
 import { buildParkingLegalText, type ParkingJurisdiction } from "./parking";
 
 export interface MailtoInput {
@@ -240,12 +241,17 @@ export function buildEmailPayload(input: MailtoInput): EmailPayload {
     input.parking ? { jurisdiction: input.parking.jurisdiction ?? null } : undefined,
   );
   const tipLabel = SESIZARE_TIPURI.find((t) => t.value === input.tip)?.label ?? "";
-  let subject = `Sesizare ${tipLabel} — ${input.locatie}`;
+  // Cetățenii tastează adresele fără diacritice ("strada Vasile Lascar
+  // in capat cu Bulevardul Stefan cel Mare"). Subiectul ajunge la
+  // primărie ca atare — îl normalizăm: diacritice + Title-case la
+  // tipurile de stradă.
+  const locatieFormatted = normalizeRoLocation(input.locatie);
+  let subject = `Sesizare ${tipLabel} — ${locatieFormatted}`;
   if (input.tip === "parcare" && input.parking?.plate) {
     // Police mailrooms search inbox by plate number when triaging
     // parking complaints — putting it in the subject shaves days off
     // the response time.
-    subject = `Sesizare parcare neregulamentară — ${input.parking.plate} — ${input.locatie}`;
+    subject = `Sesizare parcare neregulamentară — ${input.parking.plate} — ${locatieFormatted}`;
   }
   // Plain-text body: strip the bold markers the parking template uses.
   // Mail clients receiving text/plain can't render bold anyway.

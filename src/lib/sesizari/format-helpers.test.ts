@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { capitalizeName, formatAddress } from "./format-helpers";
+import { capitalizeName, formatAddress, normalizeRoLocation } from "./format-helpers";
 
 describe("capitalizeName", () => {
   it("capitalizes single word", () => {
@@ -58,5 +58,54 @@ describe("formatAddress", () => {
 
   it("handles single character", () => {
     expect(formatAddress("a")).toBe("A");
+  });
+});
+
+describe("normalizeRoLocation", () => {
+  it("fixes the real-world Vasile Lascar case", () => {
+    expect(
+      normalizeRoLocation("strada Vasile Lascar in capat cu Bulevardul Stefan cel Mare"),
+    ).toBe("Strada Vasile Lascar în capătul cu Bulevardul Ștefan cel Mare");
+  });
+
+  it("title-cases street types", () => {
+    expect(normalizeRoLocation("strada matei voievod 12")).toBe("Strada matei voievod 12");
+    expect(normalizeRoLocation("bulevardul magheru")).toBe("Bulevardul magheru");
+    expect(normalizeRoLocation("calea victoriei")).toBe("Calea victoriei");
+    expect(normalizeRoLocation("soseaua kiseleff")).toBe("Șoseaua kiseleff");
+    expect(normalizeRoLocation("piata victoriei")).toBe("Piața victoriei");
+  });
+
+  it("adds diacritics to common Romanian intersection words", () => {
+    expect(normalizeRoLocation("la intersectia cu strada X")).toBe(
+      "La intersecția cu Strada X",
+    );
+    expect(normalizeRoLocation("colt cu calea Mosilor")).toBe("Colț cu Calea Mosilor");
+    expect(normalizeRoLocation("in dreptul scolii")).toBe("În dreptul scolii");
+    expect(normalizeRoLocation("pe langa parc")).toBe("Pe lângă parc");
+  });
+
+  it("fixes proper nouns", () => {
+    expect(normalizeRoLocation("Strada Stefan cel Mare")).toBe("Strada Ștefan cel Mare");
+    expect(normalizeRoLocation("Iasi, Bulevardul X")).toBe("Iași, Bulevardul X");
+    expect(normalizeRoLocation("Targu Mures")).toBe("Târgu Mureș");
+  });
+
+  it("does not corrupt already-diacritic input", () => {
+    expect(normalizeRoLocation("Strada Vasile Lascăr, în capătul cu Bulevardul Ștefan cel Mare")).toBe(
+      "Strada Vasile Lascăr, în capătul cu Bulevardul Ștefan cel Mare",
+    );
+  });
+
+  it("handles empty input", () => {
+    expect(normalizeRoLocation("")).toBe("");
+  });
+
+  it("trims whitespace", () => {
+    expect(normalizeRoLocation("  strada Y  ")).toBe("Strada Y");
+  });
+
+  it("does not mangle standalone 'in' inside other words", () => {
+    expect(normalizeRoLocation("Linus Pauling in capat")).toBe("Linus Pauling în capăt");
   });
 });
