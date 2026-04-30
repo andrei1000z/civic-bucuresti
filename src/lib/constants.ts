@@ -50,12 +50,17 @@ export const PETITIE_CATEGORII = [
 // ============================================================
 // NAVIGATION — main links + "Mai mult" dropdown + date publice submenu
 // ============================================================
+// Top-level navigation. `national: true` means the link is always
+// rendered as the bare /route — never prefixed with /[judet]/ even if
+// the user has a county selected. Used for routes that don't have a
+// county-scoped counterpart (or where the national view is the only
+// useful one — e.g. /petitii is a national civic petition catalog).
 export const NAV_LINKS = [
-  { href: "/sesizari", label: "Sesizări" },
-  { href: "/petitii", label: "Petiții" },
+  { href: "/sesizari", label: "Sesizări", national: true },
+  { href: "/petitii", label: "Petiții", national: true },
   { href: "/harti", label: "Hărți" },
   { href: "/stiri", label: "Știri" },
-  { href: "/ghiduri", label: "Ghiduri" },
+  { href: "/ghiduri", label: "Ghiduri", national: true },
 ] as const;
 
 // „Altele" dropdown — items secundare grupate. Fiecare entry poate fi:

@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/Badge";
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 import { ThemeSettings } from "@/components/ThemeSettings";
+import { CountyPickerInline } from "@/components/account/CountyPickerInline";
 
 interface Profile {
   id: string;
@@ -439,6 +440,11 @@ export default function ContPage() {
                   className={inputClass}
                 />
               </Field>
+
+              {/* County preference — drives the /[judet]/ vs / routing in the
+                  navbar. Persisted in localStorage + cookie via the same
+                  CountyPickerInline used elsewhere. */}
+              <CountyPickerInline />
 
               {/* Newsletter opt-ins — under phone, GDPR-style explicit consent */}
               <div className="space-y-2 pt-1">

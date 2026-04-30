@@ -25,11 +25,18 @@ export function Navbar() {
   const countyObj = county ?? (validatedSlug ? ALL_COUNTIES.find((c) => c.slug === validatedSlug) : null);
   const countyName = countyObj?.name ?? null;
 
-  // Prefix links with county slug if we're inside a county route
-  const prefixedLinks = NAV_LINKS.map((l) => ({
-    ...l,
-    href: countySlug ? `/${countySlug}${l.href}` : l.href,
-  }));
+  // Prefix links with county slug if we're inside a county route — but
+  // honor the `national: true` flag (e.g. /petitii, /sesizari, /ghiduri
+  // never get /[judet]/ prepended, even when the user is browsing a
+  // county). Clicking such a link from /cj/whatever takes the user
+  // back to the national view.
+  const prefixedLinks = NAV_LINKS.map((l) => {
+    const isNational = "national" in l && l.national;
+    return {
+      ...l,
+      href: countySlug && !isNational ? `/${countySlug}${l.href}` : l.href,
+    };
+  });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [ghidDropdown, setGhidDropdown] = useState(false);
   const [moreDropdown, setMoreDropdown] = useState(false);
@@ -113,8 +120,8 @@ export function Navbar() {
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-1">
             {prefixedLinks.map((link) => {
-              const ghiduriHref = countySlug ? `/${countySlug}/ghiduri` : "/ghiduri";
-              if (link.href === ghiduriHref) {
+              // Ghiduri is national — match the canonical href directly.
+              if (link.href === "/ghiduri") {
                 return (
                   <div
                     key={link.href}
@@ -146,7 +153,7 @@ export function Navbar() {
                       {GHID_DROPDOWN.map((ghid) => (
                         <Link
                           key={ghid.href}
-                          href={countySlug ? `/${countySlug}${ghid.href}` : ghid.href}
+                          href={ghid.href}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]"
                         >
                           <span className="text-xl" aria-hidden="true">{ghid.icon}</span>
