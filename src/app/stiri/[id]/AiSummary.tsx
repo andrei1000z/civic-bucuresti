@@ -70,22 +70,35 @@ function estimateReadMinutes(plainText: string): number {
   return Math.max(1, Math.round(words / 210));
 }
 
-export function AiSummary({
-  stireId,
-  initialSummary,
-  fallbackText,
-}: {
-  stireId: string;
+interface AiSummaryProps {
+  /** Pre-rendered server-side summary. When non-null, no client fetch
+   *  is issued. */
   initialSummary: string | null;
+  /** Plain fallback text (the article excerpt / petition summary) used
+   *  if the AI generation fails. */
   fallbackText: string;
-}) {
+  /** Optional URL the client hits when initialSummary is null. Returns
+   *  `{ data: { summary } }`. If absent, the component just renders the
+   *  fallback after the load step. */
+  synthesizeUrl?: string;
+}
+
+export function AiSummary({ initialSummary, fallbackText, synthesizeUrl }: AiSummaryProps) {
   const [summary, setSummary] = useState<string | null>(initialSummary);
-  const [loading, setLoading] = useState(!initialSummary);
+  const [loading, setLoading] = useState(!initialSummary && !!synthesizeUrl);
 
   useEffect(() => {
     if (initialSummary) return;
+    if (!synthesizeUrl) {
+      // setState in effect is intentional: we only fall back to the plain
+      // excerpt after mount (so SSR/CSR markup matches the loading state).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSummary(fallbackText);
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
-    fetch(`/api/stiri/${stireId}/synthesize`)
+    fetch(synthesizeUrl)
       .then((r) => r.json())
       .then((j) => {
         if (!cancelled && j.data?.summary) {
@@ -100,7 +113,7 @@ export function AiSummary({
       });
 
     return () => { cancelled = true; };
-  }, [stireId, initialSummary, fallbackText]);
+  }, [synthesizeUrl, initialSummary, fallbackText]);
 
   if (loading) {
     return (

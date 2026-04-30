@@ -7,7 +7,6 @@ import {
   Calendar,
   ExternalLink,
   ChevronLeft,
-  ArrowRight,
   CheckCircle2,
   Share2,
 } from "lucide-react";
@@ -16,6 +15,8 @@ import { SITE_URL, PETITIE_CATEGORII } from "@/lib/constants";
 import { ALL_COUNTIES } from "@/data/counties";
 import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
 import { SharePetitie } from "./SharePetitie";
+import { AiSummary } from "@/app/stiri/[id]/AiSummary";
+import { getOrGeneratePetitieAiSummary } from "@/lib/petitii/ai-summary";
 
 export const revalidate = 60;
 
@@ -72,6 +73,18 @@ export default async function PetitiePage({
   const { slug } = await params;
   const petitie = await getPetitieBySlug(slug);
   if (!petitie) notFound();
+
+  // Generate (or read cached) AI synthesis on the server so the first
+  // visitor pays the Groq cost and every subsequent one sees the
+  // structured summary in the initial HTML — no client fetch, no flash.
+  const aiSummary = await getOrGeneratePetitieAiSummary({
+    id: petitie.id,
+    title: petitie.title,
+    summary: petitie.summary,
+    body: petitie.body,
+    category: petitie.category,
+    ai_summary: petitie.ai_summary ?? null,
+  });
 
   const isActive = petitie.status === "active";
   const cat = PETITIE_CATEGORII.find((c) => c.value === petitie.category);
@@ -180,11 +193,49 @@ export default async function PetitiePage({
             {petitie.summary}
           </p>
 
+          {/* AI synthesis — same structured output as /stiri/[id]: bullets,
+              bold spans, inline number highlights, reading-time + copy +
+              listen toolbar. Generated server-side on first visit, cached
+              in petitii.ai_summary. */}
+          {aiSummary && (
+            <section
+              aria-label="Sinteză Civia"
+              className="mb-7 bg-[var(--color-surface)] border border-purple-500/30 rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-5 md:p-6"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <span
+                  className="w-7 h-7 rounded-[var(--radius-xs)] bg-gradient-to-br from-purple-500 to-fuchsia-600 grid place-items-center text-white text-[11px] font-extrabold"
+                  aria-hidden="true"
+                >
+                  AI
+                </span>
+                <div>
+                  <p className="font-[family-name:var(--font-sora)] font-bold text-sm leading-tight">
+                    Sinteză Civia
+                  </p>
+                  <p className="text-[10px] text-[var(--color-text-muted)] leading-tight">
+                    Rezumat AI al cererii și impactului
+                  </p>
+                </div>
+              </div>
+              <AiSummary
+                initialSummary={aiSummary}
+                fallbackText={petitie.summary || petitie.body || ""}
+              />
+            </section>
+          )}
+
           {/* Body — paragraph spacing reală pe mobile (whitespace-pre-line +
               line-height generos) */}
-          <div className="text-[15px] sm:text-base text-[var(--color-text)] leading-[1.7] whitespace-pre-line">
-            {petitie.body}
-          </div>
+          <details className="group" {...(aiSummary ? {} : { open: true })}>
+            <summary className="cursor-pointer list-none mb-4 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text)] inline-flex items-center gap-1.5 transition-colors">
+              <span className="group-open:rotate-90 transition-transform" aria-hidden="true">▸</span>
+              Text original al petiției
+            </summary>
+            <div className="text-[15px] sm:text-base text-[var(--color-text-muted)] leading-[1.7] whitespace-pre-line">
+              {petitie.body}
+            </div>
+          </details>
 
           {/* Inline CTA after body — desktop + mobile (al doilea touchpoint) */}
           {petitie.external_url && isActive && (
@@ -234,19 +285,6 @@ export default async function PetitiePage({
             </p>
           </div>
 
-          {/* MOBILE-ONLY cross-link la sesizări */}
-          <Link
-            href="/sesizari"
-            className="lg:hidden mt-3 block bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[var(--radius-md)] p-4 hover:bg-[var(--color-primary-soft)]/80 transition-colors group"
-          >
-            <p className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider mb-1 inline-flex items-center gap-1">
-              <ArrowRight size={11} aria-hidden="true" /> Acțiune individuală
-            </p>
-            <p className="text-sm font-semibold mb-0.5">Trimite și o sesizare la primărie</p>
-            <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
-              Petiția pune presiune publică, sesizarea ta intră direct în registratura primăriei.
-            </p>
-          </Link>
         </div>
 
         {/* DESKTOP-ONLY SIDEBAR — hidden pe mobile (CTA + share + cross sunt
@@ -283,21 +321,6 @@ export default async function PetitiePage({
             </p>
           </div>
 
-          <Link
-            href="/sesizari"
-            className="block bg-[var(--color-primary-soft)] border border-[var(--color-primary)]/20 rounded-[var(--radius-md)] p-5 hover:bg-[var(--color-primary-soft)]/80 transition-colors group"
-          >
-            <p className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider mb-2 inline-flex items-center gap-1">
-              <Share2 size={12} aria-hidden="true" /> Acțiune individuală
-            </p>
-            <p className="text-sm font-semibold mb-1">Trimite și o sesizare la primărie</p>
-            <p className="text-xs text-[var(--color-text-muted)] mb-2 leading-relaxed">
-              Petiția pune presiune publică, sesizarea ta intră direct în registratura primăriei.
-            </p>
-            <span className="text-xs font-medium text-[var(--color-primary)] inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-              Începe sesizarea <ArrowRight size={12} aria-hidden="true" />
-            </span>
-          </Link>
         </aside>
       </div>
     </article>

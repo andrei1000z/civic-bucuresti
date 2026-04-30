@@ -4,6 +4,61 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { getGroqClient, GROQ_MODEL_FAST } from "@/lib/groq/client";
 import { PETITIE_CATEGORII } from "@/lib/constants";
 
+const ALLOWED_IMAGE_MIME: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+};
+
+/**
+ * Download the og:image from the source site and re-upload it to our
+ * Supabase Storage bucket. This sidesteps hot-link protection / CORS
+ * problems on hosts like static.controlshift.app and gives the public
+ * /petitii cards a stable URL we control.
+ *
+ * Returns the public Supabase URL on success, or `null` on any failure
+ * (caller falls back to the original `rawImage` URL — that lets
+ * preview keep working even when re-host fails).
+ */
+async function rehostImage(srcUrl: string): Promise<string | null> {
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 8_000);
+    const res = await fetch(srcUrl, {
+      signal: ctrl.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; CiviaBot/1.0; +https://civia.ro)",
+        Accept: "image/jpeg,image/png,image/webp,image/gif,*/*;q=0.8",
+      },
+      redirect: "follow",
+    });
+    clearTimeout(tid);
+    if (!res.ok) return null;
+    const ct = (res.headers.get("content-type") ?? "").split(";")[0]?.trim() ?? "";
+    const ext = ALLOWED_IMAGE_MIME[ct];
+    if (!ext) return null;
+    const arrayBuffer = await res.arrayBuffer();
+    // Cap at 8 MB — anything bigger probably isn't a petition cover.
+    if (arrayBuffer.byteLength > 8 * 1024 * 1024) return null;
+
+    const supabase = await createSupabaseServer();
+    const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const path = `public/petitii/${filename}`;
+    const { error } = await supabase.storage
+      .from("sesizari-photos")
+      .upload(path, arrayBuffer, {
+        contentType: ct,
+        cacheControl: "3600",
+      });
+    if (error) return null;
+    const { data } = supabase.storage.from("sesizari-photos").getPublicUrl(path);
+    return data.publicUrl;
+  } catch {
+    return null;
+  }
+}
+
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
@@ -204,7 +259,12 @@ export async function POST(req: Request) {
     const mainText = extractMainText(html);
 
     const rawTitle = ogTitle || titleTag;
-    const rawImage = ogImage ? resolveUrl(ogImage, url) : null;
+    const sourceImage = ogImage ? resolveUrl(ogImage, url) : null;
+    // Re-host the source image on our Supabase storage so the public
+    // /petitii cards don't break when the origin (e.g. controlshift.app)
+    // blocks hot-linking. Falls back to the original URL if re-host fails.
+    const rehosted = sourceImage ? await rehostImage(sourceImage) : null;
+    const rawImage = rehosted ?? sourceImage;
 
     if (!rawTitle && mainText.length < 100) {
       return NextResponse.json(

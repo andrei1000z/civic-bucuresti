@@ -17,6 +17,7 @@ export interface PetitieRow {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  ai_summary?: string | null;
 }
 
 export interface PetitieWithCount extends PetitieRow {

@@ -246,9 +246,9 @@ export default async function StireDetailPage({
               </div>
             </div>
             <AiSummary
-              stireId={stire.id}
               initialSummary={aiSummary}
               fallbackText={stire.excerpt || stire.content || ""}
+              synthesizeUrl={`/api/stiri/${stire.id}/synthesize`}
             />
           </div>
 
