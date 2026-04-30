@@ -12,6 +12,7 @@ import {
   timelineEventForStatus,
   type SesizareStatus,
 } from "@/lib/sesizari/status";
+import { appendTimelineEvent } from "@/lib/sesizari/timeline-writer";
 
 export const dynamic = "force-dynamic";
 
@@ -150,20 +151,20 @@ export async function POST(
 
       const eventType = timelineEventForStatus(appliedStatus);
       if (eventType) {
-        const description = appliedNote?.trim()
-          ? appliedNote
-          : `Status actualizat la: ${appliedStatus}`;
-        await admin
-          .from("sesizare_timeline")
-          .insert({
-            sesizare_id: sesizare.id,
-            event_type: eventType,
-            description,
-            // Stamp the row at the real-world event time so the
-            // citizen-facing timeline reads chronologically — not "all
-            // events at moment of approval click".
-            created_at: eventAt,
-          });
+        // Dedup vs. the latest existing timeline row — if the admin
+        // already applied this status manually, the citizen ticket
+        // shouldn't add a second visually identical row. The shared
+        // helper stamps the row at `eventAt` so the timeline still
+        // reflects when the action actually happened in real life.
+        await appendTimelineEvent({
+          admin,
+          sesizareId: sesizare.id,
+          eventType,
+          description: appliedNote?.trim() ?? null,
+          createdAt: eventAt,
+          sentryTags: { source: "ticket_approve_route" },
+          sentryExtra: { ticketId: ticket.id, code: sesizare.code },
+        });
       }
 
       invalidateSesizariCache();

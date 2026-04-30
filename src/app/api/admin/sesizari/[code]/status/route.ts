@@ -13,6 +13,7 @@ import {
   timelineEventForStatus,
   type SesizareStatus,
 } from "@/lib/sesizari/status";
+import { appendTimelineEvent } from "@/lib/sesizari/timeline-writer";
 
 export const dynamic = "force-dynamic";
 
@@ -107,24 +108,18 @@ export async function POST(
   if (statusChanged) {
     const eventType = timelineEventForStatus(newStatus);
     if (eventType) {
-      const description = parsed.data.note?.length
-        ? parsed.data.note
-        : `Status actualizat la: ${newStatus}`;
-      const { error: tErr } = await admin
-        .from("sesizare_timeline")
-        .insert({
-          sesizare_id: sesizare.id,
-          event_type: eventType,
-          description,
-        });
-      if (tErr) {
-        // Timeline insert is best-effort — don't fail the whole status
-        // change if it errors. Sentry surfaces the problem.
-        Sentry.captureException(tErr, {
-          tags: { kind: "status_timeline" },
-          extra: { code: sesizare.code, status: newStatus },
-        });
-      }
+      // Dedup against the latest timeline row — if the same status was
+      // already applied (e.g. via a citizen ticket) and the admin
+      // re-applies without a fresh note, skip the insert so the
+      // timeline doesn't show two visually identical rows.
+      await appendTimelineEvent({
+        admin,
+        sesizareId: sesizare.id,
+        eventType,
+        description: parsed.data.note?.trim() ?? null,
+        sentryTags: { source: "admin_status_route" },
+        sentryExtra: { code: sesizare.code, status: newStatus },
+      });
     }
   }
 
