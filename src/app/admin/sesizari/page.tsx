@@ -2,9 +2,23 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CheckCircle2, XCircle, Eye, Loader2, MapPin, Sparkles, X as CloseX, ArrowRight, Clock, Edit3 } from "lucide-react";
+import {
+  Eye,
+  Loader2,
+  MapPin,
+  Sparkles,
+  X as CloseX,
+  ArrowRight,
+  Edit3,
+  Inbox,
+} from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
+import {
+  SESIZARE_STATUS_META,
+  SESIZARE_STATUS_VALUES,
+  type SesizareStatus,
+} from "@/lib/sesizari/status";
 import { timeAgo } from "@/lib/utils";
 import { useToast } from "@/components/Toast";
 
@@ -17,7 +31,6 @@ interface SesizareRow {
   sector: string;
   tip: string;
   status: string;
-  moderation_status: string;
   author_name: string;
   created_at: string;
   lat?: number;
@@ -33,22 +46,22 @@ interface PolishDiff {
   aiError: string | null;
 }
 
-type StatusValue = "nou" | "in-lucru" | "rezolvat" | "respins" | "amanata";
-
 export default function AdminSesizariPage() {
   const { toast } = useToast();
   const [rows, setRows] = useState<SesizareRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
+  const [statusFilter, setStatusFilter] = useState<"toate" | SesizareStatus>("toate");
   const [polishDiff, setPolishDiff] = useState<PolishDiff | null>(null);
   const [statusEdit, setStatusEdit] = useState<{
     code: string;
     titlu: string;
     currentStatus: string;
-    status: StatusValue;
+    status: SesizareStatus;
     response: string;
+    note: string;
   } | null>(null);
+  const [pendingTickets, setPendingTickets] = useState<number>(0);
 
   useEffect(() => {
     fetch("/api/sesizari?limit=200")
@@ -56,32 +69,13 @@ export default function AdminSesizariPage() {
       .then((j) => setRows(j.data ?? []))
       .catch(() => {})
       .finally(() => setLoading(false));
+    // Surface the "Tickets" tab badge — count of pending citizen
+    // proposals waiting for admin decision.
+    fetch("/api/admin/status-tickets?decision=pending&limit=200")
+      .then((r) => r.json())
+      .then((j) => setPendingTickets((j.data ?? []).length))
+      .catch(() => {});
   }, []);
-
-  const moderate = async (code: string, action: "approve" | "reject") => {
-    setActing(code);
-    try {
-      const res = await fetch(`/api/admin/sesizari/${code}/moderate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
-      });
-      const j = await res.json();
-      if (!res.ok) throw new Error(j.error || "Eroare");
-      setRows((prev) =>
-        prev.map((r) =>
-          r.code === code
-            ? { ...r, moderation_status: action === "approve" ? "approved" : "rejected" }
-            : r
-        )
-      );
-      toast(action === "approve" ? "Sesizare aprobată" : "Sesizare respinsă", "success");
-    } catch (e) {
-      toast(e instanceof Error ? e.message : "Eroare", "error");
-    } finally {
-      setActing(null);
-    }
-  };
 
   const polish = async (code: string) => {
     setActing(`polish-${code}`);
@@ -89,9 +83,6 @@ export default function AdminSesizariPage() {
       const res = await fetch(`/api/admin/sesizari/${code}/polish`, { method: "POST" });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "Eroare polish");
-      // Sync every field the endpoint may have changed into local state
-      // so the list reflects the new titlu / locatie / descriere / lat /
-      // lng without a reload.
       setRows((prev) =>
         prev.map((r) =>
           r.code === code
@@ -106,7 +97,6 @@ export default function AdminSesizariPage() {
             : r,
         ),
       );
-      // Pop a diff modal so the admin sees exactly what AI changed.
       setPolishDiff({
         code,
         before: j.data.before,
@@ -131,7 +121,7 @@ export default function AdminSesizariPage() {
 
   const submitStatus = async () => {
     if (!statusEdit) return;
-    const { code, status, response } = statusEdit;
+    const { code, status, response, note } = statusEdit;
     setActing(`status-${code}`);
     try {
       const res = await fetch(`/api/admin/sesizari/${code}/status`, {
@@ -140,6 +130,7 @@ export default function AdminSesizariPage() {
         body: JSON.stringify({
           status,
           ...(response.trim() ? { official_response: response.trim() } : {}),
+          ...(note.trim() ? { note: note.trim() } : {}),
         }),
       });
       const j = await res.json();
@@ -156,7 +147,8 @@ export default function AdminSesizariPage() {
     }
   };
 
-  const filtered = rows.filter((r) => filter === "all" || r.moderation_status === filter);
+  const filtered =
+    statusFilter === "toate" ? rows : rows.filter((r) => r.status === statusFilter);
 
   return (
     <div>
@@ -186,9 +178,6 @@ export default function AdminSesizariPage() {
               </button>
             </div>
             <div className="p-5 space-y-4 text-sm">
-              {/* AI health banner — warn the admin when the polish call
-                  actually failed (Groq down, quota hit, etc) so they
-                  don't confuse "already clean" with "AI didn't run". */}
               {!polishDiff.aiSucceeded && (
                 <div className="p-3 rounded-[var(--radius-xs)] border border-red-500/30 bg-red-500/5 text-xs text-red-700 dark:text-red-400">
                   <strong>⚠ AI nu a putut contacta modelul.</strong> Textele au rămas
@@ -230,9 +219,6 @@ export default function AdminSesizariPage() {
                 );
               })}
 
-              {/* Coordonate — always shown with the actual status so the
-                  admin can tell whether the geocoder ran and what it
-                  concluded, even when the pin didn't need to move. */}
               {(() => {
                 const moved =
                   polishDiff.before.lat !== polishDiff.after.lat ||
@@ -291,7 +277,7 @@ export default function AdminSesizariPage() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-xl)] overflow-hidden my-8"
+            className="w-full max-w-2xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-xl)] overflow-hidden my-8"
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
               <div className="flex items-center gap-2 min-w-0">
@@ -309,50 +295,90 @@ export default function AdminSesizariPage() {
                 <CloseX size={16} aria-hidden="true" />
               </button>
             </div>
-            <div className="p-5 space-y-4">
+            <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
               <div>
                 <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
                   Sesizare
                 </p>
                 <p className="text-sm font-medium line-clamp-2">{statusEdit.titlu}</p>
                 <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                  Status actual: <strong>{STATUS_LABELS[statusEdit.currentStatus] ?? statusEdit.currentStatus}</strong>
+                  Status actual:{" "}
+                  <strong>
+                    {STATUS_LABELS[statusEdit.currentStatus] ?? statusEdit.currentStatus}
+                  </strong>
                 </p>
               </div>
 
               <div>
-                <label htmlFor="status-select" className="block text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                <p className="block text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
                   Noul status
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-2" role="radiogroup" aria-label="Selectează noul status">
-                  {(["nou", "in-lucru", "amanata", "rezolvat", "respins"] as const).map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      role="radio"
-                      aria-checked={statusEdit.status === s}
-                      onClick={() => setStatusEdit((p) => (p ? { ...p, status: s } : p))}
-                      className={`h-10 px-2 rounded-[var(--radius-xs)] text-xs font-medium border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 ${
-                        statusEdit.status === s
-                          ? "text-white border-transparent"
-                          : "bg-[var(--color-surface-2)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-primary)]/40"
-                      }`}
-                      style={
-                        statusEdit.status === s
-                          ? { backgroundColor: STATUS_COLORS[s] }
-                          : undefined
-                      }
-                    >
-                      {s === "amanata" && <Clock size={10} className="inline mr-1" aria-hidden="true" />}
-                      {STATUS_LABELS[s]}
-                    </button>
-                  ))}
+                </p>
+                <div
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-2"
+                  role="radiogroup"
+                  aria-label="Selectează noul status"
+                >
+                  {SESIZARE_STATUS_VALUES.map((s) => {
+                    const meta = SESIZARE_STATUS_META[s];
+                    const active = statusEdit.status === s;
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => setStatusEdit((p) => (p ? { ...p, status: s } : p))}
+                        className={`text-left p-3 rounded-[var(--radius-xs)] text-xs font-medium border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 ${
+                          active
+                            ? "text-white border-transparent"
+                            : "bg-[var(--color-surface-2)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-primary)]/40"
+                        }`}
+                        style={active ? { backgroundColor: meta.color } : undefined}
+                      >
+                        <p className="font-semibold flex items-center gap-1.5">
+                          <span aria-hidden="true">{meta.emoji}</span>
+                          {meta.label}
+                        </p>
+                        <p
+                          className={`text-[11px] mt-0.5 leading-relaxed normal-case ${
+                            active ? "text-white/85" : "text-[var(--color-text-muted)]"
+                          }`}
+                        >
+                          {meta.hint}
+                        </p>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               <div>
-                <label htmlFor="official-response" className="block text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
-                  Răspunsul oficial al autorității <span className="opacity-60 normal-case">(opțional — copiază din email)</span>
+                <label
+                  htmlFor="status-note"
+                  className="block text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-2"
+                >
+                  Notă internă <span className="opacity-60 normal-case">(opțional, apare în timeline)</span>
+                </label>
+                <input
+                  id="status-note"
+                  type="text"
+                  value={statusEdit.note}
+                  onChange={(e) =>
+                    setStatusEdit((p) => (p ? { ...p, note: e.target.value } : p))
+                  }
+                  placeholder="Ex: Confirmare PMB nr. 12345/30.04.2026"
+                  maxLength={500}
+                  className="w-full px-3 py-2 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="official-response"
+                  className="block text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-2"
+                >
+                  Răspunsul oficial al autorității{" "}
+                  <span className="opacity-60 normal-case">(opțional — copiază din email)</span>
                 </label>
                 <textarea
                   id="official-response"
@@ -361,7 +387,7 @@ export default function AdminSesizariPage() {
                     setStatusEdit((p) => (p ? { ...p, response: e.target.value } : p))
                   }
                   placeholder="Bună ziua, Vă mulțumim pentru sesizare..."
-                  rows={7}
+                  rows={6}
                   className="w-full px-3 py-2 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 />
                 <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
@@ -385,9 +411,13 @@ export default function AdminSesizariPage() {
                 className="h-9 px-4 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors inline-flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
               >
                 {acting === `status-${statusEdit.code}` ? (
-                  <><Loader2 size={12} className="animate-spin" aria-hidden="true" /> Salvez...</>
+                  <>
+                    <Loader2 size={12} className="animate-spin" aria-hidden="true" /> Salvez...
+                  </>
                 ) : (
-                  <>Salvează <ArrowRight size={12} aria-hidden="true" /></>
+                  <>
+                    Salvează <ArrowRight size={12} aria-hidden="true" />
+                  </>
                 )}
               </button>
             </div>
@@ -395,27 +425,60 @@ export default function AdminSesizariPage() {
         </div>
       )}
 
-      <div className="flex items-center gap-2 mb-6 flex-wrap" role="group" aria-label="Filtrează sesizări">
-        {(["all", "pending", "approved", "rejected"] as const).map((f) => (
+      {/* Sub-tabs row: filter by status + a shortcut to the ticket queue */}
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
+        <Link
+          href="/admin/sesizari/tickets"
+          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          title="Cetățenii pot propune update-uri de status — admin aprobă aici"
+        >
+          <Inbox size={12} aria-hidden="true" />
+          Tickete
+          {pendingTickets > 0 && (
+            <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-4 px-1.5 rounded-full text-[10px] font-bold bg-amber-500 text-white">
+              {pendingTickets}
+            </span>
+          )}
+        </Link>
+
+        <span className="w-px h-5 bg-[var(--color-border)] mx-1" aria-hidden="true" />
+
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1" role="group" aria-label="Filtrează după status">
           <button
-            key={f}
             type="button"
-            onClick={() => setFilter(f)}
-            aria-pressed={filter === f}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
-              filter === f
+            onClick={() => setStatusFilter("toate")}
+            aria-pressed={statusFilter === "toate"}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
+              statusFilter === "toate"
                 ? "bg-[var(--color-primary)] text-white"
                 : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)]"
             }`}
           >
-            {f === "all" ? "Toate" : f === "pending" ? "În așteptare" : f === "approved" ? "Aprobate" : "Respinse"}
-            {f !== "all" && (
-              <span className="ml-1 opacity-70">
-                ({rows.filter((r) => r.moderation_status === f).length})
-              </span>
-            )}
+            Toate
+            <span className="ml-1 opacity-70 tabular-nums">({rows.length})</span>
           </button>
-        ))}
+          {SESIZARE_STATUS_VALUES.map((s) => {
+            const count = rows.filter((r) => r.status === s).length;
+            const active = statusFilter === s;
+            return (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setStatusFilter(s)}
+                aria-pressed={active}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
+                  active
+                    ? "text-white"
+                    : "bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)]"
+                }`}
+                style={active ? { backgroundColor: SESIZARE_STATUS_META[s].color } : undefined}
+              >
+                {SESIZARE_STATUS_META[s].label}
+                <span className="ml-1 opacity-70 tabular-nums">({count})</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {loading ? (
@@ -424,7 +487,7 @@ export default function AdminSesizariPage() {
         </div>
       ) : filtered.length === 0 ? (
         <p className="text-center text-[var(--color-text-muted)] py-20">
-          Nicio sesizare {filter !== "all" ? `cu status "${filter}"` : ""}.
+          Nicio sesizare {statusFilter !== "toate" ? `cu status „${SESIZARE_STATUS_META[statusFilter].label}"` : ""}.
         </p>
       ) : (
         <div className="space-y-3">
@@ -438,21 +501,10 @@ export default function AdminSesizariPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <Badge bgColor={STATUS_COLORS[s.status]} color="white" className="text-[10px]">
-                      {STATUS_LABELS[s.status]}
+                      {STATUS_LABELS[s.status] ?? s.status}
                     </Badge>
                     <span className="text-xs">{tipIcon}</span>
                     <span className="font-mono text-[10px] text-[var(--color-text-muted)]">{s.code}</span>
-                    <span
-                      className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                        s.moderation_status === "approved"
-                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                          : s.moderation_status === "rejected"
-                          ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                          : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                      }`}
-                    >
-                      {s.moderation_status}
-                    </span>
                   </div>
                   <p className="font-semibold text-sm line-clamp-1">{s.titlu}</p>
                   <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)] mt-1">
@@ -473,21 +525,28 @@ export default function AdminSesizariPage() {
                     <Eye size={14} />
                   </Link>
                   <button
+                    type="button"
                     onClick={() => polish(s.code)}
                     disabled={acting === `polish-${s.code}`}
                     className="w-9 h-9 rounded-[var(--radius-xs)] bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center hover:brightness-110 disabled:opacity-50 transition-all"
                     title="Rescrie cu AI + re-geocode"
                   >
-                    {acting === `polish-${s.code}` ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                    {acting === `polish-${s.code}` ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Sparkles size={14} />
+                    )}
                   </button>
                   <button
+                    type="button"
                     onClick={() =>
                       setStatusEdit({
                         code: s.code,
                         titlu: s.titlu,
                         currentStatus: s.status,
-                        status: (s.status as StatusValue) ?? "nou",
+                        status: (s.status as SesizareStatus) ?? "nou",
                         response: "",
+                        note: "",
                       })
                     }
                     className="w-9 h-9 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center hover:border-[var(--color-primary)]/40 transition-colors"
@@ -495,26 +554,6 @@ export default function AdminSesizariPage() {
                   >
                     <Edit3 size={14} />
                   </button>
-                  {s.moderation_status !== "approved" && (
-                    <button
-                      onClick={() => moderate(s.code, "approve")}
-                      disabled={acting === s.code}
-                      className="w-9 h-9 rounded-[var(--radius-xs)] bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 disabled:opacity-50 transition-colors"
-                      title="Aprobă"
-                    >
-                      {acting === s.code ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-                    </button>
-                  )}
-                  {s.moderation_status !== "rejected" && (
-                    <button
-                      onClick={() => moderate(s.code, "reject")}
-                      disabled={acting === s.code}
-                      className="w-9 h-9 rounded-[var(--radius-xs)] bg-red-500 text-white flex items-center justify-center hover:bg-red-600 disabled:opacity-50 transition-colors"
-                      title="Respinge"
-                    >
-                      {acting === s.code ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
-                    </button>
-                  )}
                 </div>
               </div>
             );

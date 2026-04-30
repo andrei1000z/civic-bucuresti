@@ -26,6 +26,7 @@ import { VerifyPanel } from "@/components/sesizari/VerifyPanel";
 import { SimilarSesizari } from "@/components/sesizari/SimilarSesizari";
 import { FollowButton } from "@/components/sesizari/FollowButton";
 import { DeleteSesizareButton } from "@/components/sesizari/DeleteSesizareButton";
+import { StatusTicketButton } from "@/components/sesizari/StatusTicketButton";
 import { PhotoGallery } from "@/components/sesizari/PhotoGallery";
 import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
 import { GovernmentServiceJsonLd } from "@/components/JsonLd";
@@ -211,6 +212,10 @@ export default async function SesizareDetailPage({
                 url={`${SITE_URL}/sesizari/${sesizare.code}`}
                 title={sesizare.titlu}
                 size="md"
+              />
+              <StatusTicketButton
+                code={sesizare.code}
+                currentStatus={sesizare.status}
               />
               <DeleteSesizareButton
                 code={sesizare.code}

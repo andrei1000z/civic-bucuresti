@@ -102,6 +102,27 @@ export interface SesizareTimelineRow {
   created_at: string;
 }
 
+export type StatusTicketDecision = "pending" | "approved" | "rejected";
+
+/**
+ * Citizen-submitted proposal for a status update on a sesizare. Admin
+ * decides via /api/admin/status-tickets/[id]; on approve, the parent
+ * sesizare's status flips and a timeline row is written.
+ */
+export interface SesizareStatusTicketRow {
+  id: string;
+  sesizare_id: string;
+  user_id: string;
+  proposed_status: string;
+  note: string;
+  proof_url: string | null;
+  decision: StatusTicketDecision;
+  decided_by: string | null;
+  decided_at: string | null;
+  decision_note: string | null;
+  created_at: string;
+}
+
 export interface Database {
   __InternalSupabase: {
     PostgrestVersion: "12";
@@ -147,6 +168,25 @@ export interface Database {
         Row: SesizareVerificationRow;
         Insert: Omit<SesizareVerificationRow, "created_at"> & { created_at?: string };
         Update: Partial<SesizareVerificationRow>;
+        Relationships: [];
+      };
+      sesizare_status_tickets: {
+        Row: SesizareStatusTicketRow;
+        Insert:
+          & Omit<
+              SesizareStatusTicketRow,
+              "id" | "created_at" | "decision" | "decided_by" | "decided_at" | "decision_note" | "proof_url"
+            >
+          & {
+              id?: string;
+              created_at?: string;
+              decision?: StatusTicketDecision;
+              decided_by?: string | null;
+              decided_at?: string | null;
+              decision_note?: string | null;
+              proof_url?: string | null;
+            };
+        Update: Partial<SesizareStatusTicketRow>;
         Relationships: [];
       };
     };

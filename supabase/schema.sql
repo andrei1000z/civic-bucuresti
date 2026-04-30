@@ -40,7 +40,11 @@ create table if not exists public.sesizari (
   lng double precision not null,
   descriere text not null,
   formal_text text,
-  status text not null default 'nou' check (status in ('nou','in-lucru','rezolvat','respins')),
+  status text not null default 'nou' check (status in (
+    'nou','inregistrata','redirectionata','in-lucru',
+    'actiune-autoritate','interventie','amanata',
+    'rezolvat','respins'
+  )),
   imagini text[] default '{}',
   publica boolean default true,
   moderation_status text default 'approved' check (moderation_status in ('pending','approved','rejected')),
@@ -96,6 +100,26 @@ create table if not exists public.sesizare_follows (
   primary key (sesizare_id, user_id)
 );
 
+-- sesizare status tickets (citizen-proposed status updates, admin-approved)
+create table if not exists public.sesizare_status_tickets (
+  id uuid primary key default gen_random_uuid(),
+  sesizare_id uuid not null references public.sesizari(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  proposed_status text not null check (proposed_status in (
+    'inregistrata','redirectionata','in-lucru',
+    'actiune-autoritate','interventie','amanata',
+    'rezolvat','respins'
+  )),
+  note text not null check (length(trim(note)) > 0 and length(note) <= 1000),
+  proof_url text,
+  decision text not null default 'pending'
+    check (decision in ('pending','approved','rejected')),
+  decided_by uuid references public.profiles(id) on delete set null,
+  decided_at timestamptz,
+  decision_note text,
+  created_at timestamptz not null default now()
+);
+
 -- newsletter subscribers
 create table if not exists public.newsletter_subscribers (
   id uuid primary key default gen_random_uuid(),
@@ -134,6 +158,11 @@ create index if not exists idx_timeline_sesizare on public.sesizare_timeline(ses
 create index if not exists idx_verifications_sesizare on public.sesizare_verifications(sesizare_id);
 create index if not exists idx_follows_user on public.sesizare_follows(user_id, created_at desc);
 create index if not exists idx_follows_sesizare on public.sesizare_follows(sesizare_id);
+create index if not exists idx_status_tickets_pending
+  on public.sesizare_status_tickets(decision, created_at desc)
+  where decision = 'pending';
+create index if not exists idx_status_tickets_sesizare
+  on public.sesizare_status_tickets(sesizare_id, created_at desc);
 create index if not exists idx_newsletter_email on public.newsletter_subscribers(email);
 create index if not exists idx_stiri_published on public.stiri_cache(published_at desc);
 

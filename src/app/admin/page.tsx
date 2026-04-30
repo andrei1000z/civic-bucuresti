@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, Users, Newspaper, ArrowRight, ShieldAlert } from "lucide-react";
+import { FileText, Users, Newspaper, ArrowRight, Inbox } from "lucide-react";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { RefreshStiriButton } from "./RefreshStiriButton";
 
@@ -19,7 +19,7 @@ export default async function AdminDashboard() {
     totalSesizari,
     totalStiri,
     totalUsers,
-    pendingSesizari,
+    pendingTickets,
     todaySesizari,
     todayStiri,
     todayUsers,
@@ -28,9 +28,9 @@ export default async function AdminDashboard() {
     admin.from("stiri_cache").select("*", { count: "exact", head: true }),
     admin.from("profiles").select("*", { count: "exact", head: true }),
     admin
-      .from("sesizari")
+      .from("sesizare_status_tickets")
       .select("*", { count: "exact", head: true })
-      .eq("moderation_status", "pending"),
+      .eq("decision", "pending"),
     admin
       .from("sesizari")
       .select("*", { count: "exact", head: true })
@@ -75,7 +75,7 @@ export default async function AdminDashboard() {
     },
   ] as const;
 
-  const pendingCount = pendingSesizari.count ?? 0;
+  const pendingCount = pendingTickets.count ?? 0;
 
   return (
     <div className="space-y-6">
@@ -156,24 +156,30 @@ export default async function AdminDashboard() {
           an *action*, not a duplicate of a nav tab. */}
       <RefreshStiriButton />
 
-      {/* Subtle moderation alert — only renders when there's actual work */}
+      {/* Pending status tickets — propuneri de la cetățeni care așteaptă
+          decizie. Renderizat doar când există efectiv treabă. */}
       {pendingCount > 0 && (
         <Link
-          href="/admin/sesizari?status=pending"
+          href="/admin/sesizari/tickets"
           className="group flex items-center gap-3 p-4 rounded-[var(--radius-md)] bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
         >
           <div
             className="w-9 h-9 rounded-full bg-amber-500/20 grid place-items-center text-amber-600 dark:text-amber-400 shrink-0"
             aria-hidden="true"
           >
-            <ShieldAlert size={16} />
+            <Inbox size={16} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm text-amber-800 dark:text-amber-200">
-              {pendingCount} {pendingCount === 1 ? "sesizare așteaptă" : "sesizări așteaptă"} moderare
+              {pendingCount}{" "}
+              {pendingCount === 1
+                ? "propunere de status așteaptă"
+                : "propuneri de status așteaptă"}{" "}
+              decizie
             </p>
             <p className="text-xs text-amber-700/90 dark:text-amber-300/90">
-              Aprobă sau respinge înainte ca autorii să primească status final.
+              Cetățenii au raportat update-uri (intervenții, înregistrări,
+              răspunsuri primite). Aprobă sau respinge.
             </p>
           </div>
           <ArrowRight

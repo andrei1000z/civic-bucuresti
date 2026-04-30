@@ -175,9 +175,18 @@ export function SesizariPublice() {
           </select>
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={selectClass}>
             <option value="toate">Orice status</option>
+            {/* Keep the order in sync with the workflow in
+                src/lib/sesizari/status.ts so the dropdown reads
+                top→bottom the way the lifecycle progresses. */}
             <option value="nou">Nou</option>
+            <option value="inregistrata">Înregistrată</option>
+            <option value="redirectionata">Redirecționată</option>
             <option value="in-lucru">În lucru</option>
+            <option value="actiune-autoritate">Acțiune autoritate</option>
+            <option value="interventie">Intervenție</option>
+            <option value="amanata">Amânată</option>
             <option value="rezolvat">Rezolvat</option>
+            <option value="respins">Respins</option>
           </select>
           <select value={filterSector} onChange={(e) => setFilterSector(e.target.value)} className={selectClass}>
             <option value="toate">Toate sectoarele</option>

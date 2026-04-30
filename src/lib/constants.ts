@@ -1,3 +1,5 @@
+import { SESIZARE_STATUS_META, SESIZARE_STATUS_VALUES } from "./sesizari/status";
+
 export const SITE_NAME = "Civia";
 export const SITE_TAGLINE = "Sesizări civice gratuite, cu AI";
 export const SITE_DESCRIPTION =
@@ -148,24 +150,18 @@ export const METRO_COLORS: Record<string, string> = {
   M5: "#663399",
 };
 
-export const STATUS_COLORS: Record<string, string> = {
-  nou: "#DC2626",
-  "in-lucru": "#F59E0B",
-  rezolvat: "#059669",
-  respins: "#6B7280",
-  // Amânat — portocaliu-burnt, distinct de „în lucru" (galben activ).
-  // Folosit când autoritatea răspunde „vom analiza în cadrul unui proiect
-  // mai amplu" — nici rezolvat, nici respins.
-  amanata: "#C2410C",
-};
+// STATUS_COLORS / STATUS_LABELS provin din `SESIZARE_STATUS_META`
+// (src/lib/sesizari/status.ts) ca să avem o singură sursă pentru
+// label / culoare / hint / emoji per status. Restul codului care a
+// citit STATUS_COLORS[s] / STATUS_LABELS[s] continuă să meargă fără
+// modificări.
+export const STATUS_COLORS: Record<string, string> = Object.fromEntries(
+  SESIZARE_STATUS_VALUES.map((s) => [s, SESIZARE_STATUS_META[s].color]),
+);
 
-export const STATUS_LABELS: Record<string, string> = {
-  nou: "Nou",
-  "in-lucru": "În lucru",
-  rezolvat: "Rezolvat",
-  respins: "Respins",
-  amanata: "Amânat",
-};
+export const STATUS_LABELS: Record<string, string> = Object.fromEntries(
+  SESIZARE_STATUS_VALUES.map((s) => [s, SESIZARE_STATUS_META[s].label]),
+);
 
 export const SOURCE_COLORS: Record<string, string> = {
   "Digi24": "#DC2626",
