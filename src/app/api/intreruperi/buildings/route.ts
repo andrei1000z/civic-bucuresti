@@ -100,9 +100,12 @@ export async function GET(req: NextRequest) {
     { data: out, warming: cold.length },
     {
       headers: {
-        // Short CDN cache so polling reflects newly-warmed buildings
-        // within ~30s. Long SWR matches the underlying Redis 24h TTL.
-        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=82800",
+        // No CDN cache: the client polls this endpoint every 8s while
+        // warming is in flight, and a CDN-cached empty response would
+        // (a) hide newly-warmed buildings from the polling viewer, and
+        // (b) skip the after() hook so warming would stall. Redis
+        // already provides the durable cache layer.
+        "Cache-Control": "no-store",
       },
     },
   );
