@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Calendar, User, Tag, Building2, Info } from "lucide-react";
 import { createSupabaseAnon } from "@/lib/supabase/admin";
 import { Badge } from "@/components/ui/Badge";
-import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
+import { SOURCE_COLORS, SITE_URL, readableTextColor } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
 import { getOrGenerateAiSummary } from "@/lib/stiri/ai-summary";
 import { AiSummary } from "./AiSummary";
@@ -178,7 +178,7 @@ export default async function StireDetailPage({
                 />
               </div>
               <div className="flex gap-2 mb-3 flex-wrap">
-                <Badge bgColor={sourceColor} color="white">{stire.source}</Badge>
+                <Badge bgColor={sourceColor} color={readableTextColor(sourceColor)}>{stire.source}</Badge>
                 <Badge variant="neutral" className="uppercase text-[10px]">
                   {categoryLabels[stire.category] ?? stire.category}
                 </Badge>
@@ -202,7 +202,7 @@ export default async function StireDetailPage({
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
                 <div className="flex gap-2 mb-3 flex-wrap">
-                  <Badge bgColor={sourceColor} color="white">{stire.source}</Badge>
+                  <Badge bgColor={sourceColor} color={readableTextColor(sourceColor)}>{stire.source}</Badge>
                   <Badge className="bg-white/20 text-white border border-white/30 uppercase text-[10px] backdrop-blur-sm">
                     {categoryLabels[stire.category] ?? stire.category}
                   </Badge>
@@ -218,7 +218,7 @@ export default async function StireDetailPage({
         {!stire.image_url && (
           <>
             <div className="flex gap-2 mb-4 flex-wrap">
-              <Badge bgColor={sourceColor} color="white">{stire.source}</Badge>
+              <Badge bgColor={sourceColor} color={readableTextColor(sourceColor)}>{stire.source}</Badge>
               <Badge variant="neutral" className="uppercase text-[10px]">
                 {categoryLabels[stire.category] ?? stire.category}
               </Badge>
@@ -425,7 +425,7 @@ export default async function StireDetailPage({
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <div className="absolute top-2 left-2">
-                    <Badge bgColor={SOURCE_COLORS[r.source] ?? "#64748b"} color="white" className="text-[9px]">
+                    <Badge bgColor={SOURCE_COLORS[r.source] ?? "#64748b"} color={readableTextColor(SOURCE_COLORS[r.source] ?? "#64748b")} className="text-[9px]">
                       {r.source}
                     </Badge>
                   </div>

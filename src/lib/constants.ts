@@ -163,19 +163,64 @@ export const STATUS_LABELS: Record<string, string> = Object.fromEntries(
   SESIZARE_STATUS_VALUES.map((s) => [s, SESIZARE_STATUS_META[s].label]),
 );
 
+// Brand colors per news source. Picked to match each outlet's actual
+// visual identity so the badge / gradient on a card reads like the
+// real outlet at a glance:
+//   Digi24 = red (their on-air red)
+//   Hotnews = yellow (signature yellow logo)
+//   G4Media = black (logotype is black on white)
+//   Mediafax = blue (logo blue)
+//   News.ro = green (logo green)
+// Locals get distinct accent colors so they don't all look the same
+// on county pages.
 export const SOURCE_COLORS: Record<string, string> = {
-  "Digi24": "#DC2626",
-  "Hotnews": "#EAB308",
-  "G4Media": "#1F2937",
-  "Mediafax": "#0369A1",
-  "News.ro": "#059669",
-  "B365.ro": "#10B981",
-  "Monitorul CJ": "#7C3AED",
-  "Ziarul de Iași": "#6366F1",
-  "Opinia Timișoarei": "#EC4899",
-  "Știri Suceava": "#14B8A6",
+  // National
+  "Digi24": "#DC2626",          // red-600 — Digi24 broadcast red
+  "Hotnews": "#FACC15",          // yellow-400 — Hotnews signature yellow
+  "G4Media": "#0A0A0A",          // near-black — G4Media wordmark
+  "Mediafax": "#1D4ED8",         // blue-700 — Mediafax logo blue
+  "News.ro": "#16A34A",          // green-600 — News.ro logo green
   "Ediția de Dimineață": "#F59E0B",
-  "Gazeta BT": "#8B5CF6",
-  "Știri de Cluj": "#A855F7",
   "Știri din România": "#475569",
+  // Local houses
+  "B365.ro": "#10B981",          // București — emerald
+  "Monitorul CJ": "#7C3AED",     // Cluj — violet
+  "Știri de Cluj": "#A855F7",    // Cluj — purple
+  "Ziarul de Iași": "#6366F1",   // Iași — indigo
+  "Opinia Timișoarei": "#EC4899",// Timiș — pink
+  "Știri Suceava": "#14B8A6",    // Suceava — teal
+  "Gazeta BT": "#8B5CF6",        // Botoșani — purple
 };
+
+/**
+ * Picks a foreground color (near-black or white) that stays readable
+ * over the given background. Hotnews's signature yellow badge would
+ * be invisible with white text — this helper returns dark text in
+ * that case, white for the rest. Threshold tuned so yellow/lime
+ * pick dark, everything else picks white.
+ */
+export function readableTextColor(bgHex: string): string {
+  const hex = bgHex.replace("#", "");
+  if (hex.length !== 6) return "white";
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  // Relative luminance per WCAG-ish weights. >0.6 = pale → use dark.
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.6 ? "#0A0A0A" : "white";
+}
+
+// Mid-tone substitutes for sources whose brand color in SOURCE_COLORS
+// has poor contrast when used as plain text on a neutral surface in
+// at least one theme. Hotnews yellow-400 disappears on light surface;
+// G4Media near-black disappears on dark surface. Use these only for
+// `style={{ color: ... }}` text rendering — Badge components should
+// keep using SOURCE_COLORS + readableTextColor() for their solid bg.
+const SOURCE_TEXT_OVERRIDES: Record<string, string> = {
+  "Hotnews": "#CA8A04",  // yellow-600 — readable on both light and dark
+  "G4Media": "#64748B",  // slate-500 — neutral; "black wordmark" doesn't translate to one text color
+};
+
+export function sourceTextColor(source: string): string {
+  return SOURCE_TEXT_OVERRIDES[source] ?? SOURCE_COLORS[source] ?? "#64748b";
+}

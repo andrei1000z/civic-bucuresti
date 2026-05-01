@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, ArrowRight, ExternalLink, Loader2 } from "lucide-react";
-import { SOURCE_COLORS } from "@/lib/constants";
+import { SOURCE_COLORS, readableTextColor } from "@/lib/constants";
 import { Badge } from "@/components/ui/Badge";
 import { TimeAgo } from "@/components/ui/TimeAgo";
 import { cn } from "@/lib/utils";
@@ -42,19 +42,25 @@ const categories = [
   { id: "eveniment", label: "Evenimente" },
 ];
 
-// Fallback gradient per source (when no image)
+// Card-background gradient per source. Mirrors SOURCE_COLORS in
+// constants.ts — the badge color and the card background should
+// read as one brand block. Hotnews stays bright yellow (yellow-400→
+// yellow-700) to match their actual logo, NOT amber. G4Media stays
+// near-black to match their wordmark.
 const sourceGradients: Record<string, string> = {
   Digi24: "from-red-600 to-red-900",
-  "B365.ro": "from-emerald-600 to-emerald-900",
-  Hotnews: "from-amber-600 to-amber-900",
-  "G4Media": "from-slate-600 to-slate-900",
-  Mediafax: "from-sky-600 to-sky-900",
+  Hotnews: "from-yellow-400 to-yellow-700",
+  "G4Media": "from-zinc-800 to-black",
+  Mediafax: "from-blue-700 to-blue-950",
   "News.ro": "from-green-600 to-green-900",
+  "Ediția de Dimineață": "from-amber-500 to-amber-800",
+  "Știri din România": "from-slate-600 to-slate-800",
+  "B365.ro": "from-emerald-600 to-emerald-900",
   "Monitorul CJ": "from-violet-600 to-violet-900",
+  "Știri de Cluj": "from-purple-600 to-purple-900",
   "Ziarul de Iași": "from-indigo-600 to-indigo-900",
   "Opinia Timișoarei": "from-pink-600 to-pink-900",
   "Știri Suceava": "from-teal-600 to-teal-900",
-  "Ediția de Dimineață": "from-amber-500 to-amber-800",
   "Gazeta BT": "from-purple-600 to-purple-900",
 };
 
@@ -268,7 +274,7 @@ export function StiriList() {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <div className="absolute top-4 left-4 flex gap-2">
-                    <Badge bgColor={SOURCE_COLORS[featured.source] ?? "#64748b"} color="white" className="flex items-center gap-1.5">
+                    <Badge bgColor={SOURCE_COLORS[featured.source] ?? "#64748b"} color={readableTextColor(SOURCE_COLORS[featured.source] ?? "#64748b")} className="flex items-center gap-1.5">
                       {SOURCE_LOGOS[featured.source] && (
                         <Image
                           src={SOURCE_LOGOS[featured.source] ?? ""}
@@ -337,7 +343,7 @@ export function StiriList() {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <div className="absolute top-3 left-3">
-                    <Badge bgColor={SOURCE_COLORS[stire.source] ?? "#64748b"} color="white" className="flex items-center gap-1.5">
+                    <Badge bgColor={SOURCE_COLORS[stire.source] ?? "#64748b"} color={readableTextColor(SOURCE_COLORS[stire.source] ?? "#64748b")} className="flex items-center gap-1.5">
                       {SOURCE_LOGOS[stire.source] && (
                         <Image
                           src={SOURCE_LOGOS[stire.source] ?? ""}

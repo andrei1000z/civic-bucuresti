@@ -4,7 +4,7 @@ import { Newspaper } from "lucide-react";
 import { getCountyBySlug } from "@/data/counties";
 import { StiriList } from "@/components/stiri/StiriList";
 import { Badge } from "@/components/ui/Badge";
-import { SOURCE_COLORS } from "@/lib/constants";
+import { SOURCE_COLORS, readableTextColor } from "@/lib/constants";
 import { NATIONAL_SOURCES, LOCAL_SOURCES_BY_COUNTY } from "@/lib/stiri/sources";
 import {
   CountyPageHero,
@@ -70,7 +70,7 @@ export default async function StiriPage({
             <Badge
               key={source}
               bgColor={SOURCE_COLORS[source] ?? "#64748b"}
-              color="white"
+              color={readableTextColor(SOURCE_COLORS[source] ?? "#64748b")}
               className="text-[10px]"
             >
               {source}

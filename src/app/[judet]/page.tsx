@@ -45,7 +45,7 @@ import {
 } from "@/data/intreruperi";
 import { CountyStatCards, aqiColor } from "@/components/county/CountyStatCards";
 import { BreadcrumbJsonLd } from "@/components/FaqJsonLd";
-import { SITE_URL, STATUS_COLORS, STATUS_LABELS, SOURCE_COLORS } from "@/lib/constants";
+import { SITE_URL, STATUS_COLORS, STATUS_LABELS, SOURCE_COLORS, sourceTextColor } from "@/lib/constants";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
 export async function generateStaticParams() {
@@ -380,6 +380,7 @@ function RecentStiriColumn({
         <ul className="space-y-2">
           {rows.map((s) => {
             const tint = SOURCE_COLORS[s.source] ?? "#64748b";
+            const textTint = sourceTextColor(s.source);
             return (
               <li key={s.id}>
                 <Link
@@ -398,7 +399,7 @@ function RecentStiriColumn({
                   ) : (
                     <div
                       className="w-14 h-14 rounded-[var(--radius-xs)] grid place-items-center shrink-0"
-                      style={{ backgroundColor: `${tint}1a`, color: tint }}
+                      style={{ backgroundColor: `${tint}1a`, color: textTint }}
                       aria-hidden="true"
                     >
                       <Newspaper size={18} />
@@ -408,7 +409,7 @@ function RecentStiriColumn({
                     <div className="flex items-center gap-2 mb-0.5">
                       <span
                         className="text-[9px] font-bold uppercase tracking-wider"
-                        style={{ color: tint }}
+                        style={{ color: textTint }}
                       >
                         {s.source}
                       </span>

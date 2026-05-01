@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Newspaper, Sparkles } from "lucide-react";
 import { StiriList } from "@/components/stiri/StiriList";
 import { Badge } from "@/components/ui/Badge";
-import { SOURCE_COLORS, SITE_URL } from "@/lib/constants";
+import { SOURCE_COLORS, SITE_URL, readableTextColor } from "@/lib/constants";
 import { CollectionPageJsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
@@ -53,7 +53,7 @@ export default function StiriPage() {
                 <Badge
                   key={source}
                   bgColor={SOURCE_COLORS[source] ?? "#64748b"}
-                  color="white"
+                  color={readableTextColor(SOURCE_COLORS[source] ?? "#64748b")}
                   className="text-[10px]"
                 >
                   {source}
