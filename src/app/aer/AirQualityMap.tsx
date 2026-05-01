@@ -5,7 +5,31 @@ import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaf
 import "leaflet/dist/leaflet.css";
 import { RefreshCw, Layers, Navigation, X, Flame } from "lucide-react";
 import type { UnifiedSensor, AirDataResponse } from "@/lib/aer/types";
-import { getAqiColor, getAqiLevel, AQI_LEVELS } from "@/lib/aer/colors";
+import {
+  getAqiColor,
+  getAqiLevel,
+  AQI_LEVELS,
+  aqiFromPm25,
+  aqiFromPm10,
+} from "@/lib/aer/colors";
+
+type Pollutant = "aqi" | "pm25" | "pm10";
+
+/**
+ * AQI value that drives marker color + popup highlight, picked
+ * according to the user's pollutant selector. Falls back to the
+ * raw AQI field when the chosen pollutant isn't reported by the
+ * sensor — keeps the heatmap continuous instead of leaving holes
+ * around stations that only publish one of the two fractions.
+ */
+function aqiFor(
+  sensor: { aqi: number | null; pm25: number | null; pm10: number | null },
+  pollutant: Pollutant,
+): number | null {
+  if (pollutant === "pm25") return aqiFromPm25(sensor.pm25) ?? sensor.aqi;
+  if (pollutant === "pm10") return aqiFromPm10(sensor.pm10) ?? sensor.aqi;
+  return sensor.aqi;
+}
 import { RO_CENTER, DEFAULT_ZOOM, REFRESH_INTERVAL } from "@/lib/aer/constants";
 import { AirHeatGrid, type EstimationCell } from "./AirHeatGrid";
 
@@ -66,7 +90,7 @@ export default function AirQualityMap({
   const [lastFetch, setLastFetch] = useState<Date | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null);
-  const [selectedPollutant, setSelectedPollutant] = useState<"aqi" | "pm25" | "pm10">("aqi");
+  const [selectedPollutant, setSelectedPollutant] = useState<Pollutant>("aqi");
   const [showSources, setShowSources] = useState<Record<string, boolean>>({
     "sensor-community": true,
     openaq: true,
@@ -157,9 +181,12 @@ export default function AirQualityMap({
 
   const filteredSensors = sensors.filter((s) => showSources[s.source] !== false);
 
-  // Top 10 most polluted
+  // Top 10 most polluted, ranked by whichever pollutant the user has
+  // selected. Falls through to raw AQI when the chosen fraction isn't
+  // reported, mirroring marker-color behaviour.
   const top10 = [...filteredSensors]
-    .filter((s) => s.aqi != null)
+    .map((s) => ({ sensor: s, aqi: aqiFor(s, selectedPollutant) }))
+    .filter((x) => x.aqi != null)
     .sort((a, b) => (b.aqi ?? 0) - (a.aqi ?? 0))
     .slice(0, 10);
 
@@ -192,10 +219,23 @@ export default function AirQualityMap({
             />
           )}
 
-          {/* Station markers (on top of heatmap) */}
+          {/* Station markers — colored by the user-selected pollutant
+              (AQI, PM2.5, or PM10). Official sensors get a larger
+              radius so a single .gov.ro station isn't lost in a sea of
+              hobbyist Sensor.Community dots. The previously-shipped
+              "always-on dot" loop was a duplicate render that ignored
+              the visibility toggle and stacked another circle on top
+              of every marker; removed. */}
           {showMarkers && filteredSensors.map((sensor) => {
-            const color = getAqiColor(sensor.aqi);
+            const aqi = aqiFor(sensor, selectedPollutant);
+            const color = getAqiColor(aqi);
             const radius = sensor.isOfficial ? 8 : 5;
+            const pollutantLabel =
+              selectedPollutant === "pm25"
+                ? "PM2.5 AQI"
+                : selectedPollutant === "pm10"
+                ? "PM10 AQI"
+                : "AQI";
 
             return (
               <CircleMarker
@@ -216,7 +256,7 @@ export default function AirQualityMap({
                         className="inline-block px-2 py-0.5 rounded-full text-white font-bold text-xs"
                         style={{ backgroundColor: color }}
                       >
-                        AQI {sensor.aqi ?? "—"}
+                        {pollutantLabel} {aqi ?? "—"}
                       </span>
                       <span className="text-[10px] text-[var(--color-text-muted)] capitalize">{sensor.source}</span>
                     </div>
@@ -242,20 +282,6 @@ export default function AirQualityMap({
               </CircleMarker>
             );
           })}
-          {/* Sensor station dots (always visible, small, white border) */}
-          {filteredSensors.map((s) => (
-            <CircleMarker
-              key={`dot-${s.id}`}
-              center={[s.lat, s.lng]}
-              radius={3}
-              pathOptions={{
-                color: "#fff",
-                weight: 1.5,
-                fillColor: getAqiColor(s.aqi),
-                fillOpacity: 1,
-              }}
-            />
-          ))}
 
           {/* Active fires from NASA FIRMS (Suomi NPP / VIIRS, last 24h).
               Stacked over sensors so a wildfire near a sensor still
@@ -521,7 +547,7 @@ export default function AirQualityMap({
                 Top 10 — Cei mai poluați
               </p>
               <div className="space-y-1">
-                {top10.map((s, i) => (
+                {top10.map(({ sensor: s, aqi }, i) => (
                   <button
                     key={s.id}
                     onClick={() => setFlyTarget([s.lat, s.lng])}
@@ -530,7 +556,7 @@ export default function AirQualityMap({
                     <span className="text-xs font-bold text-[var(--color-text-muted)] w-5">{i + 1}.</span>
                     <span
                       className="w-3 h-3 rounded-full shrink-0"
-                      style={{ backgroundColor: getAqiColor(s.aqi) }}
+                      style={{ backgroundColor: getAqiColor(aqi) }}
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate">
@@ -538,8 +564,8 @@ export default function AirQualityMap({
                       </p>
                       <p className="text-[10px] text-[var(--color-text-muted)] capitalize">{s.source}</p>
                     </div>
-                    <span className="text-xs font-bold" style={{ color: getAqiColor(s.aqi) }}>
-                      {s.aqi}
+                    <span className="text-xs font-bold" style={{ color: getAqiColor(aqi) }}>
+                      {aqi}
                     </span>
                   </button>
                 ))}

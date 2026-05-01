@@ -27,3 +27,53 @@ export function getAqiLevel(aqi: number | null): AqiLevel {
 export function getAqiColor(aqi: number | null): string {
   return getAqiLevel(aqi).color;
 }
+
+// EPA AQI breakpoint table for PM2.5 (24h avg, µg/m³). Source: EPA
+// Technical Assistance Document for the Reporting of Daily Air
+// Quality (2024 update). Each row maps a concentration range
+// [cLow, cHigh] to an AQI range [aqiLow, aqiHigh]; we linearly
+// interpolate within the row.
+const PM25_BREAKPOINTS: Array<[number, number, number, number]> = [
+  [0.0, 9.0, 0, 50],
+  [9.1, 35.4, 51, 100],
+  [35.5, 55.4, 101, 150],
+  [55.5, 125.4, 151, 200],
+  [125.5, 225.4, 201, 300],
+  [225.5, 500, 301, 500],
+];
+
+const PM10_BREAKPOINTS: Array<[number, number, number, number]> = [
+  [0, 54, 0, 50],
+  [55, 154, 51, 100],
+  [155, 254, 101, 150],
+  [255, 354, 151, 200],
+  [355, 424, 201, 300],
+  [425, 604, 301, 500],
+];
+
+function aqiFromBreakpoints(
+  conc: number,
+  table: Array<[number, number, number, number]>,
+): number {
+  for (const [cLow, cHigh, aLow, aHigh] of table) {
+    if (conc <= cHigh) {
+      // Standard EPA piecewise linear formula.
+      return Math.round(((aHigh - aLow) / (cHigh - cLow)) * (conc - cLow) + aLow);
+    }
+  }
+  // Above the last breakpoint — clamp to the top of the worst level so
+  // the color stays in the "periculos" band rather than overflowing.
+  return table[table.length - 1]![3];
+}
+
+/** Convert a PM2.5 reading (µg/m³) to its EPA AQI value. */
+export function aqiFromPm25(pm25: number | null): number | null {
+  if (pm25 == null || isNaN(pm25) || pm25 < 0) return null;
+  return aqiFromBreakpoints(pm25, PM25_BREAKPOINTS);
+}
+
+/** Convert a PM10 reading (µg/m³) to its EPA AQI value. */
+export function aqiFromPm10(pm10: number | null): number | null {
+  if (pm10 == null || isNaN(pm10) || pm10 < 0) return null;
+  return aqiFromBreakpoints(pm10, PM10_BREAKPOINTS);
+}
