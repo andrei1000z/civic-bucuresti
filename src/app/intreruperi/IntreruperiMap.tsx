@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polygon, useMap } from "react-leaflet";
 import { useEffect, useMemo, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -12,6 +12,10 @@ import {
   TYPE_LABELS,
   STATUS_LABELS,
 } from "@/data/intreruperi";
+
+interface BuildingPolygonShape {
+  coords: Array<[number, number]>;
+}
 
 function createIcon(type: Interruption["type"], status: Interruption["status"]): L.DivIcon {
   const color = TYPE_COLORS[type];
@@ -103,6 +107,55 @@ function FitBounds({ items, me }: { items: Interruption[]; me: [number, number] 
   return null;
 }
 
+/**
+ * Fetches OSM building polygons for the visible outages and caches them
+ * in component state. Buildings come from /api/intreruperi/buildings
+ * which itself caches in Redis for 24h, so this is cheap on repeat
+ * views. Renders incrementally — outages that load early get their
+ * blocks painted while the rest are still in-flight.
+ */
+function useOutageBuildings(outageIds: string[]): Record<string, BuildingPolygonShape[]> {
+  const [buildings, setBuildings] = useState<Record<string, BuildingPolygonShape[]>>({});
+  const idsKey = useMemo(() => [...outageIds].sort().join(","), [outageIds]);
+
+  useEffect(() => {
+    if (!idsKey) return;
+    let cancelled = false;
+    // Fetch in batches of 10 so the first ones paint quickly while
+    // the tail of the queue is still computing on the server. The
+    // API rate-limits at 60/min/IP which leaves plenty of headroom.
+    const ids = idsKey.split(",");
+    const batches: string[][] = [];
+    for (let i = 0; i < ids.length; i += 10) {
+      batches.push(ids.slice(i, i + 10));
+    }
+    (async () => {
+      for (const batch of batches) {
+        if (cancelled) return;
+        try {
+          const res = await fetch(
+            `/api/intreruperi/buildings?ids=${encodeURIComponent(batch.join(","))}`,
+            { signal: AbortSignal.timeout(30_000) },
+          );
+          if (!res.ok) continue;
+          const json = (await res.json()) as {
+            data?: Record<string, BuildingPolygonShape[]>;
+          };
+          if (cancelled || !json.data) continue;
+          setBuildings((prev) => ({ ...prev, ...json.data! }));
+        } catch {
+          // Per-batch failure is silent — Circle fallback still shows.
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [idsKey]);
+
+  return buildings;
+}
+
 export default function IntreruperiMap({ items }: { items: Interruption[] }) {
   const [me, setMe] = useState<[number, number] | null>(null);
   const [meAccuracy, setMeAccuracy] = useState<number | null>(null);
@@ -117,6 +170,9 @@ export default function IntreruperiMap({ items }: { items: Interruption[] }) {
       ),
     [items],
   );
+
+  const outageIds = useMemo(() => withCoords.map((i) => i.id), [withCoords]);
+  const buildingsByOutage = useOutageBuildings(outageIds);
 
   const center = useMemo<[number, number]>(() => {
     if (me) return me;
@@ -226,6 +282,37 @@ export default function IntreruperiMap({ items }: { items: Interruption[] }) {
                 }}
               />
             );
+          })}
+
+          {/* OSM building footprints — painted in the outage's type
+              color so users see EXACTLY which blocks are affected,
+              not just an aspirational circle. Loads lazily after the
+              circle (which renders instantly) so the page never
+              looks empty. Falls back to circle-only when buildings
+              haven't loaded yet or Overpass returned nothing. */}
+          {withCoords.map((i) => {
+            const polys = buildingsByOutage[i.id];
+            if (!polys || polys.length === 0) return null;
+            const tone = TYPE_COLORS[i.type];
+            const active = i.status === "in-desfasurare";
+            return polys.map((p, pi) => (
+              <Polygon
+                key={`bldg-${i.id}-${pi}`}
+                positions={p.coords}
+                pathOptions={{
+                  color: tone,
+                  fillColor: tone,
+                  // Buildings pop more than the circle background:
+                  // active 70% / scheduled 50%. The fill on top of
+                  // the (already-rendered) Circle reads as solid red
+                  // for the actual blocks, faint red for "general
+                  // area".
+                  fillOpacity: active ? 0.7 : 0.5,
+                  opacity: 0.9,
+                  weight: 1,
+                }}
+              />
+            ));
           })}
 
           {withCoords.map((i) => (
@@ -365,8 +452,9 @@ export default function IntreruperiMap({ items }: { items: Interruption[] }) {
           )}
         </div>
         <p className="text-[10px] text-slate-500 mt-1.5 leading-tight">
-          Zonele colorate = aria afectată; pin = adresa principală.<br />
-          Linie punctată = avarie programată, fără punctată = activă.
+          Blocuri colorate = construcții direct afectate.<br />
+          Cerc = aria estimată; pin = adresa principală.<br />
+          Linie punctată = programată, plin = avarie activă.
         </p>
       </div>
     </div>
