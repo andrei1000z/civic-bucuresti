@@ -498,24 +498,30 @@ export default function AirQualityMap({
             </div>
           </div>
 
-          {/* Source toggles */}
+          {/* Source toggles — only sources that have at least one
+              live sensor right now. Hiding zero-count rows ("Openaq 0",
+              "Uradmonitor 0") keeps the panel honest; an upstream
+              with no readable stations isn't a useful filter and
+              makes the page look broken. */}
           <div>
             <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
               Surse de date
             </p>
             <div className="space-y-2">
-              {Object.entries(meta?.bySource ?? {}).map(([source, count]) => (
-                <label key={source} className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={showSources[source] !== false}
-                    onChange={(e) => setShowSources((prev) => ({ ...prev, [source]: e.target.checked }))}
-                    className="w-4 h-4 rounded accent-[var(--color-primary)]"
-                  />
-                  <span className="text-sm flex-1 capitalize">{source.replace("-", " ")}</span>
-                  <span className="text-xs text-[var(--color-text-muted)]">{count}</span>
-                </label>
-              ))}
+              {Object.entries(meta?.bySource ?? {})
+                .filter(([, count]) => (count ?? 0) > 0)
+                .map(([source, count]) => (
+                  <label key={source} className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showSources[source] !== false}
+                      onChange={(e) => setShowSources((prev) => ({ ...prev, [source]: e.target.checked }))}
+                      className="w-4 h-4 rounded accent-[var(--color-primary)]"
+                    />
+                    <span className="text-sm flex-1 capitalize">{source.replace("-", " ")}</span>
+                    <span className="text-xs text-[var(--color-text-muted)]">{count}</span>
+                  </label>
+                ))}
             </div>
           </div>
 

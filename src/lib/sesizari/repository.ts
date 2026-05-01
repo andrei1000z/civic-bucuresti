@@ -1,6 +1,6 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import { getHiddenUserIds } from "@/lib/privacy/hidden-users";
+import { getHiddenUserIds, getHiddenEmails } from "@/lib/privacy/hidden-users";
 import { scrubFormalTextForPublic } from "./scrub-public";
 import type {
   SesizareFeedRow,
@@ -39,6 +39,7 @@ async function getViewerContext(): Promise<{ viewerId: string | null; isAdmin: b
 type Anonymizable = {
   user_id: string | null;
   author_name: string;
+  author_email?: string | null;
   formal_text?: string | null;
 };
 
@@ -47,13 +48,15 @@ type Anonymizable = {
  *   - always scrubs the home address out of formal_text (promised on the
  *     public page: "adresa de domiciliu a fost ascunsă automat")
  *   - additionally scrubs the author name (in author_name AND in
- *     formal_text) when the owner toggled hide_name in /cont
+ *     formal_text) when the owner toggled hide_name in /cont. The match
+ *     happens on user_id OR author_email — guests-then-signed-up users
+ *     have legacy rows with user_id=null but their email in
+ *     author_email; the email path catches those.
  *   - admins and the row's owner bypass both scrubs (they're either
  *     moderating or reading their own sesizare)
  *
- * Runs one Redis SMISMEMBER batched over all user_ids in the list plus
- * one Supabase profile lookup for the viewer's role. Zero per-row
- * queries.
+ * Runs two Redis SMISMEMBER round-trips (user_ids + emails) plus one
+ * Supabase profile lookup for the viewer's role. Zero per-row queries.
  */
 async function anonymizeHiddenAuthors<T extends Anonymizable>(rows: T[]): Promise<T[]> {
   if (rows.length === 0) return rows;
@@ -62,13 +65,27 @@ async function anonymizeHiddenAuthors<T extends Anonymizable>(rows: T[]): Promis
   if (isAdmin) return rows;
 
   const userIds = Array.from(new Set(rows.map((r) => r.user_id).filter((v): v is string => !!v)));
-  const hidden = userIds.length > 0 ? await getHiddenUserIds(userIds) : new Set<string>();
+  const emails = Array.from(
+    new Set(
+      rows
+        .map((r) => r.author_email?.toLowerCase().trim())
+        .filter((v): v is string => !!v),
+    ),
+  );
+
+  const [hiddenIds, hiddenEmails] = await Promise.all([
+    userIds.length > 0 ? getHiddenUserIds(userIds) : Promise.resolve(new Set<string>()),
+    emails.length > 0 ? getHiddenEmails(emails) : Promise.resolve(new Set<string>()),
+  ]);
 
   return rows.map((r) => {
     const isOwner = !!r.user_id && r.user_id === viewerId;
     if (isOwner) return r; // owner sees their own name + address
 
-    const hideName = !!r.user_id && hidden.has(r.user_id);
+    const idHit = !!r.user_id && hiddenIds.has(r.user_id);
+    const emailHit =
+      !!r.author_email && hiddenEmails.has(r.author_email.toLowerCase().trim());
+    const hideName = idHit || emailHit;
 
     let scrubbedFormalText = r.formal_text ?? null;
     if (scrubbedFormalText) {

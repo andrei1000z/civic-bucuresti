@@ -221,9 +221,12 @@ export function HartiMap({
         <div className="flex-1 overflow-y-auto p-5">
           {activeTab === "bicicleta" && (
             <div>
-              <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-2">
-                Cu bicicleta{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
-              </h3>
+              <SectionHeader
+                icon={Bike}
+                title="Cu bicicleta"
+                scopeName={scopeName}
+                source="OpenStreetMap · live"
+              />
               <p className="text-sm text-[var(--color-text-muted)] mb-4 leading-relaxed">
                 {scopeName
                   ? `Piste dedicate și benzi marcate pentru biciclete din ${scopeName}. Sursa: OpenStreetMap, contribuții colaborative.`
@@ -240,9 +243,12 @@ export function HartiMap({
 
           {activeTab === "pejos" && (
             <div>
-              <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Unde mergi pe jos{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
-              </h3>
+              <SectionHeader
+                icon={Footprints}
+                title="Unde mergi pe jos"
+                scopeName={scopeName}
+                source="OpenStreetMap · live"
+              />
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
                 {scopeName
                   ? `Parcuri, trotuare și zone pietonale din ${scopeName}. Trotuarele se încarcă în timp ce navighezi pe hartă.`
@@ -280,11 +286,14 @@ export function HartiMap({
 
           {activeTab === "auto" && (
             <div>
-              <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-4">
-                Drumurile României — clasificate
-              </h3>
+              <SectionHeader
+                icon={Car}
+                title="Drumurile României"
+                scopeName={scopeName}
+                source="OpenStreetMap · 131.834 segmente"
+              />
               <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                Toate autostrăzile, drumurile naționale, județene și comunale din țară — 131.834 segmente din OpenStreetMap, cu codificare de culori după clasă.
+                Toate autostrăzile, drumurile naționale, județene și comunale din țară, codificate cu culori după clasă.
               </p>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
@@ -331,11 +340,17 @@ export function HartiMap({
 
           {activeTab === "transport" && (
             <div>
-              <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-2">
-                Transport public{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
-              </h3>
+              <SectionHeader
+                icon={Bus}
+                title="Transport public"
+                scopeName={scopeName}
+                source="Metrorex + OpenStreetMap · live"
+              />
               <p className="text-sm text-[var(--color-text-muted)] mb-4 leading-relaxed">
-                Metroul bucureștean (5 magistrale, <strong>63 de stații</strong>), rețeaua de tramvai și stații de autobuz — acestea din urmă se încarcă pe măsură ce navighezi. Sursa: Metrorex + OpenStreetMap.
+                Metroul bucureștean (5 magistrale, <strong>63 de stații</strong>),
+                rețeaua de tramvai națională, liniile de troleibuz din toată
+                țara și stații de autobuz — stațiile se încarcă pe măsură ce
+                navighezi.
               </p>
               <div className="space-y-2 mb-5">
                 {METRO_INFO.map((line) => {
@@ -372,11 +387,14 @@ export function HartiMap({
 
           {activeTab === "aer" && (
             <div>
-              <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg mb-2">
-                Calitatea aerului{scopeName && <span className="text-[var(--color-primary)]"> · {scopeName}</span>}
-              </h3>
+              <SectionHeader
+                icon={Wind}
+                title="Calitatea aerului"
+                scopeName={scopeName}
+                source="OpenAQ + Sensor.Community · live"
+              />
               <p className="text-sm text-[var(--color-text-muted)] mb-4 leading-relaxed">
-                Senzori europeni de calitate a aerului în timp real — PM2.5, PM10, NO₂, O₃. Sursa principală: OpenAQ + Sensor.Community (rețea civică).
+                Senzori europeni de calitate a aerului în timp real — PM2.5, PM10, NO₂, O₃.
               </p>
               <div className="space-y-1.5 mb-4">
                 <Legend color="#10B981" label="Bun (1–3) — fără riscuri" />
@@ -506,6 +524,53 @@ function Legend({ color, label }: { color: string; label: string }) {
         aria-hidden="true"
       />
       <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">{label}</p>
+    </div>
+  );
+}
+
+/**
+ * Consistent header for each map-tab section in the Detalii sidebar.
+ * Icon chip + title + (optional) county scope chip + (optional) data
+ * source line. Replaced the per-section `<h3>` patchwork that was
+ * inconsistent across tabs (some used dot separator, some bolded the
+ * county, some nothing). One component = one look.
+ */
+function SectionHeader({
+  icon: Icon,
+  title,
+  scopeName,
+  source,
+}: {
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  title: string;
+  scopeName?: string;
+  source?: string;
+}) {
+  return (
+    <div className="mb-4">
+      <div className="flex items-start gap-3">
+        <span
+          className="w-9 h-9 rounded-[var(--radius-xs)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] grid place-items-center shrink-0 ring-1 ring-[var(--color-primary)]/15"
+          aria-hidden="true"
+        >
+          <Icon size={16} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-[family-name:var(--font-sora)] font-semibold text-[17px] leading-tight">
+            {title}
+          </h3>
+          {scopeName && (
+            <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)]">
+              {scopeName}
+            </span>
+          )}
+        </div>
+      </div>
+      {source && (
+        <p className="text-[10px] uppercase tracking-wider font-medium text-[var(--color-text-muted)] mt-2 ml-12">
+          {source}
+        </p>
+      )}
     </div>
   );
 }

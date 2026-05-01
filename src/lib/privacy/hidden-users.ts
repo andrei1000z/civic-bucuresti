@@ -1,11 +1,17 @@
 // Privacy toggle: "hide my name on public sesizări".
-// Stored in Upstash Redis as a SET of user IDs that opted in. No DB
-// migration needed — works the moment this file ships. In-memory
-// fallback keeps dev mode functional without Upstash.
+// Stored in Upstash Redis as two SETs:
+//   - hidden-users:    user IDs that opted in
+//   - hidden-emails:   author_email values that opted in
+// Both are needed because a sesizare submitted while logged out has
+// user_id=NULL but a real author_email. Without the email path, those
+// rows would still leak the user's name even after they enable the
+// toggle on /cont.
+// In-memory fallback keeps dev mode functional without Upstash.
 
 import { Redis } from "@upstash/redis";
 
 const KEY = "civia:privacy:hidden-users";
+const EMAIL_KEY = "civia:privacy:hidden-emails";
 
 const redis =
   process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
@@ -14,16 +20,44 @@ const redis =
 
 // In-memory fallback (dev only) — persists for the process lifetime.
 const memoryFallback = new Set<string>();
+const memoryEmailFallback = new Set<string>();
 
-export async function setHideName(userId: string, hide: boolean): Promise<void> {
+function normalizeEmail(email: string | null | undefined): string | null {
+  if (!email) return null;
+  const trimmed = email.trim().toLowerCase();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+/**
+ * Toggle the hide-name flag for the given user. The email argument is
+ * optional but strongly recommended — guests-then-signed-up users have
+ * historical sesizari with `user_id=null`, and we need the email path
+ * to anonymize those reliably.
+ */
+export async function setHideName(
+  userId: string,
+  hide: boolean,
+  email?: string | null,
+): Promise<void> {
   if (!userId) return;
+  const normalizedEmail = normalizeEmail(email);
   if (!redis) {
-    if (hide) memoryFallback.add(userId);
-    else memoryFallback.delete(userId);
+    if (hide) {
+      memoryFallback.add(userId);
+      if (normalizedEmail) memoryEmailFallback.add(normalizedEmail);
+    } else {
+      memoryFallback.delete(userId);
+      if (normalizedEmail) memoryEmailFallback.delete(normalizedEmail);
+    }
     return;
   }
-  if (hide) await redis.sadd(KEY, userId);
-  else await redis.srem(KEY, userId);
+  if (hide) {
+    await redis.sadd(KEY, userId);
+    if (normalizedEmail) await redis.sadd(EMAIL_KEY, normalizedEmail);
+  } else {
+    await redis.srem(KEY, userId);
+    if (normalizedEmail) await redis.srem(EMAIL_KEY, normalizedEmail);
+  }
 }
 
 export async function getHideName(userId: string): Promise<boolean> {
@@ -48,6 +82,28 @@ export async function getHiddenUserIds(userIds: string[]): Promise<Set<string>> 
   const hidden = new Set<string>();
   userIds.forEach((id, i) => {
     if (flags[i] === 1) hidden.add(id);
+  });
+  return hidden;
+}
+
+/**
+ * Batch variant for emails. Used by the sesizare anonymizer to catch
+ * historical rows submitted as a guest (user_id=null) but with the
+ * user's email in author_email — without this, opting in to anonymity
+ * would only hide future sesizari, not the existing ones.
+ */
+export async function getHiddenEmails(emails: string[]): Promise<Set<string>> {
+  const normalized = Array.from(
+    new Set(emails.map((e) => normalizeEmail(e)).filter((e): e is string => !!e)),
+  );
+  if (normalized.length === 0) return new Set();
+  if (!redis) {
+    return new Set(normalized.filter((e) => memoryEmailFallback.has(e)));
+  }
+  const flags = (await redis.smismember(EMAIL_KEY, normalized)) as number[];
+  const hidden = new Set<string>();
+  normalized.forEach((e, i) => {
+    if (flags[i] === 1) hidden.add(e);
   });
   return hidden;
 }

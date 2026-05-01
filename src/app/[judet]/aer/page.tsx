@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Wind } from "lucide-react";
 import { getCountyBySlug } from "@/data/counties";
-import { getCountyStats } from "@/data/statistici-judete";
 import { AerMapWrapper } from "@/app/aer/AerMapWrapper";
 
 export const revalidate = 3600;
@@ -15,20 +14,11 @@ export async function generateMetadata({
   const { judet } = await params;
   const county = getCountyBySlug(judet);
   if (!county) return {};
-  const stats = getCountyStats(county.id);
-  const aqiText = stats ? ` AQI mediu: ${stats.aqiMediu} (${stats.aqiQuality}).` : "";
   return {
     title: "Calitatea aerului",
-    description: `Hartă interactivă cu calitatea aerului în timp real în ${county.name}.${aqiText} Date de la senzori: Sensor.Community, OpenAQ, WAQI.`,
+    description: `Hartă interactivă cu calitatea aerului în timp real în ${county.name}. Date de la senzori: Sensor.Community, OpenAQ, WAQI.`,
     alternates: { canonical: `/${county.slug}/aer` },
   };
-}
-
-function aqiHex(aqi: number): string {
-  if (aqi <= 50) return "#059669";
-  if (aqi <= 80) return "#EAB308";
-  if (aqi <= 100) return "#F97316";
-  return "#DC2626";
 }
 
 export default async function AerPage({
@@ -39,13 +29,16 @@ export default async function AerPage({
   const { judet } = await params;
   const county = getCountyBySlug(judet);
   const center = county ? ([...county.center] as [number, number]) : undefined;
-  const stats = county ? getCountyStats(county.id) : null;
 
   return (
     <div className="relative">
       {/* Compact info bar — full-bleed map page can't afford a tall hero,
-          but we still surface the county code chip + back-link + AQI
-          summary so the page feels Civia-branded. */}
+          but we still surface the county code chip + back-link so the
+          page feels Civia-branded. The annual-stat chip was removed
+          because it conflicted with the live AQI shown in the
+          AirQualityMap sidebar (75 Moderat anual vs 21 Bun live →
+          users couldn't tell which one applied). The live number is
+          the authoritative one for this surface. */}
       <div className="bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 py-2.5">
         <div className="container-narrow flex items-center gap-3 flex-wrap text-sm">
           {county && (
@@ -69,21 +62,6 @@ export default async function AerPage({
             >
               {county.id}
             </span>
-          )}
-          {stats && (
-            <>
-              <span className="text-[var(--color-text-muted)]" aria-hidden="true">·</span>
-              <span className="text-[var(--color-text-muted)] text-xs">
-                AQI mediu anual:{" "}
-                <span
-                  className="font-bold tabular-nums"
-                  style={{ color: aqiHex(stats.aqiMediu) }}
-                >
-                  {stats.aqiMediu}
-                </span>{" "}
-                ({stats.aqiQuality})
-              </span>
-            </>
           )}
           <span className="ml-auto text-[10px] text-[var(--color-text-muted)] hidden md:inline">
             Senzori live · Sensor.Community · OpenAQ · WAQI

@@ -38,6 +38,18 @@ export async function GET() {
   // the /cont page can render the toggle without needing a DB column.
   const hide_name = await getHideName(user.id);
 
+  // Self-heal: pre-existing users who set hide_name before the email
+  // path was added wouldn't have their author_email in Redis yet, so
+  // legacy guest-submitted sesizari still leak the name. Re-call
+  // setHideName(true, email) which is idempotent — adds to both the
+  // user-id and email sets. One Redis round-trip per profile load
+  // when the flag is on; cheap.
+  if (hide_name && user.email) {
+    await setHideName(user.id, true, user.email).catch(() => {
+      // Self-heal best-effort; the main response stays useful.
+    });
+  }
+
   return NextResponse.json({
     data: { ...(data ?? {}), email: user.email, hide_name },
   });
@@ -60,9 +72,12 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const parsed = updateSchema.parse(body);
 
-    // Privacy toggle goes to Redis (no DB migration).
+    // Privacy toggle goes to Redis (no DB migration). We also store
+    // the user's email so the anonymizer can match historical sesizari
+    // that were submitted as guests (user_id=null but author_email
+    // matches the now-logged-in user).
     if (parsed.hide_name !== undefined) {
-      await setHideName(user.id, parsed.hide_name);
+      await setHideName(user.id, parsed.hide_name, user.email ?? null);
     }
 
     // Build DB update — null means "clear field", undefined means "don't change"

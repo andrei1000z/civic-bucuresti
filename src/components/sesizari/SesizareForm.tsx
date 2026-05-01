@@ -959,41 +959,12 @@ ${today}`;
           </div>
         )}
 
-        {/* Quick tip picker at top — analytics arată că 7 users au abandonat
-            înainte să aleagă tipul (step "before-tip"). Îl punem vizibil de
-            la început ca onboarding vizual: icon-urile spun rapid ce se poate
-            face, chiar și fără să citească formularul. Click = set tip +
-            scroll la descriere. */}
-        {!data.tip && (
-          <div className="mb-2 p-4 rounded-[var(--radius-md)] border border-[var(--color-primary)]/20 bg-[var(--color-primary-soft)]/40">
-            <p className="text-xs font-semibold text-[var(--color-primary)] mb-3 uppercase tracking-wider">
-              Ce fel de problemă raportezi?
-            </p>
-            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-              {SESIZARE_TIPURI.slice(0, 8).map((t) => (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => {
-                    update("tip", t.value);
-                    setTipDetectedByAI(false);
-                    trackFunnelStep("sesizare-create", "tip-selected", { tip: t.value });
-                  }}
-                  className="group flex flex-col items-center justify-start gap-1 p-2 rounded-[var(--radius-xs)] bg-[var(--color-surface)]/50 hover:bg-[var(--color-surface)] border border-transparent hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-1)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] min-h-[68px]"
-                  title={t.label}
-                >
-                  <span className="text-2xl leading-none" aria-hidden="true">{t.icon}</span>
-                  <span className="text-[10px] text-center leading-tight text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] break-words">
-                    {t.short}
-                  </span>
-                </button>
-              ))}
-            </div>
-            <p className="text-[11px] text-[var(--color-text-muted)] mt-3 text-center">
-              Sau continuă să scrii — AI-ul detectează tipul automat din descriere.
-            </p>
-          </div>
-        )}
+        {/* Tip picker removed — the AI auto-classifies from descriere
+            (see polishSesizare → tipDetectedByAI flow) and there's
+            still a manual dropdown lower in the form for the rare
+            case AI gets it wrong. The icon-grid was a holdover from
+            an earlier funnel attempt and visually dominated the form
+            for no real benefit once classification got reliable. */}
 
         <Field label="Numele tău complet" required>
           <input

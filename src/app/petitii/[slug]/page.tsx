@@ -343,14 +343,6 @@ export default async function PetitiePage({
             </p>
           </div>
 
-          {/* About the petition surface — small info card to balance the sidebar */}
-          <div className="bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-md)] p-4">
-            <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
-              <strong className="text-[var(--color-text)]">Cum funcționează?</strong> Civia
-              curătă petițiile civice de pe Declic / Avaaz / petitie.civica.ro. Click → site-ul
-              oficial unde semnezi. Datele tale rămân la ei, nu la noi.
-            </p>
-          </div>
         </aside>
       </div>
     </article>
