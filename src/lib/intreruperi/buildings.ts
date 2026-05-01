@@ -113,6 +113,29 @@ function buildingKey(outageId: string): string {
   return `civia:intreruperi:buildings:${outageId}`;
 }
 
+function warmingLockKey(outageId: string): string {
+  return `civia:intreruperi:buildings:warming:${outageId}`;
+}
+
+/**
+ * Read polygons for an outage from Redis. Returns null on cache miss
+ * (or Redis hiccup) — the caller decides whether to trigger warming.
+ * Never queries Overpass; safe to call on the hot path for every
+ * outage in a viewport without rate-limit risk.
+ */
+export async function getCachedBuildings(
+  outageId: string,
+): Promise<BuildingPolygon[] | null> {
+  if (!analyticsRedis) return null;
+  try {
+    const cached = await analyticsRedis.get<BuildingPolygon[]>(buildingKey(outageId));
+    if (cached && Array.isArray(cached) && cached.length > 0) return cached;
+  } catch {
+    // Redis hiccup — treat as miss.
+  }
+  return null;
+}
+
 /**
  * Get building polygons for an outage. Result cached in Redis for 24h.
  * Only hits Overpass on cache miss. The cache is pre-warmed by the
@@ -125,19 +148,12 @@ export async function getBuildingsForOutage(
   lng: number,
   radiusM: number,
 ): Promise<BuildingPolygon[]> {
-  const key = buildingKey(outageId);
-  if (analyticsRedis) {
-    try {
-      const cached = await analyticsRedis.get<BuildingPolygon[]>(key);
-      if (cached && Array.isArray(cached) && cached.length > 0) return cached;
-    } catch {
-      // Redis hiccup — fall through to fresh query.
-    }
-  }
+  const cached = await getCachedBuildings(outageId);
+  if (cached) return cached;
   const fresh = await queryOverpass(lat, lng, radiusM);
   if (analyticsRedis && fresh.length > 0) {
     try {
-      await analyticsRedis.set(key, fresh, { ex: 24 * 60 * 60 });
+      await analyticsRedis.set(buildingKey(outageId), fresh, { ex: 24 * 60 * 60 });
     } catch {
       // Cache write failure is silent — result still returned to caller.
     }
@@ -145,11 +161,56 @@ export async function getBuildingsForOutage(
   return fresh;
 }
 
-interface WarmTarget {
+export interface WarmTarget {
   id: string;
   lat: number;
   lng: number;
   radiusM: number;
+}
+
+/**
+ * Background-warm a list of outages with cross-request deduplication.
+ *
+ * Each outage gets a Redis NX lock with 60s TTL — if 5 viewers all
+ * trigger warming for the same outage at once, only the first
+ * acquires the lock and queries Overpass; the rest skip. This lets
+ * us safely call this from `after()` on every map load without
+ * fanning out Overpass requests.
+ *
+ * Errors are swallowed — the next viewer will retry. Designed to be
+ * fired from `after()` (Next 16 background-after) so it never delays
+ * the API response.
+ */
+export async function warmBuildingsBackground(
+  targets: ReadonlyArray<WarmTarget>,
+): Promise<void> {
+  if (targets.length === 0 || !analyticsRedis) return;
+  for (const t of targets) {
+    let acquired = false;
+    try {
+      // Upstash returns "OK" when NX set succeeds, null when key exists.
+      const got = await analyticsRedis.set(warmingLockKey(t.id), "1", {
+        ex: 60,
+        nx: true,
+      });
+      acquired = got === "OK";
+    } catch {
+      // Lock check failed — be conservative, skip this one.
+      continue;
+    }
+    if (!acquired) continue;
+    try {
+      const fresh = await queryOverpass(t.lat, t.lng, t.radiusM);
+      if (fresh.length > 0) {
+        await analyticsRedis.set(buildingKey(t.id), fresh, { ex: 24 * 60 * 60 });
+      }
+    } catch {
+      // Silent — next viewer retries after lock expires.
+    }
+    // Be polite to Overpass between cold queries (kumi.systems mirror
+    // throttles around 1 req/s/IP). 1500ms gap matches the cron warmer.
+    await new Promise((r) => setTimeout(r, 1500));
+  }
 }
 
 /**

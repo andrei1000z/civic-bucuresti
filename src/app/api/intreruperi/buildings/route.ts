@@ -1,12 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import type { NextRequest } from "next/server";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 import { loadInterruptions } from "@/lib/intreruperi/store";
-import { getBuildingsForOutage, type BuildingPolygon } from "@/lib/intreruperi/buildings";
+import {
+  getCachedBuildings,
+  warmBuildingsBackground,
+  type BuildingPolygon,
+  type WarmTarget,
+} from "@/lib/intreruperi/buildings";
 
-// Heavy upstream (Overpass) but cached 24h per outage. Budget the
-// route up to 25s for the rare cold path.
-export const maxDuration = 30;
+// Hot path: cache reads only. Background warming runs after the
+// response is sent, so a 5s budget is plenty.
+export const maxDuration = 10;
 export const revalidate = 0;
 
 /**
@@ -14,12 +19,21 @@ export const revalidate = 0;
  *
  * Returns OSM building polygons for each outage id, scoped to the
  * outage's affected radius (computed the same way the map renders
- * the colored circle). Empty array means the outage has no
- * coordinates, no buildings nearby, or Overpass timed out — caller
- * keeps the colored circle as fallback.
+ * the colored circle). Two-phase design:
+ *
+ *   1. Read cache for all requested IDs in parallel — instant.
+ *   2. For cache misses, queue background warming via `after()` with
+ *      a per-outage NX lock so concurrent viewers don't trigger
+ *      duplicate Overpass requests. The next viewer (or a re-poll
+ *      from the same viewer ~10s later) sees the freshly cached
+ *      polygons.
+ *
+ * Empty array per ID = either no buildings nearby, no coordinates,
+ * or warming hasn't completed yet. Caller (IntreruperiMap) keeps the
+ * colored Circle as fallback and polls again to fill in late arrivals.
  *
  * Response shape:
- *   { data: { [id]: { coords: [[lat,lng],...] }[] } }
+ *   { data: { [id]: { coords: [[lat,lng],...] }[] }, warming: number }
  */
 export async function GET(req: NextRequest) {
   const ip = getClientIp(req);
@@ -36,45 +50,59 @@ export async function GET(req: NextRequest) {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean)
-    .slice(0, 30); // hard cap — viewport rarely shows more than ~20 outages
+    .slice(0, 30); // viewport rarely shows more than ~20 outages
   if (ids.length === 0) {
-    return NextResponse.json({ data: {} });
+    return NextResponse.json({ data: {}, warming: 0 });
   }
 
   const { items } = await loadInterruptions();
   const byId = new Map(items.map((i) => [i.id, i]));
 
-  // Run the building lookups in parallel. Each one resolves
-  // independently from cache (fast) or Overpass (5-10s); whichever
-  // is slowest paces the whole response. Never throws — falls back
-  // to empty array per outage.
+  // Build a target list (id + lat/lng/radius) for the IDs that have
+  // coordinates. Skip outages without coords entirely — neither cache
+  // nor warming applies.
+  const targets: WarmTarget[] = [];
+  for (const id of ids) {
+    const item = byId.get(id);
+    if (!item || item.lat == null || item.lng == null) continue;
+    const population = item.affectedPopulation ?? item.addresses.length * 200;
+    // Same radius formula as IntreruperiMap.tsx so the polygon set
+    // matches the colored circle exactly.
+    const radiusM = Math.max(
+      200,
+      Math.min(2500, Math.round(150 * Math.sqrt(population / 1000))),
+    );
+    targets.push({ id, lat: item.lat, lng: item.lng, radiusM });
+  }
+
+  // Phase 1 — parallel cache reads. Each is one Redis GET; ~30 total
+  // settles in well under 1s.
   const out: Record<string, BuildingPolygon[]> = {};
-  const results = await Promise.all(
-    ids.map(async (id) => {
-      const item = byId.get(id);
-      if (!item || item.lat == null || item.lng == null)
-        return [id, [] as BuildingPolygon[]] as const;
-      const population = item.affectedPopulation ?? item.addresses.length * 200;
-      // Same radius formula as IntreruperiMap.tsx so the polygon set
-      // matches the colored circle exactly.
-      const radiusM = Math.max(
-        200,
-        Math.min(2500, Math.round(150 * Math.sqrt(population / 1000))),
-      );
-      const buildings = await getBuildingsForOutage(id, item.lat, item.lng, radiusM);
-      return [id, buildings] as const;
+  await Promise.all(
+    targets.map(async (t) => {
+      const cached = await getCachedBuildings(t.id);
+      out[t.id] = cached ?? [];
     }),
   );
-  for (const [id, b] of results) out[id] = b;
+
+  // Phase 2 — fire background warming for cache misses. NX locks
+  // inside warmBuildingsBackground dedupe across concurrent viewers,
+  // so we can safely fire this on every request without overloading
+  // Overpass. Runs after the response is sent → no API latency cost.
+  const cold = targets.filter((t) => out[t.id]!.length === 0);
+  if (cold.length > 0) {
+    after(async () => {
+      await warmBuildingsBackground(cold);
+    });
+  }
 
   return NextResponse.json(
-    { data: out },
+    { data: out, warming: cold.length },
     {
       headers: {
-        // Caller is the browser via /intreruperi map; CDN-cache for
-        // 1h since buildings essentially don't change. SWR another
-        // 23h matches the Redis TTL.
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=82800",
+        // Short CDN cache so polling reflects newly-warmed buildings
+        // within ~30s. Long SWR matches the underlying Redis 24h TTL.
+        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=82800",
       },
     },
   );

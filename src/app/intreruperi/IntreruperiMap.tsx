@@ -109,10 +109,15 @@ function FitBounds({ items, me }: { items: Interruption[]; me: [number, number] 
 
 /**
  * Fetches OSM building polygons for the visible outages and caches them
- * in component state. Buildings come from /api/intreruperi/buildings
- * which itself caches in Redis for 24h, so this is cheap on repeat
- * views. Renders incrementally — outages that load early get their
- * blocks painted while the rest are still in-flight.
+ * in component state. The API is fast: it returns whatever's cached
+ * in Redis and queues background warming via `after()` for misses,
+ * with per-outage NX locks so concurrent viewers don't duplicate
+ * Overpass calls.
+ *
+ * To pick up freshly-warmed polygons we re-poll for the still-missing
+ * IDs every 8s, up to 5 attempts (~40s total). At 1.5s per Overpass
+ * call that covers ~25 outages — enough for any viewport. Polling
+ * stops as soon as every visible outage has buildings.
  */
 function useOutageBuildings(outageIds: string[]): Record<string, BuildingPolygonShape[]> {
   const [buildings, setBuildings] = useState<Record<string, BuildingPolygonShape[]>>({});
@@ -121,33 +126,76 @@ function useOutageBuildings(outageIds: string[]): Record<string, BuildingPolygon
   useEffect(() => {
     if (!idsKey) return;
     let cancelled = false;
-    // Fetch in batches of 10 so the first ones paint quickly while
-    // the tail of the queue is still computing on the server. The
-    // API rate-limits at 60/min/IP which leaves plenty of headroom.
-    const ids = idsKey.split(",");
-    const batches: string[][] = [];
-    for (let i = 0; i < ids.length; i += 10) {
-      batches.push(ids.slice(i, i + 10));
-    }
-    (async () => {
-      for (const batch of batches) {
-        if (cancelled) return;
+    const allIds = idsKey.split(",");
+
+    /** Hits /api/intreruperi/buildings for the given IDs in batches of
+     *  10 (matches the API's hard cap of 30 per call comfortably).
+     *  Returns the merged result so the caller can decide whether to
+     *  poll again. */
+    async function fetchBuildings(
+      ids: string[],
+    ): Promise<Record<string, BuildingPolygonShape[]>> {
+      const merged: Record<string, BuildingPolygonShape[]> = {};
+      for (let i = 0; i < ids.length; i += 10) {
+        if (cancelled) return merged;
+        const batch = ids.slice(i, i + 10);
         try {
           const res = await fetch(
             `/api/intreruperi/buildings?ids=${encodeURIComponent(batch.join(","))}`,
-            { signal: AbortSignal.timeout(30_000) },
+            { signal: AbortSignal.timeout(15_000) },
           );
           if (!res.ok) continue;
           const json = (await res.json()) as {
             data?: Record<string, BuildingPolygonShape[]>;
           };
-          if (cancelled || !json.data) continue;
-          setBuildings((prev) => ({ ...prev, ...json.data! }));
+          if (json.data) Object.assign(merged, json.data);
         } catch {
-          // Per-batch failure is silent — Circle fallback still shows.
+          // Per-batch failure is silent — circle fallback still shows.
         }
       }
+      return merged;
+    }
+
+    (async () => {
+      // Initial fetch — cached IDs come back immediately, misses come
+      // back as []. The API has fired background warming for the
+      // misses; we'll poll for them below.
+      const initial = await fetchBuildings(allIds);
+      if (cancelled) return;
+      setBuildings((prev) => {
+        const next = { ...prev };
+        for (const [id, polys] of Object.entries(initial)) {
+          if (polys.length > 0) next[id] = polys;
+        }
+        return next;
+      });
+
+      // Poll-retry the still-missing IDs. Background warming takes
+      // ~1.5s per outage (Overpass rate gap). 5 attempts × 8s = 40s
+      // window, enough for ~25 outages to come in.
+      const MAX_ATTEMPTS = 5;
+      const POLL_MS = 8_000;
+      let missing = allIds.filter((id) => !initial[id] || initial[id].length === 0);
+      for (let attempt = 0; attempt < MAX_ATTEMPTS && missing.length > 0; attempt++) {
+        await new Promise((r) => setTimeout(r, POLL_MS));
+        if (cancelled) return;
+        const fresh = await fetchBuildings(missing);
+        if (cancelled) return;
+        const filledNow: string[] = [];
+        setBuildings((prev) => {
+          const next = { ...prev };
+          for (const [id, polys] of Object.entries(fresh)) {
+            if (polys.length > 0 && !next[id]) {
+              next[id] = polys;
+              filledNow.push(id);
+            }
+          }
+          return next;
+        });
+        missing = missing.filter((id) => !filledNow.includes(id));
+      }
     })();
+
     return () => {
       cancelled = true;
     };
