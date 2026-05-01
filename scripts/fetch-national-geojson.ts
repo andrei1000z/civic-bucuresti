@@ -88,11 +88,78 @@ async function query(overpassQL: string, name: string): Promise<unknown> {
   return null;
 }
 
-function overpassToGeoJSON(data: { elements: Array<Record<string, unknown>> }): object {
+/**
+ * Convert Overpass output to GeoJSON.
+ *
+ * `mode = "naive"` (default) emits one feature per way, and one feature
+ * per ROUTE-RELATION-MEMBER way. This is correct but explodes for bus
+ * networks: every of the ~1100 bus routes shares the same Magheru/
+ * Calea Victoriei trunk segments, so 91k features land for ~5k unique
+ * ways. Output: 50 MB+.
+ *
+ * `mode = "dedupe-relation-members"` keys by the underlying way's OSM
+ * ID and merges the parent relations' refs/names/operators into a
+ * comma-joined string. One LineString per unique road segment, listing
+ * all bus routes that traverse it — the map popup says "Linii 601,
+ * 602, 605" instead of stacking three identical line copies. Plain
+ * (non-relation) ways and standalone nodes pass through unchanged.
+ */
+function overpassToGeoJSON(
+  data: { elements: Array<Record<string, unknown>> },
+  mode: "naive" | "dedupe-relation-members" = "naive",
+): object {
   const features: object[] = [];
+
+  // Bookkeeping for the dedupe mode. wayId → {coords, refs[], names[], …}.
+  // Refs in particular get sorted naturally so "Linii 5, 32, 601" reads
+  // small-to-large — easier than the relation-iteration order.
+  const dedup = new Map<
+    number,
+    {
+      coords: Array<[number, number]>;
+      refs: Set<string>;
+      names: Set<string>;
+      operators: Set<string>;
+      networks: Set<string>;
+      colours: Set<string>;
+    }
+  >();
+
+  // Round coords to 5 decimals (~1.1m at equator). Roads barely
+  // notice the loss visually, but the JSON shrinks by ~50% because
+  // each number drops from 15+ chars to 8. Worth ~6 MB on the bus
+  // layer.
+  const roundCoord = (n: number): number => Math.round(n * 1e5) / 1e5;
+
+  function pushDedup(
+    wayId: number,
+    geometry: Array<{ lat: number; lon: number }>,
+    relTags: Record<string, string>,
+  ) {
+    let entry = dedup.get(wayId);
+    if (!entry) {
+      entry = {
+        coords: geometry.map((p) => [roundCoord(p.lon), roundCoord(p.lat)] as [number, number]),
+        refs: new Set(),
+        names: new Set(),
+        operators: new Set(),
+        networks: new Set(),
+        colours: new Set(),
+      };
+      dedup.set(wayId, entry);
+    }
+    if (relTags.ref) entry.refs.add(relTags.ref);
+    if (relTags.name) entry.names.add(relTags.name);
+    if (relTags.operator) entry.operators.add(relTags.operator);
+    if (relTags.network) entry.networks.add(relTags.network);
+    if (relTags.colour) entry.colours.add(relTags.colour);
+  }
 
   for (const el of data.elements ?? []) {
     if (el.type === "way" && Array.isArray(el.geometry)) {
+      // Standalone way (not embedded inside a relation we're processing).
+      // Always emit; dedupe mode only collapses RELATION members, not
+      // top-level ways.
       features.push({
         type: "Feature",
         properties: el.tags ?? {},
@@ -103,19 +170,23 @@ function overpassToGeoJSON(data: { elements: Array<Record<string, unknown>> }): 
       });
     } else if (el.type === "relation" && Array.isArray(el.members)) {
       // Route relations (bus / trolleybus / subway) carry their member
-      // geometry inline when queried with `out geom`. Each way-member
-      // becomes its own LineString tagged with the parent relation's
-      // ref/name/operator so the map popup can show "Linia 601" etc.
-      // Roles like "stop"/"platform"/"forward" come back as nodes —
-      // we only emit the actual line segments.
+      // geometry inline when queried with `out geom`. Roles like
+      // "stop"/"platform" come back as nodes — we only emit the
+      // running line segments. In naive mode each member becomes its
+      // own LineString tagged with the relation's tags; in dedupe
+      // mode members are folded by way id and tags are merged.
       const relTags = (el.tags as Record<string, string>) ?? {};
       for (const m of el.members as Array<Record<string, unknown>>) {
-        if (m.type === "way" && Array.isArray(m.geometry) && m.geometry.length >= 2) {
-          // Skip stops/platforms — keep only the running line.
-          const role = (m.role as string | undefined) ?? "";
-          if (role === "stop" || role === "platform" || role === "stop_entry_only" || role === "stop_exit_only") {
-            continue;
-          }
+        if (m.type !== "way" || !Array.isArray(m.geometry) || m.geometry.length < 2) continue;
+        const role = (m.role as string | undefined) ?? "";
+        if (role === "stop" || role === "platform" || role === "stop_entry_only" || role === "stop_exit_only") {
+          continue;
+        }
+        const memberWayId = typeof m.ref === "number" ? m.ref : -1;
+        const geom = m.geometry as Array<{ lat: number; lon: number }>;
+        if (mode === "dedupe-relation-members" && memberWayId > 0) {
+          pushDedup(memberWayId, geom, relTags);
+        } else {
           features.push({
             type: "Feature",
             properties: {
@@ -125,9 +196,7 @@ function overpassToGeoJSON(data: { elements: Array<Record<string, unknown>> }): 
             },
             geometry: {
               type: "LineString",
-              coordinates: (m.geometry as Array<{ lat: number; lon: number }>).map(
-                (p) => [p.lon, p.lat],
-              ),
+              coordinates: geom.map((p) => [p.lon, p.lat]),
             },
           });
         }
@@ -140,6 +209,51 @@ function overpassToGeoJSON(data: { elements: Array<Record<string, unknown>> }): 
           type: "Point",
           coordinates: [el.lon, el.lat],
         },
+      });
+    }
+  }
+
+  // Flush deduped entries — one feature per unique way, with the
+  // relation tags collapsed into joined strings. Sort numerically when
+  // refs are integers so "5, 32, 601" reads small-to-large.
+  if (mode === "dedupe-relation-members") {
+    const sortRefs = (refs: string[]): string[] => {
+      const numeric = refs.every((r) => /^\d+$/.test(r));
+      return numeric
+        ? [...refs].sort((a, b) => Number(a) - Number(b))
+        : [...refs].sort();
+    };
+    for (const [, entry] of dedup) {
+      const refsArr = sortRefs(Array.from(entry.refs));
+      const properties: Record<string, string | number> = {};
+      if (refsArr.length > 0) {
+        properties.ref = refsArr.join(", ");
+        properties.ref_count = refsArr.length;
+      }
+      // Names get aggressively trimmed because OSM bus relations stuff
+      // the full route description ("Bus 135: C.E.T. Sud Vitan →
+      // C.F.R. Constanța") into `name`. With dozens of relations
+      // sharing a downtown segment, the joined name field can blow
+      // past 1 kB per feature. We keep only the first name and only
+      // when a single ref serves the segment — multi-line segments
+      // already convey route info through the ref list.
+      if (refsArr.length === 1 && entry.names.size > 0) {
+        const first = Array.from(entry.names)[0]!;
+        properties.name = first.length > 80 ? `${first.slice(0, 77)}…` : first;
+      }
+      if (entry.operators.size === 1) {
+        properties.operator = Array.from(entry.operators)[0]!;
+      }
+      if (entry.networks.size === 1) {
+        properties.network = Array.from(entry.networks)[0]!;
+      }
+      if (entry.colours.size === 1) {
+        properties.colour = Array.from(entry.colours)[0]!;
+      }
+      features.push({
+        type: "Feature",
+        properties,
+        geometry: { type: "LineString", coordinates: entry.coords },
       });
     }
   }
@@ -161,6 +275,14 @@ interface LayerSpec {
   emoji: string;
   filename: string;
   ql: string;
+  /**
+   * When set, fold relation member ways by their OSM way id and merge
+   * the parent relations' refs/names into one feature per segment.
+   * Required for bus (~91k → ~5k features) and helpful for trolleybus
+   * (~9k → ~2k features). Subway has fewer overlaps and a small
+   * footprint so naive mode is fine.
+   */
+  mode?: "naive" | "dedupe-relation-members";
 }
 
 const LAYERS: LayerSpec[] = [
@@ -228,6 +350,7 @@ const LAYERS: LayerSpec[] = [
     label: "BUS LINES",
     emoji: "🚌",
     filename: "autobuz-romania.json",
+    mode: "dedupe-relation-members",
     ql: `
       [out:json][timeout:180];
       area["ISO3166-1"="RO"]->.ro;
@@ -240,6 +363,7 @@ const LAYERS: LayerSpec[] = [
     label: "TROLLEYBUS LINES",
     emoji: "🚎",
     filename: "troleibuz-romania.json",
+    mode: "dedupe-relation-members",
     ql: `
       [out:json][timeout:90];
       area["ISO3166-1"="RO"]->.ro;
@@ -342,6 +466,7 @@ async function main() {
     if (data) {
       const geojson = overpassToGeoJSON(
         data as { elements: Array<Record<string, unknown>> },
+        spec.mode ?? "naive",
       );
       save(geojson, spec.filename);
     }

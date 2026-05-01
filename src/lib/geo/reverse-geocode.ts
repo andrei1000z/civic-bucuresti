@@ -4,6 +4,31 @@
  * Rate limit: 1 req/sec (Nominatim policy).
  */
 
+import { ALL_COUNTIES } from "@/data/counties";
+
+/**
+ * Haversine fallback: when Nominatim confirms the point is in Romania
+ * but doesn't return a county/state field (happens for some smaller
+ * towns whose OSM record skips admin levels), pick the closest county
+ * center. The smoke test in scripts/audit-county-detect.ts caught
+ * Rădăuți as a representative case — the API returned only `city` and
+ * `country`, leaving the parser empty-handed.
+ */
+function closestCountyCode(lat: number, lng: number): string | null {
+  let best: string | null = null;
+  let bestDist = Infinity;
+  for (const c of ALL_COUNTIES) {
+    const dLat = c.center[0] - lat;
+    const dLng = c.center[1] - lng;
+    const d = dLat * dLat + dLng * dLng;
+    if (d < bestDist) {
+      bestDist = d;
+      best = c.id;
+    }
+  }
+  return best;
+}
+
 // Map Romanian county names (from Nominatim) to our 2-letter codes
 const COUNTY_NAME_TO_CODE: Record<string, string> = {
   "alba": "AB", "arad": "AR", "argeș": "AG", "arges": "AG",
@@ -114,6 +139,17 @@ export async function reverseGeocode(lat: number, lng: number): Promise<Geocoded
         /bucure[șs]ti|bucharest/i.test(addr.city || "") ||
         /bucure[șs]ti|bucharest/i.test(displayName);
       if (looksLikeBucharest) countyCode = "B";
+    }
+
+    // Last-ditch Haversine fallback: when Nominatim confirms Romania
+    // (country_code === "ro") but stripped all admin levels — happens
+    // for some smaller towns whose OSM record only has city/road/
+    // postcode (Rădăuți was the canonical example). Pick the closest
+    // county center. The country_code guard avoids accidentally
+    // labeling Moldovan or Ukrainian border points as a Romanian
+    // county.
+    if (!countyCode && (addr.country_code ?? "").toLowerCase() === "ro") {
+      countyCode = closestCountyCode(lat, lng);
     }
 
     const countyName = addr.county || addr.state || addr.state_district || null;

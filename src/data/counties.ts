@@ -32,7 +32,7 @@ export const ALL_COUNTIES: readonly County[] = [
   { id: "HD", name: "Hunedoara", slug: "hd", center: [45.75, 22.90], population: 371033 },
   { id: "IL", name: "Ialomița", slug: "il", center: [44.57, 26.80], population: 244280 },
   { id: "IS", name: "Iași", slug: "is", center: [47.16, 27.60], population: 760774 },
-  { id: "IF", name: "Ilfov", slug: "if", center: [44.47, 26.08], population: 472751 },
+  { id: "IF", name: "Ilfov", slug: "if", center: [44.49, 26.18], population: 472751 },
   { id: "MM", name: "Maramureș", slug: "mm", center: [47.66, 24.00], population: 430790 },
   { id: "MH", name: "Mehedinți", slug: "mh", center: [44.63, 22.66], population: 228384 },
   { id: "MS", name: "Mureș", slug: "ms", center: [46.55, 24.56], population: 525671 },
