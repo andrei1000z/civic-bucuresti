@@ -108,7 +108,10 @@ export async function getBuildingsForOutage(
   if (analyticsRedis) {
     try {
       const cached = await analyticsRedis.get<BuildingPolygon[]>(key);
-      if (cached && Array.isArray(cached)) return cached;
+      // Cache hit ONLY when we have actual buildings stored. We never
+      // cache empty results (see below) — so an empty hit means we
+      // forgot to retry, and the freshness loop kicks in instead.
+      if (cached && Array.isArray(cached) && cached.length > 0) return cached;
     } catch {
       // Redis hiccup — fall through to fresh query.
     }
@@ -119,6 +122,11 @@ export async function getBuildingsForOutage(
       // 24h TTL — buildings are nearly static. If a building is
       // demolished mid-day, the next user 24h later picks up the
       // change. Worth the rare staleness for the cache hit rate.
+      // Empty results are NOT cached — Overpass timeouts / rate
+      // limits would otherwise lock in a "no buildings" answer for
+      // 24h and the user would never see the polygons. Without a
+      // cache, the next viewer pays the Overpass cost, which is the
+      // right tradeoff (rare path).
       await analyticsRedis.set(key, fresh, { ex: 24 * 60 * 60 });
     } catch {
       // Cache write failure is silent — the result is still returned.
