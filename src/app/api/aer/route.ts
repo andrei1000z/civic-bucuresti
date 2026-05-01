@@ -7,6 +7,7 @@ import { fetchUradMonitor } from "./sources/uradmonitor";
 import type { UnifiedSensor, AirDataResponse } from "@/lib/aer/types";
 import { DEDUP_RADIUS_M } from "@/lib/aer/constants";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
+import { isInsideRomania, preloadRomaniaPolygon } from "@/lib/aer/romania-polygon";
 
 // 60s ISR cache. Sensor.Community + uRADMonitor update every ~1 min;
 // OpenAQ + WAQI are pulled hourly upstream but their endpoints are
@@ -101,14 +102,19 @@ export async function GET(req: Request) {
 
   // Fetch all sources in parallel — don't fail if one is down. Each
   // pull is timeout-bounded inside its own module so a slow third
-  // party doesn't pin the whole route.
+  // party doesn't pin the whole route. Romania polygon is preloaded
+  // here so the first per-sensor membership check is a sync cache hit.
   const results = await Promise.allSettled([
     fetchSensorCommunity(),
     fetchSensorCommunityV2(),
     fetchOpenAQ(),
     fetchWaqi(),
     fetchUradMonitor(),
+    preloadRomaniaPolygon().then(() => [] as UnifiedSensor[]),
   ]);
+  // The preload result is intentionally a no-op array — strip it
+  // before the source-name mapping so it doesn't pollute bySource.
+  results.pop();
 
   const allSensors: UnifiedSensor[] = [];
   const bySource: Record<string, number> = {};
@@ -141,8 +147,20 @@ export async function GET(req: Request) {
   const plausible = allSensors.filter(isPlausible);
   const droppedOutliers = allSensors.length - plausible.length;
 
+  // Strict Romania boundary filter. WAQI returns the entire bbox
+  // (which includes Belgrade, Sofia, Chișinău, Subotica and much of
+  // southern Hungary) and even Sensor.Community sometimes includes a
+  // sensor on a Romanian-registered owner's account that lives
+  // physically across the border. Point-in-polygon here so the map
+  // shows only Romania.
+  const insideRo: UnifiedSensor[] = [];
+  for (const s of plausible) {
+    if (await isInsideRomania(s.lat, s.lng)) insideRo.push(s);
+  }
+  const droppedOutsideRo = plausible.length - insideRo.length;
+
   // Deduplicate
-  const deduplicated = dedup(plausible);
+  const deduplicated = dedup(insideRo);
 
   // Calculate average AQI
   const aqiValues = deduplicated.map((s) => s.aqi).filter((v): v is number => v != null);
@@ -163,6 +181,7 @@ export async function GET(req: Request) {
       "Cache-Control": "public, s-maxage=60, stale-while-revalidate=60",
       "X-Fetch-Time": `${Date.now() - startTime}ms`,
       "X-Outliers-Dropped": String(droppedOutliers),
+      "X-Outside-Ro-Dropped": String(droppedOutsideRo),
       ...(errors.length > 0 ? { "X-Errors": errors.join("; ") } : {}),
     },
   });

@@ -37,11 +37,29 @@ const RO_BOUNDS: [[number, number], [number, number]] = [
   [RO_LAT_N, RO_LNG_E],
 ];
 
+/**
+ * One cell from /api/aer/grid — used as a low-resolution "always
+ * colored" backstop for regions where no sensor is within
+ * `COVERAGE_RADIUS_KM`. Without this, sparse-coverage regions
+ * (Bărăgan, Dobrogea-east, mountain interior) stay transparent and
+ * the country looks half-painted.
+ */
+export interface EstimationCell {
+  lat: number;
+  lng: number;
+  aqi: number;
+  confidence: number;
+}
+
 interface Props {
   sensors: UnifiedSensor[];
   /** Optional county-level clipping box. When set, the heatmap is
    *  rendered for ONLY this rectangle (border ring is ignored). */
   clipBounds?: [[number, number], [number, number]];
+  /** Optional AI-augmented estimation grid (whole-country coverage).
+   *  Used as fallback for cells with no real sensor in range so the
+   *  map paints the entire country instead of leaving big gaps. */
+  estimationCells?: EstimationCell[];
 }
 
 function pointInRing(lat: number, lng: number, ring: number[][]): boolean {
@@ -108,7 +126,33 @@ function hexToRgb(hex: string): [number, number, number] {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-export function AirHeatGrid({ sensors, clipBounds }: Props) {
+/**
+ * Nearest-neighbor lookup against the AI estimation grid. Cheap O(N)
+ * scan — N is ≈400 cells, called per pixel that misses real-sensor
+ * coverage. Cells are sparse enough that a kd-tree would be overkill
+ * vs. the JavaScript object overhead.
+ */
+function nearestEstimationAqi(
+  lat: number,
+  lng: number,
+  cells: EstimationCell[],
+): number | null {
+  if (cells.length === 0) return null;
+  let bestDist = Infinity;
+  let bestAqi = 0;
+  for (const c of cells) {
+    const dLat = lat - c.lat;
+    const dLng = lng - c.lng;
+    const d = dLat * dLat + dLng * dLng; // squared deg, OK for ranking
+    if (d < bestDist) {
+      bestDist = d;
+      bestAqi = c.aqi;
+    }
+  }
+  return bestAqi;
+}
+
+export function AirHeatGrid({ sensors, clipBounds, estimationCells }: Props) {
   const [border, setBorder] = useState<number[][] | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
@@ -197,10 +241,19 @@ export function AirHeatGrid({ sensors, clipBounds }: Props) {
           // clip to the bounding rectangle (every cell is inside).
           if (!clipBounds && border && !pointInRing(lat, lng, border)) continue;
 
-          const aqi = idw(lat, lng, valid);
-          // No sensor within COVERAGE_RADIUS_KM → leave this cell
-          // transparent. Honest map: no data ≠ "good".
-          if (aqi == null) continue;
+          let aqi = idw(lat, lng, valid);
+          let alpha = 160;
+          // No sensor within COVERAGE_RADIUS_KM → fall back to the
+          // AI estimation grid (covers the whole country) so the map
+          // paints uniformly. Lower alpha for estimated cells signals
+          // "less certain" without being invisible.
+          if (aqi == null) {
+            if (!estimationCells || estimationCells.length === 0) continue;
+            const est = nearestEstimationAqi(lat, lng, estimationCells);
+            if (est == null) continue;
+            aqi = est;
+            alpha = 110;
+          }
 
           mask[r * GRID + col] = 1;
           const color = hexToRgb(getAqiColor(aqi));
@@ -208,9 +261,7 @@ export function AirHeatGrid({ sensors, clipBounds }: Props) {
           data[idx] = color[0];
           data[idx + 1] = color[1];
           data[idx + 2] = color[2];
-          // Slightly higher alpha (160) so hotspots read clearly without
-          // hiding the underlying map texture.
-          data[idx + 3] = 160;
+          data[idx + 3] = alpha;
         }
       }
       row = rowEnd;
@@ -227,7 +278,7 @@ export function AirHeatGrid({ sensors, clipBounds }: Props) {
       cancelled = true;
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [sensors, border, clipBounds]);
+  }, [sensors, border, clipBounds, estimationCells]);
 
   if (!imageUrl) return null;
 

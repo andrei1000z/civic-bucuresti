@@ -7,7 +7,7 @@ import { RefreshCw, Layers, Navigation, X, Flame } from "lucide-react";
 import type { UnifiedSensor, AirDataResponse } from "@/lib/aer/types";
 import { getAqiColor, getAqiLevel, AQI_LEVELS } from "@/lib/aer/colors";
 import { RO_CENTER, DEFAULT_ZOOM, REFRESH_INTERVAL } from "@/lib/aer/constants";
-import { AirHeatGrid } from "./AirHeatGrid";
+import { AirHeatGrid, type EstimationCell } from "./AirHeatGrid";
 
 interface FireDetection {
   id: string;
@@ -79,12 +79,18 @@ export default function AirQualityMap({
   // visible on iqair.com/romania. Loaded in parallel with sensors.
   const [fires, setFires] = useState<FireDetection[]>([]);
   const [showFires, setShowFires] = useState(true);
+  // AI-augmented estimation grid covering all of Romania (≈400 cells
+  // at 0.25°). Fed to AirHeatGrid as a fallback so regions with no
+  // real sensor in range still get a reasonable color instead of
+  // staying transparent.
+  const [estimationCells, setEstimationCells] = useState<EstimationCell[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
-      const [aerRes, firesRes] = await Promise.all([
+      const [aerRes, firesRes, gridRes] = await Promise.all([
         fetch("/api/aer"),
         fetch("/api/aer/fires").catch(() => null),
+        fetch("/api/aer/grid").catch(() => null),
       ]);
       if (aerRes.ok) {
         const data = (await aerRes.json()) as AirDataResponse;
@@ -95,6 +101,10 @@ export default function AirQualityMap({
       if (firesRes && firesRes.ok) {
         const fdata = (await firesRes.json()) as FiresResponse;
         setFires(fdata.fires);
+      }
+      if (gridRes && gridRes.ok) {
+        const gdata = (await gridRes.json()) as { cells: EstimationCell[] };
+        setEstimationCells(gdata.cells);
       }
     } catch {
       // network — keep stale data visible, next tick will retry
@@ -170,9 +180,16 @@ export default function AirQualityMap({
           />
           <FlyToLocation target={flyTarget} />
 
-          {/* Heatmap grid layer (below markers) */}
+          {/* Heatmap grid layer (below markers). Sensor IDW for
+              high-resolution accuracy where coverage is dense; the
+              estimation grid fills the gaps so the whole country
+              gets colored instead of leaving big transparent
+              regions. */}
           {showHeatmap && filteredSensors.length > 0 && (
-            <AirHeatGrid sensors={filteredSensors} />
+            <AirHeatGrid
+              sensors={filteredSensors}
+              estimationCells={estimationCells}
+            />
           )}
 
           {/* Station markers (on top of heatmap) */}
