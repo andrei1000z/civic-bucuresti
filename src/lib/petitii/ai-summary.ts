@@ -24,11 +24,17 @@ CORECTITUDINE GRAMATICALĂ — OBLIGATORIE:
 - Cifrele cu separatorul corect românesc (80.000 nu 80,000).
 - Numele proprii și instituțiile cu majusculă: „Primăria Capitalei", „Curtea Constituțională".
 
-STRUCTURĂ — RESPECTĂ EXACT:
-1. Secțiunea „Pe scurt:" — 1–2 propoziții cu esența cererii și beneficiarul. NU repeta titlul cuvânt cu cuvânt.
-2. Secțiunea „Ce cere petiția:" — listă de bullet-uri cu „- ", una cerere per bullet, fiecare începând cu majusculă.
-3. Secțiunea „De ce contează:" — 2–3 propoziții cu impactul concret asupra cetățenilor.
-4. Fiecare titlu de secțiune e pe linie separată, terminat cu „:".
+STRUCTURĂ — RESPECTĂ EXACT (fiecare titlu pe linie separată terminat cu „:")
+
+1. „Pe scurt:" — 2–3 propoziții cu esența cererii și beneficiarul. NU repeta titlul cuvânt cu cuvânt.
+
+2. „Ce cere petiția:" — listă de 3–6 bullet-uri cu „- ", una cerere per bullet, fiecare începând cu majusculă. Fiecare bullet e auto-suficient și conține un verb la imperativ („Adoptarea…", „Modificarea…", „Stoparea…").
+
+3. „Cifre & date cheie:" — listă de 2–5 bullet-uri cu „- " conținând cifre concrete, termene, articole de lege, instituții implicate, geografie (toate pe **bold**). Omite secțiunea complet dacă petiția nu menționează cifre concrete; nu inventa.
+
+4. „Context:" — 2–3 propoziții cu fundalul (ce s-a întâmplat înainte, ce lege e implicată, cine sunt actorii). Cititorul trebuie să înțeleagă subiectul fără să fi urmărit știri pe tema respectivă.
+
+5. „De ce contează:" — 2–3 propoziții despre impactul concret pentru cetățeni (cine e afectat, cum, când). Obligatorie.
 
 FORMATARE:
 - Prima literă din fiecare paragraf, bullet și secțiune E ÎNTOTDEAUNA majusculă.
@@ -37,10 +43,10 @@ FORMATARE:
 
 INTERZIS:
 - NU inventa fapte, cifre sau termene care nu sunt în textul sursă.
-- Dacă o secțiune nu poate fi compusă din text, omite-o complet.
+- Dacă o secțiune nu poate fi compusă din text (în special „Cifre & date cheie"), omite-o complet.
 - NU folosi emoji-uri sau adjective evaluative.
 
-LUNGIME: 200–340 cuvinte total.`;
+LUNGIME: 250–380 cuvinte total — un brief structurat, nu un rezumat scurt.`;
 
 const inFlight = new Map<string, Promise<string | null>>();
 
@@ -97,7 +103,9 @@ async function generate(
         },
       ],
       temperature: 0.2,
-      max_tokens: 900,
+      // Wider budget so the 5-section brief lands inside the
+      // 250–380 word target without truncation.
+      max_tokens: 1200,
     });
 
     const raw = completion.choices[0]?.message?.content?.trim() ?? "";

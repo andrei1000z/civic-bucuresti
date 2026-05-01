@@ -4,10 +4,34 @@ import { notFound } from "next/navigation";
 import { getCountyBySlug } from "@/data/counties";
 import { FileText, Eye, CheckCircle2, BookOpen } from "lucide-react";
 import { SesizareForm } from "@/components/sesizari/SesizareForm";
+import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import {
   CountyPageHero,
   COUNTY_HERO_GRADIENT,
 } from "@/components/county/CountyPageHero";
+
+/**
+ * Same probe as /sesizari/page.tsx — the "Rezolvate" entry-point card
+ * appears only when at least one approved public sesizare in the
+ * gallery has both `status='rezolvat'` and a `resolved_photo_url`.
+ * Kept county-agnostic for now (a shared "anything in Romania has been
+ * resolved with a photo" signal is enough to surface the gallery link).
+ */
+async function hasAnyResolvedWithPhoto(): Promise<boolean> {
+  try {
+    const admin = createSupabaseAdmin();
+    const { count } = await admin
+      .from("sesizari")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "rezolvat")
+      .eq("publica", true)
+      .eq("moderation_status", "approved")
+      .not("resolved_photo_url", "is", null);
+    return (count ?? 0) > 0;
+  } catch {
+    return false;
+  }
+}
 
 export async function generateMetadata({
   params,
@@ -33,6 +57,8 @@ export default async function SesizariPage({
   const county = getCountyBySlug(judet);
   if (!county) notFound();
 
+  const showDovezi = await hasAnyResolvedWithPhoto();
+
   const quickLinks = [
     {
       href: "/sesizari-publice",
@@ -48,13 +74,17 @@ export default async function SesizariPage({
       hint: "Verifică statusul cu codul tău",
       accent: "#F59E0B",
     },
-    {
-      href: "/sesizari-rezolvate",
-      icon: CheckCircle2,
-      label: "Rezolvate",
-      hint: "Galerie before & after",
-      accent: "#059669",
-    },
+    ...(showDovezi
+      ? [
+          {
+            href: "/sesizari-rezolvate",
+            icon: CheckCircle2,
+            label: "Rezolvate",
+            hint: "Galerie before & after",
+            accent: "#059669",
+          } as const,
+        ]
+      : []),
     {
       href: "/ghiduri/ghid-sesizari",
       icon: BookOpen,
@@ -83,8 +113,15 @@ export default async function SesizariPage({
         tagline="OG 27/2002 — autoritățile au obligația să răspundă în max 30 de zile calendaristice."
       />
 
-      {/* Quick links */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
+      {/* Quick links — column count tracks the visible-link count so a
+          missing "Rezolvate" entry doesn't leave a stretched 4th cell. */}
+      <div
+        className={
+          quickLinks.length === 4
+            ? "grid grid-cols-2 lg:grid-cols-4 gap-3 mb-10"
+            : "grid grid-cols-2 lg:grid-cols-3 gap-3 mb-10"
+        }
+      >
         {quickLinks.map((link) => {
           const Icon = link.icon;
           return (

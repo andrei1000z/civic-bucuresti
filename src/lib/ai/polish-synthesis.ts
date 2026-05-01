@@ -22,6 +22,7 @@ const SECTION_TITLES_NEED_COLON = [
   "Ce cere petiția",
   "De ce contează",
   "Cifre cheie",
+  "Cifre & date cheie",
   "Context",
   "Ce urmează",
   "Programul",

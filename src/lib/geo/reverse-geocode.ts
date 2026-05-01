@@ -75,22 +75,48 @@ export async function reverseGeocode(lat: number, lng: number): Promise<Geocoded
     const addr = data.address ?? {};
     const displayName = (data.display_name ?? "") as string;
 
-    // Extract county — try multiple Nominatim fields
-    // Nominatim returns "county" for most areas, "state" for București
-    const countyRaw = (addr.county || "").toLowerCase().trim();
-    const stateRaw = (addr.state || "").toLowerCase().trim();
-    // Try county first, then state, also handle "municipiul bucurești"
+    // Strip Romanian admin prefixes Nominatim sometimes adds in front
+    // of the actual county name. We've seen all of these in the wild
+    // depending on the underlying OSM tagging:
+    //   "Județul Cluj", "Judet Brașov", "județ Argeș"
+    //   "Municipiul București", "Municipiul Cluj-Napoca"
+    //   "Regiunea de Dezvoltare Nord-Est"  (national region — unhelpful)
+    const stripAdminPrefix = (raw: string): string =>
+      raw
+        .toLowerCase()
+        .trim()
+        .replace(/^jude[țt](?:ul)?\s+/i, "")
+        .replace(/^municipiul\s+/i, "")
+        .replace(/^regiunea(?:\s+de\s+dezvoltare)?\s+/i, "")
+        .trim();
+
+    const countyRaw = stripAdminPrefix(addr.county || "");
+    const stateRaw = stripAdminPrefix(addr.state || "");
+    // Newer Nominatim builds expose `region` for the dev-region tier;
+    // we ignore that one but keep `state_district` as a useful fallback
+    // for sub-state divisions like "Sector 1" → "București".
+    const stateDistrictRaw = stripAdminPrefix(addr.state_district || "");
+
     let countyCode = COUNTY_NAME_TO_CODE[countyRaw]
       ?? COUNTY_NAME_TO_CODE[stateRaw]
-      ?? COUNTY_NAME_TO_CODE[stateRaw.replace("municipiul ", "")]
+      ?? COUNTY_NAME_TO_CODE[stateDistrictRaw]
       ?? null;
 
-    // Fallback: if display_name contains "București", it's B
-    if (!countyCode && displayName.toLowerCase().includes("bucurești")) {
-      countyCode = "B";
+    // Bucharest-specific fallbacks: Nominatim returns the sector name
+    // ("Sector 1") in `addr.county` for Bucharest streets, with the
+    // city field as "București"/"Bucharest". When neither field maps
+    // directly, infer from display_name or addr.city.
+    if (!countyCode) {
+      const looksLikeBucharest =
+        /sector\s*\d/i.test(addr.county || "") ||
+        /sector\s*\d/i.test(addr.city_district || "") ||
+        /sector\s*\d/i.test(addr.suburb || "") ||
+        /bucure[șs]ti|bucharest/i.test(addr.city || "") ||
+        /bucure[șs]ti|bucharest/i.test(displayName);
+      if (looksLikeBucharest) countyCode = "B";
     }
 
-    const countyName = addr.county || addr.state || null;
+    const countyName = addr.county || addr.state || addr.state_district || null;
 
     // Extract locality
     const locality = addr.city || addr.town || addr.village || addr.municipality || null;

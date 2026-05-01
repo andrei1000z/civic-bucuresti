@@ -115,7 +115,7 @@ export function UrmarireSesizare() {
           </button>
         </div>
         <p id="urm-hint" className="text-[11px] text-[var(--color-text-muted)] mt-2">
-          Codul e cifric (ex: <span className="font-mono">00007</span>). E case-insensitive.
+          Codul e cifric (ex: <span className="font-mono">00007</span>).
         </p>
         {error && (
           <div

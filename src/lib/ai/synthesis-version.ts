@@ -14,5 +14,9 @@
  *       „De ce contează") + 250–380 word target. Petitii prompt
  *       unchanged (already structured). Old 2-line stiri summaries
  *       regenerate on next visit.
+ *   4 — petitii prompt expanded to a five-section brief matching the
+ *       stiri standard: „Pe scurt", „Ce cere petiția", „Cifre & date
+ *       cheie", „Context", „De ce contează" + 250–380 word target.
+ *       Old 3-section petitii summaries regenerate on next visit.
  */
-export const AI_SUMMARY_VERSION = 3;
+export const AI_SUMMARY_VERSION = 4;

@@ -167,7 +167,34 @@ export async function getComments(sesizareId: string): Promise<SesizareCommentRo
     .eq("sesizare_id", sesizareId)
     .order("created_at", { ascending: true });
   if (error) throw error;
-  return (data ?? []) as SesizareCommentRow[];
+  const rows = (data ?? []) as SesizareCommentRow[];
+  return anonymizeHiddenComments(rows);
+}
+
+/**
+ * Mirror of `anonymizeHiddenAuthors` for comments. The hide-name flag
+ * is per-user (Redis SET membership), so a user who opted in expects
+ * their name redacted everywhere their handle would surface — comments
+ * included. Owner of the comment and admins still see the real name.
+ */
+async function anonymizeHiddenComments(
+  rows: SesizareCommentRow[],
+): Promise<SesizareCommentRow[]> {
+  if (rows.length === 0) return rows;
+  const { viewerId, isAdmin } = await getViewerContext();
+  if (isAdmin) return rows;
+
+  const userIds = Array.from(
+    new Set(rows.map((r) => r.user_id).filter((v): v is string => !!v)),
+  );
+  const hidden = userIds.length > 0 ? await getHiddenUserIds(userIds) : new Set<string>();
+
+  return rows.map((r) => {
+    const isOwner = !!r.user_id && r.user_id === viewerId;
+    if (isOwner) return r;
+    if (!r.user_id || !hidden.has(r.user_id)) return r;
+    return { ...r, author_name: ANONYMOUS_LABEL };
+  });
 }
 
 export interface CreateSesizareInput {

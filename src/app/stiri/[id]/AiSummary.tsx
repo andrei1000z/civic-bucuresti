@@ -201,7 +201,7 @@ export function AiSummary({ initialSummary, fallbackText, synthesizeUrl }: AiSum
     // shape on a single line gets matched as a heading and the WHOLE
     // sentence renders violet — exactly the "everything is purple" bug.
     const HEADING_RE =
-      /^\*?\*?(Pe scurt|De ce contează|Context|Cifre cheie|Ce urmează|Programul|Detalii|Ce cere petiția)\*?\*?\s*:?\s*(.*)$/i;
+      /^\*?\*?(Pe scurt|De ce contează|Context|Cifre cheie|Cifre & date cheie|Ce urmează|Programul|Detalii|Ce cere petiția)\*?\*?\s*:?\s*(.*)$/i;
     const m = line.match(HEADING_RE);
     if (m) {
       const label = m[1] ?? "";

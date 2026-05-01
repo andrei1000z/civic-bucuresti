@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Eye, Search, CheckCircle2, Send, Sparkles, Scale } from "lucide-react";
 import { SesizareForm } from "@/components/sesizari/SesizareForm";
+import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
 export const metadata: Metadata = {
   title: "Sesizări — Civia",
@@ -10,10 +11,21 @@ export const metadata: Metadata = {
   alternates: { canonical: "/sesizari" },
 };
 
-// Pure form shell — content e static. ISR 24h e suficient.
+// Pure form shell — content e mostly static. ISR 24h is enough; the
+// "Dovezi că funcționează" probe below is checked at revalidate time
+// so the link surfaces automatically the day after the first resolved
+// sesizare with an after-photo lands.
 export const revalidate = 86400;
 
-const QUICK_LINKS = [
+interface QuickLink {
+  href: string;
+  icon: typeof Eye;
+  title: string;
+  desc: string;
+  accent: string;
+}
+
+const STATIC_QUICK_LINKS: readonly QuickLink[] = [
   {
     href: "/sesizari-publice",
     icon: Eye,
@@ -28,16 +40,45 @@ const QUICK_LINKS = [
     desc: "Verifică statusul cu codul primit",
     accent: "#F59E0B",
   },
-  {
-    href: "/sesizari-rezolvate",
-    icon: CheckCircle2,
-    title: "Dovezi că funcționează",
-    desc: `Galerie „înainte / după"`,
-    accent: "#10B981",
-  },
 ] as const;
 
-export default function SesizariPage() {
+const DOVEZI_LINK: QuickLink = {
+  href: "/sesizari-rezolvate",
+  icon: CheckCircle2,
+  title: "Dovezi că funcționează",
+  desc: `Galerie „înainte / după"`,
+  accent: "#10B981",
+};
+
+/**
+ * Returns true once at least one approved public sesizare has both a
+ * resolved status AND an after-photo. The /sesizari-rezolvate gallery
+ * is built from this exact intersection — surfacing the entry-point
+ * card before that first row exists ships users to an empty page.
+ */
+async function hasAnyResolvedWithPhoto(): Promise<boolean> {
+  try {
+    const admin = createSupabaseAdmin();
+    const { count } = await admin
+      .from("sesizari")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "rezolvat")
+      .eq("publica", true)
+      .eq("moderation_status", "approved")
+      .not("resolved_photo_url", "is", null);
+    return (count ?? 0) > 0;
+  } catch {
+    // Conservative on failure: assume there's nothing to show, so the
+    // user doesn't land on an empty gallery from a broken probe.
+    return false;
+  }
+}
+
+export default async function SesizariPage() {
+  const showDovezi = await hasAnyResolvedWithPhoto();
+  const QUICK_LINKS: readonly QuickLink[] = showDovezi
+    ? [...STATIC_QUICK_LINKS, DOVEZI_LINK]
+    : STATIC_QUICK_LINKS;
   return (
     <div className="container-narrow py-8 md:py-12">
       {/* Hero header — same gradient pattern used across /admin, /cont,
@@ -68,8 +109,18 @@ export default function SesizariPage() {
         </div>
       </header>
 
-      {/* Quick links — colored accent ring + icon chip per item */}
-      <div className="grid sm:grid-cols-3 gap-3 mb-8">
+      {/* Quick links — colored accent ring + icon chip per item.
+          Grid scales to the link count so two cards don't stretch
+          weirdly when the "Dovezi" entry is hidden pending the first
+          resolved-with-photo sesizare. Class names are listed as
+          literals so Tailwind's JIT picks them up. */}
+      <div
+        className={
+          QUICK_LINKS.length === 3
+            ? "grid sm:grid-cols-3 gap-3 mb-8"
+            : "grid sm:grid-cols-2 gap-3 mb-8"
+        }
+      >
         {QUICK_LINKS.map((q) => {
           const Icon = q.icon;
           return (

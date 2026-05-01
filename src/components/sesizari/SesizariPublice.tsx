@@ -9,7 +9,8 @@ import dynamic from "next/dynamic";
 import { ShareButton } from "./ShareButton";
 
 const SesizariMap = dynamic(() => import("@/components/maps/SesizariMap").then((m) => m.SesizariMap), { ssr: false });
-import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI, SECTOARE } from "@/lib/constants";
+import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
+import { ALL_COUNTIES } from "@/data/counties";
 import { timeAgo, cn } from "@/lib/utils";
 import { stripForPreview } from "@/lib/privacy";
 import { Badge } from "@/components/ui/Badge";
@@ -35,8 +36,11 @@ export function SesizariPublice() {
   const [filterStatus, setFilterStatus] = useState<string>(
     () => searchParams.get("status") || "toate",
   );
-  const [filterSector, setFilterSector] = useState<string>(
-    () => searchParams.get("sector") || "toate",
+  // County filter — only meaningful on the national /sesizari surface;
+  // when scoped to /[judet]/sesizari useCountyOptional() pins the
+  // county and we hide the dropdown entirely.
+  const [filterCounty, setFilterCounty] = useState<string>(
+    () => searchParams.get("judet") || "toate",
   );
   const [sort, setSort] = useState<SortKey>(
     () => (searchParams.get("sort") === "votate" ? "votate" : "recent"),
@@ -54,12 +58,12 @@ export function SesizariPublice() {
     const params = new URLSearchParams();
     if (filterTip !== "toate") params.set("tip", filterTip);
     if (filterStatus !== "toate") params.set("status", filterStatus);
-    if (filterSector !== "toate") params.set("sector", filterSector);
+    if (filterCounty !== "toate" && !county) params.set("judet", filterCounty);
     if (sort !== "recent") params.set("sort", sort);
     if (view !== "list") params.set("view", view);
     const qs = params.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [filterTip, filterStatus, filterSector, sort, view, router, pathname]);
+  }, [filterTip, filterStatus, filterCounty, sort, view, router, pathname, county]);
 
   const copyUrl = async () => {
     try {
@@ -69,8 +73,13 @@ export function SesizariPublice() {
     } catch { /* ignore */ }
   };
 
+  // Resolved county filter: route-scoped county wins, otherwise the
+  // dropdown selection. When neither is set the API receives no county
+  // and returns the full national feed.
+  const effectiveCounty = county?.id ?? (filterCounty !== "toate" ? filterCounty : null);
+
   // "loading" is derived: true when last-fetched key differs from current filter key
-  const fetchKey = `${filterTip}|${filterStatus}|${filterSector}|${sort}|${county?.id ?? "all"}`;
+  const fetchKey = `${filterTip}|${filterStatus}|${sort}|${effectiveCounty ?? "all"}`;
   const [lastFetchedKey, setLastFetchedKey] = useState<string | null>(null);
   const loading = lastFetchedKey !== fetchKey;
 
@@ -80,8 +89,7 @@ export function SesizariPublice() {
     const params = new URLSearchParams();
     if (filterTip !== "toate") params.set("tip", filterTip);
     if (filterStatus !== "toate") params.set("status", filterStatus);
-    if (filterSector !== "toate") params.set("sector", filterSector);
-    if (county) params.set("county", county.id);
+    if (effectiveCounty) params.set("county", effectiveCounty);
     params.set("sort", sort);
     params.set("limit", String(PAGE_SIZE));
     params.set("offset", "0");
@@ -99,35 +107,55 @@ export function SesizariPublice() {
       });
 
     return () => controller.abort();
-  }, [filterTip, filterStatus, filterSector, sort, fetchKey, county]);
+  }, [filterTip, filterStatus, sort, fetchKey, effectiveCounty]);
 
-  // Realtime subscribe to new sesizari
+  // Realtime subscribe to new sesizari. The Supabase `postgres_changes`
+  // payload is the RAW row, so injecting `payload.new` straight into
+  // the list bypasses the server-side anonymization that our /api/sesizari
+  // path applies (hide-name flag, scrubbed formal_text). Instead, when
+  // a new INSERT lands we refetch the first page through the API so
+  // the new row arrives anonymized exactly like the rest. Slight
+  // bandwidth cost; correct privacy.
   useEffect(() => {
     const supabase = createSupabaseBrowser();
-    // Unique channel name per mount — vezi NotificationBell.tsx pentru
-    // explicație (Strict Mode rerun + same name = subscribe error).
     const channelName = `sesizari-realtime-${typeof crypto !== "undefined" ? crypto.randomUUID().slice(0, 8) : Date.now()}`;
     const channel = supabase
       .channel(channelName)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "sesizari" },
-        (payload: { new: SesizareFeedRow }) => {
+        async (payload: { new: SesizareFeedRow }) => {
           const row = payload.new as SesizareFeedRow;
-          if (row.publica && row.moderation_status === "approved") {
-            setRows((prev) => [
-              { ...row, upvotes: 0, downvotes: 0, voturi_net: 0, nr_comentarii: 0 },
-              ...prev,
-            ]);
+          if (!row.publica || row.moderation_status !== "approved") return;
+          // Filter out updates that aren't relevant to the current view
+          // (e.g. a new sesizare in another county when scoped). Cheap
+          // client-side guard; the refetch below is the source of truth.
+          if (effectiveCounty && row.county && row.county !== effectiveCounty) return;
+          if (filterTip !== "toate" && row.tip !== filterTip) return;
+          if (filterStatus !== "toate" && row.status !== filterStatus) return;
+          try {
+            const params = new URLSearchParams();
+            if (filterTip !== "toate") params.set("tip", filterTip);
+            if (filterStatus !== "toate") params.set("status", filterStatus);
+            if (effectiveCounty) params.set("county", effectiveCounty);
+            params.set("sort", sort);
+            params.set("limit", String(PAGE_SIZE));
+            params.set("offset", "0");
+            const res = await fetch(`/api/sesizari?${params.toString()}`, { cache: "no-store" });
+            const j = await res.json();
+            const fresh = (j.data ?? []) as SesizareFeedRow[];
+            if (fresh.length > 0) setRows(fresh);
+          } catch {
+            // Silent — next manual refresh will reconcile.
           }
-        }
+        },
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [effectiveCounty, filterTip, filterStatus, sort]);
 
   const filtered = rows;
 
@@ -159,78 +187,93 @@ export function SesizariPublice() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-4 mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <Filter size={16} className="text-[var(--color-text-muted)]" />
-          <span className="text-sm font-medium">Filtrează</span>
-          {loading && <Loader2 size={14} className="animate-spin text-[var(--color-text-muted)]" />}
-        </div>
-        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3">
-          <select value={filterTip} onChange={(e) => setFilterTip(e.target.value)} className={selectClass}>
-            <option value="toate">Toate tipurile</option>
-            {SESIZARE_TIPURI.map((t) => (
-              <option key={t.value} value={t.value}>{t.label}</option>
-            ))}
-          </select>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={selectClass}>
-            <option value="toate">Orice status</option>
-            {/* Keep the order in sync with the workflow in
-                src/lib/sesizari/status.ts so the dropdown reads
-                top→bottom the way the lifecycle progresses. */}
-            <option value="nou">Nou</option>
-            <option value="inregistrata">Înregistrată</option>
-            <option value="redirectionata">Redirecționată</option>
-            <option value="in-lucru">În lucru</option>
-            <option value="actiune-autoritate">Acțiune autoritate</option>
-            <option value="interventie">Intervenție</option>
-            <option value="amanata">Amânată</option>
-            <option value="rezolvat">Rezolvat</option>
-            <option value="respins">Respins</option>
-          </select>
-          <select value={filterSector} onChange={(e) => setFilterSector(e.target.value)} className={selectClass}>
-            <option value="toate">Toate sectoarele</option>
-            {SECTOARE.map((s) => (
-              <option key={s.id} value={s.id}>{s.label}</option>
-            ))}
-          </select>
-          <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className={selectClass}>
-            <option value="recent">Cele mai recente</option>
-            <option value="votate">Cele mai votate</option>
-          </select>
-        </div>
-        <div className="mt-3 flex flex-wrap items-center justify-between text-xs gap-2">
-          <span className="text-[var(--color-text-muted)]">
-            {filtered.length} sesizări găsite · 🔴 live
-          </span>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={copyUrl}
-              className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium"
-              title="Copiază link cu filtrul curent"
-            >
-              {copied ? <Check size={11} /> : <LinkIcon size={11} />}
-              {copied ? "Link copiat" : "Copiază link"}
-            </button>
-            {(() => {
-              const params = new URLSearchParams();
-              if (filterTip !== "toate") params.set("tip", filterTip);
-              if (filterStatus !== "toate") params.set("status", filterStatus);
-              if (filterSector !== "toate") params.set("sector", filterSector);
-              const exportUrl = `/api/sesizari/export?${params.toString()}`;
-              return (
-                <a
-                  href={exportUrl}
-                  className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium"
-                  title="Descarcă CSV cu filtrul curent"
-                >
-                  📥 Export CSV
-                </a>
-              );
-            })()}
+      {/* Filters — hidden on map view; the map already provides spatial
+          filtering and the controls just compete with the canvas for
+          attention. The list view still gets the full filter bar. */}
+      {view !== "map" && (
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-4 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Filter size={16} className="text-[var(--color-text-muted)]" />
+            <span className="text-sm font-medium">Filtrează</span>
+            {loading && <Loader2 size={14} className="animate-spin text-[var(--color-text-muted)]" />}
+          </div>
+          <div className={cn(
+            "grid gap-3",
+            // 4 cols when county dropdown is shown (national surface),
+            // 3 cols when route-scoped county hides the dropdown.
+            county ? "sm:grid-cols-2 md:grid-cols-3" : "sm:grid-cols-2 md:grid-cols-4",
+          )}>
+            <select value={filterTip} onChange={(e) => setFilterTip(e.target.value)} className={selectClass}>
+              <option value="toate">Toate tipurile</option>
+              {SESIZARE_TIPURI.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={selectClass}>
+              <option value="toate">Orice status</option>
+              {/* Keep the order in sync with the workflow in
+                  src/lib/sesizari/status.ts so the dropdown reads
+                  top→bottom the way the lifecycle progresses. */}
+              <option value="nou">Nou</option>
+              <option value="inregistrata">Înregistrată</option>
+              <option value="redirectionata">Redirecționată</option>
+              <option value="in-lucru">În lucru</option>
+              <option value="actiune-autoritate">Acțiune autoritate</option>
+              <option value="interventie">Intervenție</option>
+              <option value="amanata">Amânată</option>
+              <option value="rezolvat">Rezolvat</option>
+              <option value="respins">Respins</option>
+            </select>
+            {/* County dropdown — only on the national surface. The
+                /[judet]/sesizari route already pins county via context
+                and exposing the picker there would let users wander
+                off the county landing page. */}
+            {!county && (
+              <select value={filterCounty} onChange={(e) => setFilterCounty(e.target.value)} className={selectClass}>
+                <option value="toate">Toate județele</option>
+                {ALL_COUNTIES.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            )}
+            <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className={selectClass}>
+              <option value="recent">Cele mai recente</option>
+              <option value="votate">Cele mai votate</option>
+            </select>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center justify-between text-xs gap-2">
+            <span className="text-[var(--color-text-muted)]">
+              {filtered.length} sesizări găsite · 🔴 live
+            </span>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={copyUrl}
+                className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium"
+                title="Copiază link cu filtrul curent"
+              >
+                {copied ? <Check size={11} /> : <LinkIcon size={11} />}
+                {copied ? "Link copiat" : "Copiază link"}
+              </button>
+              {(() => {
+                const params = new URLSearchParams();
+                if (filterTip !== "toate") params.set("tip", filterTip);
+                if (filterStatus !== "toate") params.set("status", filterStatus);
+                if (effectiveCounty) params.set("county", effectiveCounty);
+                const exportUrl = `/api/sesizari/export?${params.toString()}`;
+                return (
+                  <a
+                    href={exportUrl}
+                    className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium"
+                    title="Descarcă CSV cu filtrul curent"
+                  >
+                    📥 Export CSV
+                  </a>
+                );
+              })()}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {view === "map" && filtered.length > 0 ? (
         <SesizariMap limit={50} height="600px" zoom={12} />
@@ -252,7 +295,7 @@ export function SesizariPublice() {
       ) : filtered.length === 0 ? (
         (() => {
           const hasActiveFilter =
-            filterTip !== "toate" || filterStatus !== "toate" || filterSector !== "toate";
+            filterTip !== "toate" || filterStatus !== "toate" || filterCounty !== "toate";
           return (
             <div className="py-20 text-center">
               <div className="text-6xl mb-4 opacity-40">📮</div>
@@ -273,7 +316,7 @@ export function SesizariPublice() {
                     onClick={() => {
                       setFilterTip("toate");
                       setFilterStatus("toate");
-                      setFilterSector("toate");
+                      setFilterCounty("toate");
                       setSort("recent");
                     }}
                     className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
@@ -402,8 +445,7 @@ export function SesizariPublice() {
                 const params = new URLSearchParams();
                 if (filterTip !== "toate") params.set("tip", filterTip);
                 if (filterStatus !== "toate") params.set("status", filterStatus);
-                if (filterSector !== "toate") params.set("sector", filterSector);
-                if (county) params.set("county", county.id);
+                if (effectiveCounty) params.set("county", effectiveCounty);
                 params.set("sort", sort);
                 params.set("limit", String(PAGE_SIZE));
                 params.set("offset", String(rows.length));
