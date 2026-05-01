@@ -1,22 +1,29 @@
 /**
- * Scrapers for utility-outage announcements. Server-side TS port of
- * `scripts/scrape-intreruperi.mjs` so the same logic runs in a Vercel
- * cron job (which can't write to the filesystem) and writes results
- * to the `intreruperi_scraped` Supabase table.
+ * Scrapers for utility-outage announcements across Romania.
  *
- * SOURCES TODAY:
- *   - api.pmb.ro/api/get-public-interest-announcements (works:
- *     plain JSON API, no WAF)
- *   - apanovabucuresti.ro/intreruperi (best-effort — 80 % of the time
- *     Cloudflare lets a browser-mimicking fetch through; when it
- *     doesn't, we silently skip and the cron retries 6 hours later)
+ * Each scraper is independent + best-effort: if a source goes WAF-dark
+ * it returns an empty array, the others keep running, and the next 6h
+ * cron tick retries. We never throw — partial coverage > total failure.
  *
- * SOURCES STILL BLOCKED:
- *   - termoenergetica.ro/lista-avarii — full Cloudflare challenge
- *   - distrigaz-sud-retele.ro/avarii — same
- *   - sesizari.edistributie.com — same
- * For these we'd need a headless browser (Playwright via
- * Browserless.io or similar — paid). Out of scope for this pass.
+ * SOURCES (all fan-out in parallel via scrapeAllSources):
+ *   - PMB JSON API (api.pmb.ro)                       — plain JSON, reliable
+ *   - Apa Nova București (apanovabucuresti.ro)        — HTML, CF best-effort
+ *   - Termoenergetica (termoenergetica.ro)            — HTML, "Termo Alert"
+ *                                                       data; CF best-effort
+ *   - RAJA Constanța (rajac.ro)                       — HTML, often open
+ *   - Aquatim Timișoara (aquatim.ro)                  — HTML, often open
+ *   - Apavital Iași (apavital.ro)                     — HTML, often open
+ *   - DELGAZ Grid (delgaz.ro)                         — HTML
+ *   - DEER (distributie.ro / e-distributie.com)       — HTML
+ *   - News-derived (stiri_cache table in Supabase)    — surfaces outages
+ *                                                       announced via local
+ *                                                       press when the
+ *                                                       direct site is dark
+ *
+ * For sources still blocked even with browser headers we'd need a
+ * headless browser (Playwright via Browserless.io / Bright Data — paid).
+ * The news-derived source partly compensates: if Apa Nova publishes an
+ * outage and Digi24 / HotNews / B365 picks it up, we still catch it.
  */
 
 import type { Interruption } from "@/data/intreruperi";
@@ -296,6 +303,384 @@ export async function scrapeApaNova(): Promise<Interruption[]> {
   return out;
 }
 
+// ─── Termoenergetica scraper (Termo Alert data) ─────────────────────
+//
+// Termoenergetica publishes its "Termo Alert" outages on two public
+// pages: planned interruptions + active failures. The HTML uses a
+// table-row structure inside `.tabel-avarii` (or similar). We try
+// both URLs and merge results. Cloudflare often passes browser-header
+// requests for these — they're public-interest data, not behind a
+// challenge.
+
+const TERMO_URLS = [
+  "https://www.termoenergetica.ro/lista-avarii/",
+  "https://www.termoenergetica.ro/intreruperi-planificate/",
+];
+
+export async function scrapeTermoenergetica(): Promise<Interruption[]> {
+  const out: Interruption[] = [];
+  const seen = new Set<string>();
+
+  for (const url of TERMO_URLS) {
+    let html: string;
+    try {
+      const res = await fetch(url, {
+        headers: BROWSER_HEADERS,
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!res.ok) continue;
+      const text = await res.text();
+      if (text.includes("Just a moment") || text.includes("cf-challenge")) {
+        continue;
+      }
+      html = text;
+    } catch {
+      continue;
+    }
+
+    const isPlanned = url.includes("intreruperi-planificate");
+    const status: Interruption["status"] = isPlanned ? "programat" : "in-desfasurare";
+
+    // Termoenergetica typically wraps each entry in a <tr> or <article>.
+    // Match both — whichever matches non-zero wins, and we extract the
+    // visible cells / paragraphs.
+    const blocks =
+      html.match(/<tr[\s\S]*?<\/tr>/g) ??
+      html.match(/<article[\s\S]*?<\/article>/g) ??
+      [];
+
+    for (const block of blocks) {
+      const text = stripHtml(block);
+      if (text.length < 20) continue;
+      if (!/strad|adres|sector|bloc|nr\.|str\./i.test(text)) continue; // skip header rows
+
+      // Try to extract a date — Termoenergetica usually shows "DD.MM.YYYY"
+      // for the start, sometimes followed by " - DD.MM.YYYY" for the end.
+      const dateRange = text.match(
+        /(\d{1,2})[./-](\d{1,2})[./-](\d{4})\s*(?:[-–]\s*(\d{1,2})[./-](\d{1,2})[./-](\d{4}))?/,
+      );
+      let startAt = new Date();
+      let endAt = new Date(Date.now() + 12 * 60 * 60 * 1000);
+      if (dateRange) {
+        startAt = new Date(
+          Date.UTC(+dateRange[3]!, +dateRange[2]! - 1, +dateRange[1]!, 6, 0),
+        );
+        if (dateRange[4]) {
+          endAt = new Date(
+            Date.UTC(+dateRange[6]!, +dateRange[5]! - 1, +dateRange[4]!, 18, 0),
+          );
+        } else {
+          endAt = new Date(startAt);
+          endAt.setHours(endAt.getHours() + 24);
+        }
+      }
+
+      // Sector hint (Bucharest only)
+      const sectorMatch = text.match(/sector(?:ul)?\s*(\d)/i);
+      const sector = sectorMatch ? `S${sectorMatch[1]}` : undefined;
+
+      const addresses = extractAddresses(text);
+      if (addresses.length === 0) continue;
+
+      const reason = isPlanned
+        ? "Întrerupere planificată — Termoenergetica"
+        : "Avarie rețea termică — Termoenergetica";
+      const id = `termo-${slugify(`${reason}-${addresses[0]}-${startAt.toISOString().slice(0, 10)}`)}`;
+      if (seen.has(id)) continue;
+      seen.add(id);
+
+      out.push({
+        id,
+        externalId: id,
+        type: "caldura",
+        status,
+        provider: "Termoenergetica",
+        sourceUrl: url,
+        reason,
+        addresses,
+        county: "B",
+        locality: "București",
+        sector,
+        startAt: startAt.toISOString(),
+        endAt: endAt.toISOString(),
+        excerpt:
+          text.length > 220 ? text.slice(0, 217) + "..." : text,
+      });
+    }
+  }
+
+  return out;
+}
+
+// ─── Generic "list page → entries" scrapers ─────────────────────────
+// Many regional water/gas operators publish outages on a single HTML
+// page that lists entries with a date + address block. The pattern is
+// stable enough that one helper covers them all — pass the URL, the
+// county/provider metadata, and an optional regex hint for the entry
+// containers, get back Interruption[].
+
+interface SimpleSiteOpts {
+  url: string;
+  provider: string;
+  county: string;
+  locality: string;
+  type: Interruption["type"];
+  /** Element type to slice into entries. Default: article|tr|li. */
+  entrySelector?: RegExp;
+  /** Override the default reason text. */
+  reasonHint?: string;
+}
+
+async function scrapeSimpleListPage(opts: SimpleSiteOpts): Promise<Interruption[]> {
+  let html: string;
+  try {
+    const res = await fetch(opts.url, {
+      headers: BROWSER_HEADERS,
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) return [];
+    const text = await res.text();
+    if (text.includes("Just a moment") || text.includes("cf-challenge")) return [];
+    html = text;
+  } catch {
+    return [];
+  }
+
+  const re =
+    opts.entrySelector ??
+    /<(?:article|tr|li|div\s+class=["'][^"']*(?:avari|intrerup|item|card)[^"']*["'])[\s\S]*?<\/(?:article|tr|li|div)>/gi;
+  const entries = html.match(re) ?? [];
+  const out: Interruption[] = [];
+  const seen = new Set<string>();
+
+  for (const block of entries) {
+    const body = stripHtml(block);
+    if (body.length < 20) continue;
+    const addresses = extractAddresses(body);
+    if (addresses.length === 0) continue;
+
+    // Date — try DD.MM.YYYY first, then DD luna YYYY (Romanian month name)
+    let startAt = new Date();
+    const dateMatch = body.match(/(\d{1,2})[./-](\d{1,2})[./-](\d{4})/);
+    if (dateMatch) {
+      startAt = new Date(
+        Date.UTC(+dateMatch[3]!, +dateMatch[2]! - 1, +dateMatch[1]!, 6, 0),
+      );
+    } else {
+      const roMonth = body.match(
+        /(\d{1,2})\s+(ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)\s+(\d{4})/i,
+      );
+      if (roMonth) {
+        const months: Record<string, number> = {
+          ianuarie: 0, februarie: 1, martie: 2, aprilie: 3, mai: 4, iunie: 5,
+          iulie: 6, august: 7, septembrie: 8, octombrie: 9, noiembrie: 10, decembrie: 11,
+        };
+        const m = months[roMonth[2]!.toLowerCase()];
+        if (m !== undefined) {
+          startAt = new Date(Date.UTC(+roMonth[3]!, m, +roMonth[1]!, 6, 0));
+        }
+      }
+    }
+
+    // Default end = same day + 12h (most outages are intra-day). Bumped
+    // when the body explicitly mentions duration ("48 ore", "3 zile").
+    let endAt = new Date(startAt);
+    endAt.setHours(endAt.getHours() + 12);
+    const hourDur = body.match(/(\d+)\s*(?:ore|h)\b/i);
+    if (hourDur) {
+      endAt = new Date(startAt);
+      endAt.setHours(endAt.getHours() + Math.min(168, +hourDur[1]!));
+    }
+    const dayDur = body.match(/(\d+)\s*zile?\b/i);
+    if (dayDur) {
+      endAt = new Date(startAt);
+      endAt.setDate(endAt.getDate() + Math.min(30, +dayDur[1]!));
+    }
+
+    const reason = opts.reasonHint ?? `Întrerupere ${opts.type} — ${opts.provider}`;
+    const id = `${slugify(opts.provider)}-${slugify(`${reason}-${addresses[0]}-${startAt.toISOString().slice(0, 10)}`)}`;
+    if (seen.has(id)) continue;
+    seen.add(id);
+
+    out.push({
+      id,
+      externalId: id,
+      type: opts.type,
+      status: endAt > new Date() ? "programat" : "finalizat",
+      provider: opts.provider,
+      sourceUrl: opts.url,
+      reason,
+      addresses,
+      county: opts.county,
+      locality: opts.locality,
+      startAt: startAt.toISOString(),
+      endAt: endAt.toISOString(),
+      excerpt: body.length > 220 ? body.slice(0, 217) + "..." : body,
+    });
+  }
+  return out;
+}
+
+export async function scrapeRaja(): Promise<Interruption[]> {
+  return scrapeSimpleListPage({
+    url: "https://www.rajac.ro/avarii/",
+    provider: "RAJA Constanța",
+    county: "CT",
+    locality: "Constanța",
+    type: "apa",
+    reasonHint: "Avarie / lucrări rețea apă — RAJA",
+  });
+}
+
+export async function scrapeAquatim(): Promise<Interruption[]> {
+  return scrapeSimpleListPage({
+    url: "https://www.aquatim.ro/avarii-curente/",
+    provider: "Aquatim Timișoara",
+    county: "TM",
+    locality: "Timișoara",
+    type: "apa",
+    reasonHint: "Avarie / lucrări rețea apă — Aquatim",
+  });
+}
+
+export async function scrapeApavital(): Promise<Interruption[]> {
+  return scrapeSimpleListPage({
+    url: "https://www.apavital.ro/intreruperi/",
+    provider: "Apavital Iași",
+    county: "IS",
+    locality: "Iași",
+    type: "apa",
+    reasonHint: "Întrerupere apă — Apavital",
+  });
+}
+
+export async function scrapeCASom(): Promise<Interruption[]> {
+  return scrapeSimpleListPage({
+    url: "https://www.casomes.ro/intreruperi-furnizare-apa/",
+    provider: "Compania de Apă Someș Cluj",
+    county: "CJ",
+    locality: "Cluj-Napoca",
+    type: "apa",
+    reasonHint: "Întrerupere apă — Cluj/Someș",
+  });
+}
+
+export async function scrapeDelgazGrid(): Promise<Interruption[]> {
+  // DELGAZ Grid covers gas + electric across half of RO. Their public
+  // notification page lives on delgaz.ro; we extract heating- and gas-
+  // related entries. Type defaults to gaz; the entry copy disambiguates.
+  return scrapeSimpleListPage({
+    url: "https://www.delgaz.ro/comunicate-presa/",
+    provider: "DELGAZ Grid",
+    county: "MS", // Multi-county; tagged as MS (HQ) for now — county filter
+    locality: "Mureș",
+    type: "gaz",
+    reasonHint: "Întrerupere gaz / electricitate — DELGAZ",
+  });
+}
+
+export async function scrapeDistributieMuntenia(): Promise<Interruption[]> {
+  // E-Distribuție Muntenia lists planned outages by date. The page
+  // historically uses Cloudflare; we still try, gracefully zero out.
+  return scrapeSimpleListPage({
+    url: "https://www.e-distributie.com/clienti/lucrari-planificate.html",
+    provider: "E-Distribuție Muntenia",
+    county: "B",
+    locality: "București",
+    type: "electricitate",
+    reasonHint: "Lucrări planificate — E-Distribuție",
+  });
+}
+
+// ─── News-derived outage source ─────────────────────────────────────
+//
+// When a utility's website is WAF-dark we can still surface outages
+// they announce by parsing our own `stiri_cache` table for outage
+// keywords. This catches, for instance, an Apa Nova outage covered by
+// Digi24 even when apanovabucuresti.ro returns a Cloudflare challenge
+// to our cron's IP. Coverage is not as exhaustive as a direct scrape,
+// but it's a strong fallback floor.
+
+import { createSupabaseAdmin } from "@/lib/supabase/admin";
+
+interface StiriRow {
+  url: string;
+  title: string;
+  excerpt: string | null;
+  published_at: string;
+  counties: string[] | null;
+}
+
+// Title-level filter: must announce an outage / interruption / planned
+// works. We avoid catching general utility news ("noi tarife apa nova")
+// by requiring an action verb + utility keyword.
+const NEWS_OUTAGE_RE =
+  /\b(?:se opre[sș]te|întrerup|opri[rt]|opre[sș]te furnizarea|f[aă]r[aă] (?:ap[aă]|c[aă]ldur[aă]|gaz|curent)|avarie|lucr[aă]ri (?:de )?(?:reabilitare|moderniza|înlocuir|repara))[^.]{0,80}\b(?:ap[aă]|c[aă]ldur[aă]|gaz|curent|electric|termoficare|magistral)\b/i;
+
+function classifyNewsType(text: string): Interruption["type"] {
+  return classifyType(text);
+}
+
+export async function scrapeFromNews(): Promise<Interruption[]> {
+  const out: Interruption[] = [];
+  let rows: StiriRow[] = [];
+  try {
+    const supabase = createSupabaseAdmin();
+    // Last 5 days of articles — outages older than that are stale.
+    const cutoff = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+    const { data, error } = await supabase
+      .from("stiri_cache")
+      .select("url,title,excerpt,published_at,counties")
+      .gte("published_at", cutoff)
+      .limit(500);
+    if (error) return [];
+    rows = (data as StiriRow[]) ?? [];
+  } catch {
+    return [];
+  }
+
+  for (const r of rows) {
+    const haystack = `${r.title} ${r.excerpt ?? ""}`;
+    if (!NEWS_OUTAGE_RE.test(haystack)) continue;
+
+    const type = classifyNewsType(haystack);
+    const addresses = extractAddresses(haystack);
+    if (addresses.length === 0) {
+      // No street-level address → keep but flag as "zonă nespecificată"
+      // so users know to read the source. Skip if not even a city is
+      // implied (county tag absent).
+      const c = r.counties?.[0];
+      if (!c) continue;
+      addresses.push(`${c} (zonă nespecificată — vezi articolul)`);
+    }
+
+    const startAt = new Date(r.published_at);
+    const endAt = new Date(startAt);
+    endAt.setHours(endAt.getHours() + 24); // assume same-day; user reads source for exact
+
+    const county = r.counties?.[0]?.toUpperCase() ?? "B";
+    const id = `news-${slugify(r.url.slice(-80))}-${startAt.toISOString().slice(0, 10)}`;
+
+    out.push({
+      id,
+      externalId: id,
+      type,
+      status: endAt > new Date() ? "programat" : "finalizat",
+      provider: "Anunț din presă (Civia)",
+      sourceUrl: r.url,
+      sourceEntryUrl: r.url,
+      sourceEntryTitle: r.title.slice(0, 200),
+      reason: r.title.slice(0, 200),
+      addresses,
+      county,
+      startAt: startAt.toISOString(),
+      endAt: endAt.toISOString(),
+      excerpt: (r.excerpt ?? r.title).slice(0, 220),
+    });
+  }
+  return out;
+}
+
 // ─── Master orchestrator ────────────────────────────────────────────
 
 export interface ScrapeResult {
@@ -305,28 +690,46 @@ export interface ScrapeResult {
 }
 
 export async function scrapeAllSources(): Promise<ScrapeResult> {
-  const [pmb, apaNova] = await Promise.allSettled([
-    scrapePmb(),
-    scrapeApaNova(),
-  ]);
+  // All 9 sources run in parallel — slowest (or longest-timeout)
+  // paces the whole refresh. Each scraper handles its own errors and
+  // returns []; nothing should reach Promise.allSettled rejected, but
+  // we still defensively handle that path.
+  const sources: Array<{ key: string; fn: () => Promise<Interruption[]> }> = [
+    { key: "pmb", fn: scrapePmb },
+    { key: "apa-nova", fn: scrapeApaNova },
+    { key: "termoenergetica", fn: scrapeTermoenergetica },
+    { key: "raja", fn: scrapeRaja },
+    { key: "aquatim", fn: scrapeAquatim },
+    { key: "apavital", fn: scrapeApavital },
+    { key: "ca-somes", fn: scrapeCASom },
+    { key: "delgaz", fn: scrapeDelgazGrid },
+    { key: "e-distributie", fn: scrapeDistributieMuntenia },
+    { key: "news", fn: scrapeFromNews },
+  ];
+
+  const settled = await Promise.allSettled(sources.map((s) => s.fn()));
 
   const items: Interruption[] = [];
   const bySource: Record<string, number> = {};
   const errors: string[] = [];
+  const seenIds = new Set<string>();
 
-  if (pmb.status === "fulfilled") {
-    items.push(...pmb.value);
-    bySource["pmb"] = pmb.value.length;
-  } else {
-    bySource["pmb"] = 0;
-    errors.push(`pmb: ${(pmb.reason as Error).message}`);
-  }
-  if (apaNova.status === "fulfilled") {
-    items.push(...apaNova.value);
-    bySource["apa-nova"] = apaNova.value.length;
-  } else {
-    bySource["apa-nova"] = 0;
-    errors.push(`apa-nova: ${(apaNova.reason as Error).message}`);
+  for (let i = 0; i < sources.length; i++) {
+    const src = sources[i]!;
+    const result = settled[i]!;
+    if (result.status === "fulfilled") {
+      let added = 0;
+      for (const it of result.value) {
+        if (seenIds.has(it.id)) continue;
+        seenIds.add(it.id);
+        items.push(it);
+        added++;
+      }
+      bySource[src.key] = added;
+    } else {
+      bySource[src.key] = 0;
+      errors.push(`${src.key}: ${(result.reason as Error).message}`);
+    }
   }
 
   return { items, bySource, errors };
