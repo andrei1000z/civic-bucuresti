@@ -306,18 +306,21 @@ export async function scrapeApaNova(): Promise<Interruption[]> {
   return out;
 }
 
-// ─── Termoenergetica scraper (Termo Alert data) ─────────────────────
+// ─── Termoenergetica (CMTEB) scraper ────────────────────────────────
 //
-// Termoenergetica publishes its "Termo Alert" outages on two public
-// pages: planned interruptions + active failures. The HTML uses a
-// table-row structure inside `.tabel-avarii` (or similar). We try
-// both URLs and merge results. Cloudflare often passes browser-header
-// requests for these — they're public-interest data, not behind a
-// challenge.
+// Compania Municipală Termoenergetica București — the company's
+// official site is cmteb.ro (NOT termoenergetica.ro, which we used
+// to try; that domain redirects / 404s). Real notices posted on
+// apartment buildings cite cmteb.ro as the canonical URL. We try
+// the most likely paths for both planned interruptions and active
+// failures. Cloudflare may still block a fraction of requests; the
+// scraper degrades silently and the cron retries.
 
 const TERMO_URLS = [
-  "https://www.termoenergetica.ro/lista-avarii/",
-  "https://www.termoenergetica.ro/intreruperi-planificate/",
+  "https://www.cmteb.ro/intreruperi-planificate.php",
+  "https://www.cmteb.ro/intreruperi.php",
+  "https://www.cmteb.ro/avarii.php",
+  "https://www.cmteb.ro/",
 ];
 
 export async function scrapeTermoenergetica(): Promise<Interruption[]> {
@@ -397,7 +400,7 @@ export async function scrapeTermoenergetica(): Promise<Interruption[]> {
         externalId: id,
         type: "caldura",
         status,
-        provider: "Termoenergetica",
+        provider: "Termoenergetica (CMTEB)",
         sourceUrl: url,
         reason,
         addresses,

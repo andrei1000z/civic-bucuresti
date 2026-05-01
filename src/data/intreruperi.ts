@@ -88,6 +88,31 @@ const iso = (offsetDays: number, hour = 8): string => {
 };
 
 export const INTRERUPERI: Interruption[] = [
+  // Aviz fizic afișat la bloc — SDS5 / Termoenergetica (CMTEB)
+  // 04.05.2026 ora 09:00 → 08.05.2026 ora 23:00. Adresa exactă nu e
+  // pe aviz; păstrată ca "Sector 5 — zona SDS5" până când avem
+  // aviz cu strada vizibilă sau cmteb.ro începe să răspundă.
+  {
+    id: "cmteb-sds5-2026-05-04",
+    externalId: "cmteb-sds5-2026-05-04",
+    type: "caldura",
+    status: "programat",
+    provider: "Termoenergetica (CMTEB)",
+    sourceUrl: "https://www.cmteb.ro/",
+    reason: "Lucrări rețea termică primară — SDS5",
+    addresses: ["Sector 5 — zonă SDS5 (rețea primară)"],
+    lat: 44.4167,
+    lng: 26.0667,
+    county: "B",
+    locality: "București",
+    sector: "S5",
+    startAt: "2026-05-04T06:00:00.000Z",
+    endAt: "2026-05-08T20:00:00.000Z",
+    affectedPopulation: 0,
+    excerpt:
+      "Apă caldă oprită 4 zile în Sector 5 (rețea primară SDS5) — 04.05 ora 09 → 08.05 ora 23. Aviz CMTEB.",
+  },
+
   // ═══ BUCUREȘTI ══════════════════════════════════════════════════════
   {
     id: "tm-magistrala-2-sudest",
