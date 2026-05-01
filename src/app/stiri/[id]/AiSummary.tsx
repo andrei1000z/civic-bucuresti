@@ -193,16 +193,37 @@ export function AiSummary({ initialSummary, fallbackText, synthesizeUrl }: AiSum
       return;
     }
 
-    // Section headers like "De ce contează:"
-    if (line.match(/^(Pe scurt|De ce contează|Context|Cifre cheie|Ce urmează|Programul|Detalii|Ce cere petiția)/i)) {
+    // Section headers like „De ce contează:" — accept three shapes:
+    //   1. „Pe scurt:" alone on a line  → render as h3, content on next line
+    //   2. „**Pe scurt:** Content..."   → split into h3 + p (markdown style)
+    //   3. „Pe scurt: Content..."       → split into h3 + p (plain style)
+    // Without #2/#3 splitting, the AI's preferred „heading: content"
+    // shape on a single line gets matched as a heading and the WHOLE
+    // sentence renders violet — exactly the "everything is purple" bug.
+    const HEADING_RE =
+      /^\*?\*?(Pe scurt|De ce contează|Context|Cifre cheie|Ce urmează|Programul|Detalii|Ce cere petiția)\*?\*?\s*:?\s*(.*)$/i;
+    const m = line.match(HEADING_RE);
+    if (m) {
+      const label = m[1] ?? "";
+      const rest = (m[2] ?? "").trim();
       blocks.push(
         <h3
-          key={i}
+          key={`h-${i}`}
           className="font-[family-name:var(--font-sora)] font-bold text-sm mt-5 mb-1.5 text-violet-700 dark:text-violet-400"
         >
-          {renderInline(line, `h-${i}`)}
+          {label}:
         </h3>,
       );
+      if (rest.length > 0) {
+        blocks.push(
+          <p
+            key={`hp-${i}`}
+            className="mb-2.5 text-sm text-[var(--color-text)] leading-relaxed"
+          >
+            {renderInline(rest, `hp-${i}`)}
+          </p>,
+        );
+      }
       return;
     }
 
