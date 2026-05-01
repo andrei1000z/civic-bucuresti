@@ -27,9 +27,13 @@ export interface BuildingPolygon {
   coords: Array<[number, number]>;
 }
 
+// Endpoint order matters: kumi.systems first because it's a private
+// volunteer mirror with way less traffic than the official one, so
+// it almost never rate-limits. Official .de second as a strong
+// backup. .fr third — slow but works when the others throttle.
 const OVERPASS_ENDPOINTS = [
-  "https://overpass-api.de/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
   "https://overpass.openstreetmap.fr/api/interpreter",
 ];
 
@@ -62,9 +66,8 @@ async function queryOverpass(
   // we don't need a follow-up query.
   const ql = `[out:json][timeout:20];(way["building"](around:${radiusM},${lat},${lng}););out geom ${MAX_BUILDINGS};`;
 
-  // Try each endpoint in order — primary often rate-limits during
-  // peak hours. If all three fail we return [] and the map still
-  // renders the colored Circle.
+  // Try each endpoint in order — primary may rate-limit. If all fail
+  // we return [] and the map still renders the colored Circle.
   for (const endpoint of OVERPASS_ENDPOINTS) {
     try {
       const res = await fetch(endpoint, {
@@ -73,8 +76,22 @@ async function queryOverpass(
         body: `data=${encodeURIComponent(ql)}`,
         signal: AbortSignal.timeout(25_000),
       });
+      // 429 / 504 / 503 — rate-limited or upstream issue, try next
+      // mirror. Status 200 doesn't mean success: Overpass returns
+      // 200 with a `remark` field describing soft errors (slot limit,
+      // runtime error). Empty `elements` with a `remark` is a soft
+      // fail; try the next endpoint instead of caching empty.
       if (!res.ok) continue;
-      const data = (await res.json()) as { elements: OverpassWay[] };
+      const ctype = res.headers.get("content-type") ?? "";
+      if (!ctype.includes("json")) continue; // HTML error page
+      const data = (await res.json()) as {
+        elements?: OverpassWay[];
+        remark?: string;
+      };
+      if (data.remark && (!data.elements || data.elements.length === 0)) {
+        // soft-fail — try next endpoint instead of caching empty
+        continue;
+      }
       const out: BuildingPolygon[] = [];
       for (const el of data.elements ?? []) {
         if (el.type !== "way" || !el.geometry || el.geometry.length < 3) continue;
@@ -172,9 +189,12 @@ export async function warmBuildingsForOutages(
         // Silent — next viewer will retry.
       }
     }
-    // Be polite to Overpass: 600ms between cold requests stays under
-    // the public-mirror rate limit (~1 req/s sustained).
-    await new Promise((r) => setTimeout(r, 600));
+    // Be polite to Overpass: 1500ms between cold requests. Public
+    // mirrors enforce a slot-based limit (1-2 concurrent slots per
+    // IP with a few seconds of cooldown). 1.5s sustained is well
+    // under the threshold and lets all 22-50 outages succeed in
+    // a single warm pass instead of 19/22 timing out.
+    await new Promise((r) => setTimeout(r, 1500));
   }
   return { warmed, skipped, total: targets.length };
 }
