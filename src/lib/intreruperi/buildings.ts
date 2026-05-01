@@ -92,11 +92,15 @@ async function queryOverpass(
   return [];
 }
 
+function buildingKey(outageId: string): string {
+  return `civia:intreruperi:buildings:${outageId}`;
+}
+
 /**
- * Get building polygons for an outage. Result cached in Redis under
- * `civia:intreruperi:buildings:<outage-id>` for 24h. The first user
- * to view an outage on the map pays the Overpass cost (5-10s);
- * everyone else gets it instantly.
+ * Get building polygons for an outage. Result cached in Redis for 24h.
+ * Only hits Overpass on cache miss. The cache is pre-warmed by the
+ * 6h refresh cron (warmBuildingsForOutages below) so users almost
+ * never pay the Overpass latency on a page load.
  */
 export async function getBuildingsForOutage(
   outageId: string,
@@ -104,13 +108,10 @@ export async function getBuildingsForOutage(
   lng: number,
   radiusM: number,
 ): Promise<BuildingPolygon[]> {
-  const key = `civia:intreruperi:buildings:${outageId}`;
+  const key = buildingKey(outageId);
   if (analyticsRedis) {
     try {
       const cached = await analyticsRedis.get<BuildingPolygon[]>(key);
-      // Cache hit ONLY when we have actual buildings stored. We never
-      // cache empty results (see below) — so an empty hit means we
-      // forgot to retry, and the freshness loop kicks in instead.
       if (cached && Array.isArray(cached) && cached.length > 0) return cached;
     } catch {
       // Redis hiccup — fall through to fresh query.
@@ -119,18 +120,61 @@ export async function getBuildingsForOutage(
   const fresh = await queryOverpass(lat, lng, radiusM);
   if (analyticsRedis && fresh.length > 0) {
     try {
-      // 24h TTL — buildings are nearly static. If a building is
-      // demolished mid-day, the next user 24h later picks up the
-      // change. Worth the rare staleness for the cache hit rate.
-      // Empty results are NOT cached — Overpass timeouts / rate
-      // limits would otherwise lock in a "no buildings" answer for
-      // 24h and the user would never see the polygons. Without a
-      // cache, the next viewer pays the Overpass cost, which is the
-      // right tradeoff (rare path).
       await analyticsRedis.set(key, fresh, { ex: 24 * 60 * 60 });
     } catch {
-      // Cache write failure is silent — the result is still returned.
+      // Cache write failure is silent — result still returned to caller.
     }
   }
   return fresh;
+}
+
+interface WarmTarget {
+  id: string;
+  lat: number;
+  lng: number;
+  radiusM: number;
+}
+
+/**
+ * Pre-warm the Redis building cache for a list of outages. Serialized
+ * with a 600ms gap between requests so we stay polite to Overpass
+ * (the public mirrors throttle at ~1 req/s per IP). Idempotent: if
+ * the cache already has the buildings, the lookup is instant and
+ * Overpass is never called.
+ *
+ * Called by /api/intreruperi/refresh after the scrape completes so
+ * the building polygons are ready by the time the next user views
+ * the map. Returns counts so the cron can report what got warmed.
+ */
+export async function warmBuildingsForOutages(
+  targets: ReadonlyArray<WarmTarget>,
+): Promise<{ warmed: number; skipped: number; total: number }> {
+  let warmed = 0;
+  let skipped = 0;
+  for (const t of targets) {
+    if (analyticsRedis) {
+      try {
+        const cached = await analyticsRedis.get<BuildingPolygon[]>(buildingKey(t.id));
+        if (cached && Array.isArray(cached) && cached.length > 0) {
+          skipped++;
+          continue;
+        }
+      } catch {
+        // Redis hiccup — re-query upstream.
+      }
+    }
+    const fresh = await queryOverpass(t.lat, t.lng, t.radiusM);
+    if (fresh.length > 0 && analyticsRedis) {
+      try {
+        await analyticsRedis.set(buildingKey(t.id), fresh, { ex: 24 * 60 * 60 });
+        warmed++;
+      } catch {
+        // Silent — next viewer will retry.
+      }
+    }
+    // Be polite to Overpass: 600ms between cold requests stays under
+    // the public-mirror rate limit (~1 req/s sustained).
+    await new Promise((r) => setTimeout(r, 600));
+  }
+  return { warmed, skipped, total: targets.length };
 }

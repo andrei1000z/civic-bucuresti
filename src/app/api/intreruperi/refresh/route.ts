@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 import { createHash } from "crypto";
 import { scrapeAllSources } from "@/lib/intreruperi/scrapers";
+import { warmBuildingsForOutages } from "@/lib/intreruperi/buildings";
+import { loadInterruptions } from "@/lib/intreruperi/store";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { rateLimitAsync } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+// 300s budget — scrape ~10s + serialized Overpass warm of ~50 outages
+// at 600ms each ≈ 30s. Headroom for slow Overpass responses.
+export const maxDuration = 300;
 
 /**
  * POST /api/intreruperi/refresh
@@ -141,12 +145,44 @@ export async function POST(req: Request) {
 
     if (error) throw error;
 
+    // Pre-warm the OSM building polygon cache for every active outage
+    // with coordinates. Serialized 600ms-apart inside warmBuildings so
+    // we stay under Overpass's per-IP rate limit. Runs in-band on
+    // cron path (we have 60s budget, plenty); on admin-triggered
+    // refreshes we skip warming so the dashboard returns fast and
+    // the next visit triggers it via the GET path.
+    let warmStats: { warmed: number; skipped: number; total: number } | null = null;
+    if (authResult.viaCron) {
+      try {
+        const { items } = await loadInterruptions();
+        const targets = items
+          .filter((i) => i.lat != null && i.lng != null)
+          .filter((i) => i.status !== "anulat" && i.status !== "finalizat")
+          .map((i) => {
+            const pop = i.affectedPopulation ?? i.addresses.length * 200;
+            const radiusM = Math.max(
+              200,
+              Math.min(2500, Math.round(150 * Math.sqrt(pop / 1000))),
+            );
+            return { id: i.id, lat: i.lat!, lng: i.lng!, radiusM };
+          })
+          // Cap to 50 — covers Bucharest + 1-2 cities at full coverage.
+          // Past 50 we'd risk timing out the 60s function, and stale
+          // outages can wait for the next cron tick.
+          .slice(0, 50);
+        warmStats = await warmBuildingsForOutages(targets);
+      } catch (e) {
+        Sentry.captureException(e, { tags: { kind: "intreruperi_warm_buildings" } });
+      }
+    }
+
     return NextResponse.json({
       data: {
         total: result.items.length,
         upserted: count ?? rows.length,
         bySource: result.bySource,
         errors: result.errors,
+        buildingsWarmed: warmStats,
       },
     });
   } catch (e) {
