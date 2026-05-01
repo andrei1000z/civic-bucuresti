@@ -1,13 +1,16 @@
 import { ImageResponse } from "next/og";
 import { getActiveInterruptions, TYPE_ICONS, TYPE_LABELS } from "@/data/intreruperi";
 
-export const runtime = "edge";
+// Node runtime: getActiveInterruptions reads from Supabase via the
+// admin client which uses Node-only crypto under @supabase/supabase-js.
+// Edge runtime would force us to either embed the seed only or use
+// a fetch-based path; not worth the savings for a OG image render.
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "Întreruperi programate — Civia";
 
-export default function OgImage() {
-  const all = getActiveInterruptions();
+export default async function OgImage() {
+  const all = await getActiveInterruptions();
   const countByType: Record<string, number> = {};
   for (const i of all) countByType[i.type] = (countByType[i.type] ?? 0) + 1;
 

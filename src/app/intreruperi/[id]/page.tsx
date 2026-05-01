@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import {
   getInterruptionById,
+  getAllInterruptions,
   INTRERUPERI,
   TYPE_COLORS,
   TYPE_ICONS,
@@ -29,7 +30,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const item = getInterruptionById(id);
+  const item = await getInterruptionById(id);
   if (!item) return {};
   const title = `${TYPE_ICONS[item.type]} ${TYPE_LABELS[item.type]} — ${item.addresses[0] ?? item.reason}`;
   return {
@@ -88,12 +89,15 @@ export default async function InterruptionDetail({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const item = getInterruptionById(id);
+  const item = await getInterruptionById(id);
   if (!item) notFound();
 
-  const related = INTRERUPERI.filter(
-    (i) => i.id !== item.id && i.county === item.county && i.status !== "finalizat",
-  ).slice(0, 4);
+  const all = await getAllInterruptions();
+  const related = all
+    .filter(
+      (i) => i.id !== item.id && i.county === item.county && i.status !== "finalizat",
+    )
+    .slice(0, 4);
 
   // Schema.org Event JSON-LD
   const jsonLd = {

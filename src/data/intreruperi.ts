@@ -490,55 +490,12 @@ export const INTRERUPERI: Interruption[] = [
 ];
 
 // ─── SCRAPED DATA ─────────────────────────────────────────────────────────────
-// Populat automat la fiecare 6h de scripts/scrape-intreruperi.mjs
-// (rulat de Claude routine trig_01RABuszPxBCWRabFkWavJqu).
-// Sursă: api.pmb.ro — deep links la PDF-urile oficiale PMB.
-import scrapedData from "./intreruperi-scraped.json" assert { type: "json" };
-
-interface ScrapedShape {
-  updated_at: string;
-  source: string;
-  count: number;
-  items: Array<Omit<Interruption, "lat" | "lng">>;
-}
-
-const SCRAPED = scrapedData as ScrapedShape;
-const SCRAPED_ITEMS: Interruption[] = SCRAPED.items.map((it) => ({
-  ...it,
-  type: it.type as InterruptionType,
-  status: it.status as InterruptionStatus,
-}));
-
-export const INTRERUPERI_LAST_SCRAPED = SCRAPED.updated_at;
-export const INTRERUPERI_SCRAPED_COUNT = SCRAPED.count;
-
-// Merge seed static cu date scrape-uite. Dacă un entry scrape-uit are
-// același externalId ca unul static, scrape-uitul câștigă (date mai
-// proaspete).
-const _MERGED: Interruption[] = [
-  ...INTRERUPERI,
-  ...SCRAPED_ITEMS.filter(
-    (s) => !INTRERUPERI.some((local) => local.externalId === s.externalId),
-  ),
-];
-
-// Override — de aici în jos, helper-ele folosesc catalogul merge-uit.
-// Păstrăm INTRERUPERI ca export original (seed-ul static — pentru teste)
-// dar expunem și getAllInterruptions() pentru consumatori.
-
-export function getAllInterruptions(): Interruption[] {
-  return _MERGED;
-}
-
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-
-export function getInterruptionsForCounty(countyCode: string): Interruption[] {
-  return _MERGED.filter((i) => i.county.toUpperCase() === countyCode.toUpperCase());
-}
-
-export function getInterruptionById(id: string): Interruption | null {
-  return _MERGED.find((i) => i.id === id) ?? null;
-}
+// Live scraped data lives in `intreruperi_scraped` Supabase table,
+// refreshed daily by Vercel cron + every 6h by the visit-self-heal.
+// Async getters that merge scraped + seed live in
+// `src/lib/intreruperi/store.ts` (kept separate so this static module
+// has no Supabase / Sentry imports — keeps the edge runtime path clean
+// for OG images and ICS routes that only need the seed).
 
 /** ICS (iCalendar) export pentru un entry — compatibil Google Cal/Apple Cal/Outlook. */
 export function toIcsVEvent(item: Interruption): string {
@@ -651,26 +608,12 @@ export function toIcsCalendar(items: Interruption[]): string {
 /**
  * Filtrează întreruperile active (nu finalizate/anulate) + le sortează
  * cu cele în desfășurare primele, apoi cele programate după data de început.
+ *
+ * Re-exported from @/lib/intreruperi/store so callers can keep the
+ * familiar `from "@/data/intreruperi"` import. Async because the
+ * underlying merge with Supabase scraper output is async.
  */
-export function getActiveInterruptions(): Interruption[] {
-  const now = Date.now();
-  return [..._MERGED]
-    .filter((i) => {
-      if (i.status === "anulat") return false;
-      if (i.status === "finalizat") return false;
-      // Strict > now — întrerupere care s-a terminat exact ACUM nu mai e
-      // „activă". Evită să afișezi întreruperi de ieri care apar ca active
-      // pentru că dataset-ul e static și ora de comparație drift-ează.
-      return new Date(i.endAt).getTime() > now;
-    })
-    .sort((a, b) => {
-      // „in-desfasurare" primele
-      if (a.status === "in-desfasurare" && b.status !== "in-desfasurare") return -1;
-      if (a.status !== "in-desfasurare" && b.status === "in-desfasurare") return 1;
-      // apoi după start
-      return new Date(a.startAt).getTime() - new Date(b.startAt).getTime();
-    });
-}
+export { getActiveInterruptions, getAllInterruptions, getInterruptionsForCounty, getInterruptionById } from "@/lib/intreruperi/store";
 
 export const TYPE_LABELS: Record<InterruptionType, string> = {
   apa: "Apă",

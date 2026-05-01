@@ -56,10 +56,12 @@ export const metadata: Metadata = {
   ],
 };
 
-export const revalidate = 1800; // 30 min — seed static deocamdată, scraper vine în v2
+// 5 min ISR — paired with the 6h scrape cycle; the page-served list
+// can stay cached for a few minutes without users seeing a stale catalog.
+export const revalidate = 300;
 
-export default function IntreruperiPage() {
-  const all = getActiveInterruptions();
+export default async function IntreruperiPage() {
+  const all = await getActiveInterruptions();
 
   // Dataset JSON-LD pentru Google (catalog utilitar)
   const jsonLd = {

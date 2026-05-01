@@ -6,6 +6,10 @@
       "schedule": "0 6 * * *"
     },
     {
+      "path": "/api/intreruperi/refresh",
+      "schedule": "0 4 * * *"
+    },
+    {
       "path": "/api/newsletter/digest",
       "schedule": "0 8 * * 1"
     }
@@ -24,6 +28,9 @@
       "maxDuration": 30
     },
     "src/app/api/stiri/fetch/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/intreruperi/refresh/route.ts": {
       "maxDuration": 60
     },
     "src/app/api/newsletter/digest/route.ts": {

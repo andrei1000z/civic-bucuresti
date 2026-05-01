@@ -93,7 +93,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // Intreruperi detail pages — toate entry-urile (seed + scrape-uite)
-  const intreruperiRoutes: MetadataRoute.Sitemap = getAllInterruptions().map((i) => ({
+  const allIntreruperi = await getAllInterruptions();
+  const intreruperiRoutes: MetadataRoute.Sitemap = allIntreruperi.map((i) => ({
     url: `${base}/intreruperi/${i.id}`,
     lastModified: new Date(i.endAt) > now ? now : new Date(i.endAt),
     changeFrequency: "daily" as const,

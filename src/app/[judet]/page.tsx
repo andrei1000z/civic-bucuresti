@@ -444,7 +444,7 @@ function ActiveInterruperiColumn({
 }: {
   countyName: string;
   countySlug: string;
-  rows: ReturnType<typeof getInterruptionsForCounty>;
+  rows: Awaited<ReturnType<typeof getInterruptionsForCounty>>;
 }) {
   return (
     <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5">
@@ -645,26 +645,26 @@ export default async function CountyHomePage({
     ? "Bucureștiului."
     : `județului ${county.name}.`;
 
-  // Live data — sesizari + stiri DB-fan-out, intreruperi from static
-  // bundle. All in parallel so the slowest dependency paces the page.
-  const allInterruptions = getInterruptionsForCounty(county.id);
-  // Server component re-evaluated on each ISR regeneration (revalidate=300),
-  // so `Date.now()` is fine here — the value is stable during render and
-  // refreshes on the next regeneration.
+  // Live data — sesizari + stiri DB-fan-out, intreruperi from Supabase
+  // (scraped) merged with static seed. All in parallel so the slowest
+  // dependency paces the page.
   // eslint-disable-next-line react-hooks/purity -- ISR Server Component, Date.now() captured per regeneration
   const nowMs = Date.now();
+  const [
+    allInterruptions,
+    { rows: recentSesizari, totalCount: sesizariTotalCount },
+    recentStiri,
+  ] = await Promise.all([
+    getInterruptionsForCounty(county.id),
+    fetchRecentSesizari(county.id),
+    fetchRecentStiri(county.id),
+  ]);
   const activeInterruptions = allInterruptions.filter(
     (i) =>
       i.status !== "anulat" &&
       i.status !== "finalizat" &&
       new Date(i.endAt).getTime() > nowMs,
   );
-
-  const [{ rows: recentSesizari, totalCount: sesizariTotalCount }, recentStiri] =
-    await Promise.all([
-      fetchRecentSesizari(county.id),
-      fetchRecentStiri(county.id),
-    ]);
 
   // Authority lookups — static data file, sync access. Bucharest uses
   // its own dedicated detail elsewhere; the home hub still surfaces a

@@ -22,9 +22,9 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const county = searchParams.get("county")?.toUpperCase();
-  const items = county
+  const items = await (county
     ? getInterruptionsForCounty(county)
-    : getActiveInterruptions();
+    : getActiveInterruptions());
   const ics = toIcsCalendar(items);
   return new Response(ics, {
     headers: {

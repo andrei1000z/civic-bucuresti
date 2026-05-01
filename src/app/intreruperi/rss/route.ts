@@ -17,7 +17,7 @@ function esc(s: string): string {
 }
 
 export async function GET() {
-  const items = getActiveInterruptions();
+  const items = await getActiveInterruptions();
   const now = new Date().toUTCString();
 
   const body = items

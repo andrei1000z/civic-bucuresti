@@ -18,7 +18,7 @@ export async function GET(
   }
 
   const { id } = await params;
-  const item = getInterruptionById(id);
+  const item = await getInterruptionById(id);
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const ics = [
     "BEGIN:VCALENDAR",

@@ -17,7 +17,7 @@ export async function generateStaticParams() {
 
 export default async function OgImage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const item = getInterruptionById(id);
+  const item = await getInterruptionById(id);
   if (!item) {
     return new ImageResponse(
       (

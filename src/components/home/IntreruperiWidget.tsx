@@ -21,8 +21,8 @@ function relativeTime(iso: string): string {
  * Homepage widget — arată următoarele 4 întreruperi care pornesc curând.
  * Server component — zero JS trimis la client.
  */
-export function IntreruperiWidget() {
-  const items = getActiveInterruptions().slice(0, 4);
+export async function IntreruperiWidget() {
+  const items = (await getActiveInterruptions()).slice(0, 4);
   if (items.length === 0) return null;
 
   return (

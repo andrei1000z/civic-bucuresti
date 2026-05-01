@@ -45,7 +45,8 @@ export default async function JudetIntreruperiPage({
   // fiecare regenerare ISR, nu la fiecare request → comportament stabil.
   // eslint-disable-next-line react-hooks/purity -- ISR Server Component, fresh per regeneration
   const now = Date.now();
-  const all = getInterruptionsForCounty(county.id).filter((i) => {
+  const countyItems = await getInterruptionsForCounty(county.id);
+  const all = countyItems.filter((i) => {
     // Strict > now (NU >=) — întreruperi care s-au terminat exact acum
     // nu mai apar ca active. Consistent cu getActiveInterruptions().
     return i.status !== "anulat" && i.status !== "finalizat" && new Date(i.endAt).getTime() > now;

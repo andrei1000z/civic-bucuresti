@@ -1,18 +1,22 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import type { NextRequest } from "next/server";
-import { getActiveInterruptions, INTRERUPERI } from "@/data/intreruperi";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
+import { loadInterruptions, maybeTriggerBackgroundRefresh } from "@/lib/intreruperi/store";
 
-export const revalidate = 1800;
+// Page-side polling can be aggressive; 5 min is short enough that the
+// admin queue feels live but long enough that 1000 viewers don't beat
+// up Supabase reads.
+export const revalidate = 300;
 
 /**
  * GET /api/intreruperi
  *   ?county=CJ          — filtrează pe județ
- *   ?type=apa           — filtrează pe tip (apa|caldura|gaz|electricitate|lucrari-strazi)
+ *   ?type=apa           — filtrează pe tip
  *   ?active=1           — doar cele active (neterminate)
  *   ?lat=44.43&lng=26.1&radius_km=5 — bounding-circle distance filter
  *
- * Cache: 30 min (revalidate). Rate-limit covers the rare miss.
+ * Reads from `intreruperi_scraped` Supabase + the curated static seed.
+ * Background fires the scraper if the 6h Redis lock has expired.
  */
 export async function GET(req: NextRequest) {
   const ip = getClientIp(req);
@@ -32,7 +36,18 @@ export async function GET(req: NextRequest) {
   const lng = Number(searchParams.get("lng"));
   const radius = Number(searchParams.get("radius_km"));
 
-  let list = activeOnly ? getActiveInterruptions() : INTRERUPERI;
+  const { items, scrapedCount, lastSeenAt, source } = await loadInterruptions();
+
+  let list = items;
+  if (activeOnly) {
+    const now = Date.now();
+    list = list.filter(
+      (i) =>
+        i.status !== "anulat" &&
+        i.status !== "finalizat" &&
+        new Date(i.endAt).getTime() > now,
+    );
+  }
 
   if (county) list = list.filter((i) => i.county.toUpperCase() === county);
   if (type) list = list.filter((i) => i.type === type);
@@ -52,11 +67,21 @@ export async function GET(req: NextRequest) {
     });
   }
 
+  // Fire the throttled background scraper AFTER the response is sent.
+  // 6h Redis lock means actual scrape happens at most once per 6h
+  // regardless of viewer count. Hobby cron is the daily floor.
+  after(maybeTriggerBackgroundRefresh);
+
   return NextResponse.json(
-    { data: list, count: list.length, updated_at: new Date().toISOString() },
+    {
+      data: list,
+      count: list.length,
+      updated_at: new Date().toISOString(),
+      meta: { scraped_count: scrapedCount, last_seen_at: lastSeenAt, source },
+    },
     {
       headers: {
-        "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600",
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=900",
       },
     },
   );

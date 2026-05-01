@@ -68,27 +68,30 @@ describe("intreruperi — data integrity", () => {
 });
 
 describe("intreruperi — helpers", () => {
-  it("getInterruptionById găsește entry existent", () => {
+  // Helpers now resolve through @/lib/intreruperi/store, which falls
+  // back to the seed when Supabase is unreachable (test env). All
+  // helpers are async; wrap in async/await.
+  it("getInterruptionById găsește entry existent", async () => {
     const first = INTRERUPERI[0];
     expect(first).toBeDefined();
     if (!first) return;
-    const found = getInterruptionById(first.id);
+    const found = await getInterruptionById(first.id);
     expect(found).toEqual(first);
   });
 
-  it("getInterruptionById returnează null pentru id inexistent", () => {
-    expect(getInterruptionById("inexistent-xyz-123")).toBeNull();
+  it("getInterruptionById returnează null pentru id inexistent", async () => {
+    expect(await getInterruptionById("inexistent-xyz-123")).toBeNull();
   });
 
-  it("getInterruptionsForCounty filtrează corect case-insensitive", () => {
-    const b = getInterruptionsForCounty("B");
-    const bLower = getInterruptionsForCounty("b");
+  it("getInterruptionsForCounty filtrează corect case-insensitive", async () => {
+    const b = await getInterruptionsForCounty("B");
+    const bLower = await getInterruptionsForCounty("b");
     expect(b.length).toBe(bLower.length);
     expect(b.every((i) => i.county === "B")).toBe(true);
   });
 
-  it("getActiveInterruptions exclude cele finalizate/anulate/expirate", () => {
-    const active = getActiveInterruptions();
+  it("getActiveInterruptions exclude cele finalizate/anulate/expirate", async () => {
+    const active = await getActiveInterruptions();
     for (const i of active) {
       expect(i.status).not.toBe("finalizat");
       expect(i.status).not.toBe("anulat");
@@ -96,8 +99,8 @@ describe("intreruperi — helpers", () => {
     }
   });
 
-  it("getActiveInterruptions pune in-desfasurare primele", () => {
-    const active = getActiveInterruptions();
+  it("getActiveInterruptions pune in-desfasurare primele", async () => {
+    const active = await getActiveInterruptions();
     let sawScheduled = false;
     for (const i of active) {
       if (i.status === "programat") sawScheduled = true;
