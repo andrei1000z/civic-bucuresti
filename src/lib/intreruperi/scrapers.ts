@@ -46,10 +46,13 @@ const BROWSER_HEADERS: Record<string, string> = {
 
 function classifyType(text: string): Interruption["type"] {
   const t = text.toLowerCase();
+  // Order matters: "apă caldă" / "termoficare" → caldura first, so a
+  // hot-water outage doesn't get tagged as plain water. Then plain
+  // water, then gas, then electric, then street works.
+  if (/\bcaldur[aă]\b|termoficare|agent termic|magistral|ap[aă] cald/i.test(t))
+    return "caldura";
   if (/\bapa\b|\bapă\b|\bapei\b|potabil|conduct.*apa|r[eâ]ut.*apa/i.test(t))
     return "apa";
-  if (/\bcaldur[aă]\b|termoficare|agent termic|magistral/i.test(t))
-    return "caldura";
   if (/\bgaz\b|distrig/i.test(t)) return "gaz";
   if (/\bcurent\b|electric|e-distribu|en\.?l\b/i.test(t)) return "electricitate";
   if (/traf|carosabil|asfalt|strad|b-dul|șos\.|închider|restric/i.test(t))
