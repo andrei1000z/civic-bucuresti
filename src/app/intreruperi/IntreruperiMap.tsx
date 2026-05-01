@@ -190,9 +190,47 @@ export default function IntreruperiMap({ items }: { items: Interruption[] }) {
           <FitBounds items={items} me={me} />
           {me && <RecenterOn coords={me} />}
 
+          {/* Affected zones — colored circles whose radius scales with
+              affectedPopulation (or address count fallback). The fill
+              uses the type color (red water, blue gas, amber heating,
+              orange streets) so the user sees the impact area, not
+              just a pin. Stacked under the marker so click still
+              hits the marker first. */}
+          {withCoords.map((i) => {
+            const population = i.affectedPopulation ?? i.addresses.length * 200;
+            // Crude population-density radius: 1000 people in a dense
+            // urban block = ~150m radius; 10,000 covers ~500m; 100k =
+            // 1.6km. log scale so a 50k-person outage doesn't paint
+            // half the map red.
+            const radiusM = Math.max(
+              200,
+              Math.min(2500, Math.round(150 * Math.sqrt(population / 1000))),
+            );
+            const tone = TYPE_COLORS[i.type];
+            const active = i.status === "in-desfasurare";
+            return (
+              <Circle
+                key={`zone-${i.id}`}
+                center={[i.lat, i.lng]}
+                radius={radiusM}
+                pathOptions={{
+                  color: tone,
+                  fillColor: tone,
+                  // Active outages pop more (35% fill vs 18% for
+                  // scheduled/finalized). Stroke at 60% opacity
+                  // outlines the zone clearly without being harsh.
+                  fillOpacity: active ? 0.35 : 0.18,
+                  opacity: 0.6,
+                  weight: 2,
+                  dashArray: i.status === "programat" ? "6, 4" : undefined,
+                }}
+              />
+            );
+          })}
+
           {withCoords.map((i) => (
             <Marker key={i.id} position={[i.lat, i.lng]} icon={createIcon(i.type, i.status)}>
-              <Popup maxWidth={320}>
+              <Popup maxWidth={360}>
                 <div className="text-sm">
                   <p className="font-semibold mb-1 flex items-center gap-1 flex-wrap">
                     <span>{TYPE_ICONS[i.type]}</span> {TYPE_LABELS[i.type]}
@@ -207,10 +245,30 @@ export default function IntreruperiMap({ items }: { items: Interruption[] }) {
                     </span>
                   </p>
                   <p className="font-medium mb-1 text-sm">{i.reason}</p>
-                  <p className="text-xs text-slate-600 mb-2">
-                    {i.addresses.slice(0, 2).join(" · ")}
-                    {i.addresses.length > 2 && ` + ${i.addresses.length - 2}`}
-                  </p>
+                  {i.addresses.length > 0 && (
+                    <div className="mb-2">
+                      <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mb-1">
+                        Adrese / străzi afectate ({i.addresses.length})
+                      </p>
+                      <ul className="text-xs text-slate-700 space-y-0.5 max-h-28 overflow-y-auto pr-1">
+                        {i.addresses.slice(0, 8).map((addr, idx) => (
+                          <li key={idx} className="flex items-start gap-1">
+                            <span
+                              className="w-1 h-1 rounded-full mt-1.5 shrink-0"
+                              style={{ backgroundColor: TYPE_COLORS[i.type] }}
+                              aria-hidden="true"
+                            />
+                            <span>{addr}</span>
+                          </li>
+                        ))}
+                        {i.addresses.length > 8 && (
+                          <li className="text-[10px] text-slate-500 italic pl-2">
+                            +{i.addresses.length - 8} alte adrese
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
                   <p className="text-[11px] text-slate-500 mb-2">
                     🕒 {timeRangeLabel(i.startAt, i.endAt)}
                     {i.affectedPopulation != null && i.affectedPopulation > 0 && (
@@ -306,6 +364,10 @@ export default function IntreruperiMap({ items }: { items: Interruption[] }) {
             </span>
           )}
         </div>
+        <p className="text-[10px] text-slate-500 mt-1.5 leading-tight">
+          Zonele colorate = aria afectată; pin = adresa principală.<br />
+          Linie punctată = avarie programată, fără punctată = activă.
+        </p>
       </div>
     </div>
   );
