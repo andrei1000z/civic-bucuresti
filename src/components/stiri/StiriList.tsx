@@ -48,7 +48,7 @@ const categories = [
 // (not template-string concatenated) so the JIT picks them up.
 const sourceGradients: Record<string, string> = {
   // National wire-service tier
-  Digi24: "from-red-600 to-red-900",
+  Digi24: "from-blue-700 to-blue-950",             // matches the corporate blue, not the red "24" accent
   Hotnews: "from-amber-500 to-amber-800",          // golden-orange, matches Hotnews actual logo
   "G4Media": "from-zinc-800 to-black",              // near-black wordmark
   Mediafax: "from-blue-900 to-slate-950",           // deep navy

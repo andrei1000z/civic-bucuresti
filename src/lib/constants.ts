@@ -174,7 +174,7 @@ export const STATUS_LABELS: Record<string, string> = Object.fromEntries(
 export const SOURCE_COLORS: Record<string, string> = {
   // National wire-service tier — colors match each outlet's actual
   // brand kit (cross-checked against logos / mastheads as of 2026-05).
-  "Digi24": "#E30613",          // Digi broadcast red — distinctive on-air "24" red
+  "Digi24": "#005DAA",          // Digi24 corporate blue — the wordmark sits on blue, the "24" accent is red but the brand is blue
   "Hotnews": "#F59E0B",          // signature golden-orange yellow (not lemon)
   "G4Media": "#0A0A0A",          // near-black wordmark on white
   "Mediafax": "#003D7A",         // deep navy — Mediafax masthead

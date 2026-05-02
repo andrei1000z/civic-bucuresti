@@ -112,6 +112,45 @@ const FEEDS: Feed[] = [
   { url: "https://www.monitoruldevrancea.ro/feed", source: "Monitorul VN" },
 ];
 
+/**
+ * Detect promotional / advertorial / sponsored content so it stays
+ * out of the civic feed. Romanian outlets typically tag these with:
+ *   - "(P)" / "[P]" prefix or " P " suffix on the title
+ *   - "ADVERTORIAL", "PROMO", "PUBLICITATE", "Sponsorizat" in title
+ *   - "/advertorial/", "/promo/", "/publicitate/" path segment in URL
+ *   - rare: category="advertorial" in the RSS itself
+ *
+ * Plus crowd-pleaser fluff that has no civic angle (horoscope,
+ * lifestyle puffery, "10 motive de…" listicles) — these aren't
+ * paid promo but they're noise. Filtered with a softer pattern.
+ */
+export function isPromotional(title: string, url: string, category?: string): boolean {
+  const t = title.toLowerCase();
+  const u = url.toLowerCase();
+
+  // Hard signals — explicitly marked as paid content.
+  if (/\(\s*p\s*\)|\[\s*p\s*\]|\badvertorial\b|\bsponsoriz|\bpromo[\s\-:]+|publicitate|reclamă|partener[ie]a|articol\s+plătit/i.test(title)) {
+    return true;
+  }
+  if (/\/(advertorial|promo|publicitate|sponsor[a-z]*|partener[a-z]*|reclam[ae])\//i.test(u)) {
+    return true;
+  }
+  if (category && /^(advertorial|promo|publicitate|sponsor)/i.test(category)) {
+    return true;
+  }
+
+  // Soft signals — outlet sections that are noise on a civic feed.
+  // (horoscope, gossip, recipe, lifestyle clickbait, weather puffery)
+  if (/\b(horoscop|zodii|astrolog|reteta|reţeta|rețetă|vedete|gossip|cancan|wow)\b/i.test(t)) {
+    return true;
+  }
+  if (/\/(horoscop|stiri-vedete|monden|gossip|lifestyle|sport|sex)\//i.test(u)) {
+    return true;
+  }
+
+  return false;
+}
+
 // Simple category classifier from keywords in title + excerpt
 export function classifyCategory(text: string): string {
   const lower = text.toLowerCase();
@@ -183,6 +222,17 @@ export async function fetchFeed(feed: Feed): Promise<RssArticle[]> {
       if (!item.link || !item.title) continue;
 
       const title = item.title;
+
+      // Drop promo / advertorial / lifestyle fluff before any further
+      // processing — saves Groq cycles, DB writes, and avoids polluting
+      // the civic feed with paid content. The check is cheap (regex
+      // on title + URL + RSS category).
+      const itemCategory =
+        Array.isArray(item.categories) && item.categories.length > 0
+          ? String(item.categories[0])
+          : undefined;
+      if (isPromotional(title, item.link, itemCategory)) continue;
+
       const content = cleanText(item["contentEncoded"] as string) || cleanText(item.content) || "";
       const excerpt = cleanText(item.contentSnippet) || content.slice(0, 240);
       const searchText = `${title} ${excerpt}`;

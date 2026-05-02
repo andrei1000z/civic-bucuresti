@@ -17,6 +17,42 @@ export const revalidate = 30;
 const FETCH_LOCK_KEY = "civia:stiri:fetch-lock";
 const FETCH_LOCK_TTL_S = 5 * 60;
 
+/**
+ * Reorder a recency-sorted list so no single source appears more than
+ * `maxPerWindow` times within any sliding window of `windowSize`
+ * positions. Recency is preserved as much as possible — items only
+ * shift later when they would over-saturate the window. When ALL
+ * remaining items are over-quota (typical when one source published
+ * a burst), fall back to plain recency for that step so the feed
+ * doesn't deadlock.
+ *
+ * O(n²) worst case, but n ≤ 200 here so it's microsecond work.
+ */
+function diversifyBySource<T extends { source: string }>(
+  rows: T[],
+  opts: { maxPerWindow: number; windowSize: number },
+): T[] {
+  const { maxPerWindow, windowSize } = opts;
+  const out: T[] = [];
+  const remaining = [...rows];
+  while (remaining.length > 0) {
+    const recent = out.slice(-windowSize);
+    const idx = remaining.findIndex((r) => {
+      const count = recent.filter((p) => p.source === r.source).length;
+      return count < maxPerWindow;
+    });
+    if (idx === -1) {
+      // Everyone in `remaining` would overflow the window; take the
+      // first (most recent) anyway to avoid an infinite loop. This
+      // can happen if a single source dominates the entire pool.
+      out.push(remaining.shift()!);
+    } else {
+      out.push(remaining.splice(idx, 1)[0]!);
+    }
+  }
+  return out;
+}
+
 async function maybeTriggerBackgroundFetch() {
   if (!analyticsRedis) return;
   const cronSecret = process.env.CRON_SECRET;
@@ -73,6 +109,17 @@ export async function GET(req: Request) {
     const { data, error } = await query;
     if (error) throw error;
 
+    // Source diversification — no single outlet may dominate the
+    // first window of articles. Without this, a publisher with a
+    // burst of recent posts (PressOne uploaded 12 articles in one
+    // session) takes over the top 10, hiding everything else.
+    // The diversifier keeps recency as the primary key but caps
+    // per-source occurrence within a sliding window.
+    const diversified = diversifyBySource(
+      (data ?? []) as Array<{ source: string }>,
+      { maxPerWindow: 2, windowSize: 8 },
+    );
+
     // Fire the throttled background RSS refresh AFTER the response is
     // sent — Next 16 `after()` keeps the function instance alive long
     // enough for the trigger fetch to leave the box. The lock makes
@@ -80,7 +127,7 @@ export async function GET(req: Request) {
     after(maybeTriggerBackgroundFetch);
 
     return NextResponse.json(
-      { data: data ?? [] },
+      { data: diversified },
       { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } },
     );
   } catch (e) {
