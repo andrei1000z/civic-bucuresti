@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { getGroqClient, GROQ_MODEL, GROQ_MODEL_FAST } from "@/lib/groq/client";
+import { callGemini, isGeminiConfigured, GEMINI_MODEL, GEMINI_MODEL_FAST } from "@/lib/ai/gemini";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { polishSynthesis } from "@/lib/ai/polish-synthesis";
 import { AI_SUMMARY_VERSION } from "@/lib/ai/synthesis-version";
@@ -98,45 +99,84 @@ function isRateLimited(err: unknown): boolean {
 }
 
 /**
- * Same model-fallback pattern as stiri: try the strict-grammar 70B
- * model first, fall back to the faster 8B when 70B is rate-limited.
- * Without this, every 70B 429 made the petition page silently render
- * the original `summary` field instead of the structured 5-section
- * brief — that was the symptom that caused the v4 schema to look
- * "broken" in production after the prompt upgrade.
+ * Multi-provider AI fallback chain. Mirrors the stiri synthesis chain:
+ *   1. Gemini 2.5 Flash       (separate quota from Groq)
+ *   2. Gemini 2.5 Flash Lite  (separate per-model Gemini counter)
+ *   3. Groq Llama 3.3 70B
+ *   4. Groq Llama 3.1 8B-instant
+ *
+ * Gemini goes first because Groq's free 70B daily token budget runs
+ * out fast, and when that happens both Groq tiers 429 in tandem,
+ * which used to leave the petition page rendering the raw `summary`
+ * field instead of a structured 5-section brief.
  */
-async function callGroqWithFallback(
+async function callAiWithFallback(
   prompt: string,
   rawText: string,
   petitie: SummarizablePetitie,
 ): Promise<string | null> {
-  const groq = getGroqClient();
   const userMsg = `Sintetizează această petiție civică${petitie.category ? ` (categorie: ${petitie.category})` : ""}:\n\n${rawText.slice(0, 4000)}`;
   const messages = [
     { role: "system" as const, content: prompt },
     { role: "user" as const, content: userMsg },
   ];
 
-  const candidates = [
-    { model: GROQ_MODEL, max_tokens: 1200 },
-    { model: GROQ_MODEL_FAST, max_tokens: 1200 },
+  type Candidate = {
+    provider: "gemini" | "groq";
+    model: string;
+    run: () => Promise<string>;
+  };
+  const groq = getGroqClient();
+  const groqCall = (model: string, max_tokens: number) => async (): Promise<string> => {
+    const completion = await groq.chat.completions.create({
+      model,
+      messages,
+      temperature: 0.2,
+      max_tokens,
+    });
+    return completion.choices[0]?.message?.content?.trim() ?? "";
+  };
+  const geminiCall = (model: string) => async (): Promise<string> => {
+    // Gemini 2.5 Flash uses internal "thinking" tokens that count
+    // against max_tokens. 4500 leaves room for both the thinking
+    // and the structured 250-380 word output.
+    const out = await callGemini({
+      messages,
+      model,
+      temperature: 0.2,
+      max_tokens: 4500,
+    });
+    return (out ?? "").trim();
+  };
+  const candidates: Candidate[] = [
+    ...(isGeminiConfigured()
+      ? [
+          { provider: "gemini" as const, model: GEMINI_MODEL, run: geminiCall(GEMINI_MODEL) },
+          { provider: "gemini" as const, model: GEMINI_MODEL_FAST, run: geminiCall(GEMINI_MODEL_FAST) },
+        ]
+      : []),
+    { provider: "groq" as const, model: GROQ_MODEL, run: groqCall(GROQ_MODEL, 1200) },
+    { provider: "groq" as const, model: GROQ_MODEL_FAST, run: groqCall(GROQ_MODEL_FAST, 1200) },
   ];
 
-  for (const cand of candidates) {
+  for (let i = 0; i < candidates.length; i++) {
+    const cand = candidates[i]!;
+    const isLast = i === candidates.length - 1;
     try {
-      const completion = await groq.chat.completions.create({
-        model: cand.model,
-        messages,
-        temperature: 0.2,
-        max_tokens: cand.max_tokens,
-      });
-      return completion.choices[0]?.message?.content?.trim() ?? null;
+      return await cand.run();
     } catch (err) {
-      if (isRateLimited(err) && cand.model !== GROQ_MODEL_FAST) {
-        Sentry.captureMessage("petitii AI fell back to fast model (70B 429)", {
+      if (isRateLimited(err) && !isLast) {
+        const next = candidates[i + 1]!;
+        Sentry.captureMessage("petitii AI fell back to next provider (429)", {
           level: "info",
           tags: { kind: "petitii_ai_fallback" },
-          extra: { petitieId: petitie.id, fromModel: cand.model, toModel: GROQ_MODEL_FAST },
+          extra: {
+            petitieId: petitie.id,
+            fromProvider: cand.provider,
+            fromModel: cand.model,
+            toProvider: next.provider,
+            toModel: next.model,
+          },
         });
         continue;
       }
@@ -151,7 +191,7 @@ async function generate(
   rawText: string,
 ): Promise<string | null> {
   try {
-    const raw = await callGroqWithFallback(SYSTEM_PROMPT, rawText, petitie);
+    const raw = await callAiWithFallback(SYSTEM_PROMPT, rawText, petitie);
     if (!raw || raw.length <= 20) {
       Sentry.captureMessage("petitii AI summary too short or empty", {
         level: "warning",

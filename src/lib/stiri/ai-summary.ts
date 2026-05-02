@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { getGroqClient, GROQ_MODEL, GROQ_MODEL_FAST } from "@/lib/groq/client";
+import { callGemini, isGeminiConfigured, GEMINI_MODEL, GEMINI_MODEL_FAST } from "@/lib/ai/gemini";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { polishSynthesis } from "@/lib/ai/polish-synthesis";
 import { AI_SUMMARY_VERSION } from "@/lib/ai/synthesis-version";
@@ -16,7 +17,15 @@ export interface SummarizableStire {
   ai_summary_version?: number | null;
 }
 
-const SYSTEM_PROMPT = `Ești un jurnalist senior român care scrie pentru Civia, o platformă civică serioasă, de standarde editoriale înalte.
+const SYSTEM_PROMPT = `Ești un jurnalist senior român care scrie pentru Civia, o platformă civică serioasă, de standarde editoriale înalte. Sinteza ta nu e un rezumat — e o reorganizare a faptelor cu valoare adăugată: structură scanabilă, context legal/instituțional, impact pentru cetățean.
+
+VALOAREA ADĂUGATĂ E NEGOCIABILĂ. Cititorul a venit la Civia, nu la sursa originală, pentru că vrea CEVA ÎN PLUS:
+- Structură clară, scanabilă în 30 secunde.
+- Cifrele extrase și evidențiate (nu pierdute în text).
+- Contextul instituțional / legal explicat scurt (cine ce poate, ce lege se aplică).
+- Implicația pentru un cetățean obișnuit (cine e afectat, cum, când).
+
+Dacă sinteza ta arată identic cu excerpt-ul original, ai eșuat. REORGANIZEAZĂ informația.
 
 CORECTITUDINE GRAMATICALĂ — OBLIGATORIE:
 - Limba română corectă, cu diacritice complete (ă, â, î, ș, ț) — fără excepții.
@@ -28,15 +37,15 @@ CORECTITUDINE GRAMATICALĂ — OBLIGATORIE:
 
 STRUCTURĂ — RESPECTĂ EXACT (fiecare titlu pe linie separată terminat cu „:")
 
-1. „Pe scurt:" — 2–3 propoziții care surprind ESENȚIAL faptul. NU repeta titlul cuvânt cu cuvânt.
+1. „Pe scurt:" — 2–3 propoziții care surprind ESENȚIAL faptul, REFORMULAT. NU repeta titlul sau excerpt-ul cuvânt cu cuvânt; reformulează cu altă structură de propoziție.
 
-2. „Cifre cheie:" — listă de 3–5 bullet-uri cu „- ", fiecare începe cu majusculă, fiecare conține o cifră / un nume / un termen legal pus pe **bold**. Omite secțiunea dacă articolul nu are cifre concrete; nu inventa.
+2. „Cifre cheie:" — listă de 3–5 bullet-uri cu „- ", fiecare începe cu majusculă, fiecare conține o cifră / un nume / un termen legal pus pe **bold**. Omite secțiunea dacă articolul chiar nu are cifre concrete; nu inventa. Pentru articole fără cifre, sari direct la „Context".
 
-3. „Context:" — 2–3 propoziții cu fundalul (ce s-a întâmplat înainte, ce lege se aplică, cine sunt actorii). Cititorul trebuie să înțeleagă povestea fără să fi urmărit subiectul.
+3. „Context:" — 2–3 propoziții cu fundalul (ce s-a întâmplat înainte, ce lege se aplică, cine sunt actorii și ce rol au, ce instituție decide). Cititorul trebuie să înțeleagă povestea fără să fi urmărit subiectul. Dacă sursa nu dă context explicit, dedu din cunoștințele generale (NATO, instituții UE, legi românești) — dar fără să inventezi cifre sau evenimente specifice.
 
-4. „Ce urmează:" — 1–2 propoziții cu pașii imediat următori (vot, decizie, deadline). Omite dacă articolul nu menționează nimic; nu specula.
+4. „Ce urmează:" — 1–2 propoziții cu pașii imediat următori (vot, decizie, deadline, sesiune parlamentară etc.). Omite dacă articolul nu menționează nimic concret; nu specula data.
 
-5. „De ce contează:" — 1–2 propoziții despre impactul concret pentru cetățeni (cine e afectat, cum, când). Obligatorie.
+5. „De ce contează:" — 1–2 propoziții despre impactul concret pentru cetățeni (cine e afectat, cum, când). OBLIGATORIE — chiar și pentru articole de politică externă, leagă de cetățean (taxe, drepturi, securitate, costuri, libertăți).
 
 FORMATARE:
 - Prima literă din fiecare paragraf, bullet și secțiune E ÎNTOTDEAUNA majusculă.
@@ -46,10 +55,11 @@ FORMATARE:
 INTERZIS:
 - NU inventa cifre, nume sau date care nu sunt în textul original.
 - Dacă o cifră lipsește din sursă, scrie „nepublicat" — nu plasa o estimare.
-- NU repeta titlul cuvânt cu cuvânt în „Pe scurt".
+- NU repeta titlul sau excerpt-ul cuvânt cu cuvânt — reformulează.
 - NU folosi emoji-uri sau adjective evaluative („incredibil", „șocant", „dramatic").
+- NU produce o sinteză identică cu excerpt-ul original. E inutilă.
 
-LUNGIME: 250–380 de cuvinte (mai mult decât un simplu rezumat — un brief structurat).`;
+LUNGIME: 200–400 de cuvinte. Pentru articole foarte scurte (excerpt < 300 caractere), scoate cel puțin „Pe scurt" + „Context" + „De ce contează" — chiar și pe input puțin, structura adaugă valoare.`;
 
 const inFlight = new Map<string, Promise<string | null>>();
 
@@ -101,48 +111,89 @@ function isRateLimited(err: unknown): boolean {
   return typeof e.message === "string" && /rate.?limit|429/i.test(e.message);
 }
 
-async function callGroqWithFallback(
+async function callAiWithFallback(
   prompt: string,
   rawText: string,
   source: string,
 ): Promise<{ raw: string; modelUsed: string } | null> {
-  const groq = getGroqClient();
   const userMsg = `Sintetizează acest articol de la ${source}:\n\n${rawText.slice(0, 3000)}`;
   const messages = [
     { role: "system" as const, content: prompt },
     { role: "user" as const, content: userMsg },
   ];
 
-  // First try the strict-grammar 70B model. Falls back to the
-  // faster/cheaper 8B-instant when 70B is rate-limited (Groq free
-  // tier caps 70B at 100K tokens/day; 8B has a much larger daily
-  // budget). The polishSynthesis post-processor smooths over the
-  // grammar quality gap.
-  const candidates: { model: string; max_tokens: number }[] = [
-    { model: GROQ_MODEL, max_tokens: 900 },
-    { model: GROQ_MODEL_FAST, max_tokens: 900 },
+  // Multi-provider chain. Order matches /api/ai/improve:
+  //   1. Gemini 2.5 Flash       (separate quota from Groq)
+  //   2. Gemini 2.5 Flash Lite  (separate per-model Gemini counter)
+  //   3. Groq Llama 3.3 70B
+  //   4. Groq Llama 3.1 8B-instant
+  // Gemini goes first because Groq's free 70B daily token budget
+  // exhausts fast — when that happens, the previous chain (Groq-only)
+  // dropped straight to the article excerpt as "summary", which is
+  // why users were seeing "Sinteză Civia" identical to the excerpt
+  // below it. Gemini 2.5 Flash has 1500 RPD on free tier, plenty for
+  // a synthesis use-case. The polishSynthesis post-processor smooths
+  // over any grammar gap between providers.
+  type Candidate = {
+    provider: "gemini" | "groq";
+    model: string;
+    run: () => Promise<string>;
+  };
+  const groq = getGroqClient();
+  const groqCall = (model: string, max_tokens: number) => async (): Promise<string> => {
+    const completion = await groq.chat.completions.create({
+      model,
+      messages,
+      temperature: 0.2,
+      max_tokens,
+    });
+    return completion.choices[0]?.message?.content?.trim() ?? "";
+  };
+  const geminiCall = (model: string) => async (): Promise<string> => {
+    // Gemini 2.5 Flash uses internal "thinking" tokens that count
+    // against max_tokens. 4000 leaves comfortable room for both
+    // thinking + the structured 250-380 word output.
+    const out = await callGemini({
+      messages,
+      model,
+      temperature: 0.2,
+      max_tokens: 4000,
+    });
+    return (out ?? "").trim();
+  };
+  const candidates: Candidate[] = [
+    ...(isGeminiConfigured()
+      ? [
+          { provider: "gemini" as const, model: GEMINI_MODEL, run: geminiCall(GEMINI_MODEL) },
+          { provider: "gemini" as const, model: GEMINI_MODEL_FAST, run: geminiCall(GEMINI_MODEL_FAST) },
+        ]
+      : []),
+    { provider: "groq" as const, model: GROQ_MODEL, run: groqCall(GROQ_MODEL, 900) },
+    { provider: "groq" as const, model: GROQ_MODEL_FAST, run: groqCall(GROQ_MODEL_FAST, 900) },
   ];
 
-  for (const cand of candidates) {
+  for (let i = 0; i < candidates.length; i++) {
+    const cand = candidates[i]!;
+    const isLast = i === candidates.length - 1;
     try {
-      const completion = await groq.chat.completions.create({
-        model: cand.model,
-        messages,
-        temperature: 0.2,
-        max_tokens: cand.max_tokens,
-      });
-      const raw = completion.choices[0]?.message?.content?.trim() ?? "";
-      return { raw, modelUsed: cand.model };
+      const raw = await cand.run();
+      return { raw, modelUsed: `${cand.provider}:${cand.model}` };
     } catch (err) {
-      if (isRateLimited(err) && cand.model !== GROQ_MODEL_FAST) {
-        Sentry.captureMessage("stiri AI fell back to fast model (70B 429)", {
+      if (isRateLimited(err) && !isLast) {
+        const next = candidates[i + 1]!;
+        Sentry.captureMessage("stiri AI fell back to next provider (429)", {
           level: "info",
           tags: { kind: "stiri_ai_fallback" },
-          extra: { source, fromModel: cand.model, toModel: GROQ_MODEL_FAST },
+          extra: {
+            source,
+            fromProvider: cand.provider,
+            fromModel: cand.model,
+            toProvider: next.provider,
+            toModel: next.model,
+          },
         });
-        continue; // try the fast model
+        continue;
       }
-      // Non-429 error or both models rate-limited — bubble up.
       throw err;
     }
   }
@@ -154,7 +205,7 @@ async function generate(
   rawText: string
 ): Promise<string | null> {
   try {
-    const result = await callGroqWithFallback(SYSTEM_PROMPT, rawText, stire.source);
+    const result = await callAiWithFallback(SYSTEM_PROMPT, rawText, stire.source);
     if (!result) {
       return stire.excerpt || stire.content || stire.title || null;
     }

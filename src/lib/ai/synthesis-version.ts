@@ -24,5 +24,14 @@
  *       actually the wrong shape (single paragraph, not 5 sections).
  *       Bumping invalidates them so the new fallback path regenerates
  *       proper structured briefs on next read.
+ *   6 — Both stiri AND petitii synthesis chains now go Gemini-first
+ *       (2.5 Flash → 2.5 Flash Lite → Groq 70B → Groq 8B). v5 cached
+ *       a lot of rows with stire.excerpt as ai_summary because both
+ *       Groq tiers were 429-ing daily; those rows render identical
+ *       text in "Sinteză Civia" and "Text original" panels. Bumping
+ *       invalidates them so the Gemini-backed regeneration produces
+ *       proper structured 5-section briefs. Stiri prompt also tightened
+ *       with explicit "value-add" rules + "if your output looks like
+ *       the excerpt, you failed; reorganise" instruction.
  */
-export const AI_SUMMARY_VERSION = 5;
+export const AI_SUMMARY_VERSION = 6;
