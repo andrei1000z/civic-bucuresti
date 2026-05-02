@@ -42,10 +42,10 @@ export function Footer() {
             <p className="text-sm text-[var(--color-text-muted)] mb-3 max-w-xs leading-relaxed">
               Platformă civică independentă, gratuită.
               <br />
-              Făcută cu <span className="text-rose-500" aria-label="dragoste">❤️</span> pentru o țară ca afară.
+              Făcută cu <span className="text-rose-500" aria-label="dragoste">❤️</span> pentru o Românie ca afară.
             </p>
             <p className="text-xs text-[var(--color-text-muted)] max-w-xs leading-relaxed italic">
-              Civia.ro nu promovează niciun partid politic, nicio poziționare ideologică. Militam pentru o lume corectă, modernă și pentru oameni.
+              Civia.ro nu promovează niciun partid politic, nicio poziționare ideologică. Milităm pentru o țară corectă, modernă și pentru oameni.
             </p>
           </div>
 
@@ -81,10 +81,12 @@ export function Footer() {
         {/* Feedback + newsletter */}
         <FooterFeedback />
 
-        {/* Bottom bar */}
+        {/* Bottom bar — year derived dynamically so the footer doesn't
+            need a yearly bump. ISR rebuilds capture the new year on
+            their next regeneration cycle. */}
         <div className="mt-10 pt-6 border-t border-[var(--color-border)]">
           <p className="text-xs text-[var(--color-text-muted)] text-center">
-            &copy; 2026 Civia.ro · Toate drepturile rezervate
+            &copy; {new Date().getFullYear()} Civia.ro · Toate drepturile rezervate
           </p>
         </div>
       </div>
