@@ -85,13 +85,17 @@ async function queryOverpass(
 
   // Try each endpoint in order — primary may rate-limit. If all fail
   // we return [] and the map still renders the colored Circle.
+  // Per-endpoint timeout is generous (45s) because kumi.systems
+  // routinely takes 40-50s for whole-county building queries while
+  // still succeeding. A tighter cap was killing requests right before
+  // they would have returned, leading to the cache never filling.
   for (const endpoint of OVERPASS_ENDPOINTS) {
     try {
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `data=${encodeURIComponent(ql)}`,
-        signal: AbortSignal.timeout(25_000),
+        signal: AbortSignal.timeout(45_000),
       });
       // 429 / 504 / 503 — rate-limited or upstream issue, try next
       // mirror. Status 200 doesn't mean success: Overpass returns

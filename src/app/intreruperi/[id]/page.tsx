@@ -72,6 +72,13 @@ export async function generateMetadata({
 // fresh without hammering the function.
 export const revalidate = 300;
 
+// 60s function budget so the inline Overpass fallback (up to ~45s on
+// the slow kumi.systems mirror) can complete on a cache-cold page,
+// AND the after() warming hook still has headroom afterwards. Default
+// 10s was killing both: inline fetch raced past it, after() never
+// got time to write the cache for the next viewer.
+export const maxDuration = 60;
+
 export async function generateStaticParams() {
   return INTRERUPERI.map((i) => ({ id: i.id }));
 }
@@ -133,10 +140,14 @@ export default async function InterruptionDetail({
     let polygons = cached;
     if (!polygons) {
       try {
+        // 50s race so even a slow kumi.systems response (~45s observed
+        // on whole-cluster queries) gets through before the page
+        // renders. maxDuration=60 above gives us headroom plus room
+        // for the after() warmer that follows.
         polygons = await Promise.race([
           getBuildingsForOutage(item.id, item.lat, item.lng, radiusM),
           new Promise<typeof cached>((resolve) =>
-            setTimeout(() => resolve(null), 12_000),
+            setTimeout(() => resolve(null), 50_000),
           ),
         ]);
       } catch {

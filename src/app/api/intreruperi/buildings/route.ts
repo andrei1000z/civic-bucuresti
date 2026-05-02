@@ -9,9 +9,12 @@ import {
   type WarmTarget,
 } from "@/lib/intreruperi/buildings";
 
-// Hot path: cache reads only. Background warming runs after the
-// response is sent, so a 5s budget is plenty.
-export const maxDuration = 10;
+// Hot path returns cached polygons in < 1s. The after() warmer
+// hangs on the same lambda and needs the full 60s budget to make
+// real progress (each Overpass query takes 5-45s, NX-locked at
+// 1.5s gap). Without the bump the warmer would get killed mid-loop
+// and the cache would never fill.
+export const maxDuration = 60;
 export const revalidate = 0;
 
 /**
