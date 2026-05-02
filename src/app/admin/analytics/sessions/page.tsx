@@ -73,7 +73,6 @@ export default function SessionsPage() {
 
   useEffect(() => {
     load(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = filter.trim()

@@ -439,6 +439,11 @@ function InterruptionCard({
   // SSR și CSR cu câteva ms → cauzează React #418/#419 în production.
   // Fix: deferăm până la post-mount, render null pe SSR.
   const [mounted, setMounted] = useState(false);
+  // setState in effect is intentional — defer to post-mount so the
+  // SSR pass renders absolute time, then swap to relative after
+  // hydration. The alternative (rendering null) would shift layout
+  // on every card on first paint. ESLint warning is acked.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
   const startRelative = mounted && isUpcoming ? relativeTime(item.startAt) : null;
   const endRelative = mounted && isActive ? `se termină ${relativeTime(item.endAt)}` : null;
