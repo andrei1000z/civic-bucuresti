@@ -44,24 +44,62 @@ const categories = [
 
 // Card-background gradient per source. Mirrors SOURCE_COLORS in
 // constants.ts — the badge color and the card background should
-// read as one brand block. Hotnews stays bright yellow (yellow-400→
-// yellow-700) to match their actual logo, NOT amber. G4Media stays
-// near-black to match their wordmark.
+// read as one brand block. Tailwind classes are listed as literals
+// (not template-string concatenated) so the JIT picks them up.
 const sourceGradients: Record<string, string> = {
+  // National wire-service tier
   Digi24: "from-red-600 to-red-900",
-  Hotnews: "from-yellow-400 to-yellow-700",
-  "G4Media": "from-zinc-800 to-black",
-  Mediafax: "from-blue-700 to-blue-950",
+  Hotnews: "from-amber-500 to-amber-800",          // golden-orange, matches Hotnews actual logo
+  "G4Media": "from-zinc-800 to-black",              // near-black wordmark
+  Mediafax: "from-blue-900 to-slate-950",           // deep navy
   "News.ro": "from-green-600 to-green-900",
+  Libertatea: "from-red-500 to-red-800",
+  "Adevărul": "from-blue-900 to-indigo-950",
+  "Gândul": "from-pink-600 to-fuchsia-800",         // hot pink — current Gândul brand
+  // National investigative + independent
+  PressOne: "from-violet-600 to-violet-900",
+  Spotmedia: "from-orange-600 to-orange-900",       // matches Spotmedia accent
+  "Europa Liberă": "from-blue-700 to-blue-950",
+  Recorder: "from-red-600 to-red-900",              // RED, like Recorder logo
+  "Ziarul Financiar": "from-rose-600 to-rose-900",  // ZF salmon-rose
   "Ediția de Dimineață": "from-amber-500 to-amber-800",
   "Știri din România": "from-slate-600 to-slate-800",
+  // Local houses
   "B365.ro": "from-emerald-600 to-emerald-900",
   "Monitorul CJ": "from-violet-600 to-violet-900",
   "Știri de Cluj": "from-purple-600 to-purple-900",
+  "Actual de Cluj": "from-purple-600 to-fuchsia-800",
   "Ziarul de Iași": "from-indigo-600 to-indigo-900",
+  BZI: "from-indigo-600 to-indigo-900",
+  "7Iași": "from-violet-600 to-violet-900",
   "Opinia Timișoarei": "from-pink-600 to-pink-900",
-  "Știri Suceava": "from-teal-600 to-teal-900",
-  "Gazeta BT": "from-purple-600 to-purple-900",
+  PressAlert: "from-pink-600 to-rose-800",
+  TION: "from-rose-600 to-rose-900",
+  Telegraf: "from-sky-600 to-sky-900",
+  "Ziua de Constanța": "from-blue-700 to-blue-950",
+  Alba24: "from-cyan-600 to-cyan-900",
+  "Ziarul Unirea": "from-cyan-700 to-cyan-950",
+  Aradon: "from-orange-600 to-orange-900",
+  "Jurnalul de Argeș": "from-lime-600 to-lime-900",
+  "Deșteptarea": "from-teal-700 to-teal-950",
+  Bihon: "from-purple-600 to-purple-900",
+  "Gazeta de Bistrița": "from-lime-700 to-green-900",
+  "Monitorul BT": "from-violet-600 to-violet-900",
+  "Obiectiv BR": "from-yellow-600 to-amber-800",
+  "BizBrașov": "from-emerald-600 to-emerald-900",
+  "Opinia Buzău": "from-pink-600 to-pink-900",
+  "Gazeta de Sud": "from-red-700 to-red-950",
+  "Replica HD": "from-rose-700 to-rose-950",
+  "eMaramureș": "from-green-700 to-green-950",
+  "Zi de Zi": "from-orange-700 to-orange-950",
+  "Monitorul NT": "from-violet-700 to-violet-950",
+  "Observatorul PH": "from-cyan-700 to-cyan-950",
+  "Gazeta Nord-Vest": "from-purple-700 to-purple-950",
+  "Turnul Sfatului": "from-blue-700 to-blue-950",
+  Tribuna: "from-blue-700 to-indigo-900",
+  "Monitorul SV": "from-teal-600 to-teal-900",
+  "News Bucovina": "from-teal-700 to-teal-950",
+  "Monitorul VN": "from-purple-600 to-purple-900",
 };
 
 export function StiriList() {

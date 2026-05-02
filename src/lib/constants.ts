@@ -172,22 +172,23 @@ export const STATUS_LABELS: Record<string, string> = Object.fromEntries(
 // Locals get distinct accent colors so they don't all look the same
 // on county pages.
 export const SOURCE_COLORS: Record<string, string> = {
-  // National wire-service tier
-  "Digi24": "#DC2626",          // red-600 — broadcast red
-  "Hotnews": "#FACC15",          // yellow-400 — signature yellow
-  "G4Media": "#0A0A0A",          // near-black wordmark
-  "Mediafax": "#1D4ED8",         // blue-700
+  // National wire-service tier — colors match each outlet's actual
+  // brand kit (cross-checked against logos / mastheads as of 2026-05).
+  "Digi24": "#E30613",          // Digi broadcast red — distinctive on-air "24" red
+  "Hotnews": "#F59E0B",          // signature golden-orange yellow (not lemon)
+  "G4Media": "#0A0A0A",          // near-black wordmark on white
+  "Mediafax": "#003D7A",         // deep navy — Mediafax masthead
   "News.ro": "#16A34A",          // green-600
-  "Libertatea": "#DC2626",       // red — Libertatea logo red
+  "Libertatea": "#ED1C24",       // bright red — slightly distinct from Digi
   "Adevărul": "#1E3A8A",         // navy — Adevărul masthead
-  "Gândul": "#0F766E",           // teal — Gândul accent
+  "Gândul": "#DB2777",           // hot pink/magenta — current Gândul brand (was teal — wrong)
   // National investigative + independent
-  "PressOne": "#7C3AED",         // violet — PressOne brand
-  "Spotmedia": "#0EA5E9",        // sky — Spotmedia
-  "Europa Liberă": "#0369A1",    // RFE/RL blue
-  "Recorder": "#EA580C",         // orange — Recorder accent
+  "PressOne": "#7C3AED",         // violet — PressOne brand accent
+  "Spotmedia": "#EA580C",        // orange — Spotmedia accent dot (was sky blue — wrong)
+  "Europa Liberă": "#0067B1",    // RFE/RL royal blue
+  "Recorder": "#DC2626",         // RED — Recorder logo (was orange — wrong)
   // Business / specialist
-  "Ziarul Financiar": "#9F1239", // ZF burgundy
+  "Ziarul Financiar": "#E11D48", // ZF salmon-rose masthead
   // Long-tail aggregators
   "Ediția de Dimineață": "#F59E0B",
   "Știri din România": "#475569",
