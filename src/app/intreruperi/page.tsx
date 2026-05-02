@@ -106,9 +106,13 @@ export default async function IntreruperiPage() {
         tagline={`${all.length} ${all.length === 1 ? "întrerupere activă" : "întreruperi active"} în catalog · subscribe RSS / iCal pentru update automat`}
       />
 
-      {/* Stats quick */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        {(["apa", "caldura", "gaz", "electricitate"] as const).map((t) => {
+      {/* Stats quick — five real categories instead of four. The
+          stat block was rendering apa/caldura/gaz/electricitate but
+          /intreruperi catalog ALSO scrapes lucrari-strazi (street
+          works), and the count there is often non-trivial — surfacing
+          it in the stat row matches what the filter chips offer. */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+        {(["apa", "caldura", "gaz", "electricitate", "lucrari-strazi"] as const).map((t) => {
           const count = all.filter((i) => i.type === t).length;
           return (
             <div
@@ -116,11 +120,11 @@ export default async function IntreruperiPage() {
               className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-4"
             >
               <div className="text-2xl mb-1">{TYPE_ICONS[t]}</div>
-              <div className="text-2xl font-bold text-[var(--color-primary)] font-[family-name:var(--font-sora)]">
+              <div className="text-2xl font-bold text-[var(--color-primary)] font-[family-name:var(--font-sora)] tabular-nums">
                 {count}
               </div>
               <div className="text-xs text-[var(--color-text-muted)] mt-0.5">
-                {TYPE_LABELS[t]} active
+                {TYPE_LABELS[t]}
               </div>
             </div>
           );
@@ -138,9 +142,9 @@ export default async function IntreruperiPage() {
             Nicio întrerupere programată în catalog
           </h2>
           <p className="text-sm text-[var(--color-text-muted)] mb-4 max-w-md mx-auto leading-relaxed">
-            E vești bune sau înseamnă că anunțul nu a ajuns încă în catalog.
-            Verifică din nou peste câteva ore — sau, dacă știi o întrerupere
-            despre care nu vezi nimic aici, raporteaz-o tu mai jos.
+            Sunt vești bune — sau înseamnă că anunțul nu a ajuns încă în
+            catalog. Verifică din nou peste câteva ore. Dacă știi o
+            întrerupere despre care nu vezi nimic aici, raporteaz-o tu mai jos.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Link
