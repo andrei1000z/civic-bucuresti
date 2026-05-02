@@ -41,10 +41,10 @@ export default function HomePage() {
             </h1>
 
             <p className="text-lg md:text-xl text-emerald-100/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Fă o poză, scrie problema în câteva cuvinte — noi construim
-              sesizarea formală cu temei legal și o trimitem la autoritatea
-              competentă. Plus petiții civice cu impact real, semnate pe site-ul
-              oficial.
+              Sesizări formale către primărie cu AI. Petiții civice cu impact.
+              Hărți de mobilitate, calitatea aerului în timp real, întreruperi
+              programate, știri locale și statistici pentru toate cele 42 de
+              județe — într-un singur loc.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
@@ -63,24 +63,6 @@ export default function HomePage() {
                 Semnează petiții
               </Link>
             </div>
-
-            {/* Trust strip — three signals that pre-empt the most common
-                first-visit objections (cost, ads, vendor lock-in). Subtle
-                so it doesn't compete with the CTAs above. */}
-            <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-emerald-100/75">
-              <li className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" aria-hidden="true" />
-                Gratuit, mereu
-              </li>
-              <li className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" aria-hidden="true" />
-                Fără reclame, fără tracking
-              </li>
-              <li className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" aria-hidden="true" />
-                Date deschise (CC BY 4.0)
-              </li>
-            </ul>
           </div>
         </div>
 
