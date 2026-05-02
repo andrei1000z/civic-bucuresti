@@ -83,16 +83,16 @@ function formatDistance(km: number): string {
 // Relative time: „În 2h", „Mâine 08:00", „Ieri"
 // IMPORTANT: timeZone explicit (Europe/Bucharest) ca server (UTC) și
 // client (local) să producă ACELAȘI text. Altfel React hydration error.
-function relativeTime(iso: string): string {
+//
+// Returns null when the time is in the PAST. The chip on InterruptionCard
+// composes "se termină ${relativeTime(endAt)}", so a past endAt would
+// produce nonsense like "se termină acum 9 min" (= ends 9 min ago).
+// Caller falls back to hiding the chip when null.
+function relativeTime(iso: string): string | null {
   const t = new Date(iso).getTime();
   const now = Date.now();
   const diffMin = Math.round((t - now) / 60_000);
-  if (diffMin < 0) {
-    const ago = -diffMin;
-    if (ago < 60) return `acum ${ago} min`;
-    if (ago < 24 * 60) return `acum ${Math.round(ago / 60)}h`;
-    return `acum ${Math.round(ago / 1440)} zile`;
-  }
+  if (diffMin < 0) return null;
   if (diffMin < 60) return `în ${diffMin} min`;
   if (diffMin < 24 * 60) return `în ${Math.round(diffMin / 60)}h`;
   const d = new Date(t);
@@ -445,8 +445,14 @@ function InterruptionCard({
   // on every card on first paint. ESLint warning is acked.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
-  const startRelative = mounted && isUpcoming ? relativeTime(item.startAt) : null;
-  const endRelative = mounted && isActive ? `se termină ${relativeTime(item.endAt)}` : null;
+  // relativeTime() returns null when the time is in the past. Combined
+  // with isActive/isUpcoming (which trust the scrape-time status), this
+  // prevents nonsense chips like "se termină acum 9 min" when an outage
+  // whose end-time slipped past hasn't been re-scraped yet.
+  const startRel = mounted && isUpcoming ? relativeTime(item.startAt) : null;
+  const endRel = mounted && isActive ? relativeTime(item.endAt) : null;
+  const startRelative = startRel;
+  const endRelative = endRel ? `se termină ${endRel}` : null;
 
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault();
