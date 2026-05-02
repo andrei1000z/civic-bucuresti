@@ -105,24 +105,48 @@ export async function generateMetadata(
   }
   const title = stire.title;
   const description = stire.excerpt?.slice(0, 160) ?? `Știre din ${stire.source}`;
+  const sectionLabel = categoryLabels[stire.category] ?? stire.category;
   return {
     title,
     description,
     alternates: { canonical: `${SITE_URL}/stiri/${id}` },
-    authors: stire.author ? [{ name: stire.author }] : undefined,
+    authors: stire.author ? [{ name: stire.author }] : [{ name: "Civia" }],
     openGraph: {
       title,
       description,
       type: "article",
       publishedTime: stire.published_at,
+      modifiedTime: stire.published_at,
+      // article:section helps Google News + social previews place the
+      // article in the right vertical (Politică, Sport, etc.).
+      section: sectionLabel,
+      authors: stire.author ? [stire.author] : ["Civia"],
       url: `${SITE_URL}/stiri/${id}`,
-      images: stire.image_url ? [stire.image_url] : undefined,
+      siteName: "Civia",
+      locale: "ro_RO",
+      images: stire.image_url
+        ? [{ url: stire.image_url, alt: stire.title }]
+        : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
       images: stire.image_url ? [stire.image_url] : undefined,
+    },
+    // News-specific signals for Google + Bingbot. Robots default is
+    // index/follow; max-image-preview=large unlocks the big-image
+    // Google News carousel card.
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-snippet": -1,
+        "max-image-preview": "large",
+        "max-video-preview": -1,
+      },
     },
   };
 }
@@ -158,7 +182,8 @@ export default async function StireDetailPage({
         url={`${SITE_URL}/stiri/${stire.id}`}
         datePublished={stire.published_at}
         author={stire.author ?? undefined}
-        publisher={stire.source}
+        sourceName={stire.source}
+        sourceUrl={stire.url}
         image={stire.image_url ?? undefined}
       />
       <Link

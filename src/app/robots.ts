@@ -43,7 +43,14 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: "Google-Extended", allow: "/", disallow: PRIVATE },
       { userAgent: "CCBot", allow: "/", disallow: PRIVATE },
     ],
-    sitemap: [`${SITE_URL}/sitemap.xml`],
+    sitemap: [
+      `${SITE_URL}/sitemap.xml`,
+      // Google News sitemap — separate file scoped to articles from
+      // the last 48h per Google's spec. Listed in robots so Googlebot-
+      // News + Search Console pick it up automatically; Publisher
+      // Center can also be pointed at this URL directly.
+      `${SITE_URL}/news-sitemap.xml`,
+    ],
     host: SITE_URL,
   };
 }

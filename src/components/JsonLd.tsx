@@ -67,38 +67,94 @@ export function NewsArticleJsonLd({
   description,
   url,
   datePublished,
+  dateModified,
   author,
-  publisher,
+  sourceName,
+  sourceUrl,
   image,
 }: {
   headline: string;
   description?: string;
   url: string;
   datePublished: string;
+  /** When the article (or our cached/derived version) was last
+   *  updated. Falls back to datePublished. */
+  dateModified?: string;
+  /** Original byline from the source, when known. Becomes a Person
+   *  author. When absent, author defaults to the Civia organisation. */
   author?: string;
-  publisher?: string;
+  /** Name of the originating publisher (e.g. "G4Media"). Used for
+   *  attribution via `isBasedOn` / `provider` — Google understands we
+   *  aggregated this from the source. The platform `publisher` is
+   *  always Civia (the entity Google indexes us under). */
+  sourceName?: string;
+  /** Canonical URL on the source publisher's site. Used for
+   *  `isBasedOn` so Google + readers can navigate back. */
+  sourceUrl?: string;
+  /** Article image — must be a high-resolution URL (Google News
+   *  recommends ≥ 696px wide). */
   image?: string;
 }) {
-  const schema = {
+  // Logo MUST be a real PNG/JPG endpoint with explicit dimensions for
+  // Google News rich results. /apple-touch-icon.png is 180×180, which
+  // qualifies (Google's minimum is 60×60).
+  const logoUrl = `${SITE_URL}/apple-touch-icon.png`;
+
+  const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
+    // Headline ≤ 110 chars per Google News guidelines.
     headline: headline.slice(0, 110),
-    description: description?.slice(0, 300),
+    ...(description ? { description: description.slice(0, 300) } : {}),
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     url,
     datePublished,
-    dateModified: datePublished,
+    dateModified: dateModified || datePublished,
+    // Author: real byline when we have one (Person), else Civia
+    // (Organization). Per Google News guidelines, Organization-only
+    // authors are accepted for staff-bylined and aggregated content.
     author: author
       ? { "@type": "Person", name: author }
-      : { "@type": "Organization", name: publisher || SITE_NAME },
+      : { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    // Publisher = Civia (the platform serving the page). Google
+    // indexes the publisher field to attribute coverage to the
+    // entity registered in Publisher Center.
     publisher: {
       "@type": "Organization",
-      name: publisher || SITE_NAME,
-      logo: { "@type": "ImageObject", url: `${SITE_URL}/apple-icon` },
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: logoUrl,
+        width: 180,
+        height: 180,
+      },
     },
-    ...(image ? { image: [image] } : {}),
+    ...(image
+      ? {
+          image: {
+            "@type": "ImageObject",
+            url: image,
+          },
+        }
+      : {}),
     inLanguage: "ro-RO",
+    isAccessibleForFree: true,
   };
+
+  // Attribution back to the source publisher when present. Google +
+  // readers can both follow this to find the original.
+  if (sourceName) {
+    schema.provider = {
+      "@type": "Organization",
+      name: sourceName,
+      ...(sourceUrl ? { url: sourceUrl } : {}),
+    };
+  }
+  if (sourceUrl) {
+    schema.isBasedOn = sourceUrl;
+  }
+
   return (
     <script
       type="application/ld+json"
