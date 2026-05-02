@@ -1061,7 +1061,7 @@ export default async function CountyHomePage({
                   Ai o problemă în {county.name}?
                 </h2>
                 <p className="text-emerald-100/80 leading-relaxed text-sm md:text-base max-w-xl">
-                  Depune o sesizare formală — AI-ul generează textul cu temei legal,
+                  Depune o sesizare formală — generăm textul cu temei legal,
                   detectăm autoritățile competente, tu doar apeși trimite.
                 </p>
               </div>

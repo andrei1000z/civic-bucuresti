@@ -41,7 +41,7 @@ export default function HomePage() {
             </h1>
 
             <p className="text-lg md:text-xl text-emerald-100/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Sesizări formale către primărie cu AI. Petiții civice cu impact.
+              Sesizări formale către primărie. Petiții civice cu impact.
               Hărți de mobilitate, calitatea aerului în timp real, întreruperi
               programate, știri locale și statistici pentru toate cele 42 de
               județe — într-un singur loc.
@@ -142,7 +142,7 @@ export default function HomePage() {
               num={2}
               icon={<Sparkles size={20} aria-hidden="true" />}
               title="Scrie 2-3 rânduri în română simplă"
-              text="AI-ul transformă textul tău într-o cerere formală cu temei legal (OG 27/2002) și alege singur autoritatea competentă."
+              text="Transformăm textul tău într-o cerere formală cu temei legal (OG 27/2002) și alegem singuri autoritatea competentă."
             />
             <Step
               num={3}

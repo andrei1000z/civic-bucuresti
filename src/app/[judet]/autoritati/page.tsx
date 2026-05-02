@@ -297,7 +297,7 @@ export default async function AutoritatiPage({
           Ai o problemă în {county.name}?
         </h2>
         <p className="text-sm text-[var(--color-text-muted)] mb-4">
-          Civia generează automat o sesizare formală cu AI și o trimite direct la autoritatea competentă.
+          Civia generează automat o sesizare formală cu temei legal și o trimite direct la autoritatea competentă.
         </p>
         <a
           href={`/${county.slug}/sesizari`}

@@ -240,7 +240,7 @@ export function CivicAssistant() {
         <button
           type="button"
           onClick={() => setOpen(!open)}
-          aria-label={open ? "Închide asistentul civic" : "Deschide asistentul civic AI"}
+          aria-label={open ? "Închide asistentul civic" : "Deschide asistentul civic"}
           aria-expanded={open}
           aria-haspopup="dialog"
           className={cn(
@@ -427,7 +427,7 @@ export function CivicAssistant() {
               </button>
             </div>
             <p className="text-[10px] text-[var(--color-text-muted)] mt-2 text-center">
-              AI poate face greșeli. Verifică informațiile importante oficial.
+              Răspunsurile pot conține greșeli. Verifică informațiile importante din surse oficiale.
             </p>
           </form>
         </div>

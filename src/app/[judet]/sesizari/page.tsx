@@ -43,7 +43,7 @@ export async function generateMetadata({
   if (!county) return {};
   return {
     title: "Sesizări",
-    description: `Trimite sesizări formale la autoritățile din ${county.name}. AI-ul generează textul cu temei legal.`,
+    description: `Trimite sesizări formale la autoritățile din ${county.name}. Generăm textul cu temei legal automat.`,
     alternates: { canonical: `/${county.slug}/sesizari` },
   };
 }
@@ -106,7 +106,7 @@ export default async function SesizariPage({
         description={
           <>
             Trimite o sesizare formală la autoritățile din <strong>{county.name}</strong>.
-            AI-ul generează textul cu temei legal, alegem instituția competentă, tu doar
+            Generăm textul cu temei legal, alegem instituția competentă, tu doar
             apeși trimite.
           </>
         }
@@ -159,7 +159,7 @@ export default async function SesizariPage({
           Alege tipul de sesizare. <strong>Sesizarea rapidă</strong> necesită
           doar datele minime — tip, locație, descriere. <strong>Sesizarea completă</strong>{" "}
           adaugă date care ajută autoritățile să rezolve mai repede: poze, GPS,
-          context. AI-ul rescrie totul într-un text formal cu temei legal.
+          context. Rescriem totul într-un text formal cu temei legal.
         </p>
       </div>
 

@@ -64,7 +64,7 @@ const TYPE_LABEL: Record<string, string> = {
   glosar: "Termen",
   "ghid-sesizare": "Tip sesizare",
   transport: "Transport",
-  ai: "AI",
+  ai: "Răspuns",
 };
 
 const QUICK_LINKS = [
@@ -340,15 +340,15 @@ export function CommandPalette() {
                         <div className="w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center" aria-hidden="true">
                           <Sparkles size={10} className="text-violet-500" />
                         </div>
-                        <p className="text-[10px] font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wider">Răspuns AI</p>
-                        {aiLoading && <Loader2 size={10} className="animate-spin text-violet-500" aria-hidden="true" />}
+                        <p className="text-[10px] font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wider">Răspuns asistent</p>
+                        {aiLoading && <Loader2 size={10} className="motion-safe:animate-spin text-violet-500" aria-hidden="true" />}
                       </div>
                       <p className="text-sm text-[var(--color-text)] leading-relaxed whitespace-pre-wrap">{aiAnswer}</p>
                     </div>
                   ) : aiLoading ? (
                     <div className="flex items-center gap-2 p-4" role="status">
-                      <Loader2 size={14} className="animate-spin text-violet-500" aria-hidden="true" />
-                      <p className="text-xs text-[var(--color-text-muted)]">AI generează răspunsul...</p>
+                      <Loader2 size={14} className="motion-safe:animate-spin text-violet-500" aria-hidden="true" />
+                      <p className="text-xs text-[var(--color-text-muted)]">Se generează răspunsul…</p>
                     </div>
                   ) : (
                     <button
@@ -360,9 +360,9 @@ export function CommandPalette() {
                         <Sparkles size={14} className="text-violet-500" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-violet-700 dark:text-violet-300">Întreabă AI-ul despre &bdquo;{query}&rdquo;</p>
+                        <p className="text-sm font-medium text-violet-700 dark:text-violet-300">Întreabă asistentul despre &bdquo;{query}&rdquo;</p>
                         <p className="text-[10px] text-[var(--color-text-muted)]">
-                          {results.length > 0 ? "Shift+Enter" : "Enter"} pentru răspuns AI
+                          {results.length > 0 ? "Shift+Enter" : "Enter"} pentru răspuns
                         </p>
                       </div>
                       <Sparkles size={12} className="text-violet-400 shrink-0" aria-hidden="true" />
@@ -384,7 +384,7 @@ export function CommandPalette() {
               <kbd className="px-1 py-0.5 rounded bg-[var(--color-surface-2)] font-mono text-[9px]">↵</kbd> deschide
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1 py-0.5 rounded bg-[var(--color-surface-2)] font-mono text-[9px]">⇧↵</kbd> AI
+              <kbd className="px-1 py-0.5 rounded bg-[var(--color-surface-2)] font-mono text-[9px]">⇧↵</kbd> asistent
             </span>
             <span className="flex items-center gap-1">
               <kbd className="px-1 py-0.5 rounded bg-[var(--color-surface-2)] font-mono text-[9px]">esc</kbd> închide

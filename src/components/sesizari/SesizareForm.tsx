@@ -434,7 +434,7 @@ export function SesizareForm() {
       return;
     }
     if (!data.tip) {
-      if (!silent) setError("Alege tipul problemei — AI folosește un template specific pe tip");
+      if (!silent) setError("Alege tipul problemei — folosim un template specific pe tip");
       return;
     }
     trackAiUsage(opts?.withPhotos ? "improve-vision" : "improve-text", { tip: data.tip });
@@ -455,7 +455,7 @@ export function SesizareForm() {
         }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "AI eroare");
+      if (!res.ok) throw new Error(json.error || "Generarea textului a eșuat");
       const formalText = json.data.formal_text as string;
       const descriereRafinata = (json.data.descriere_rafinata as string | undefined) || undefined;
       // Extract title: take the "Vă sesizez cu privire la..." part, or first sentence
@@ -478,7 +478,7 @@ export function SesizareForm() {
           : d.descriere,
       }));
     } catch (e) {
-      if (!silent) setError(e instanceof Error ? e.message : "AI temporar indisponibil");
+      if (!silent) setError(e instanceof Error ? e.message : "Serviciul de generare a textului e temporar indisponibil");
     } finally {
       setAiLoading(false);
     }
@@ -1078,7 +1078,7 @@ ${today}`;
           <p className="text-xs text-[var(--color-text-muted)] mt-1 leading-relaxed">
             <strong>Cu cât mai concret, cu atât primești răspuns mai rapid.</strong>{" "}
             Dă dimensiuni aproximative, intersecția / nr. stâlp / reper, dacă e
-            pe trotuar sau carosabil. AI-ul pune textul în formă oficială după.{" "}
+            pe trotuar sau carosabil. Punem textul în formă oficială după.{" "}
             <span
               className={cn(
                 "whitespace-nowrap tabular-nums font-medium",
@@ -1114,7 +1114,7 @@ ${today}`;
             </select>
             {tipDetecting && (
               <span className="text-xs text-[var(--color-text-muted)] inline-flex items-center gap-1" role="status">
-                <Loader2 size={12} className="animate-spin" aria-hidden="true" /> AI detectează tipul…
+                <Loader2 size={12} className="motion-safe:animate-spin" aria-hidden="true" /> Detectăm tipul…
               </span>
             )}
             {tipDetectedByAI && !tipDetecting && (
@@ -1308,18 +1308,18 @@ ${today}`;
           onClick={() => handleAIImprove({ withPhotos: imagini.length > 0 })}
           disabled={aiLoading || data.descriere.length < 10}
           className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-[var(--radius-sm)] bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[var(--shadow-md)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-purple-500"
-          title={imagini.length > 0 ? "AI citește descrierea + vede pozele și rescrie textul oficial" : "AI rescrie descrierea ta în limbaj oficial cu temei legal"}
+          title={imagini.length > 0 ? "Citim descrierea + vedem pozele și rescriem textul oficial" : "Rescriem descrierea ta în limbaj oficial cu temei legal"}
         >
-          {aiLoading ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <Sparkles size={18} aria-hidden="true" />}
+          {aiLoading ? <Loader2 size={18} className="motion-safe:animate-spin" aria-hidden="true" /> : <Sparkles size={18} aria-hidden="true" />}
           {aiLoading
-            ? (imagini.length > 0 ? "AI analizează pozele..." : "AI rescrie textul...")
+            ? (imagini.length > 0 ? "Analizăm pozele…" : "Rescriem textul…")
             : data.formal_text
-              ? (imagini.length > 0 ? "Re-rescrie cu AI — include pozele" : "Re-rescrie textul cu AI")
-              : (imagini.length > 0 ? "Rescrie cu AI — citește și pozele" : "Rescrie cu AI în limbaj oficial")}
+              ? (imagini.length > 0 ? "Re-rescrie textul — include pozele" : "Re-rescrie textul")
+              : (imagini.length > 0 ? "Rescrie textul — citește și pozele" : "Rescrie textul în limbaj oficial")}
         </button>
         {data.formal_text && !aiLoading && (
           <p className="text-xs text-[var(--color-text-muted)] text-center -mt-1">
-            <Sparkles size={11} className="inline text-purple-500" aria-hidden="true" /> AI a rescris textul — apare în emailul final și pe pagina publică.
+            <Sparkles size={11} className="inline text-purple-500" aria-hidden="true" /> Textul a fost rescris — apare în emailul final și pe pagina publică.
           </p>
         )}
 
@@ -1375,7 +1375,7 @@ ${today}`;
             <h3 className="font-[family-name:var(--font-sora)] font-semibold text-lg">Previzualizare</h3>
             {data.formal_text && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 text-xs font-medium">
-                <Sparkles size={10} /> AI
+                <Sparkles size={10} aria-hidden="true" /> Formal
               </span>
             )}
           </div>

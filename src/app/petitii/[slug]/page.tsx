@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   CheckCircle2,
   Share2,
+  Sparkles,
 } from "lucide-react";
 import { getPetitieBySlug } from "@/lib/petitii/repository";
 import { SITE_URL, PETITIE_CATEGORII } from "@/lib/constants";
@@ -209,17 +210,17 @@ export default async function PetitiePage({
             >
               <div className="flex items-center gap-2 mb-4">
                 <span
-                  className="w-7 h-7 rounded-[var(--radius-xs)] bg-gradient-to-br from-purple-500 to-fuchsia-600 grid place-items-center text-white text-[11px] font-extrabold"
+                  className="w-7 h-7 rounded-[var(--radius-xs)] bg-gradient-to-br from-purple-500 to-fuchsia-600 grid place-items-center text-white"
                   aria-hidden="true"
                 >
-                  AI
+                  <Sparkles size={14} />
                 </span>
                 <div>
                   <p className="font-[family-name:var(--font-sora)] font-bold text-sm leading-tight">
                     Sinteză Civia
                   </p>
                   <p className="text-[10px] text-[var(--color-text-muted)] leading-tight">
-                    Rezumat AI al cererii și impactului
+                    Rezumat al cererii și impactului
                   </p>
                 </div>
               </div>

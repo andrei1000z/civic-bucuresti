@@ -376,9 +376,9 @@ export function SesizariPublice() {
                     {s.formal_text && (
                       <span
                         className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 text-[10px] font-medium"
-                        title="Text rescris cu AI în limbaj formal"
+                        title="Text rescris în limbaj formal"
                       >
-                        <span aria-hidden="true">✨</span> AI
+                        <span aria-hidden="true">✨</span> Formal
                       </span>
                     )}
                   </div>

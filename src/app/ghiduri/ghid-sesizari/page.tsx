@@ -107,10 +107,10 @@ export default function GhidSesizariPage() {
           <li><strong>Anexe:</strong> poze, coordonate, alte documente</li>
         </ol>
 
-        <Callout type="tip" title="AI-ul te poate ajuta">
+        <Callout type="tip" title="Civia te ajută cu textul">
           Pe această platformă, la <strong>Sesizări → Fă o sesizare</strong>, bagi descrierea
-          colocvial (chiar și cu greșeli) și apesi <strong>Îmbunătățește cu AI</strong>. AI-ul
-          generează textul formal în limbaj juridic corect.
+          colocvial (chiar și cu greșeli) și apesi <strong>Îmbunătățește textul</strong>.
+          Generăm versiunea formală în limbaj juridic corect.
         </Callout>
 
         <h3>Formule magice</h3>

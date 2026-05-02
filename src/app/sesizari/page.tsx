@@ -9,7 +9,7 @@ import { FaqJsonLd } from "@/components/FaqJsonLd";
 export const metadata: Metadata = {
   title: "Sesizări",
   description:
-    "Trimite o sesizare formală la autorități. AI-ul generează textul cu temei legal. Detectăm automat județul din locația ta.",
+    "Trimite o sesizare formală la autorități. Generăm textul cu temei legal automat. Detectăm județul din locația ta.",
   alternates: { canonical: "/sesizari" },
 };
 
@@ -90,8 +90,8 @@ export default async function SesizariPage() {
         description={
           <>
             Descrie problema în română simplă, atașează o poză, alege locația.
-            AI-ul rescrie textul în limbaj formal cu temei legal, noi alegem
-            singuri autoritatea competentă.
+            Rescriem textul în limbaj formal cu temei legal și alegem singuri
+            autoritatea competentă.
           </>
         }
         tagline="2 minute de la tine, 30 de zile pentru răspunsul lor (OG 27/2002)."

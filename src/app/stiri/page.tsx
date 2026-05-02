@@ -35,7 +35,7 @@ export default function StiriPage() {
             corespunzător.
           </>
         }
-        tagline="Fiecare articol primește o sinteză AI structurată — citești esența în 30 de secunde."
+        tagline="Fiecare articol primește o sinteză structurată — citești esența în 30 de secunde."
       >
         <div className="flex flex-wrap gap-1.5 mt-4">
           {NATIONAL_SOURCES.map((source) => (

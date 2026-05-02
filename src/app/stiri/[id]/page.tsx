@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, Calendar, User, Tag, Building2, Info } from "lucide-react";
+import { ArrowLeft, ExternalLink, Calendar, User, Tag, Building2, Info, Sparkles } from "lucide-react";
 import { createSupabaseAnon } from "@/lib/supabase/admin";
 import { Badge } from "@/components/ui/Badge";
 import { SOURCE_COLORS, SITE_URL, readableTextColor, sourceTextColor } from "@/lib/constants";
@@ -276,14 +276,14 @@ export default async function StireDetailPage({
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-2)] p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <span
-                className="w-7 h-7 rounded-[var(--radius-xs)] bg-gradient-to-br from-violet-500 to-fuchsia-600 grid place-items-center text-white text-[11px] font-extrabold"
+                className="w-7 h-7 rounded-[var(--radius-xs)] bg-gradient-to-br from-violet-500 to-fuchsia-600 grid place-items-center text-white"
                 aria-hidden="true"
               >
-                AI
+                <Sparkles size={14} />
               </span>
               <div>
                 <p className="font-[family-name:var(--font-sora)] font-bold text-sm leading-tight">Sinteză Civia</p>
-                <p className="text-[10px] text-[var(--color-text-muted)] leading-tight">Rezumat AI al articolului original</p>
+                <p className="text-[10px] text-[var(--color-text-muted)] leading-tight">Rezumat al articolului original</p>
               </div>
             </div>
             <AiSummary
@@ -389,8 +389,8 @@ export default async function StireDetailPage({
               Despre
             </p>
             <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
-              Civia agregează știri din surse verificate și generează automat o sinteză AI pentru a
-              facilita înțelegerea rapidă. Conținutul original aparține publicației{" "}
+              Civia agregă știri din surse verificate și generează automat o sinteză
+              pentru înțelegere rapidă. Conținutul original aparține publicației{" "}
               <strong>{stire.source}</strong>.
             </p>
           </div>

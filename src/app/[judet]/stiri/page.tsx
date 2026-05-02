@@ -53,7 +53,7 @@ export default async function StiriPage({
               Surse <strong>naționale</strong> verificate + {localSources.length}{" "}
               {localSources.length === 1 ? "casă" : "case"} de știri locală
               {localSources.length === 1 ? "" : "e"} din {county.name}. Fiecare
-              articol primește o sinteză AI structurată — citești esența în 30s.
+              articol primește o sinteză structurată — citești esența în 30s.
             </>
           ) : (
             <>
@@ -63,7 +63,7 @@ export default async function StiriPage({
             </>
           )
         }
-        tagline={`${visibleSources.length} surse active · sinteza AI rulează la fiecare articol cu Llama 3.3 70B + post-processor de gramatică românească.`}
+        tagline={`${visibleSources.length} surse active · sinteză structurată generată automat la fiecare articol.`}
       >
         <div className="flex flex-wrap gap-1.5">
           {visibleSources.map((source) => (

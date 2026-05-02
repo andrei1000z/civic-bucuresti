@@ -44,7 +44,7 @@ export default async function PetitiiPage() {
         description={
           <>
             Curate de Civia. Click pe petiție → vezi argumentele, sinteza
-            AI și sursa oficială (Declic / Avaaz / petitie.civica.ro) unde
+            și sursa oficială (Declic / Avaaz / petitie.civica.ro) unde
             semnezi. Spre deosebire de o sesizare individuală, petiția adună{" "}
             <strong>multe voci pentru aceeași cauză</strong>.
           </>

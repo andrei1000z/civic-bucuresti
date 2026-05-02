@@ -117,10 +117,10 @@ export function AiSummary({ initialSummary, fallbackText, synthesizeUrl }: AiSum
 
   if (loading) {
     return (
-      <div className="flex items-center gap-3 py-4">
-        <Loader2 size={16} className="animate-spin text-violet-500" />
+      <div className="flex items-center gap-3 py-4" role="status" aria-live="polite">
+        <Loader2 size={16} className="motion-safe:animate-spin text-violet-500" aria-hidden="true" />
         <p className="text-sm text-[var(--color-text-muted)]">
-          Se generează sinteza AI...
+          Se generează sinteza…
         </p>
       </div>
     );
