@@ -93,7 +93,18 @@ async function queryOverpass(
     try {
       const res = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          // Identify ourselves. Without a User-Agent the public
+          // mirrors return 200 with `{ elements: [] }` for many
+          // queries — a politeness-throttle more than a hard block,
+          // but it tanked our cache fill rate from Vercel's edge
+          // runtime where the default UA is generic. The debug
+          // endpoint sent UA and got 50 elements; this path didn't
+          // and got 0.
+          "User-Agent": "Civia/1.0 (civia.ro; contact@civia.ro)",
+          Accept: "application/json",
+        },
         body: `data=${encodeURIComponent(ql)}`,
         signal: AbortSignal.timeout(45_000),
       });
