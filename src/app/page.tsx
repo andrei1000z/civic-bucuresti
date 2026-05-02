@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, TrendingUp, Megaphone, MapPin, Camera, Send, Sparkles, Building2 } from "lucide-react";
+import { ArrowRight, TrendingUp, Megaphone, Camera, Send, Sparkles } from "lucide-react";
 import { SITE_NAME } from "@/lib/constants";
 import { CountyPicker } from "./CountyPicker";
 import { LiveStatsBar } from "@/components/home/LiveStatsBar";
 import { TopVotedWidget } from "@/components/home/TopVotedWidget";
 import { IntreruperiWidget } from "@/components/home/IntreruperiWidget";
-import { ALL_COUNTIES } from "@/data/counties";
-import {
-  PRIMARII,
-  POLITIA_LOCALA_JUDET,
-  getCityCount,
-} from "@/data/autoritati-contact";
+import { StiriWidget } from "@/components/home/StiriWidget";
 
-export const revalidate = 300;
+export const revalidate = 1800;
 
 export const metadata: Metadata = {
   title: { absolute: `${SITE_NAME} — Schimbă România prin sesizări și petiții civice` },
@@ -23,18 +18,15 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  const totalJudete = ALL_COUNTIES.length;
-  const totalPrimarii = Object.keys(PRIMARII).length;
-  const totalPL = Object.keys(POLITIA_LOCALA_JUDET).length;
-  const totalOrase = getCityCount();
-
   return (
     <>
       {/* HERO — `-mt-16` bleeds the gradient up under the sticky navbar
           (h-16 = 64px) so the page-bg black bar disappears behind it.
-          Inner padding adds back the 16 (= 4rem = 64px) so visible content
-          stays in the same place. */}
-      <section className="relative overflow-hidden -mt-16 bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] text-white">
+          Inner padding adds back the 16 so visible content stays in
+          the same place. Two CTAs only — sesizare (primary action) +
+          petiții (secondary). The "alege-ți județul" link removed
+          from hero — the picker section right below is the entry. */}
+      <section className="relative overflow-hidden -mt-16 bg-gradient-to-br from-[var(--color-primary)] via-emerald-800 to-[#0a0a0a] text-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.3),transparent)]" />
         <div className="absolute inset-0 bg-grid-pattern opacity-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/80 via-transparent to-transparent" />
@@ -49,9 +41,10 @@ export default function HomePage() {
             </h1>
 
             <p className="text-lg md:text-xl text-emerald-100/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Fă o poză, scrie în 2 cuvinte care e problema — noi îți construim sesizarea formală
-              către autoritatea corectă. Plus poți semna petiții civice și alte acțiuni care
-              pun presiune publică reală.
+              Fă o poză, scrie problema în câteva cuvinte — noi construim
+              sesizarea formală cu temei legal și o trimitem la autoritatea
+              competentă. Plus petiții civice cu impact real, semnate pe site-ul
+              oficial.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
@@ -68,13 +61,6 @@ export default function HomePage() {
               >
                 <Megaphone size={16} aria-hidden="true" />
                 Semnează petiții
-              </Link>
-              <Link
-                href="/#county-picker"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-12 px-7 rounded-[var(--radius-full)] text-white/90 hover:text-white text-sm font-medium underline-offset-4 hover:underline transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              >
-                <MapPin size={16} aria-hidden="true" />
-                Alege-ți județul <ArrowRight size={14} aria-hidden="true" />
               </Link>
             </div>
           </div>
@@ -94,14 +80,14 @@ export default function HomePage() {
               Alege-ți județul
             </h2>
             <p className="text-[var(--color-text-muted)] mt-2">
-              Sesizări, hărți, calitatea aerului, știri și date publice — filtrate pe județul tău.
+              Sesizări, hărți interactive, știri locale și date publice — filtrate pe județul tău.
             </p>
           </div>
         </div>
         <CountyPicker />
       </section>
 
-      {/* TOP VOTED — fără coloana „Aerul respirat acum" la cererea user-ului. */}
+      {/* TOP VOTED */}
       <section className="py-12 md:py-16">
         <div className="container-narrow">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -120,43 +106,13 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* STIRI WIDGET — 6 most recent national articles */}
+      <StiriWidget />
+
       {/* INTRERUPERI WIDGET */}
       <IntreruperiWidget />
 
-      {/* COVERAGE / AUTORITATI */}
-      <section className="py-14 md:py-16 bg-[var(--color-surface)] border-y border-[var(--color-border)]">
-        <div className="container-narrow">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div>
-              <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] text-xs font-semibold mb-4">
-                <Building2 size={12} aria-hidden="true" /> Autorități publice
-              </p>
-              <h2 className="font-[family-name:var(--font-sora)] text-2xl md:text-3xl font-bold mb-3">
-                {totalPrimarii} primării, {totalPL} Poliții Locale, {totalOrase} orașe — toate acoperite
-              </h2>
-              <p className="text-[var(--color-text-muted)] mb-5 leading-relaxed">
-                Nu mai cauți pe Google „cum contactez primăria din Turda". Civia are un
-                catalog verificat cu emailuri, telefoane și adrese pentru toate autoritățile
-                civice — de la București la cel mai mic oraș județean.
-              </p>
-              <Link
-                href="/autoritati"
-                className="inline-flex items-center gap-2 h-11 px-5 rounded-[var(--radius-full)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] active:scale-[0.97] shadow-[var(--shadow-2)] hover:shadow-[var(--shadow-3)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
-              >
-                Vezi catalogul de autorități <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <CoverageStat value={totalJudete} label="Județe" />
-              <CoverageStat value={totalPrimarii} label="Primării" />
-              <CoverageStat value={totalPL} label="Poliție Locală" />
-              <CoverageStat value={totalOrase} label="Orașe mari" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
+      {/* HOW IT WORKS — explainer + tail CTA */}
       <section className="py-16 md:py-20">
         <div className="container-narrow">
           <div className="text-center mb-12">
@@ -168,7 +124,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 mb-10">
             <Step
               num={1}
               icon={<Camera size={20} aria-hidden="true" />}
@@ -179,31 +135,28 @@ export default function HomePage() {
               num={2}
               icon={<Sparkles size={20} aria-hidden="true" />}
               title="Scrie 2-3 rânduri în română simplă"
-              text="AI-ul transformă textul tău într-o cerere formală cu temei legal (OUG 195/2002, OG 27/2002) și alege autoritatea competentă."
+              text="AI-ul transformă textul tău într-o cerere formală cu temei legal (OG 27/2002) și alege singur autoritatea competentă."
             />
             <Step
               num={3}
               icon={<Send size={20} aria-hidden="true" />}
               title="Trimite și urmărește răspunsul"
-              text="Un click deschide emailul către primărie, deja completat. Primești un cod cu care urmărești răspunsul de 30 de zile."
+              text="Un click deschide emailul către primărie, deja completat. Primești un cod cu care urmărești răspunsul în cele 30 de zile."
             />
+          </div>
+
+          <div className="text-center">
+            <Link
+              href="/sesizari"
+              className="inline-flex items-center gap-2 h-12 px-8 rounded-[var(--radius-full)] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] active:scale-[0.97] transition-all shadow-[var(--shadow-2)] hover:shadow-[var(--shadow-3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+            >
+              Începe — fă o sesizare în 90 de secunde
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
           </div>
         </div>
       </section>
     </>
-  );
-}
-
-function CoverageStat({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-5 text-center">
-      <div className="text-3xl md:text-4xl font-extrabold text-[var(--color-primary)] font-[family-name:var(--font-sora)] tabular-nums">
-        {value}
-      </div>
-      <div className="text-xs text-[var(--color-text-muted)] mt-1 uppercase tracking-wide font-semibold">
-        {label}
-      </div>
-    </div>
   );
 }
 
