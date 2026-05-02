@@ -25,6 +25,22 @@ import { analyticsRedis } from "@/lib/analytics/redis";
 export interface BuildingPolygon {
   /** Outer ring of [lat, lng] pairs. Closed (first === last). */
   coords: Array<[number, number]>;
+  /**
+   * OSM addr/* and identity tags from the building way. Optional —
+   * older cached entries (pre-tag-capture) and many rural buildings
+   * simply don't have these fields populated. The /intreruperi/[id]
+   * detail page uses them to print "Strada Magheru nr. 12, 14, 16"
+   * style affected-building lists.
+   */
+  tags?: {
+    street?: string;
+    housenumber?: string;
+    name?: string;
+    /** building=apartments|residential|commercial|school|hospital|… */
+    kind?: string;
+    /** addr:postcode */
+    postcode?: string;
+  };
 }
 
 // Endpoint order matters: kumi.systems first because it's a private
@@ -46,6 +62,7 @@ const MAX_BUILDINGS = 600;
 interface OverpassWay {
   type: "way";
   geometry?: Array<{ lat: number; lon: number }>;
+  tags?: Record<string, string>;
 }
 
 /**
@@ -98,7 +115,22 @@ async function queryOverpass(
         const coords: Array<[number, number]> = el.geometry.map(
           (p) => [roundCoord(p.lat), roundCoord(p.lon)] as [number, number],
         );
-        out.push({ coords });
+        const entry: BuildingPolygon = { coords };
+        // Capture identifying address tags when present. We deliberately
+        // only keep the fields the detail page needs — Overpass returns
+        // dozens of esoteric building tags (height, roof:shape, etc.)
+        // that would inflate the cache for no end-user benefit.
+        const t = el.tags ?? {};
+        const tags: NonNullable<BuildingPolygon["tags"]> = {};
+        if (t["addr:street"]) tags.street = t["addr:street"];
+        if (t["addr:housenumber"]) tags.housenumber = t["addr:housenumber"];
+        if (t["name"]) tags.name = t["name"];
+        if (t["addr:postcode"]) tags.postcode = t["addr:postcode"];
+        // building=yes is the default catch-all; only keep the value
+        // when it's a meaningful subtype (apartments, hospital, etc).
+        if (t["building"] && t["building"] !== "yes") tags.kind = t["building"];
+        if (Object.keys(tags).length > 0) entry.tags = tags;
+        out.push(entry);
         if (out.length >= MAX_BUILDINGS) break;
       }
       return out;
@@ -109,12 +141,116 @@ async function queryOverpass(
   return [];
 }
 
+// v2 — schema bumped when we started keeping addr/name tags on each
+// polygon (used by /intreruperi/[id] to print "Strada X — nr. 12, 14"
+// affected-building lists). Old v1 entries had only `coords`, so the
+// detail page couldn't show the street breakdown until they expired.
+// Bumping the suffix expires them all at once: next viewer triggers
+// warming, which writes tags-included v2 records.
 function buildingKey(outageId: string): string {
-  return `civia:intreruperi:buildings:${outageId}`;
+  return `civia:intreruperi:buildings:v2:${outageId}`;
+}
+
+/**
+ * One entry per address-tagged street in the affected zone, listing
+ * the house numbers grouped together. Used by the /intreruperi/[id]
+ * detail page to print "Strada Magheru — nr. 12, 14, 16, 18, 20".
+ * Buildings without addr:street are bucketed into the dedicated
+ * `untaggedCount` instead so the total is honest.
+ */
+export interface AffectedBuildingsSummary {
+  /** Total building polygons returned by Overpass (tagged + untagged). */
+  total: number;
+  /** Buildings without any addr:street info. Reported as a count so
+   *  users know "we know about them but can't print an address". */
+  untaggedCount: number;
+  /** Streets, sorted by number-of-buildings descending then name. */
+  streets: Array<{
+    street: string;
+    /** Sorted, deduped house numbers. May be empty for street-only
+     *  matches (a building tagged with a street but no number). */
+    housenumbers: string[];
+    /** Building names (schools, hospitals, named blocks) on this
+     *  street. Capped at 6 entries; a single street rarely has more
+     *  named buildings worth listing. */
+    namedBuildings: string[];
+    /** Total buildings on this street — usually equals housenumbers
+     *  length, but counts unnumbered named buildings too. */
+    count: number;
+  }>;
+  /** Standalone named buildings (no street tag) — schools, hospitals,
+   *  industrial sites that OSM tagged with name= but no addr:street. */
+  unstreetedNamedBuildings: string[];
+}
+
+/**
+ * Smart natural sort for Romanian house numbers: "5", "5A", "5B",
+ * "7", "9-11", "12". Strips leading zeros and respects letter
+ * suffixes so "12B" comes after "12A" not after "12".
+ */
+function compareHouseNumbers(a: string, b: string): number {
+  const parse = (s: string): [number, string] => {
+    const m = s.match(/^(\d+)(.*)$/);
+    return m ? [parseInt(m[1]!, 10), m[2]!.toLowerCase()] : [Number.MAX_SAFE_INTEGER, s];
+  };
+  const [an, asuf] = parse(a);
+  const [bn, bsuf] = parse(b);
+  if (an !== bn) return an - bn;
+  return asuf.localeCompare(bsuf);
+}
+
+export function summarizeAffectedBuildings(
+  polygons: ReadonlyArray<BuildingPolygon>,
+): AffectedBuildingsSummary {
+  const byStreet = new Map<
+    string,
+    { housenumbers: Set<string>; named: Set<string>; count: number }
+  >();
+  const unstreetedNamed = new Set<string>();
+  let untagged = 0;
+
+  for (const p of polygons) {
+    const t = p.tags;
+    if (!t || !t.street) {
+      // No street tag. If at least there's a name (school/hospital/
+      // landmark), surface it in the unstreeted bucket — the user
+      // still benefits from "Spitalul Județean is in the affected
+      // area" even without a postal address.
+      if (t?.name) unstreetedNamed.add(t.name);
+      else untagged++;
+      continue;
+    }
+    let entry = byStreet.get(t.street);
+    if (!entry) {
+      entry = { housenumbers: new Set(), named: new Set(), count: 0 };
+      byStreet.set(t.street, entry);
+    }
+    entry.count++;
+    if (t.housenumber) entry.housenumbers.add(t.housenumber);
+    if (t.name) entry.named.add(t.name);
+  }
+
+  const streets = Array.from(byStreet.entries())
+    .map(([street, e]) => ({
+      street,
+      housenumbers: Array.from(e.housenumbers).sort(compareHouseNumbers),
+      namedBuildings: Array.from(e.named).slice(0, 6),
+      count: e.count,
+    }))
+    // Streets with the most affected buildings first; tie-break by
+    // alphabetical street name for deterministic output.
+    .sort((a, b) => b.count - a.count || a.street.localeCompare(b.street, "ro"));
+
+  return {
+    total: polygons.length,
+    untaggedCount: untagged,
+    streets,
+    unstreetedNamedBuildings: Array.from(unstreetedNamed).slice(0, 12),
+  };
 }
 
 function warmingLockKey(outageId: string): string {
-  return `civia:intreruperi:buildings:warming:${outageId}`;
+  return `civia:intreruperi:buildings:warming:v2:${outageId}`;
 }
 
 /**

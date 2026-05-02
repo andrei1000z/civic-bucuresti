@@ -8,6 +8,7 @@ import {
   Users,
   ExternalLink,
   Building2,
+  Home,
 } from "lucide-react";
 import {
   getInterruptionById,
@@ -20,6 +21,10 @@ import {
   STATUS_LABELS,
 } from "@/data/intreruperi";
 import { SITE_URL } from "@/lib/constants";
+import {
+  getCachedBuildings,
+  summarizeAffectedBuildings,
+} from "@/lib/intreruperi/buildings";
 import { ShareButton } from "./ShareButton";
 import { MapClient } from "./MapClient";
 import { CalendarMenu } from "./CalendarMenu";
@@ -98,6 +103,18 @@ export default async function InterruptionDetail({
       (i) => i.id !== item.id && i.county === item.county && i.status !== "finalizat",
     )
     .slice(0, 4);
+
+  // Pull the OSM building polygons we cached for the map renderer and
+  // boil them down into a per-street address list. Cache-only — the
+  // 6h refresh cron warms every active outage, so by the time a user
+  // opens the detail page the data is almost always there. When it's
+  // not (cold deploy, brand-new outage), the section just doesn't
+  // render — better than blocking SSR for 5–10s of Overpass.
+  const cachedBuildings =
+    item.lat != null && item.lng != null ? await getCachedBuildings(item.id) : null;
+  const buildingsSummary = cachedBuildings
+    ? summarizeAffectedBuildings(cachedBuildings)
+    : null;
 
   // Schema.org Event JSON-LD
   const jsonLd = {
@@ -210,7 +227,7 @@ export default async function InterruptionDetail({
 
             <div>
               <h2 className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)] mb-2 flex items-center gap-1.5">
-                <MapPin size={12} /> Adrese afectate
+                <MapPin size={12} /> Adrese afectate (din anunțul oficial)
               </h2>
               <ul className="space-y-1">
                 {item.addresses.map((addr, i) => (
@@ -221,6 +238,74 @@ export default async function InterruptionDetail({
                 ))}
               </ul>
             </div>
+
+            {/* OSM-derived list: every building in the affected radius
+                grouped by street + house number. Complements the
+                provider's address list — providers usually publish a
+                short street-level summary, but the OSM polygons let
+                us show "Strada Magheru — nr. 12, 14, 16, 18" with the
+                exact buildings. Hidden when no cached polygons exist
+                (new outage, cron hasn't warmed yet). */}
+            {buildingsSummary && buildingsSummary.streets.length > 0 && (
+              <div>
+                <h2 className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)] mb-2 flex items-center gap-1.5">
+                  <Home size={12} /> Clădiri în zona afectată ({buildingsSummary.total})
+                </h2>
+                <p className="text-[11px] text-[var(--color-text-muted)] mb-3 leading-relaxed">
+                  Listă generată automat din OpenStreetMap pentru raza
+                  estimată a întreruperii. Poate include clădiri vecine
+                  sau omite unele care nu sunt cartografiate încă.
+                </p>
+                <ul className="space-y-2.5">
+                  {buildingsSummary.streets.map((s, i) => (
+                    <li
+                      key={i}
+                      className="text-sm bg-[var(--color-surface-2)] rounded-[var(--radius-xs)] px-3 py-2.5"
+                    >
+                      <p className="font-semibold mb-1 flex items-center gap-2 flex-wrap">
+                        <span>{s.street}</span>
+                        <span className="text-[10px] font-normal text-[var(--color-text-muted)] tabular-nums">
+                          {s.count} {s.count === 1 ? "clădire" : "clădiri"}
+                        </span>
+                      </p>
+                      {s.housenumbers.length > 0 && (
+                        <p className="text-[13px] text-[var(--color-text)] leading-relaxed">
+                          <span className="text-[var(--color-text-muted)]">nr.</span>{" "}
+                          <span className="tabular-nums">
+                            {s.housenumbers.join(", ")}
+                          </span>
+                        </p>
+                      )}
+                      {s.namedBuildings.length > 0 && (
+                        <p className="text-[12px] text-[var(--color-text-muted)] mt-1 italic">
+                          {s.namedBuildings.join(" · ")}
+                        </p>
+                      )}
+                      {s.housenumbers.length === 0 && s.namedBuildings.length === 0 && (
+                        <p className="text-[11px] text-[var(--color-text-muted)] italic">
+                          Numere de stradă necartografiate
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                {buildingsSummary.unstreetedNamedBuildings.length > 0 && (
+                  <div className="mt-3 text-[12px] text-[var(--color-text-muted)]">
+                    <p className="font-medium mb-1">Și alte locații în zonă:</p>
+                    <p className="leading-relaxed">
+                      {buildingsSummary.unstreetedNamedBuildings.join(" · ")}
+                    </p>
+                  </div>
+                )}
+                {buildingsSummary.untaggedCount > 0 && (
+                  <p className="text-[11px] text-[var(--color-text-muted)] mt-3 italic">
+                    + {buildingsSummary.untaggedCount}{" "}
+                    {buildingsSummary.untaggedCount === 1 ? "clădire" : "clădiri"} fără
+                    adresă în OpenStreetMap.
+                  </p>
+                )}
+              </div>
+            )}
 
             {item.affectedPopulation != null && item.affectedPopulation > 0 && (
               <div>
