@@ -14,9 +14,17 @@ export async function GET(req: Request) {
   const limit = Math.min(Number(searchParams.get("limit") ?? 10), 50);
   try {
     const supabase = await createSupabaseServer();
+    // Homepage widget only renders id/code/titlu/tip/status/sector/
+    // locatie/voturi_net/nr_comentarii. Skipping formal_text +
+    // descriere + imagini cuts the payload from ~3 KB/row to
+    // ~300 B/row — the widget pulls 5 rows so we save ~14 KB per
+    // homepage hit, on top of the already-aggressive 5 min CDN
+    // cache below.
     const { data, error } = await supabase
       .from("sesizari_feed")
-      .select("*")
+      .select(
+        "id,code,titlu,tip,status,sector,locatie,voturi_net,nr_comentarii",
+      )
       .in("status", ["nou", "in-lucru"])
       .order("voturi_net", { ascending: false })
       .limit(limit);

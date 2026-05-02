@@ -99,17 +99,24 @@ export async function GET(req: NextRequest) {
     });
   }
 
+  // Cache strategy:
+  //   - When ALL requested IDs are warm (warming=0), the response is
+  //     pure cached data and safe to share at the edge for an hour.
+  //     SWR a full day so any viewer past that hour still gets an
+  //     instant response while the background revalidates.
+  //   - When some IDs are still warming, we MUST NOT CDN-cache an
+  //     empty/partial response — the polling client would then
+  //     receive the same hollow payload until TTL expired, AND the
+  //     after() hook never fires for the cached response. Use a
+  //     short s-maxage so we cap repeat origin hits while still
+  //     letting warming complete.
+  const cacheControl =
+    cold.length === 0
+      ? "public, s-maxage=3600, stale-while-revalidate=86400"
+      : "public, s-maxage=10, stale-while-revalidate=60";
+
   return NextResponse.json(
     { data: out, warming: cold.length },
-    {
-      headers: {
-        // No CDN cache: the client polls this endpoint every 8s while
-        // warming is in flight, and a CDN-cached empty response would
-        // (a) hide newly-warmed buildings from the polling viewer, and
-        // (b) skip the after() hook so warming would stall. Redis
-        // already provides the durable cache layer.
-        "Cache-Control": "no-store",
-      },
-    },
+    { headers: { "Cache-Control": cacheControl } },
   );
 }

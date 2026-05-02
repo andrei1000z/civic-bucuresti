@@ -14,20 +14,38 @@ export const metadata: Metadata = {
   alternates: { canonical: "/sesizari-rezolvate" },
 };
 
-export const revalidate = 300;
+// Resolved gallery is curated, low churn (a handful per week).
+// 6 hours ISR keeps it fresh enough that a newly resolved sesizare
+// surfaces same-day without burning regenerations.
+export const revalidate = 21600;
 
-async function getResolved(): Promise<SesizareRow[]> {
+// Subset of SesizareRow with only the columns the gallery actually
+// renders — saves ~1-3 KB per row vs select("*"), times 48 rows
+// per render times every 6h.
+type ResolvedGalleryRow = Pick<
+  SesizareRow,
+  | "id"
+  | "code"
+  | "titlu"
+  | "tip"
+  | "locatie"
+  | "imagini"
+  | "resolved_photo_url"
+  | "resolved_at"
+>;
+
+async function getResolved(): Promise<ResolvedGalleryRow[]> {
   try {
     const admin = createSupabaseAdmin();
     const { data } = await admin
       .from("sesizari")
-      .select("*")
+      .select("id,code,titlu,tip,locatie,imagini,resolved_photo_url,resolved_at")
       .eq("status", "rezolvat")
       .eq("publica", true)
       .eq("moderation_status", "approved")
       .order("resolved_at", { ascending: false })
       .limit(48);
-    return (data as SesizareRow[] | null) ?? [];
+    return (data as ResolvedGalleryRow[] | null) ?? [];
   } catch {
     return [];
   }

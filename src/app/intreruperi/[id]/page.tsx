@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import {
   getInterruptionById,
-  getAllInterruptions,
+  getInterruptionsForCounty,
   INTRERUPERI,
   TYPE_COLORS,
   TYPE_ICONS,
@@ -66,11 +66,13 @@ export async function generateMetadata({
   };
 }
 
-// Short ISR window so the buildings list appears soon after the
-// background warmer fills the cache. Page itself is mostly static
-// content (provider, dates, addresses); 5 min is enough to feel
-// fresh without hammering the function.
-export const revalidate = 300;
+// Outage detail content is essentially fixed after the scrape:
+// provider, addresses, start/end times don't change. Status flips
+// occasionally (programat → in-desfasurare → finalizat). 1 hour
+// ISR strikes the balance — fresh enough that a status change
+// surfaces within the day, gentle enough on origin transfer to
+// not regenerate every 5 min × 50 outages.
+export const revalidate = 3600;
 
 // 60s function budget so the inline Overpass fallback (up to ~45s on
 // the slow kumi.systems mirror) can complete on a cache-cold page,
@@ -111,11 +113,13 @@ export default async function InterruptionDetail({
   const item = await getInterruptionById(id);
   if (!item) notFound();
 
-  const all = await getAllInterruptions();
-  const related = all
-    .filter(
-      (i) => i.id !== item.id && i.county === item.county && i.status !== "finalizat",
-    )
+  // County-scoped fetch instead of pulling the full national catalog
+  // just to filter to the same county. Same in-memory store, but the
+  // helper trims the working set right away — and once we cache the
+  // store layer per-county (TODO) this becomes a real DB-side filter.
+  const sameCounty = await getInterruptionsForCounty(item.county);
+  const related = sameCounty
+    .filter((i) => i.id !== item.id && i.status !== "finalizat")
     .slice(0, 4);
 
   // Pull the OSM building polygons (cached or freshly fetched) and

@@ -6,7 +6,11 @@ import { listPetitii } from "@/lib/petitii/repository";
 import { CollectionPageJsonLd } from "@/components/JsonLd";
 import { SITE_URL, PETITIE_CATEGORII } from "@/lib/constants";
 
-export const revalidate = 60;
+// Petitions list barely changes hour-to-hour — moderators add a
+// handful per week. 60 s ISR was burning regenerations for no UX
+// gain; 30 min still keeps the page feeling current and slashes
+// origin transfer ~30×.
+export const revalidate = 1800;
 
 export const metadata: Metadata = {
   title: "Petiții civice — Civia",

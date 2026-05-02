@@ -56,9 +56,11 @@ export const metadata: Metadata = {
   ],
 };
 
-// 5 min ISR — paired with the 6h scrape cycle; the page-served list
-// can stay cached for a few minutes without users seeing a stale catalog.
-export const revalidate = 300;
+// 30 min ISR — paired with the 6h scrape cycle, this gives users a
+// recent-enough catalog while cutting regenerations 6× vs the old
+// 5-min window. The page is also relatively heavy (full outage
+// list + map), so each save matters.
+export const revalidate = 1800;
 
 export default async function IntreruperiPage() {
   const all = await getActiveInterruptions();

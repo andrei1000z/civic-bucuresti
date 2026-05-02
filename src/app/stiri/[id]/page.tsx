@@ -48,17 +48,25 @@ interface StireRow {
 
 const getSupabase = createSupabaseAnon;
 
-async function getRelatedArticles(stire: StireRow): Promise<StireRow[]> {
+// The "Articole similare" rail only needs id/title/source/category/
+// published_at/image_url. Skipping content + excerpt + ai_summary
+// drops ~10-30 KB per row off the page payload, times 4 related
+// articles per render times every revalidate cycle.
+type RelatedStireRow = Pick<
+  StireRow,
+  "id" | "title" | "source" | "category" | "published_at" | "image_url"
+>;
+
+async function getRelatedArticles(stire: StireRow): Promise<RelatedStireRow[]> {
   try {
-    // Get articles from same category + same counties, excluding current
     const { data } = await getSupabase()
       .from("stiri_cache")
-      .select("*")
+      .select("id,title,source,category,published_at,image_url")
       .neq("id", stire.id)
       .eq("category", stire.category)
       .order("published_at", { ascending: false })
       .limit(4);
-    return (data ?? []) as StireRow[];
+    return (data ?? []) as RelatedStireRow[];
   } catch {
     return [];
   }

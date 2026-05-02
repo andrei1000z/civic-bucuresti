@@ -18,7 +18,10 @@ import { SharePetitie } from "./SharePetitie";
 import { AiSummary } from "@/app/stiri/[id]/AiSummary";
 import { getOrGeneratePetitieAiSummary } from "@/lib/petitii/ai-summary";
 
-export const revalidate = 60;
+// Petition detail content (title, body, AI summary) is essentially
+// frozen after creation. The signature count comes from the external
+// platform, not us. 1 hour ISR is more than enough freshness.
+export const revalidate = 3600;
 
 export async function generateMetadata({
   params,
