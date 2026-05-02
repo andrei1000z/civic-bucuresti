@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Megaphone, ArrowRight, ExternalLink, Sparkles } from "lucide-react";
+import { Megaphone, ArrowRight, ExternalLink } from "lucide-react";
 import { listPetitii } from "@/lib/petitii/repository";
 import { CollectionPageJsonLd } from "@/components/JsonLd";
 import { SITE_URL, PETITIE_CATEGORII } from "@/lib/constants";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 // Petitions list barely changes hour-to-hour — moderators add a
 // handful per week. 60 s ISR was burning regenerations for no UX
@@ -36,35 +37,25 @@ export default async function PetitiiPage() {
         url={`${SITE_URL}/petitii`}
       />
 
-      {/* Hero — purple gradient distinguishes the petition surface from the
-          green sesizari surface, while keeping the same layout pattern. */}
-      <header className="relative mb-8 overflow-hidden rounded-[var(--radius-lg)] bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-900 p-6 md:p-8 text-white shadow-[var(--shadow-3)]">
-        <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none" aria-hidden="true" />
-        <div className="absolute -bottom-16 -left-8 w-72 h-72 rounded-full bg-fuchsia-400/20 blur-3xl pointer-events-none" aria-hidden="true" />
-        <div className="relative flex items-start gap-4">
-          <div
-            className="w-12 h-12 rounded-[var(--radius-xs)] bg-white/15 backdrop-blur-sm ring-2 ring-white/30 grid place-items-center shrink-0"
-            aria-hidden="true"
-          >
-            <Megaphone size={22} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-4xl font-extrabold leading-tight mb-2">
-              Petiții civice
-            </h1>
-            <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-2xl">
-              Curatat de Civia. Click pe petiție → vezi argumentele, sinteza AI și sursa oficială
-              (Declic / Avaaz / etc.) unde semnezi. Spre deosebire de o sesizare individuală,
-              petiția adună <strong>multe voci pentru aceeași cauză</strong>.
-            </p>
-            <p className="text-[11px] text-white/70 mt-3 inline-flex items-center gap-1.5">
-              <Sparkles size={11} aria-hidden="true" />
-              {active.length} {active.length === 1 ? "petiție activă" : "petiții active"}
-              {closed.length > 0 && ` · ${closed.length} încheiate`}
-            </p>
-          </div>
-        </div>
-      </header>
+      <PageHero
+        title="Petiții civice"
+        icon={Megaphone}
+        gradient={HERO_GRADIENT.petition}
+        description={
+          <>
+            Curatat de Civia. Click pe petiție → vezi argumentele, sinteza
+            AI și sursa oficială (Declic / Avaaz / petitie.civica.ro) unde
+            semnezi. Spre deosebire de o sesizare individuală, petiția adună{" "}
+            <strong>multe voci pentru aceeași cauză</strong>.
+          </>
+        }
+        tagline={
+          <>
+            {active.length} {active.length === 1 ? "petiție activă" : "petiții active"}
+            {closed.length > 0 && ` · ${closed.length} încheiate`}
+          </>
+        }
+      />
 
       {petitii.length === 0 ? (
         <EmptyState />
