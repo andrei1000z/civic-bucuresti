@@ -159,11 +159,33 @@ async function callAiWithFallback(
     { provider: "groq" as const, model: GROQ_MODEL_FAST, run: groqCall(GROQ_MODEL_FAST, 1200) },
   ];
 
+  // Same MIN_LEN guard as stiri — empty/short responses cascade to
+  // the next provider instead of being accepted as success.
+  const MIN_LEN = 80;
+
   for (let i = 0; i < candidates.length; i++) {
     const cand = candidates[i]!;
     const isLast = i === candidates.length - 1;
     try {
-      return await cand.run();
+      const raw = await cand.run();
+      if (raw && raw.length >= MIN_LEN) return raw;
+      if (!isLast) {
+        const next = candidates[i + 1]!;
+        Sentry.captureMessage("petitii AI returned empty/short response, falling back", {
+          level: "info",
+          tags: { kind: "petitii_ai_fallback_empty" },
+          extra: {
+            petitieId: petitie.id,
+            fromProvider: cand.provider,
+            fromModel: cand.model,
+            toProvider: next.provider,
+            toModel: next.model,
+            rawLength: raw?.length ?? 0,
+          },
+        });
+        continue;
+      }
+      return raw ?? null;
     } catch (err) {
       if (isRateLimited(err) && !isLast) {
         const next = candidates[i + 1]!;
@@ -176,6 +198,23 @@ async function callAiWithFallback(
             fromModel: cand.model,
             toProvider: next.provider,
             toModel: next.model,
+          },
+        });
+        continue;
+      }
+      // Non-rate-limit error — try next instead of crashing.
+      if (!isLast) {
+        const next = candidates[i + 1]!;
+        Sentry.captureMessage("petitii AI threw, falling back to next provider", {
+          level: "warning",
+          tags: { kind: "petitii_ai_fallback_error" },
+          extra: {
+            petitieId: petitie.id,
+            fromProvider: cand.provider,
+            fromModel: cand.model,
+            toProvider: next.provider,
+            toModel: next.model,
+            errorMessage: err instanceof Error ? err.message.slice(0, 200) : String(err).slice(0, 200),
           },
         });
         continue;

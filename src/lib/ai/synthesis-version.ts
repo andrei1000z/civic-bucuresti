@@ -33,5 +33,15 @@
  *       proper structured 5-section briefs. Stiri prompt also tightened
  *       with explicit "value-add" rules + "if your output looks like
  *       the excerpt, you failed; reorganise" instruction.
+ *   7 — v6 chain still cached excerpt-as-summary on a lot of rows
+ *       because of a bug in the fallback loop: Gemini sometimes
+ *       returns an empty content field (safety filter on political
+ *       articles, thinking-only response with all max_tokens spent
+ *       on internal reasoning, mid-output truncation), and the loop
+ *       accepted the empty string as success instead of falling
+ *       through to Groq. Fix: reject responses < 80 chars and try
+ *       the next provider; non-rate-limit errors also cascade now
+ *       instead of crashing. Bump invalidates v6 cache so the next
+ *       page view of any v6 article regenerates properly.
  */
-export const AI_SUMMARY_VERSION = 6;
+export const AI_SUMMARY_VERSION = 7;

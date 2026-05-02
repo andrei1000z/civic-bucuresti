@@ -172,12 +172,45 @@ async function callAiWithFallback(
     { provider: "groq" as const, model: GROQ_MODEL_FAST, run: groqCall(GROQ_MODEL_FAST, 900) },
   ];
 
+  // Minimum chars we'll accept as a "real" synthesis. Below this it's
+  // either an empty response (Gemini safety-filtered, thinking-only,
+  // or truncated mid-output), so we treat it as a failure and try
+  // the next provider instead of returning it as success.
+  const MIN_LEN = 80;
+
   for (let i = 0; i < candidates.length; i++) {
     const cand = candidates[i]!;
     const isLast = i === candidates.length - 1;
     try {
       const raw = await cand.run();
-      return { raw, modelUsed: `${cand.provider}:${cand.model}` };
+      if (raw && raw.length >= MIN_LEN) {
+        return { raw, modelUsed: `${cand.provider}:${cand.model}` };
+      }
+      // Empty / too-short response: log + try next provider.
+      // Common causes: Gemini safety-filtered the prompt (politics,
+      // sensitive content), Gemini 2.5 spent all its max_tokens on
+      // thinking and emitted nothing, or the model truncated mid-
+      // output. Either way, we don't want to "succeed" with garbage.
+      if (!isLast) {
+        const next = candidates[i + 1]!;
+        Sentry.captureMessage("stiri AI returned empty/short response, falling back", {
+          level: "info",
+          tags: { kind: "stiri_ai_fallback_empty" },
+          extra: {
+            source,
+            fromProvider: cand.provider,
+            fromModel: cand.model,
+            toProvider: next.provider,
+            toModel: next.model,
+            rawLength: raw?.length ?? 0,
+          },
+        });
+        continue;
+      }
+      // Last candidate also returned nothing — return what we have so
+      // the caller can decide what to do (generate() will fall back
+      // to excerpt at this point).
+      return { raw: raw ?? "", modelUsed: `${cand.provider}:${cand.model}` };
     } catch (err) {
       if (isRateLimited(err) && !isLast) {
         const next = candidates[i + 1]!;
@@ -190,6 +223,25 @@ async function callAiWithFallback(
             fromModel: cand.model,
             toProvider: next.provider,
             toModel: next.model,
+          },
+        });
+        continue;
+      }
+      // Non-rate-limit error — also try the next provider rather than
+      // crashing. Network blips, timeouts, malformed responses all
+      // get a second chance.
+      if (!isLast) {
+        const next = candidates[i + 1]!;
+        Sentry.captureMessage("stiri AI threw, falling back to next provider", {
+          level: "warning",
+          tags: { kind: "stiri_ai_fallback_error" },
+          extra: {
+            source,
+            fromProvider: cand.provider,
+            fromModel: cand.model,
+            toProvider: next.provider,
+            toModel: next.model,
+            errorMessage: err instanceof Error ? err.message.slice(0, 200) : String(err).slice(0, 200),
           },
         });
         continue;
