@@ -1544,11 +1544,14 @@ function SuccessScreen({
         ? buildGmailIosLink(emailInput)
         : null;
 
-  // Scroll to top so the success screen is visible. The form was
-  // taller than the success screen — without scroll-reset the user
-  // ends up on empty whitespace below the (now-removed) form bottom.
+  // Scroll the success card itself into view (not the page top) —
+  // the page has the PageHero + quick links above the form, and
+  // landing at scroll=0 puts the user above the success message.
+  // scrollIntoView with block:"start" puts the success card right
+  // at the top of the viewport.
+  const cardRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
   // Auto-open ONLY on desktop. On mobile, programmatic click on
@@ -1598,7 +1601,7 @@ function SuccessScreen({
   };
 
   return (
-    <div className="max-w-md mx-auto py-8 text-center">
+    <div ref={cardRef} className="max-w-md mx-auto py-8 text-center scroll-mt-4">
       {/* aria-live polite — screen readers announce the submit success
           + the code without interrupting whatever they were reading. */}
       <div role="status" aria-live="polite" className="sr-only">
