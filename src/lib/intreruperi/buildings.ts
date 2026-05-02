@@ -137,6 +137,14 @@ async function queryOverpass(
         out.push(entry);
         if (out.length >= MAX_BUILDINGS) break;
       }
+      // Empty result from a mirror is treated as a transient soft
+      // failure (slot/throttle/sat-down area) and we move on to the
+      // next mirror instead of caching nothing. Outages always sit
+      // in inhabited areas — `way["building"](around:200, …)` should
+      // never legitimately return 0 in Bucharest/Cluj/Timișoara.
+      // Returning early on the first 0-result mirror was the bug
+      // that kept the v2 cache empty for hours.
+      if (out.length === 0) continue;
       return out;
     } catch {
       // try next endpoint
