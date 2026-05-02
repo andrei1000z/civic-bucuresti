@@ -233,12 +233,18 @@ Răspunde JSON:
 
     let content: string | null = null;
     let lastError: unknown = null;
+    let usedProvider = "unknown";
+    let usedModel = "unknown";
     for (let i = 0; i < candidates.length; i++) {
       const cand = candidates[i]!;
       const isLast = i === candidates.length - 1;
       try {
         content = await cand.run();
-        if (content) break;
+        if (content) {
+          usedProvider = cand.provider;
+          usedModel = cand.model;
+          break;
+        }
       } catch (err) {
         lastError = err;
         if (isRateLimited(err) && !isLast) {
@@ -281,7 +287,18 @@ Răspunde JSON:
 
     parsed.formal_text = normalizeFormatting(parsed.formal_text);
 
-    return NextResponse.json({ data: parsed });
+    // Debug headers — open DevTools → Network → /api/ai/improve →
+    // Headers to see which provider actually generated the text.
+    // Useful when debugging "did Gemini fire?" without leaking keys.
+    return NextResponse.json(
+      { data: parsed },
+      {
+        headers: {
+          "X-AI-Provider": usedProvider,
+          "X-AI-Model": usedModel,
+        },
+      },
+    );
   } catch (e) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: "Input invalid" }, { status: 400 });
