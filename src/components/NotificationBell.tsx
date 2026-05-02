@@ -291,7 +291,7 @@ export function NotificationBell() {
       <button
         type="button"
         onClick={handleOpen}
-        className="relative w-9 h-9 inline-flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors"
+        className="relative w-11 h-11 sm:w-9 sm:h-9 inline-flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         aria-label={unread > 0 ? `Notificări (${unread} necitite)` : "Notificări"}
         aria-expanded={open}
         aria-haspopup="menu"

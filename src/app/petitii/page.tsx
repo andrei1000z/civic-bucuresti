@@ -69,7 +69,7 @@ export default async function PetitiiPage() {
                   aria-hidden="true"
                 >
                   <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-60 animate-ping" />
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-60 motion-safe:animate-ping" />
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500" />
                   </span>
                 </span>

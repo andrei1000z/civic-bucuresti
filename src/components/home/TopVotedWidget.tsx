@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ThumbsUp, MapPin, ArrowRight } from "lucide-react";
+import { ThumbsUp, MapPin, ArrowRight, Send } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
 
@@ -70,14 +70,21 @@ export function TopVotedWidget() {
 
   if (isEmpty) {
     return (
-      <div className="flex items-center justify-center min-h-[200px] p-6 bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-md)] text-center">
+      <div className="flex items-center justify-center min-h-[220px] p-6 bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-md)] text-center">
         <div>
           <p className="text-sm font-medium text-[var(--color-text)]">
             Nicio sesizare votată încă
           </p>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">
-            Trimite prima ta sesizare și votează ce contează pentru tine.
+          <p className="text-xs text-[var(--color-text-muted)] mt-1 mb-4">
+            Fii primul cetățean care raportează o problemă civică.
           </p>
+          <Link
+            href="/sesizari"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-full)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+          >
+            <Send size={14} aria-hidden="true" />
+            Fă prima sesizare
+          </Link>
         </div>
       </div>
     );

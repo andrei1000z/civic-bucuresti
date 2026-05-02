@@ -197,7 +197,7 @@ function Countdown({ range }: { range: ExtractedDateRange }) {
       <div className="p-4 rounded-[var(--radius-xs)] bg-emerald-500/8 border border-emerald-500/30 mb-1">
         <div className="flex items-center gap-2 mb-2">
           <span className="relative flex h-2 w-2" aria-hidden="true">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60 animate-ping" />
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60 motion-safe:animate-ping" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
           <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">

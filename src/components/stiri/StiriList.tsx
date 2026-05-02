@@ -246,7 +246,7 @@ export function StiriList() {
         {!loading && rows.length > 0 && (
           <span className="inline-flex items-center gap-1.5 text-[11px] text-[var(--color-text-muted)]">
             <span className="relative flex h-2 w-2" aria-hidden="true">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60 animate-ping" />
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60 motion-safe:animate-ping" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
             Live · refresh la 30s

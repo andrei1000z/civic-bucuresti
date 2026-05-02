@@ -346,9 +346,9 @@ export function CivicAssistant() {
                   <span className="sr-only">{msg.role === "user" ? "Tu: " : "Asistent: "}</span>
                   {msg.content || (streaming && i === messages.length - 1 ? (
                     <span className="inline-flex gap-1" aria-label="Asistentul scrie">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDelay: "0ms" }} aria-hidden="true" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDelay: "150ms" }} aria-hidden="true" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDelay: "300ms" }} aria-hidden="true" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] motion-safe:animate-bounce" style={{ animationDelay: "0ms" }} aria-hidden="true" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] motion-safe:animate-bounce" style={{ animationDelay: "150ms" }} aria-hidden="true" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-text-muted)] motion-safe:animate-bounce" style={{ animationDelay: "300ms" }} aria-hidden="true" />
                     </span>
                   ) : null)}
                 </div>
