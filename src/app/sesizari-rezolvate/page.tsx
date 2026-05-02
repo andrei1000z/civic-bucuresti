@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, CheckCircle2, MapPin, Calendar, Send, Sparkles } from "lucide-react";
+import { CheckCircle2, MapPin, Calendar, Send } from "lucide-react";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { SESIZARE_TIPURI } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 import type { SesizareRow } from "@/lib/supabase/types";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
   title: "Probleme rezolvate — Civia",
@@ -63,41 +64,20 @@ export default async function SesizariResolvatePage() {
 
   return (
     <div className="container-narrow py-8 md:py-12">
-      <Link
-        href="/sesizari"
-        className="inline-flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] mb-5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
-      >
-        <ArrowLeft size={13} aria-hidden="true" />
-        Trimit și eu o sesizare
-      </Link>
-
-      <header className="relative mb-10 overflow-hidden rounded-[var(--radius-lg)] bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 p-6 md:p-8 text-white shadow-[var(--shadow-3)]">
-        <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none" aria-hidden="true" />
-        <div className="absolute -bottom-16 -left-8 w-72 h-72 rounded-full bg-teal-300/20 blur-3xl pointer-events-none" aria-hidden="true" />
-        <div className="relative flex items-start gap-4">
-          <div
-            className="w-12 h-12 rounded-[var(--radius-xs)] bg-white/15 backdrop-blur-sm ring-2 ring-white/30 grid place-items-center shrink-0"
-            aria-hidden="true"
-          >
-            <CheckCircle2 size={22} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-4xl font-extrabold leading-tight mb-2">
-              Probleme rezolvate — dovada că funcționează
-            </h1>
-            <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-2xl">
-              Fiecare poză „înainte / după" de mai jos este o sesizare trimisă prin Civia, acționată
-              de primărie sau de autoritate. Scris-am, a răspuns, au reparat. Așa arată implicarea
-              civică reală.
-            </p>
-            <p className="text-[11px] text-white/70 mt-3 inline-flex items-center gap-1.5">
-              <Sparkles size={11} aria-hidden="true" />
-              {withPhotos.length} {withPhotos.length === 1 ? "poveste" : "povești"} reparate cu poză „după"
-              · {resolved.length} sesizări rezolvate total
-            </p>
-          </div>
-        </div>
-      </header>
+      <PageHero
+        backHref="/sesizari"
+        backLabel="Trimit și eu o sesizare"
+        title="Probleme rezolvate — dovada că funcționează"
+        icon={CheckCircle2}
+        gradient={HERO_GRADIENT.success}
+        description={`Fiecare poză „înainte / după" de mai jos este o sesizare trimisă prin Civia, acționată de primărie sau de autoritate. Scris-am, au răspuns, au reparat. Așa arată implicarea civică reală.`}
+        tagline={
+          <>
+            {withPhotos.length} {withPhotos.length === 1 ? "poveste" : "povești"} reparate cu
+            poză „după" · {resolved.length} sesizări rezolvate total
+          </>
+        }
+      />
 
       {resolved.length === 0 ? (
         <div className="bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[var(--radius-md)] p-10 text-center">

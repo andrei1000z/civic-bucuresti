@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Eye, Search, CheckCircle2, Send, Sparkles, Scale } from "lucide-react";
+import { Eye, Search, CheckCircle2, Send, Scale } from "lucide-react";
 import { SesizareForm } from "@/components/sesizari/SesizareForm";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
   title: "Sesizări — Civia",
@@ -81,33 +82,19 @@ export default async function SesizariPage() {
     : STATIC_QUICK_LINKS;
   return (
     <div className="container-narrow py-8 md:py-12">
-      {/* Hero header — same gradient pattern used across /admin, /cont,
-          /urmareste so the sesizari surface clusters visually. */}
-      <header className="relative mb-8 overflow-hidden rounded-[var(--radius-lg)] bg-gradient-to-br from-[var(--color-primary)] via-emerald-700 to-indigo-800 p-6 md:p-8 text-white shadow-[var(--shadow-3)]">
-        <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none" aria-hidden="true" />
-        <div className="absolute -bottom-16 -left-8 w-72 h-72 rounded-full bg-indigo-400/20 blur-3xl pointer-events-none" aria-hidden="true" />
-        <div className="relative flex items-start gap-4">
-          <div
-            className="w-12 h-12 rounded-[var(--radius-xs)] bg-white/15 backdrop-blur-sm ring-2 ring-white/30 grid place-items-center shrink-0"
-            aria-hidden="true"
-          >
-            <Send size={22} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-[family-name:var(--font-sora)] text-2xl md:text-4xl font-extrabold leading-tight mb-2">
-              Trimite o sesizare formală
-            </h1>
-            <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-2xl">
-              Descrie problema în română simplă și atașează o poză. AI-ul rescrie textul pentru a fi
-              luat în serios la primărie, iar noi alegem automat autoritatea competentă.
-            </p>
-            <p className="text-[11px] text-white/70 mt-3 inline-flex items-center gap-1.5">
-              <Sparkles size={11} aria-hidden="true" />
-              2 minute de la tine, 30 de zile pentru răspunsul lor (OG 27/2002).
-            </p>
-          </div>
-        </div>
-      </header>
+      <PageHero
+        title="Trimite o sesizare formală"
+        icon={Send}
+        gradient={HERO_GRADIENT.primary}
+        description={
+          <>
+            Descrie problema în română simplă, atașează o poză, alege locația.
+            AI-ul rescrie textul în limbaj formal cu temei legal, noi alegem
+            singuri autoritatea competentă.
+          </>
+        }
+        tagline="2 minute de la tine, 30 de zile pentru răspunsul lor (OG 27/2002)."
+      />
 
       {/* Quick links — colored accent ring + icon chip per item.
           Grid scales to the link count so two cards don't stretch
