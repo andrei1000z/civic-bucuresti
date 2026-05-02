@@ -11,6 +11,7 @@ import {
   ArrowRight,
   Edit3,
   Inbox,
+  Trash2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { STATUS_COLORS, STATUS_LABELS, SESIZARE_TIPURI } from "@/lib/constants";
@@ -76,6 +77,28 @@ export default function AdminSesizariPage() {
       .then((j) => setPendingTickets((j.data ?? []).length))
       .catch(() => {});
   }, []);
+
+  const del = async (code: string, titlu: string) => {
+    // window.confirm intentionally — we want a hard browser modal
+    // because Trash2 is destructive (cascades votes/comments/timeline).
+    // No undo. The pretty in-page confirm modal lives elsewhere; here
+    // we keep the admin flow keyboard-fast.
+    if (!confirm(`Ștergi sesizarea „${titlu}"?\n\nVoturile, comentariile și istoricul se șterg automat (CASCADE). Acțiunea NU poate fi anulată.`)) {
+      return;
+    }
+    setActing(`del-${code}`);
+    try {
+      const res = await fetch(`/api/admin/sesizari/${code}`, { method: "DELETE" });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j.error || "Eroare ștergere");
+      setRows((prev) => prev.filter((r) => r.code !== code));
+      toast(`Sesizarea ${code} a fost ștearsă`, "success");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Eroare la ștergere", "error");
+    } finally {
+      setActing(null);
+    }
+  };
 
   const polish = async (code: string) => {
     setActing(`polish-${code}`);
@@ -553,6 +576,19 @@ export default function AdminSesizariPage() {
                     title="Schimbă status + paste răspuns autoritate"
                   >
                     <Edit3 size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => del(s.code, s.titlu)}
+                    disabled={acting === `del-${s.code}`}
+                    className="w-9 h-9 rounded-[var(--radius-xs)] bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 flex items-center justify-center hover:bg-rose-500/20 hover:border-rose-500/50 disabled:opacity-50 transition-colors"
+                    title="Șterge sesizarea (CASCADE pe voturi/comentarii/timeline)"
+                  >
+                    {acting === `del-${s.code}` ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={14} />
+                    )}
                   </button>
                 </div>
               </div>

@@ -1456,14 +1456,28 @@ function SuccessScreen({
   const [, setAutoOpened] = useState(false);
   const [, setPopupBlocked] = useState(false);
 
-  // Auto-open email provider on mount. If user has @gmail address → Gmail.
-  // Otherwise → mailto: (system default).
+  // Auto-open email provider on mount.
+  //
+  // Routing logic:
+  // - Mobile (Android/iOS) → ALWAYS mailto:. The OS routes mailto:
+  //   to the user's default mail app (Gmail app on Android, iOS Mail
+  //   or Outlook on iPhone). Opening Gmail web on mobile is broken
+  //   when the user isn't logged into mail.google.com in the browser
+  //   (extremely common — most Android users have Gmail app but no
+  //   browser session).
+  // - Desktop with @gmail address → Gmail web (reliable, opens in a
+  //   new tab where user is usually already logged in).
+  // - Desktop other → mailto: (default mail client).
   useEffect(() => {
+    const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+    const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
     const emailAddr = emailInput.author_email?.toLowerCase() ?? "";
-    const useGmail = emailAddr.endsWith("@gmail.com") || emailAddr.endsWith("@googlemail.com");
-    const url = useGmail ? buildGmailLink(emailInput) : buildMailtoLink(emailInput);
+    const isGmailAddr =
+      emailAddr.endsWith("@gmail.com") || emailAddr.endsWith("@googlemail.com");
+    const useGmailWeb = isGmailAddr && !isMobile;
+    const url = useGmailWeb ? buildGmailLink(emailInput) : buildMailtoLink(emailInput);
     try {
-      if (useGmail) {
+      if (useGmailWeb) {
         const win = window.open(url, "_blank", "noopener,noreferrer");
         if (!win || win.closed || typeof win.closed === "undefined") {
           setPopupBlocked(true);
@@ -1471,7 +1485,10 @@ function SuccessScreen({
           setAutoOpened(true);
         }
       } else {
-        // mailto: — use invisible link click to avoid page navigation loss
+        // mailto: — use invisible link click to avoid page navigation
+        // loss. On mobile this hands off to the native mail app
+        // (Gmail / iOS Mail / Outlook) without leaving the browser
+        // tab in a broken state.
         const a = document.createElement("a");
         a.href = url;
         a.style.display = "none";
