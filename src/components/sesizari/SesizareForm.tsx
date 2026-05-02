@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Locate,
   Copy,
@@ -137,6 +137,46 @@ export function SesizareForm() {
     setData((d) => ({ ...d, [key]: value }));
     setError(null);
   };
+
+  // ── Web Share Target prefill ──────────────────────────────────────
+  // When the user shares a photo / link / text from another app via
+  // the OS share sheet → "Civia", they land here at /sesizari?from=share
+  // with the shared content already in the URL (and the photo already
+  // uploaded by /sesizari/share/route.ts). Pre-fill the form so the
+  // user just has to confirm and submit.
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("from") !== "share") return;
+    const sharedTitle = searchParams.get("title");
+    const sharedDesc = searchParams.get("desc");
+    const sharedLink = searchParams.get("link");
+    const sharedPhoto = searchParams.get("photo");
+
+    setData((d) => {
+      const next = { ...d };
+      if (sharedTitle && !d.titlu) next.titlu = sharedTitle;
+      // Build the description from text + link if both came in. The
+      // link by itself is rarely useful; combined with a description
+      // it's context for the AI classifier.
+      const descParts: string[] = [];
+      if (sharedDesc) descParts.push(sharedDesc);
+      if (sharedLink) descParts.push(`Sursă: ${sharedLink}`);
+      if (descParts.length > 0 && !d.descriere) {
+        next.descriere = descParts.join("\n\n");
+      }
+      return next;
+    });
+    if (sharedPhoto) {
+      setImagini((prev) => (prev.length === 0 ? [sharedPhoto] : prev));
+    }
+    // Clean the query string so a refresh doesn't re-prefill on top
+    // of the user's edits. replaceState avoids adding to history.
+    if (typeof window !== "undefined") {
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, "", cleanUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Draft persistence — snapshot the form every ~4s so a refresh /
   // accidental tab close doesn't vaporize what the user typed.

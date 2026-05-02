@@ -155,6 +155,27 @@ export default function RootLayout({
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} crossOrigin="anonymous" />
         <link rel="alternate" type="application/rss+xml" title="Sesizări Civia" href="/feed.xml" />
         <link rel="alternate" type="application/rss+xml" title="Întreruperi Civia" href="/intreruperi/rss" />
+
+        {/* ── iOS PWA meta tags ────────────────────────────────────────
+            Safari doesn't read most of the W3C manifest; it relies on
+            its own apple-mobile-web-app-* + apple-touch-* family.
+            Without these, "Add to Home Screen" launches in a regular
+            browser tab with the URL bar — defeats the whole PWA point.
+        */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Civia" />
+        {/* Disable iOS's auto-linkification of phone numbers — we
+            already render proper tel: links where appropriate, and
+            the auto-link mangles styling on numeric IDs (sesizare
+            codes, statistics). */}
+        <meta name="format-detection" content="telephone=no" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+        <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+        <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png" />
+        {/* Mask icon for Safari pinned tabs — falls back to favicon
+            if absent. We don't ship one yet; favicon-32 is fine. */}
         {/* Preload the #1 font weight used above the fold (hero) for faster
             LCP on the homepage + county pages. Next font already fingerprints
             it so cache hits are immediate. */}

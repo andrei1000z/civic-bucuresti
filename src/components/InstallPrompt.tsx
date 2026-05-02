@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, X } from "lucide-react";
+import { Download, X, Share, Plus } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -10,24 +10,104 @@ interface BeforeInstallPromptEvent extends Event {
 
 const DISMISS_KEY = "civia_install_dismissed";
 const VISIT_COUNT_KEY = "civia_visit_count";
+const UPDATE_DISMISS_KEY = "civia_sw_update_dismissed";
 // Conversion 1.5% (5 din 335 prompts) — prea agresiv. Strategie nouă:
 // nu mai arătăm prompt-ul la prima vizită, doar de la a 3-a încolo, când
 // userul a demonstrat interes real. Acceptarea ar trebui să crească
 // pentru că oamenii „familiar" cu produsul instalează cu convingere.
 const MIN_VISITS_BEFORE_PROMPT = 3;
+const DISMISS_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+/** Already running as a standalone PWA — don't show install UI. */
+function isStandalone(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia?.("(display-mode: standalone)").matches ||
+    // iOS Safari uses navigator.standalone instead of the W3C media query.
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
+/** True for iOS Safari (Chrome on iOS uses WebKit too — handled below). */
+function isIOS(): boolean {
+  if (typeof window === "undefined") return false;
+  const ua = window.navigator.userAgent;
+  // iPadOS reports as Mac on iPad; the touch check disambiguates.
+  return (
+    /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+/** True specifically for iOS Safari (PWA install isn't supported in
+ *  iOS Chrome / Firefox webviews — they reuse Safari's stack but
+ *  don't expose Add-to-Home-Screen). */
+function isIOSSafari(): boolean {
+  if (!isIOS()) return false;
+  const ua = window.navigator.userAgent;
+  // Excludes CriOS (Chrome iOS), FxiOS (Firefox iOS), EdgiOS (Edge iOS)
+  return !/CriOS|FxiOS|EdgiOS|GSA/.test(ua) && /Safari/.test(ua);
+}
 
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
+  const [iosVisible, setIosVisible] = useState(false);
+  const [updateReady, setUpdateReady] = useState(false);
 
-  // Register the service worker once
+  // Register the service worker once + listen for update events
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
     // Only register in production to avoid dev-mode caching headaches
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") return;
-    navigator.serviceWorker.register("/sw.js").catch(() => {
-      // silent fail — SW is progressive enhancement
-    });
+
+    let registration: ServiceWorkerRegistration | null = null;
+
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((reg) => {
+        registration = reg;
+        // If a worker is already waiting (user previously dismissed
+        // the update prompt and reopened the tab), surface again.
+        if (reg.waiting) {
+          setUpdateReady(true);
+        }
+        // New SW arrived during this session — wait for install,
+        // then prompt to refresh.
+        reg.addEventListener("updatefound", () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener("statechange", () => {
+            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+              // Respect user dismissal of an earlier update prompt for 4h
+              const dismissedAt = parseInt(
+                localStorage.getItem(UPDATE_DISMISS_KEY) ?? "0",
+                10,
+              );
+              if (Date.now() - dismissedAt < 4 * 60 * 60 * 1000) return;
+              setUpdateReady(true);
+            }
+          });
+        });
+      })
+      .catch(() => {
+        // silent fail — SW is progressive enhancement
+      });
+
+    // Reload once when the new SW takes over (after we postMessage
+    // SKIP_WAITING). The `controller` change fires after activate.
+    let reloaded = false;
+    const onControllerChange = () => {
+      if (reloaded) return;
+      reloaded = true;
+      window.location.reload();
+    };
+    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
+
+    return () => {
+      navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+      registration = null;
+    };
   }, []);
 
   // Increment visit counter on every mount
@@ -36,23 +116,35 @@ export function InstallPrompt() {
     try {
       const count = parseInt(localStorage.getItem(VISIT_COUNT_KEY) ?? "0", 10) + 1;
       localStorage.setItem(VISIT_COUNT_KEY, String(count));
-    } catch { /* quota ignored */ }
+    } catch {
+      /* quota ignored */
+    }
   }, []);
 
-  // Listen for install prompt
+  // Listen for Chrome's install prompt event
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (isStandalone()) return; // Already installed
+
     // Respect user dismissal (shows again after 30 days)
     const dismissed = localStorage.getItem(DISMISS_KEY);
     if (dismissed) {
       const dismissedAt = parseInt(dismissed, 10);
-      if (Date.now() - dismissedAt < 30 * 24 * 60 * 60 * 1000) return;
+      if (Date.now() - dismissedAt < DISMISS_TTL_MS) return;
     }
 
     // Visit-count gate — don't bother first-time visitors
     const visitCount = parseInt(localStorage.getItem(VISIT_COUNT_KEY) ?? "0", 10);
     if (visitCount < MIN_VISITS_BEFORE_PROMPT) return;
 
+    // iOS Safari path — no `beforeinstallprompt` event exists; we
+    // surface manual A2HS instructions instead.
+    if (isIOSSafari()) {
+      const t = setTimeout(() => setIosVisible(true), 5000);
+      return () => clearTimeout(t);
+    }
+
+    // Chrome / Edge / Samsung Internet path — wait for the event.
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -69,13 +161,16 @@ export function InstallPrompt() {
     if (!deferredPrompt) return;
     await deferredPrompt.prompt();
     const choice = await deferredPrompt.userChoice;
-    // Track outcome separately for conversion analytics
     if (typeof window !== "undefined") {
-      import("@/components/analytics/CiviaTracker").then(({ trackCustomEvent }) => {
-        trackCustomEvent(
-          choice.outcome === "accepted" ? "pwa-install-accepted" : "pwa-install-dismissed",
-        );
-      }).catch(() => { /* ignore */ });
+      import("@/components/analytics/CiviaTracker")
+        .then(({ trackCustomEvent }) => {
+          trackCustomEvent(
+            choice.outcome === "accepted" ? "pwa-install-accepted" : "pwa-install-dismissed",
+          );
+        })
+        .catch(() => {
+          /* ignore */
+        });
     }
     setDeferredPrompt(null);
     setVisible(false);
@@ -83,30 +178,147 @@ export function InstallPrompt() {
 
   const dismiss = () => {
     localStorage.setItem(DISMISS_KEY, Date.now().toString());
-    // Track that user actively dismissed (vs. just ignored)
-    import("@/components/analytics/CiviaTracker").then(({ trackCustomEvent }) => {
-      trackCustomEvent("pwa-install-dismissed-before-show");
-    }).catch(() => { /* ignore */ });
+    import("@/components/analytics/CiviaTracker")
+      .then(({ trackCustomEvent }) => {
+        trackCustomEvent("pwa-install-dismissed-before-show");
+      })
+      .catch(() => {
+        /* ignore */
+      });
     setVisible(false);
+    setIosVisible(false);
   };
 
+  const applyUpdate = () => {
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (reg?.waiting) {
+        reg.waiting.postMessage({ type: "SKIP_WAITING" });
+      }
+    });
+    // The `controllerchange` listener above will reload the page
+    // once the new SW takes over. No state cleanup needed.
+  };
+
+  const dismissUpdate = () => {
+    localStorage.setItem(UPDATE_DISMISS_KEY, Date.now().toString());
+    setUpdateReady(false);
+  };
+
+  // ─── Update-ready pill (highest priority — surfaces over install) ───
+  if (updateReady) {
+    return (
+      <div
+        role="status"
+        className="fixed left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-[var(--z-toast)] animate-fade-in-up"
+        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+      >
+        <div className="glass-surface-strong rounded-[var(--radius-lg)] shadow-[var(--shadow-4)] p-4 flex items-start gap-3">
+          <div className="shrink-0 w-10 h-10 rounded-[var(--radius-xs)] bg-gradient-to-br from-emerald-500 to-emerald-700 grid place-items-center text-white">
+            <Download size={18} aria-hidden="true" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm mb-0.5">Versiune nouă disponibilă</p>
+            <p className="text-xs text-[var(--color-text-muted)] mb-3">
+              Reîncarcă pagina ca să folosești cea mai nouă versiune Civia.
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={applyUpdate}
+                className="h-9 px-3 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white text-xs font-medium hover:bg-[var(--color-primary-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)] transition-colors"
+              >
+                Reîncarcă acum
+              </button>
+              <button
+                type="button"
+                onClick={dismissUpdate}
+                className="h-9 px-3 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] text-xs font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-colors"
+              >
+                Mai târziu
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={dismissUpdate}
+            className="shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text)] -mt-1 -mr-1 p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            aria-label="Închide notificarea de actualizare"
+          >
+            <X size={14} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── iOS A2HS instructions ────────────────────────────────────────
+  if (iosVisible) {
+    return (
+      <div
+        role="dialog"
+        aria-labelledby="install-prompt-ios-title"
+        className="fixed left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-[var(--z-toast)] animate-fade-in-up"
+        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+      >
+        <div className="glass-surface-strong rounded-[var(--radius-lg)] shadow-[var(--shadow-4)] p-4">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="shrink-0 w-10 h-10 rounded-[var(--radius-xs)] bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 grid place-items-center text-white">
+              <Download size={18} aria-hidden="true" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p
+                id="install-prompt-ios-title"
+                className="font-semibold text-sm mb-0.5"
+              >
+                Pune Civia pe iPhone
+              </p>
+              <p className="text-xs text-[var(--color-text-muted)]">
+                Apasă <Share size={11} className="inline -mt-0.5" aria-label="Share" /> jos în Safari, apoi „Adaugă pe ecran principal" <Plus size={11} className="inline -mt-0.5" aria-label="Plus" />.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={dismiss}
+              className="shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text)] -mt-1 -mr-1 p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              aria-label="Închide promptul de instalare"
+            >
+              <X size={14} aria-hidden="true" />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={dismiss}
+            className="w-full h-9 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] text-xs font-medium hover:bg-[var(--color-border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-colors"
+          >
+            Am înțeles
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Standard Chrome / Edge install prompt ─────────────────────────
   if (!visible || !deferredPrompt) return null;
 
   return (
     <div
       role="dialog"
       aria-labelledby="install-prompt-title"
-      className="fixed left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-[90] animate-fade-in-up"
+      className="fixed left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-[var(--z-toast)] animate-fade-in-up"
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
     >
       <div className="glass-surface-strong rounded-[var(--radius-lg)] shadow-[var(--shadow-4)] p-4 flex items-start gap-3">
-        <div className="shrink-0 w-10 h-10 rounded-[var(--radius-xs)] bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 flex items-center justify-center text-white">
+        <div className="shrink-0 w-10 h-10 rounded-[var(--radius-xs)] bg-gradient-to-br from-[var(--color-primary)] to-indigo-900 grid place-items-center text-white">
           <Download size={18} aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">
-          <p id="install-prompt-title" className="font-semibold text-sm mb-0.5">Pune Civia pe ecranul de start</p>
+          <p id="install-prompt-title" className="font-semibold text-sm mb-0.5">
+            Pune Civia pe ecranul de start
+          </p>
           <p className="text-xs text-[var(--color-text-muted)] mb-3">
-            Click rapid din home screen, fără bara de browser. Ghidurile civice rămân disponibile offline — util la dezastre și unde n-ai semnal.
+            Click rapid din home screen, fără bara de browser. Ghidurile civice
+            rămân disponibile offline — util la dezastre și unde n-ai semnal.
           </p>
           <div className="flex gap-2">
             <button
