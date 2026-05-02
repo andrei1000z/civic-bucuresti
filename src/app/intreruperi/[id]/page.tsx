@@ -21,8 +21,11 @@ import {
   STATUS_LABELS,
 } from "@/data/intreruperi";
 import { SITE_URL } from "@/lib/constants";
+import { after } from "next/server";
 import {
   getCachedBuildings,
+  getBuildingsForOutage,
+  warmBuildingsBackground,
   summarizeAffectedBuildings,
 } from "@/lib/intreruperi/buildings";
 import { ShareButton } from "./ShareButton";
@@ -63,7 +66,11 @@ export async function generateMetadata({
   };
 }
 
-export const revalidate = 1800;
+// Short ISR window so the buildings list appears soon after the
+// background warmer fills the cache. Page itself is mostly static
+// content (provider, dates, addresses); 5 min is enough to feel
+// fresh without hammering the function.
+export const revalidate = 300;
 
 export async function generateStaticParams() {
   return INTRERUPERI.map((i) => ({ id: i.id }));
@@ -104,17 +111,51 @@ export default async function InterruptionDetail({
     )
     .slice(0, 4);
 
-  // Pull the OSM building polygons we cached for the map renderer and
-  // boil them down into a per-street address list. Cache-only — the
-  // 6h refresh cron warms every active outage, so by the time a user
-  // opens the detail page the data is almost always there. When it's
-  // not (cold deploy, brand-new outage), the section just doesn't
-  // render — better than blocking SSR for 5–10s of Overpass.
-  const cachedBuildings =
-    item.lat != null && item.lng != null ? await getCachedBuildings(item.id) : null;
-  const buildingsSummary = cachedBuildings
-    ? summarizeAffectedBuildings(cachedBuildings)
-    : null;
+  // Pull the OSM building polygons (cached or freshly fetched) and
+  // boil them down into a per-street address list. Strategy:
+  //   1. Try Redis cache first — instant when the warming cron has
+  //      already covered this outage.
+  //   2. On cache miss, race a single Overpass fetch against a 12s
+  //      timeout. The page's 5-min ISR window means the slow path
+  //      runs at most once per 5 min per outage, not per request.
+  //   3. Whether or not the inline fetch produced data, fire a
+  //      background warming job (NX-locked) so the next viewer
+  //      definitely sees a populated cache.
+  let buildingsSummary: ReturnType<typeof summarizeAffectedBuildings> | null = null;
+  if (item.lat != null && item.lng != null) {
+    const radiusM = (() => {
+      const pop = item.affectedPopulation ?? item.addresses.length * 200;
+      // Same formula IntreruperiMap + the buildings API use, so the
+      // cache key matches and we never pay Overpass twice.
+      return Math.max(200, Math.min(2500, Math.round(150 * Math.sqrt(pop / 1000))));
+    })();
+    const cached = await getCachedBuildings(item.id);
+    let polygons = cached;
+    if (!polygons) {
+      try {
+        polygons = await Promise.race([
+          getBuildingsForOutage(item.id, item.lat, item.lng, radiusM),
+          new Promise<typeof cached>((resolve) =>
+            setTimeout(() => resolve(null), 12_000),
+          ),
+        ]);
+      } catch {
+        polygons = null;
+      }
+    }
+    if (polygons && polygons.length > 0) {
+      buildingsSummary = summarizeAffectedBuildings(polygons);
+    }
+    // Belt-and-suspenders: even if the inline fetch succeeded, queue
+    // a background warm so a newer Overpass dataset (or a v3 schema
+    // bump someday) refreshes without page latency. NX-locked inside
+    // warmBuildingsBackground so concurrent visitors don't pile on.
+    after(async () => {
+      await warmBuildingsBackground([
+        { id: item.id, lat: item.lat!, lng: item.lng!, radiusM },
+      ]);
+    });
+  }
 
   // Schema.org Event JSON-LD
   const jsonLd = {
