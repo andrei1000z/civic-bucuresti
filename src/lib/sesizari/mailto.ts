@@ -297,6 +297,11 @@ export function buildGmailLink(input: MailtoInput): string {
  * on phones where the user has a Google account in the browser but
  * Chrome's "default mail" isn't set to the Gmail app).
  *
+ * Format MATTERS: `intent:RECIPIENT?subject=X&body=Y#Intent;...;end`
+ * (no `//` — mailto: URIs don't use authority). The previous version
+ * used `intent://send?to=X` which produced data URI `mailto://send?...`
+ * which Gmail doesn't recognise as a valid mailto:.
+ *
  * `S.browser_fallback_url` fires if the Gmail app isn't installed —
  * Chrome falls back to the system mailto: handler so non-Gmail-app
  * users still get SOMETHING.
@@ -305,13 +310,16 @@ export function buildGmailLink(input: MailtoInput): string {
  */
 export function buildGmailAndroidIntent(input: MailtoInput): string {
   const p = buildEmailPayload(input);
+  // Recipient(s) go in the URI path right after `intent:` — that
+  // becomes the mailto: URI body (e.g. mailto:a@x.com,b@y.com). The
+  // @ sign is allowed in URI paths so we don't encode it.
+  const to = p.to.join(",");
   const params = new URLSearchParams();
-  params.set("to", p.to.join(","));
   params.set("subject", p.subject);
   params.set("body", p.body);
   if (p.cc.length > 0) params.set("cc", p.cc.join(","));
   const fallback = encodeURIComponent(buildMailtoLink(input));
-  return `intent://send?${params.toString()}#Intent;scheme=mailto;package=com.google.android.gm;S.browser_fallback_url=${fallback};end`;
+  return `intent:${to}?${params.toString()}#Intent;scheme=mailto;package=com.google.android.gm;S.browser_fallback_url=${fallback};end`;
 }
 
 /**
