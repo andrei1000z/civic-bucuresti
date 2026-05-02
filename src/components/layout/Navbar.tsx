@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
-import { NAV_LINKS, NAV_MORE, GHID_DROPDOWN, SITE_NAME } from "@/lib/constants";
+import { NAV_LINKS, NAV_MORE, SITE_NAME } from "@/lib/constants";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useCountyOptional } from "@/lib/county-context";
@@ -38,21 +38,11 @@ export function Navbar() {
     };
   });
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [ghidDropdown, setGhidDropdown] = useState(false);
   const [moreDropdown, setMoreDropdown] = useState(false);
 
-  // Debounce close pe dropdown-uri cu 150ms — evită flicker când mouse-ul
-  // traversează diagonal de la trigger la submenu (zona „outside" dintre ele).
-  const ghidCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Debounce close pe dropdown — evită flicker când mouse-ul traversează
+  // diagonal între trigger și submenu.
   const moreCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const openGhid = () => {
-    if (ghidCloseTimer.current) clearTimeout(ghidCloseTimer.current);
-    setGhidDropdown(true);
-  };
-  const closeGhidSoon = () => {
-    if (ghidCloseTimer.current) clearTimeout(ghidCloseTimer.current);
-    ghidCloseTimer.current = setTimeout(() => setGhidDropdown(false), 150);
-  };
   const openMore = () => {
     if (moreCloseTimer.current) clearTimeout(moreCloseTimer.current);
     setMoreDropdown(true);
@@ -117,53 +107,12 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Desktop nav */}
+          {/* Desktop nav. Ghiduri used to expand into a hover-dropdown
+              with all guides inline; we removed that — clicking the
+              link goes straight to /ghiduri where the full catalog
+              lives, less nav noise. */}
           <nav className="hidden lg:flex items-center gap-1">
             {prefixedLinks.map((link) => {
-              // Ghiduri is national — match the canonical href directly.
-              if (link.href === "/ghiduri") {
-                return (
-                  <div
-                    key={link.href}
-                    className="relative"
-                    onMouseEnter={openGhid}
-                    onMouseLeave={closeGhidSoon}
-                  >
-                    <Link
-                      href={link.href}
-                      aria-current={pathname.startsWith("/ghiduri") ? "page" : undefined}
-                      className={cn(
-                        "flex items-center gap-1 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]",
-                        pathname.startsWith("/ghiduri")
-                          ? "text-[var(--color-primary)] bg-[var(--color-primary-soft)]"
-                          : "text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
-                      )}
-                    >
-                      {link.label}
-                      <ChevronDown size={14} className={cn("transition-transform", ghidDropdown && "rotate-180")} />
-                    </Link>
-                    <div
-                      className={cn(
-                        "absolute top-full left-0 w-64 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-lg)] overflow-hidden py-2 origin-top transition-all duration-150",
-                        ghidDropdown
-                          ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-                          : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
-                      )}
-                    >
-                      {GHID_DROPDOWN.map((ghid) => (
-                        <Link
-                          key={ghid.href}
-                          href={ghid.href}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:bg-[var(--color-surface-2)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]"
-                        >
-                          <span className="text-xl" aria-hidden="true">{ghid.icon}</span>
-                          <span className="text-[var(--color-text)]">{ghid.label}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                );
-              }
               const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
               return (
                 <Link

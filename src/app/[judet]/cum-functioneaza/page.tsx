@@ -229,6 +229,37 @@ export default async function CountyCumFunctioneazaPage({
         </div>
       </section>
 
+      {/* Istoricul primarilor — surfaced here after we collapsed
+          the standalone "Istoric admin." entry from the nav. The
+          dedicated /[judet]/istoric page still works via direct URL,
+          this section is just the entry point + teaser. */}
+      <section className="mb-14">
+        <Link
+          href={`/${county.slug}/istoric`}
+          className="group block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 md:p-7 hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-3)] hover:-translate-y-0.5 transition-all"
+        >
+          <div className="flex items-start gap-4">
+            <div className="shrink-0 w-12 h-12 rounded-[var(--radius-sm)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] grid place-items-center">
+              📜
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="font-[family-name:var(--font-sora)] text-xl font-bold mb-1.5 group-hover:text-[var(--color-primary)] transition-colors">
+                Istoricul primarilor din {county.name}
+              </h2>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed mb-3">
+                Cine a condus județul de-a lungul timpului — partid, mandat, ce
+                a livrat. Util ca să vezi cum se schimbă politicile locale între
+                administrații.
+              </p>
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-primary)] group-hover:gap-2 transition-all">
+                Vezi istoricul complet
+                <ArrowRight size={14} />
+              </span>
+            </div>
+          </div>
+        </Link>
+      </section>
+
       {/* FAQ */}
       <section className="mb-14">
         <h2 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-6 flex items-center gap-3">

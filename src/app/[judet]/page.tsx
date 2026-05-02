@@ -613,14 +613,17 @@ const PRIMARY_SECTIONS = [
   { path: "/stiri", icon: Newspaper, label: "Știri locale", color: "#0EA5E9", prefetch: false },
 ];
 
+// SECONDARY_SECTIONS = "Tot despre {judet}" grid. Round 2026-05-02
+// cleanup: dropped /impact (already prominent on /sesizari), /aer
+// (now lives as a tab on /harti), /autoritati (one click via the
+// in-page authorities panel below + still accessible by URL),
+// /evenimente (renamed → calendar civic, redundant with sesizari
+// timeline), /istoric (merged into /cum-functioneaza which now has
+// a "Mayor history" section). Keeps the grid tight + signal-rich.
 const SECONDARY_SECTIONS = [
-  { path: "/impact", icon: BarChart3, label: "Impact local", color: "#1C4ED8" },
   { path: "/statistici", icon: Gauge, label: "Statistici", color: "#8B5CF6" },
   { path: "/intreruperi", icon: AlertTriangle, label: "Întreruperi", color: "#F59E0B" },
-  { path: "/autoritati", icon: Building2, label: "Autorități", color: "#64748B" },
   { path: "/ghiduri", icon: BookOpen, label: "Ghiduri", color: "#A855F7" },
-  { path: "/evenimente", icon: Calendar, label: "Evenimente", color: "#EC4899" },
-  { path: "/istoric", icon: History, label: "Istoric admin.", color: "#6366F1" },
   { path: "/cum-functioneaza", icon: HelpCircle, label: "Cum funcționează", color: "#14B8A6" },
   { path: "/bilete", icon: Ticket, label: "Bilete & abonamente", color: "#F97316" },
   { path: "/buget", icon: Inbox, label: "Buget local", color: "#0891B2" },

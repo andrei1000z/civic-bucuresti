@@ -70,20 +70,18 @@ export const NAV_LINKS = [
 //   - nationalOnly: true → URL absolut (nu se prepend-ează countySlug)
 //   - default: prepend countySlug dacă e în county-context
 //
-// Round 2026-04-29: re-introduse statistici/aer/intreruperi/calendar/impact
-// /autoritati/compara/cum-functioneaza la cererea user-ului — Sesizări +
-// Petiții + Hărți + Știri + Ghiduri rămân top-level, restul intră aici.
+// Round 2026-05-02: deduplicat la cererea user-ului. Calitatea aerului
+// trăiește acum pe tab-ul Aer din /harti; Autoritățile publice rămân
+// accesibile via URL direct dar n-au nevoie de top-nav (Sesizări le
+// alege automat); Calendar civic la fel; Impact local apare pe pagina
+// de Sesizări; Istoricul primarilor a fost mutat ca secțiune în
+// "Cum funcționează administrația" — un singur entry-point.
 export const NAV_MORE = [
   { href: "/statistici", label: "Statistici", icon: "📊" },
-  { href: "/aer", label: "Calitatea aerului", icon: "🌬️" },
   { href: "/intreruperi", label: "Întreruperi programate", icon: "⚠️" },
-  { href: "/autoritati", label: "Autorități publice", icon: "🏛️", nationalOnly: true },
-  { href: "/calendar-civic", label: "Calendar civic", icon: "📅", nationalOnly: true },
   { href: "/compara", label: "Compară județe", icon: "⚖️", nationalOnly: true },
-  { href: "/impact", label: "Impact local", icon: "🎯" },
   { href: "/cum-functioneaza", label: "Cum funcționează administrația", icon: "❓" },
   { href: "/bilete", label: "Bilete și abonamente transport", icon: "🎫", countyOnly: true },
-  { href: "/istoric", label: "Istoricul primarilor", icon: "📜", countyOnly: true },
 ] as const;
 
 // Date publice eliminate din nav — accesibile direct via URL sau din
