@@ -209,12 +209,17 @@ Răspunde JSON:
       });
       return completion.choices[0]?.message?.content ?? null;
     };
+    // Gemini 2.5 Flash uses internal "thinking" tokens that count
+    // against max_tokens. With 1100 the model spends ~800 thinking
+    // and truncates the JSON output, causing parse failures down-
+    // stream. 4000 leaves comfortable room for both. Free tier per-
+    // minute token budget is 1M so this is well within limits.
     const geminiCall = (model: string) => () =>
       callGemini({
         messages: messages.map((m) => ({ role: m.role, content: m.content as string })),
         model,
         temperature: 0.3,
-        max_tokens: 1100,
+        max_tokens: 4000,
         response_format: { type: "json_object" as const },
       });
     const candidates: Candidate[] = hasPhotos
@@ -265,9 +270,25 @@ Răspunde JSON:
     }
     if (!content) throw lastError ?? new Error("Empty response from text generator");
 
+    // Resilient JSON extraction: strip markdown code fences if the
+    // model wraps its output in ```json ... ```, then try to extract
+    // the first {...} block if surrounding prose leaks through.
+    function extractJson(raw: string): string {
+      const trimmed = raw.trim();
+      // ```json\n{...}\n``` or ```\n{...}\n```
+      const fenceMatch = trimmed.match(/^```(?:json)?\s*\n?([\s\S]*?)\n?\s*```$/);
+      if (fenceMatch && fenceMatch[1]) return fenceMatch[1].trim();
+      // First {...} block (handles leading/trailing prose)
+      const firstBrace = trimmed.indexOf("{");
+      const lastBrace = trimmed.lastIndexOf("}");
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        return trimmed.slice(firstBrace, lastBrace + 1);
+      }
+      return trimmed;
+    }
     let parsed: AIResponse;
     try {
-      parsed = JSON.parse(content) as AIResponse;
+      parsed = JSON.parse(extractJson(content)) as AIResponse;
     } catch {
       throw new Error("AI returned invalid JSON");
     }
