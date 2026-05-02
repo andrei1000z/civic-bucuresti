@@ -5,7 +5,11 @@ import { getOrGenerateAiSummary } from "@/lib/stiri/ai-summary";
 import { AI_SUMMARY_VERSION } from "@/lib/ai/synthesis-version";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 300; // up to 5 min — sequential AI calls add up
+// Vercel Hobby caps Lambda functions at 60s. Sequential AI calls
+// average ~3-4s each (network + thinking + write), so 10 articles
+// per call is the safe ceiling (~50s total). Users can re-run for
+// the next batch.
+export const maxDuration = 60;
 
 /**
  * POST /api/admin/stiri/regenerate-summaries?limit=50&force=1
@@ -29,24 +33,35 @@ export const maxDuration = 300; // up to 5 min — sequential AI calls add up
  * which providers handled which articles.
  */
 export async function POST(req: Request) {
-  // Admin auth — same shape as moderate/polish/status routes.
-  const supabase = await createSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
+  // Auth: either CRON_SECRET via Bearer token (for ops scripts +
+  // post-deploy cache warming) OR an admin session cookie (for
+  // dashboard-driven runs). Mirrors the pattern in /api/stiri/fetch.
+  const cronSecret = process.env.CRON_SECRET;
+  const authHeader = req.headers.get("authorization") ?? "";
+  const viaBearer = !!cronSecret && authHeader === `Bearer ${cronSecret}`;
+  if (!viaBearer) {
+    const supabase = await createSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-  if ((profile as { role?: string } | null)?.role !== "admin") {
-    return NextResponse.json({ error: "Admin required" }, { status: 403 });
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    if ((profile as { role?: string } | null)?.role !== "admin") {
+      return NextResponse.json({ error: "Admin required" }, { status: 403 });
+    }
   }
 
   const url = new URL(req.url);
-  const limit = Math.min(200, Math.max(1, parseInt(url.searchParams.get("limit") ?? "50", 10) || 50));
+  // Cap at 10 per call to fit Vercel Hobby's 60s function timeout.
+  // For larger batches, call repeatedly with `?offset=N` (TODO if
+  // needed) — for now re-running works because newer cache rows
+  // skip on cacheValid.
+  const limit = Math.min(10, Math.max(1, parseInt(url.searchParams.get("limit") ?? "10", 10) || 10));
   const force = url.searchParams.get("force") === "1";
 
   const admin = createSupabaseAdmin();
@@ -101,10 +116,11 @@ export async function POST(req: Request) {
         error: e instanceof Error ? e.message.slice(0, 200) : "unknown",
       });
     }
-    // 600ms gap between calls — keeps us under Gemini 2.5 Flash's
-    // 15 RPM free tier (4s between requests would be safer but
-    // the burst cap is ~1 per 4s sustained; we're fine on average).
-    await new Promise((r) => setTimeout(r, 600));
+    // 1s gap — Gemini's 15 RPM cap rarely trips with our chain
+    // (Flash → Lite split between 2 separate per-model counters),
+    // and the 60s Vercel timeout is the binding constraint. Tight
+    // pacing maximises throughput per call.
+    await new Promise((r) => setTimeout(r, 1000));
   }
 
   const ok = results.filter((r) => r.ok).length;
