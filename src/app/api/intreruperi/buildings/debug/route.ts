@@ -1,48 +1,64 @@
 import { NextResponse } from "next/server";
-import { getBuildingsForOutage, getCachedBuildings } from "@/lib/intreruperi/buildings";
 
-// Temporary debug endpoint — will be removed once we confirm the
-// production warming pipeline works end-to-end. Hard-coded to the
-// Magheru asphalting outage so it's safe to call without auth (no
-// arbitrary input). Reports cache-hit/miss + a synchronous Overpass
-// call result so we can see whether the function runtime is actually
-// reaching kumi/overpass-api.
+// Temporary debug endpoint — probes each Overpass mirror separately
+// for a hardcoded Magheru location and reports HTTP status + element
+// count + remark, so we can see why production is returning 0
+// buildings while local curl gets a full result set.
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
+const MIRRORS = [
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.openstreetmap.fr/api/interpreter",
+];
+
 export async function GET() {
-  const lat = 44.4419;
-  const lng = 26.099;
-  const id = "pmb-magheru-asfaltare";
-  const radiusM = 200;
+  const ql = `[out:json][timeout:20];(way["building"](around:200,44.4419,26.099););out geom 50;`;
+  const results: Array<Record<string, unknown>> = [];
 
-  const t0 = Date.now();
-  const cached = await getCachedBuildings(id);
-  const t1 = Date.now();
-
-  let fresh: unknown[] = [];
-  let freshError: string | null = null;
-  let freshMs = 0;
-  if (!cached) {
+  for (const url of MIRRORS) {
+    const start = Date.now();
+    const out: Record<string, unknown> = { mirror: new URL(url).hostname };
     try {
-      const t2 = Date.now();
-      fresh = await getBuildingsForOutage(id, lat, lng, radiusM);
-      freshMs = Date.now() - t2;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "User-Agent": "Civia/1.0 (civia.ro)",
+          Accept: "application/json",
+        },
+        body: `data=${encodeURIComponent(ql)}`,
+        signal: AbortSignal.timeout(45_000),
+      });
+      out.status = res.status;
+      out.contentType = res.headers.get("content-type") ?? null;
+      out.timeMs = Date.now() - start;
+      if (res.ok) {
+        const text = await res.text();
+        out.bodyLen = text.length;
+        try {
+          const data = JSON.parse(text) as { elements?: unknown[]; remark?: string };
+          out.elementCount = Array.isArray(data.elements) ? data.elements.length : 0;
+          out.remark = data.remark ?? null;
+          out.firstElementSample =
+            Array.isArray(data.elements) && data.elements.length > 0
+              ? (data.elements[0] as { type?: unknown; tags?: unknown }).type ?? null
+              : null;
+        } catch (e) {
+          out.parseError = e instanceof Error ? e.message : String(e);
+          out.bodySample = text.slice(0, 200);
+        }
+      } else {
+        const text = await res.text();
+        out.bodySample = text.slice(0, 200);
+      }
     } catch (e) {
-      freshError = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+      out.timeMs = Date.now() - start;
+      out.fetchError = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
     }
+    results.push(out);
   }
 
-  return NextResponse.json({
-    id,
-    cached: cached ? cached.length : null,
-    cacheReadMs: t1 - t0,
-    fresh: Array.isArray(fresh) ? fresh.length : null,
-    freshSampleTags:
-      Array.isArray(fresh) && fresh.length > 0
-        ? (fresh as Array<{ tags?: unknown }>).slice(0, 3).map((p) => p.tags ?? null)
-        : [],
-    freshMs,
-    freshError,
-  });
+  return NextResponse.json({ ql, results });
 }
