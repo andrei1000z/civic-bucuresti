@@ -106,7 +106,12 @@ async function queryOverpass(
           Accept: "application/json",
         },
         body: `data=${encodeURIComponent(ql)}`,
-        signal: AbortSignal.timeout(45_000),
+        // 55s — covers the long tail (Iași Copou observed at 57s on
+        // kumi during a high-load window). Page maxDuration is 60s,
+        // leaving 5s for Redis writes + render after the fetch
+        // resolves. Per-mirror; the loop falls through if one
+        // genuinely times out.
+        signal: AbortSignal.timeout(55_000),
       });
       // 429 / 504 / 503 — rate-limited or upstream issue, try next
       // mirror. Status 200 doesn't mean success: Overpass returns
