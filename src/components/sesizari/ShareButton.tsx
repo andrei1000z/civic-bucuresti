@@ -50,7 +50,7 @@ export function ShareButton({ code, size = "sm" }: { code: string; size?: "sm" |
       aria-label={copied ? "Link copiat în clipboard" : "Distribuie sesizarea"}
     >
       {copied ? <Check size={iconSize} aria-hidden="true" /> : <Share2 size={iconSize} aria-hidden="true" />}
-      <span>{copied ? "Copiat" : "Share"}</span>
+      <span>{copied ? "Copiat" : "Distribuie"}</span>
     </button>
   );
 }

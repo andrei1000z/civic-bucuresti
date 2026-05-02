@@ -99,7 +99,7 @@ export default async function SesizariResolvatePage() {
             className="inline-flex items-center gap-2 h-11 px-5 rounded-[var(--radius-full)] bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
           >
             <Send size={14} aria-hidden="true" />
-            Trimite o sesizare acum
+            Fă o sesizare acum
           </Link>
         </div>
       ) : (

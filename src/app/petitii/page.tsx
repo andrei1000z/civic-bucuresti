@@ -43,7 +43,7 @@ export default async function PetitiiPage() {
         gradient={HERO_GRADIENT.petition}
         description={
           <>
-            Curatat de Civia. Click pe petiție → vezi argumentele, sinteza
+            Curate de Civia. Click pe petiție → vezi argumentele, sinteza
             AI și sursa oficială (Declic / Avaaz / petitie.civica.ro) unde
             semnezi. Spre deosebire de o sesizare individuală, petiția adună{" "}
             <strong>multe voci pentru aceeași cauză</strong>.
@@ -130,7 +130,7 @@ function EmptyState() {
           href="/sesizari"
           className="inline-flex items-center gap-2 mt-5 h-11 px-5 rounded-[var(--radius-full)] bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
         >
-          Trimite o sesizare
+          Fă o sesizare
           <ArrowRight size={14} aria-hidden="true" />
         </Link>
       </div>

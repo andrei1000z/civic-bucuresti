@@ -98,6 +98,17 @@ Petition synthesis uses a smaller, structured prompt (`src/lib/petitii/ai-summar
 
 `vitest.config.ts` runs unit tests on `src/lib/**`. Smoke-test data extractors before relying on them (e.g. the AQI IDW + dedup, the news fact extractor, the sesizari format helpers). Coverage isn't enforced, but the bar is: any helper you wouldn't ship without a test, ship with one.
 
+## CTA copy convention
+
+To keep the verbs consistent across surfaces:
+
+- **Hero / entry-point CTA** — use **„Fă o sesizare"** (low-friction, friendly, encourages start). Optionally append context: "Fă o sesizare acum", "Fă o sesizare în 90 de secunde".
+- **Form-submit button** — use **„Trimite sesizarea"** (action verb, formal, signals completion).
+- **Listing card link** — use **„Vezi detalii"** or **„Vezi sesizarea"** (descriptive, not just an arrow). Avoid bare "Detalii →".
+- **Share / clipboard** — use **„Distribuie"** or **„Copiază link"** (Romanian, never "Share").
+
+Same convention applies for petitii: hero/entry "Semnează petiția", action button "Semnează acum", card link "Vezi detalii".
+
 ## Don't do
 
 - **Don't add new full-bleed `<section>` heroes.** Use `<PageHero>` from `src/components/layout/PageHero.tsx`.

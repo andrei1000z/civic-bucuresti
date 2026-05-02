@@ -261,7 +261,8 @@ export default async function PetitiePage({
               </h2>
               <p className="text-sm text-white/90 mb-5 leading-relaxed">
                 Civia agregă petițiile civice. Click → semnezi pe site-ul oficial unde
-                petiția a fost lansată. O secundă, niciun spam.
+                petiția a fost lansată. O secundă, niciun spam, nu stocăm date despre
+                semnătura ta.
               </p>
               <a
                 href={petitie.external_url}
@@ -325,7 +326,7 @@ export default async function PetitiePage({
               </a>
               <p className="text-[10px] text-[var(--color-text-muted)] mt-3 text-center leading-relaxed">
                 Petiția e găzduită pe <strong>{externalHost}</strong>. Civia o
-                agregă pentru vizibilitate.
+                agregă pentru vizibilitate — <strong>nu stocăm date despre semnătura ta</strong>.
               </p>
             </div>
           )}
