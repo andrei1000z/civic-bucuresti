@@ -13,7 +13,13 @@
  */
 
 export const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai";
-export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+// Primary = 2.5-flash (best Romanian quality on free tier); fallback
+// to 2.5-flash-lite when primary 429s. Each model has a SEPARATE
+// per-day counter on the free tier so the lite variant acts as a
+// real second life. 2.0-flash is intentionally NOT in the chain —
+// it has the smallest free quota of the bunch.
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+export const GEMINI_MODEL_FAST = process.env.GEMINI_MODEL_FAST || "gemini-2.5-flash-lite";
 
 export function isGeminiConfigured(): boolean {
   return !!process.env.GEMINI_API_KEY;

@@ -6,7 +6,7 @@ import { SYSTEM_PROMPT_FORMAL } from "@/lib/groq/prompts";
 import { getTemplate } from "@/lib/groq/templates";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 import { isProd } from "@/lib/env";
-import { callGemini, isGeminiConfigured, GEMINI_MODEL } from "@/lib/ai/gemini";
+import { callGemini, isGeminiConfigured, GEMINI_MODEL, GEMINI_MODEL_FAST } from "@/lib/ai/gemini";
 
 /** True for upstream 429 (rate limit / token budget exhausted). Works
  *  on both Groq SDK errors and Gemini fetch errors (we synthesise the
@@ -209,22 +209,21 @@ Răspunde JSON:
       });
       return completion.choices[0]?.message?.content ?? null;
     };
+    const geminiCall = (model: string) => () =>
+      callGemini({
+        messages: messages.map((m) => ({ role: m.role, content: m.content as string })),
+        model,
+        temperature: 0.3,
+        max_tokens: 1100,
+        response_format: { type: "json_object" as const },
+      });
     const candidates: Candidate[] = hasPhotos
       ? [{ provider: "groq", model: GROQ_MODEL_VISION, run: groqCall(GROQ_MODEL_VISION) }]
       : [
           ...(isGeminiConfigured()
             ? [
-                {
-                  provider: "gemini" as const,
-                  model: GEMINI_MODEL,
-                  run: () =>
-                    callGemini({
-                      messages: messages.map((m) => ({ role: m.role, content: m.content as string })),
-                      temperature: 0.3,
-                      max_tokens: 1100,
-                      response_format: { type: "json_object" as const },
-                    }),
-                },
+                { provider: "gemini" as const, model: GEMINI_MODEL, run: geminiCall(GEMINI_MODEL) },
+                { provider: "gemini" as const, model: GEMINI_MODEL_FAST, run: geminiCall(GEMINI_MODEL_FAST) },
               ]
             : []),
           { provider: "groq", model: GROQ_MODEL, run: groqCall(GROQ_MODEL) },
