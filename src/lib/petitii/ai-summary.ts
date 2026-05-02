@@ -1,4 +1,5 @@
-import { getGroqClient, GROQ_MODEL } from "@/lib/groq/client";
+import * as Sentry from "@sentry/nextjs";
+import { getGroqClient, GROQ_MODEL, GROQ_MODEL_FAST } from "@/lib/groq/client";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { polishSynthesis } from "@/lib/ai/polish-synthesis";
 import { AI_SUMMARY_VERSION } from "@/lib/ai/synthesis-version";
@@ -87,45 +88,111 @@ export async function getOrGeneratePetitieAiSummary(
   }
 }
 
+/** True for Groq 429 (rate limit / token budget exhausted). Mirrors
+ *  the same helper in lib/stiri/ai-summary.ts. */
+function isRateLimited(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const e = err as { status?: number; message?: string };
+  if (e.status === 429) return true;
+  return typeof e.message === "string" && /rate.?limit|429/i.test(e.message);
+}
+
+/**
+ * Same model-fallback pattern as stiri: try the strict-grammar 70B
+ * model first, fall back to the faster 8B when 70B is rate-limited.
+ * Without this, every 70B 429 made the petition page silently render
+ * the original `summary` field instead of the structured 5-section
+ * brief — that was the symptom that caused the v4 schema to look
+ * "broken" in production after the prompt upgrade.
+ */
+async function callGroqWithFallback(
+  prompt: string,
+  rawText: string,
+  petitie: SummarizablePetitie,
+): Promise<string | null> {
+  const groq = getGroqClient();
+  const userMsg = `Sintetizează această petiție civică${petitie.category ? ` (categorie: ${petitie.category})` : ""}:\n\n${rawText.slice(0, 4000)}`;
+  const messages = [
+    { role: "system" as const, content: prompt },
+    { role: "user" as const, content: userMsg },
+  ];
+
+  const candidates = [
+    { model: GROQ_MODEL, max_tokens: 1200 },
+    { model: GROQ_MODEL_FAST, max_tokens: 1200 },
+  ];
+
+  for (const cand of candidates) {
+    try {
+      const completion = await groq.chat.completions.create({
+        model: cand.model,
+        messages,
+        temperature: 0.2,
+        max_tokens: cand.max_tokens,
+      });
+      return completion.choices[0]?.message?.content?.trim() ?? null;
+    } catch (err) {
+      if (isRateLimited(err) && cand.model !== GROQ_MODEL_FAST) {
+        Sentry.captureMessage("petitii AI fell back to fast model (70B 429)", {
+          level: "info",
+          tags: { kind: "petitii_ai_fallback" },
+          extra: { petitieId: petitie.id, fromModel: cand.model, toModel: GROQ_MODEL_FAST },
+        });
+        continue;
+      }
+      throw err;
+    }
+  }
+  return null;
+}
+
 async function generate(
   petitie: SummarizablePetitie,
   rawText: string,
 ): Promise<string | null> {
   try {
-    const groq = getGroqClient();
-    const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: `Sintetizează această petiție civică${petitie.category ? ` (categorie: ${petitie.category})` : ""}:\n\n${rawText.slice(0, 4000)}`,
-        },
-      ],
-      temperature: 0.2,
-      // Wider budget so the 5-section brief lands inside the
-      // 250–380 word target without truncation.
-      max_tokens: 1200,
-    });
-
-    const raw = completion.choices[0]?.message?.content?.trim() ?? "";
-    if (raw.length <= 20) {
+    const raw = await callGroqWithFallback(SYSTEM_PROMPT, rawText, petitie);
+    if (!raw || raw.length <= 20) {
+      Sentry.captureMessage("petitii AI summary too short or empty", {
+        level: "warning",
+        tags: { kind: "petitii_ai_short" },
+        extra: { petitieId: petitie.id, rawLength: raw?.length ?? 0 },
+      });
       return petitie.summary || petitie.body || petitie.title || null;
     }
     const summary = polishSynthesis(raw);
 
     try {
       const admin = createSupabaseAdmin();
-      await admin
+      const { error: dbErr } = await admin
         .from("petitii")
         .update({ ai_summary: summary, ai_summary_version: AI_SUMMARY_VERSION })
         .eq("id", petitie.id);
-    } catch {
-      // Best-effort; next request will retry the persist.
+      if (dbErr) {
+        Sentry.captureException(dbErr, {
+          tags: { kind: "petitii_ai_persist" },
+          extra: { petitieId: petitie.id },
+        });
+      }
+    } catch (persistErr) {
+      Sentry.captureException(persistErr, {
+        tags: { kind: "petitii_ai_persist" },
+        extra: { petitieId: petitie.id },
+      });
     }
 
     return summary;
-  } catch {
+  } catch (err) {
+    // Surface the real reason (Groq error, network timeout, etc.) so
+    // we stop silently falling back to the petition's plain summary
+    // without anyone noticing in production.
+    Sentry.captureException(err, {
+      tags: { kind: "petitii_ai_generate" },
+      extra: {
+        petitieId: petitie.id,
+        rawTextLength: rawText.length,
+      },
+    });
     return petitie.summary || petitie.body || petitie.title || null;
   }
 }

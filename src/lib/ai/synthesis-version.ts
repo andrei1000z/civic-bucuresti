@@ -18,5 +18,11 @@
  *       stiri standard: „Pe scurt", „Ce cere petiția", „Cifre & date
  *       cheie", „Context", „De ce contează" + 250–380 word target.
  *       Old 3-section petitii summaries regenerate on next visit.
+ *   5 — petitii AI generate() gained the same 70B → 8B fallback that
+ *       stiri had. v4 silently shipped petition.summary as ai_summary
+ *       whenever 70B was rate-limited, so a lot of v4 cache rows are
+ *       actually the wrong shape (single paragraph, not 5 sections).
+ *       Bumping invalidates them so the new fallback path regenerates
+ *       proper structured briefs on next read.
  */
-export const AI_SUMMARY_VERSION = 4;
+export const AI_SUMMARY_VERSION = 5;
