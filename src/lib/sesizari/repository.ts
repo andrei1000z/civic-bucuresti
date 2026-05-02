@@ -113,9 +113,33 @@ export interface ListFilters {
   offset?: number;
 }
 
+// Columns the public list cards actually render (SesizariPublice.tsx).
+// We deliberately skip large fields the card never shows (formal_text
+// in full, lat/lng, address, author_email, AI metadata, etc.) and
+// instead derive a short formal_text excerpt below. The detail page
+// uses getSesizareByCode which selects the full row.
+const FEED_LIST_COLUMNS =
+  "id,code,user_id,author_name,author_email,titlu,locatie,sector,county,tip,status,formal_text,descriere,imagini,resolved_photo_url,created_at,upvotes,nr_comentarii,voturi_net,publica,moderation_status";
+
+// Card preview is line-clamp-2 (~150 visible chars). 320 is a safe
+// over-provision that still slashes the average row from ~3 KB to
+// ~600 B while preserving punctuation/diacritics around the cut.
+const PREVIEW_CHARS = 320;
+
+function truncateForFeed<T extends { formal_text?: string | null; descriere?: string | null }>(row: T): T {
+  const next = { ...row };
+  if (next.formal_text && next.formal_text.length > PREVIEW_CHARS) {
+    next.formal_text = next.formal_text.slice(0, PREVIEW_CHARS).trimEnd() + "…";
+  }
+  if (next.descriere && next.descriere.length > PREVIEW_CHARS) {
+    next.descriere = next.descriere.slice(0, PREVIEW_CHARS).trimEnd() + "…";
+  }
+  return next;
+}
+
 export async function listSesizari(filters: ListFilters = {}): Promise<SesizareFeedRow[]> {
   const supabase = await createSupabaseServer();
-  let query = supabase.from("sesizari_feed").select("*");
+  let query = supabase.from("sesizari_feed").select(FEED_LIST_COLUMNS);
 
   if (filters.tip && filters.tip !== "toate") query = query.eq("tip", filters.tip);
   if (filters.status && filters.status !== "toate") query = query.eq("status", filters.status);
@@ -134,7 +158,8 @@ export async function listSesizari(filters: ListFilters = {}): Promise<SesizareF
 
   const { data, error } = await query;
   if (error) throw error;
-  return await anonymizeHiddenAuthors((data ?? []) as SesizareFeedRow[]);
+  const anonymized = await anonymizeHiddenAuthors((data ?? []) as SesizareFeedRow[]);
+  return anonymized.map(truncateForFeed);
 }
 
 export async function getSesizareByCode(code: string): Promise<SesizareFeedRow | null> {

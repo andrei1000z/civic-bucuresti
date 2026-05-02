@@ -55,9 +55,14 @@ export async function GET(req: Request) {
 
   try {
     const supabase = await createSupabaseServer();
+    // List view (StiriList card) renders id/title/source/category/
+    // excerpt/image_url/published_at/author. Skipping `content`
+    // (full article body, 5–20 KB) and `ai_summary` (also large)
+    // saves ~10–25 KB per row × `limit` (typically 50). Detail
+    // page fetches the row again with full content via getStire.
     let query = supabase
       .from("stiri_cache")
-      .select("*")
+      .select("id,title,source,category,excerpt,image_url,published_at,author,url,counties")
       .in("source", allowedSources)
       .order("published_at", { ascending: false })
       .limit(limit);

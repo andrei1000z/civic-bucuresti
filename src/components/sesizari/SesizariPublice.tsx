@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -109,13 +109,15 @@ export function SesizariPublice() {
     return () => controller.abort();
   }, [filterTip, filterStatus, sort, fetchKey, effectiveCounty]);
 
-  // Realtime subscribe to new sesizari. The Supabase `postgres_changes`
-  // payload is the RAW row, so injecting `payload.new` straight into
-  // the list bypasses the server-side anonymization that our /api/sesizari
-  // path applies (hide-name flag, scrubbed formal_text). Instead, when
-  // a new INSERT lands we refetch the first page through the API so
-  // the new row arrives anonymized exactly like the rest. Slight
-  // bandwidth cost; correct privacy.
+  // Realtime: instead of auto-refetching the entire feed on every
+  // INSERT (which sent ~10-20 KB through origin per viewer × per new
+  // sesizare), we just count the relevant new rows and show a
+  // "N sesizări noi — reîmprospătează" pill. The user clicks it
+  // when they want to refresh; until then the list is stable AND
+  // the origin doesn't ship anything. The Supabase realtime payload
+  // is filtered client-side against the current filter set so the
+  // count is accurate per view.
+  const [pendingNew, setPendingNew] = useState(0);
   useEffect(() => {
     const supabase = createSupabaseBrowser();
     const channelName = `sesizari-realtime-${typeof crypto !== "undefined" ? crypto.randomUUID().slice(0, 8) : Date.now()}`;
@@ -124,30 +126,13 @@ export function SesizariPublice() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "sesizari" },
-        async (payload: { new: SesizareFeedRow }) => {
+        (payload: { new: SesizareFeedRow }) => {
           const row = payload.new as SesizareFeedRow;
           if (!row.publica || row.moderation_status !== "approved") return;
-          // Filter out updates that aren't relevant to the current view
-          // (e.g. a new sesizare in another county when scoped). Cheap
-          // client-side guard; the refetch below is the source of truth.
           if (effectiveCounty && row.county && row.county !== effectiveCounty) return;
           if (filterTip !== "toate" && row.tip !== filterTip) return;
           if (filterStatus !== "toate" && row.status !== filterStatus) return;
-          try {
-            const params = new URLSearchParams();
-            if (filterTip !== "toate") params.set("tip", filterTip);
-            if (filterStatus !== "toate") params.set("status", filterStatus);
-            if (effectiveCounty) params.set("county", effectiveCounty);
-            params.set("sort", sort);
-            params.set("limit", String(PAGE_SIZE));
-            params.set("offset", "0");
-            const res = await fetch(`/api/sesizari?${params.toString()}`, { cache: "no-store" });
-            const j = await res.json();
-            const fresh = (j.data ?? []) as SesizareFeedRow[];
-            if (fresh.length > 0) setRows(fresh);
-          } catch {
-            // Silent — next manual refresh will reconcile.
-          }
+          setPendingNew((n) => n + 1);
         },
       )
       .subscribe();
@@ -156,6 +141,28 @@ export function SesizariPublice() {
       supabase.removeChannel(channel);
     };
   }, [effectiveCounty, filterTip, filterStatus, sort]);
+
+  // User-triggered refetch — runs only when the pill is clicked.
+  // Hits the same /api/sesizari path that powers the initial load
+  // so the row arrives anonymized + truncated like the rest.
+  const refreshFeed = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      if (filterTip !== "toate") params.set("tip", filterTip);
+      if (filterStatus !== "toate") params.set("status", filterStatus);
+      if (effectiveCounty) params.set("county", effectiveCounty);
+      params.set("sort", sort);
+      params.set("limit", String(PAGE_SIZE));
+      params.set("offset", "0");
+      const res = await fetch(`/api/sesizari?${params.toString()}`);
+      const j = await res.json();
+      const fresh = (j.data ?? []) as SesizareFeedRow[];
+      if (fresh.length > 0) setRows(fresh);
+      setPendingNew(0);
+    } catch {
+      // Silent — user can click again.
+    }
+  }, [filterTip, filterStatus, effectiveCounty, sort]);
 
   const filtered = rows;
 
@@ -242,8 +249,18 @@ export function SesizariPublice() {
             </select>
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between text-xs gap-2">
-            <span className="text-[var(--color-text-muted)]">
-              {filtered.length} sesizări găsite · 🔴 live
+            <span className="text-[var(--color-text-muted)] inline-flex items-center gap-2 flex-wrap">
+              <span>{filtered.length} sesizări găsite · 🔴 live</span>
+              {pendingNew > 0 && (
+                <button
+                  type="button"
+                  onClick={refreshFeed}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--color-primary)] text-white font-medium text-[10px] hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                  title="Actualizează lista cu noile sesizări"
+                >
+                  ↻ {pendingNew} {pendingNew === 1 ? "nouă" : "noi"}
+                </button>
+              )}
             </span>
             <div className="flex items-center gap-3">
               <button

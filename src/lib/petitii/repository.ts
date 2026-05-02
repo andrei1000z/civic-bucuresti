@@ -36,15 +36,25 @@ export interface PetitieSignatureRow {
   created_at: string;
 }
 
+/** List columns shown on /petitii cards. We deliberately skip `body`
+ *  (full petition text, can be 5–20 KB) and `ai_summary` (also large)
+ *  — both are loaded only on the detail page via getPetitieBySlug. */
+const PETITIE_LIST_COLUMNS =
+  "id,slug,title,summary,image_url,external_url,target_signatures,category,county_code,starts_at,ends_at,status,created_at,signature_count";
+
+/** Subset returned by listPetitii — body and ai_summary are stripped
+ *  to keep the list payload small. */
+export type PetitieListItem = Omit<PetitieWithCount, "body" | "ai_summary" | "ai_summary_version">;
+
 /** List active + closed petitii ordered by recent. Used pe /petitii. */
 export async function listPetitii(opts: {
   status?: Array<"active" | "closed" | "archived">;
   limit?: number;
-} = {}): Promise<PetitieWithCount[]> {
+} = {}): Promise<PetitieListItem[]> {
   const admin = createSupabaseAdmin();
   let query = admin
     .from("petitii_with_count")
-    .select("*")
+    .select(PETITIE_LIST_COLUMNS)
     .order("starts_at", { ascending: false });
 
   const statuses = opts.status ?? ["active", "closed"];
@@ -57,7 +67,7 @@ export async function listPetitii(opts: {
     // Table missing (migration 020 nu e aplicată) — return empty.
     return [];
   }
-  return (data ?? []) as PetitieWithCount[];
+  return (data ?? []) as PetitieListItem[];
 }
 
 /** Get single petitie by slug. Null if not found / archived. */
