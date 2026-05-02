@@ -1453,42 +1453,43 @@ function SuccessScreen({
   onAnother: () => void;
 }) {
   const router = useRouter();
-  const [, setAutoOpened] = useState(false);
-  const [, setPopupBlocked] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [autoOpened, setAutoOpened] = useState(false);
 
-  // Auto-open email provider on mount.
-  //
-  // Routing logic:
-  // - Mobile (Android/iOS) → ALWAYS mailto:. The OS routes mailto:
-  //   to the user's default mail app (Gmail app on Android, iOS Mail
-  //   or Outlook on iPhone). Opening Gmail web on mobile is broken
-  //   when the user isn't logged into mail.google.com in the browser
-  //   (extremely common — most Android users have Gmail app but no
-  //   browser session).
-  // - Desktop with @gmail address → Gmail web (reliable, opens in a
-  //   new tab where user is usually already logged in).
-  // - Desktop other → mailto: (default mail client).
+  // Detect mobile UA once at mount. Used both for auto-open routing
+  // and for which button label to show.
   useEffect(() => {
     const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
-    const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-    const emailAddr = emailInput.author_email?.toLowerCase() ?? "";
-    const isGmailAddr =
-      emailAddr.endsWith("@gmail.com") || emailAddr.endsWith("@googlemail.com");
-    const useGmailWeb = isGmailAddr && !isMobile;
-    const url = useGmailWeb ? buildGmailLink(emailInput) : buildMailtoLink(emailInput);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMobile(/Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua));
+  }, []);
+
+  // Build URLs once — both used in rendered buttons too, not just
+  // auto-open. mailto: is always available; Gmail web is only sane
+  // for @gmail addresses on desktop.
+  const mailtoUrl = buildMailtoLink(emailInput);
+  const emailAddr = emailInput.author_email?.toLowerCase() ?? "";
+  const isGmailAddr =
+    emailAddr.endsWith("@gmail.com") || emailAddr.endsWith("@googlemail.com");
+  const gmailWebUrl = isGmailAddr ? buildGmailLink(emailInput) : null;
+
+  // Auto-open ONLY on desktop. On mobile, programmatic click on
+  // mailto: is blocked by Chrome / Safari (security policy — only
+  // user-gesture clicks trigger the OS protocol handler), so the
+  // auto-open silently does nothing and the user sees the success
+  // screen with no mail app opened. On mobile we rely on the big
+  // tap-target button below — user taps it, OS handles it correctly.
+  useEffect(() => {
+    if (isMobile) return; // mobile auto-open is unreliable; user taps the button
+    const url = gmailWebUrl ?? mailtoUrl;
     try {
-      if (useGmailWeb) {
+      if (gmailWebUrl) {
+        // Desktop @gmail user: open Gmail web in a new tab.
         const win = window.open(url, "_blank", "noopener,noreferrer");
-        if (!win || win.closed || typeof win.closed === "undefined") {
-          setPopupBlocked(true);
-        } else {
-          setAutoOpened(true);
-        }
+        if (win && !win.closed) setAutoOpened(true);
       } else {
-        // mailto: — use invisible link click to avoid page navigation
-        // loss. On mobile this hands off to the native mail app
-        // (Gmail / iOS Mail / Outlook) without leaving the browser
-        // tab in a broken state.
+        // Desktop other: trigger mailto: via synthetic click. Works
+        // on desktop because there's no protocol-handler restriction.
         const a = document.createElement("a");
         a.href = url;
         a.style.display = "none";
@@ -1498,10 +1499,10 @@ function SuccessScreen({
         setAutoOpened(true);
       }
     } catch {
-      setPopupBlocked(true);
+      /* popup blocked — user taps the button below */
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isMobile]);
 
   // Copy-to-clipboard for the code. Since the user just submitted, this
   // is the most likely thing they want to grab — small UX win.
@@ -1533,15 +1534,60 @@ function SuccessScreen({
       <h3 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-2">
         Sesizare înregistrată!
       </h3>
-      <p className="text-[var(--color-text-muted)] mb-1 text-sm">Cod unic — salvează-l:</p>
+      <p className="text-[var(--color-text-muted)] mb-5 text-sm">
+        Următorul pas: deschide emailul în aplicația ta și apasă <strong>Trimite</strong>.
+      </p>
+
+      {/* PRIMARY ACTION: opens the user's mail app with the pre-filled
+          email. On mobile this MUST be a real anchor that the user
+          taps — programmatic clicks on mailto: are blocked by Chrome/
+          Safari for security. On desktop the auto-open useEffect above
+          already triggered, but this button stays as a "do it again"
+          fallback if the user closed the tab or popup was blocked. */}
+      <a
+        href={mailtoUrl}
+        className="inline-flex w-full items-center justify-center gap-2 h-14 px-6 mb-3 rounded-[var(--radius-md)] bg-[var(--color-primary)] text-white text-base font-bold hover:bg-[var(--color-primary-hover)] active:scale-[0.98] shadow-[var(--shadow-3)] hover:shadow-[var(--shadow-4)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+      >
+        <Mail size={20} aria-hidden="true" />
+        {isMobile
+          ? "Deschide aplicația de email"
+          : autoOpened
+            ? "Re-deschide emailul"
+            : "Deschide emailul"}
+      </a>
+
+      {/* Desktop @gmail users get a secondary button to use Gmail web
+          explicitly. Hidden on mobile — the mailto: handler routes
+          through the Gmail Android app anyway. */}
+      {!isMobile && gmailWebUrl && (
+        <a
+          href={gmailWebUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex w-full items-center justify-center gap-2 h-11 px-4 mb-3 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)]/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+        >
+          Sau deschide în Gmail web →
+        </a>
+      )}
+
+      <p className="text-[11px] text-[var(--color-text-muted)] mb-6 leading-relaxed">
+        {isMobile
+          ? "Apasă butonul de sus → se deschide aplicația ta de email cu textul deja completat. Tu apeși Trimite în Gmail / Mail / Outlook."
+          : "Emailul ar trebui să se deschidă automat. Dacă nu, apasă butonul de sus."}
+      </p>
+
+      {/* Code + copy — secondary now (the email button is the real
+          next step). Code matters for tracking but only AFTER the
+          email is sent. */}
+      <p className="text-[var(--color-text-muted)] mb-1 text-xs">Cod unic — salvează-l pentru urmărire:</p>
 
       <button
         type="button"
         onClick={copyCode}
-        className="group inline-flex items-center gap-2 mb-2 px-4 py-2 rounded-[var(--radius-xs)] bg-[var(--color-primary-soft)] hover:bg-[var(--color-primary)]/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+        className="group inline-flex items-center gap-2 mb-1 px-4 py-2 rounded-[var(--radius-xs)] bg-[var(--color-primary-soft)] hover:bg-[var(--color-primary)]/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         aria-label={`Copiază codul ${code}`}
       >
-        <span className="font-mono font-bold text-3xl text-[var(--color-primary)] tracking-wide">
+        <span className="font-mono font-bold text-2xl text-[var(--color-primary)] tracking-wide">
           {code}
         </span>
         {codeCopied ? (
@@ -1554,32 +1600,27 @@ function SuccessScreen({
           />
         )}
       </button>
-      <p className="text-[11px] text-[var(--color-text-muted)] mb-6">
+      <p className="text-[10px] text-[var(--color-text-muted)] mb-6">
         {codeCopied ? "Copiat în clipboard" : "Apasă să-l copiezi"}
       </p>
 
       <div className="flex flex-col gap-3">
         <button
           onClick={() => router.push(`/sesizari/${code}`)}
-          className="h-12 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+          className="h-11 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
         >
           Vezi sesizarea ta →
         </button>
         <button
           onClick={onAnother}
-          className="h-12 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+          className="h-11 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
         >
           Altă sesizare
         </button>
       </div>
 
-      {/* Reassurance + next-step hint — preempts the most common
-          post-submit question ("am trimis-o, dar acum?"). */}
-      <p className="text-xs text-[var(--color-text-muted)] mt-6 leading-relaxed">
-        Am deschis emailul către primărie cu textul deja completat.
-        <br />
-        Tu apeși <strong className="text-[var(--color-text)]">Trimite</strong> în clientul tău de email.
-        Răspunsul vine în max. <strong className="text-[var(--color-text)]">30 de zile</strong> (OG 27/2002).
+      <p className="text-[11px] text-[var(--color-text-muted)] mt-6 leading-relaxed">
+        Răspunsul vine în max. <strong className="text-[var(--color-text)]">30 de zile</strong> calendaristice (OG 27/2002).
       </p>
     </div>
   );
