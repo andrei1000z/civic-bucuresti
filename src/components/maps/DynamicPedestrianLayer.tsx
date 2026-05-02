@@ -67,13 +67,14 @@ export function DynamicPedestrianLayer() {
   return (
     <>
       {loading && !lowZoom && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-[1000] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full px-4 py-1.5 shadow-lg text-xs text-[var(--color-text-muted)] pointer-events-none">
-          Se încarcă trotuarele...
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] inline-flex items-center gap-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full px-3.5 py-1.5 shadow-lg text-xs font-medium text-[var(--color-text)] pointer-events-none">
+          <span className="w-2 h-2 rounded-full bg-[var(--color-primary)] animate-pulse" aria-hidden="true" />
+          Se încarcă trotuarele…
         </div>
       )}
       {lowZoom && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-[1000] bg-[var(--color-surface)]/90 backdrop-blur border border-[var(--color-border)] rounded-full px-4 py-1.5 shadow-lg text-xs text-[var(--color-text-muted)] pointer-events-none">
-          Zoom la oraș pentru a vedea trotuarele
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] inline-flex items-center gap-1.5 bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-full px-3.5 py-1.5 shadow-lg text-xs font-medium text-[var(--color-text-muted)] pointer-events-none">
+          🔍 Mărește (zoom 13+) ca să vezi trotuarele
         </div>
       )}
     </>
