@@ -6,9 +6,11 @@ import { SYSTEM_PROMPT_FORMAL } from "@/lib/groq/prompts";
 import { getTemplate } from "@/lib/groq/templates";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 import { isProd } from "@/lib/env";
+import { callGemini, isGeminiConfigured, GEMINI_MODEL } from "@/lib/ai/gemini";
 
-/** True for Groq 429 (rate limit / token budget exhausted). Mirrors
- *  the same helper in lib/petitii/ai-summary.ts. */
+/** True for upstream 429 (rate limit / token budget exhausted). Works
+ *  on both Groq SDK errors and Gemini fetch errors (we synthesise the
+ *  same `status` shape in callGemini for parity). */
 function isRateLimited(err: unknown): boolean {
   if (!err || typeof err !== "object") return false;
   const e = err as { status?: number; message?: string };
@@ -173,43 +175,80 @@ Răspunde JSON:
         ]
       : textContext;
 
-    // Model-fallback pattern: try the strict 70B (or vision) first,
-    // fall back to the faster 8B-instant when 70B is rate-limited.
-    // Without this, a Groq 429 left the user with a hard error and
-    // they'd retry blindly while the limiter was still cooling down.
-    // Vision requests can't fall back to a text model — if the vision
-    // tier is throttled, we surface the original error.
-    const candidates = hasPhotos
-      ? [{ model: GROQ_MODEL_VISION, max_tokens: 1100 }]
+    // Multi-provider fallback chain. Order: Groq 70B (best Romanian
+    // prose) → Gemini 2.0 Flash (separate quota, equivalent quality)
+    // → Groq 8B-instant (degraded but always-on rescue). Vision
+    // requests stay on Groq Vision — Gemini can do vision too but
+    // we keep the photo path single-provider for now to avoid
+    // surprising the prompt-engineering work in SYSTEM_PROMPT_FORMAL.
+    //
+    // Each candidate is a thunk so we can mix Groq SDK and Gemini
+    // fetch calls in the same loop. isRateLimited() recognises 429
+    // from both providers (callGemini synthesises the same `status`
+    // shape the Groq SDK throws).
+    type Candidate = {
+      provider: "groq" | "gemini";
+      model: string;
+      run: () => Promise<string | null>;
+    };
+    const messages = [
+      { role: "system" as const, content: SYSTEM_PROMPT_FORMAL },
+      // Groq SDK accepts string or array content depending on model.
+      { role: "user" as const, content: userContent as unknown as string },
+    ];
+    const groqCall = (model: string) => async (): Promise<string | null> => {
+      const completion = await groq.chat.completions.create({
+        model,
+        messages,
+        temperature: 0.3,
+        max_tokens: 1100,
+        response_format: { type: "json_object" },
+      });
+      return completion.choices[0]?.message?.content ?? null;
+    };
+    const candidates: Candidate[] = hasPhotos
+      ? [{ provider: "groq", model: GROQ_MODEL_VISION, run: groqCall(GROQ_MODEL_VISION) }]
       : [
-          { model: GROQ_MODEL, max_tokens: 1100 },
-          { model: GROQ_MODEL_FAST, max_tokens: 1100 },
+          { provider: "groq", model: GROQ_MODEL, run: groqCall(GROQ_MODEL) },
+          ...(isGeminiConfigured()
+            ? [
+                {
+                  provider: "gemini" as const,
+                  model: GEMINI_MODEL,
+                  run: () =>
+                    callGemini({
+                      messages: messages.map((m) => ({ role: m.role, content: m.content as string })),
+                      temperature: 0.3,
+                      max_tokens: 1100,
+                      response_format: { type: "json_object" as const },
+                    }),
+                },
+              ]
+            : []),
+          { provider: "groq", model: GROQ_MODEL_FAST, run: groqCall(GROQ_MODEL_FAST) },
         ];
 
     let content: string | null = null;
     let lastError: unknown = null;
-    for (const cand of candidates) {
+    for (let i = 0; i < candidates.length; i++) {
+      const cand = candidates[i]!;
+      const isLast = i === candidates.length - 1;
       try {
-        const completion = await groq.chat.completions.create({
-          model: cand.model,
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT_FORMAL },
-            // Groq SDK accepts string or array content depending on model.
-            { role: "user", content: userContent as unknown as string },
-          ],
-          temperature: 0.3,
-          max_tokens: cand.max_tokens,
-          response_format: { type: "json_object" },
-        });
-        content = completion.choices[0]?.message?.content ?? null;
+        content = await cand.run();
         if (content) break;
       } catch (err) {
         lastError = err;
-        if (isRateLimited(err) && cand.model !== GROQ_MODEL_FAST) {
-          Sentry.captureMessage("ai-improve fell back to fast model (70B 429)", {
+        if (isRateLimited(err) && !isLast) {
+          const next = candidates[i + 1]!;
+          Sentry.captureMessage("ai-improve fell back to next provider (429)", {
             level: "info",
             tags: { kind: "ai_improve_fallback" },
-            extra: { fromModel: cand.model, toModel: GROQ_MODEL_FAST },
+            extra: {
+              fromProvider: cand.provider,
+              fromModel: cand.model,
+              toProvider: next.provider,
+              toModel: next.model,
+            },
           });
           continue;
         }
