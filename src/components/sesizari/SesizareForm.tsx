@@ -40,7 +40,14 @@ const ParkingHotspotModal = nextDynamic(
 import { PARKING_JURISDICTION_OPTIONS, type ParkingJurisdiction } from "@/lib/sesizari/parking";
 import { VoiceInput } from "./VoiceInput";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { buildFormalText, buildGmailLink, buildMailtoLink, type MailtoInput } from "@/lib/sesizari/mailto";
+import {
+  buildFormalText,
+  buildGmailLink,
+  buildMailtoLink,
+  buildGmailAndroidIntent,
+  buildGmailIosLink,
+  type MailtoInput,
+} from "@/lib/sesizari/mailto";
 import { trackFunnelStep, trackAiUsage, trackFormAbandon } from "@/components/analytics/CiviaTracker";
 import { useCountyOptional } from "@/lib/county-context";
 
@@ -1453,34 +1460,48 @@ function SuccessScreen({
   onAnother: () => void;
 }) {
   const router = useRouter();
-  const [isMobile, setIsMobile] = useState(false);
+  type Platform = "ios" | "android" | "desktop";
+  const [platform, setPlatform] = useState<Platform>("desktop");
   const [autoOpened, setAutoOpened] = useState(false);
 
-  // Detect mobile UA once at mount. Used both for auto-open routing
-  // and for which button label to show.
+  // Detect platform once at mount. iOS / Android distinguished
+  // because they need different deep-link schemes
+  // (googlegmail:// vs intent://). Everything else falls into
+  // "desktop" — auto-open + Gmail web behavior.
   useEffect(() => {
     const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsMobile(/Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua));
+    if (/iPad|iPhone|iPod/.test(ua)) setPlatform("ios");
+    else if (/Android/.test(ua)) setPlatform("android");
+    else setPlatform("desktop");
   }, []);
 
-  // Build URLs once — both used in rendered buttons too, not just
-  // auto-open. mailto: is always available; Gmail web is only sane
-  // for @gmail addresses on desktop.
+  const isMobile = platform === "ios" || platform === "android";
+
+  // Build all URL variants up-front — used both in render (as anchor
+  // hrefs that the user TAPS) and in the desktop auto-open path.
   const mailtoUrl = buildMailtoLink(emailInput);
   const emailAddr = emailInput.author_email?.toLowerCase() ?? "";
   const isGmailAddr =
     emailAddr.endsWith("@gmail.com") || emailAddr.endsWith("@googlemail.com");
   const gmailWebUrl = isGmailAddr ? buildGmailLink(emailInput) : null;
+  // Mobile-only deep links into the Gmail app. Android intent has a
+  // built-in mailto: fallback; iOS doesn't (silent fail), so we also
+  // render the mailto: button as backup on iOS.
+  const gmailAppUrl =
+    platform === "android"
+      ? buildGmailAndroidIntent(emailInput)
+      : platform === "ios"
+        ? buildGmailIosLink(emailInput)
+        : null;
 
   // Auto-open ONLY on desktop. On mobile, programmatic click on
-  // mailto: is blocked by Chrome / Safari (security policy — only
-  // user-gesture clicks trigger the OS protocol handler), so the
-  // auto-open silently does nothing and the user sees the success
-  // screen with no mail app opened. On mobile we rely on the big
-  // tap-target button below — user taps it, OS handles it correctly.
+  // mailto:/intent:/googlegmail:// is blocked by Chrome / Safari
+  // (security policy — only user-gesture taps trigger protocol
+  // handlers), so we don't bother — the big tap-target buttons
+  // below handle it.
   useEffect(() => {
-    if (isMobile) return; // mobile auto-open is unreliable; user taps the button
+    if (isMobile) return;
     const url = gmailWebUrl ?? mailtoUrl;
     try {
       if (gmailWebUrl) {
@@ -1538,42 +1559,73 @@ function SuccessScreen({
         Următorul pas: deschide emailul în aplicația ta și apasă <strong>Trimite</strong>.
       </p>
 
-      {/* PRIMARY ACTION: opens the user's mail app with the pre-filled
-          email. On mobile this MUST be a real anchor that the user
-          taps — programmatic clicks on mailto: are blocked by Chrome/
-          Safari for security. On desktop the auto-open useEffect above
-          already triggered, but this button stays as a "do it again"
-          fallback if the user closed the tab or popup was blocked. */}
-      <a
-        href={mailtoUrl}
-        className="inline-flex w-full items-center justify-center gap-2 h-14 px-6 mb-3 rounded-[var(--radius-md)] bg-[var(--color-primary)] text-white text-base font-bold hover:bg-[var(--color-primary-hover)] active:scale-[0.98] shadow-[var(--shadow-3)] hover:shadow-[var(--shadow-4)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
-      >
-        <Mail size={20} aria-hidden="true" />
-        {isMobile
-          ? "Deschide aplicația de email"
-          : autoOpened
-            ? "Re-deschide emailul"
-            : "Deschide emailul"}
-      </a>
-
-      {/* Desktop @gmail users get a secondary button to use Gmail web
-          explicitly. Hidden on mobile — the mailto: handler routes
-          through the Gmail Android app anyway. */}
-      {!isMobile && gmailWebUrl && (
+      {/* PRIMARY ACTION — different per platform.
+          - Android: intent:// URL targeting Gmail app directly. Has
+            S.browser_fallback_url=mailto: so non-Gmail-app users get
+            redirected to their default mail handler. Single button
+            covers everyone.
+          - iOS: googlegmail:// deep link as primary, mailto: as
+            secondary. iOS doesn't have a Chrome-style fallback for
+            custom URL schemes — if Gmail isn't installed the link
+            silently fails, so we MUST also render the mailto: button.
+          - Desktop: mailto: (auto-opens default mail client) as
+            primary. Desktop @gmail users get Gmail web as secondary. */}
+      {platform === "android" && (
         <a
-          href={gmailWebUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex w-full items-center justify-center gap-2 h-11 px-4 mb-3 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)]/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          href={gmailAppUrl!}
+          className="inline-flex w-full items-center justify-center gap-2 h-14 px-6 mb-3 rounded-[var(--radius-md)] bg-[var(--color-primary)] text-white text-base font-bold hover:bg-[var(--color-primary-hover)] active:scale-[0.98] shadow-[var(--shadow-3)] hover:shadow-[var(--shadow-4)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
         >
-          Sau deschide în Gmail web →
+          <Mail size={20} aria-hidden="true" />
+          Deschide în aplicația Gmail
         </a>
       )}
 
+      {platform === "ios" && (
+        <>
+          <a
+            href={gmailAppUrl!}
+            className="inline-flex w-full items-center justify-center gap-2 h-14 px-6 mb-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] text-white text-base font-bold hover:bg-[var(--color-primary-hover)] active:scale-[0.98] shadow-[var(--shadow-3)] hover:shadow-[var(--shadow-4)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+          >
+            <Mail size={20} aria-hidden="true" />
+            Deschide în Gmail
+          </a>
+          <a
+            href={mailtoUrl}
+            className="inline-flex w-full items-center justify-center gap-2 h-12 px-4 mb-3 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          >
+            Sau deschide în Mail (iOS)
+          </a>
+        </>
+      )}
+
+      {platform === "desktop" && (
+        <>
+          <a
+            href={mailtoUrl}
+            className="inline-flex w-full items-center justify-center gap-2 h-14 px-6 mb-3 rounded-[var(--radius-md)] bg-[var(--color-primary)] text-white text-base font-bold hover:bg-[var(--color-primary-hover)] active:scale-[0.98] shadow-[var(--shadow-3)] hover:shadow-[var(--shadow-4)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-primary)]"
+          >
+            <Mail size={20} aria-hidden="true" />
+            {autoOpened ? "Re-deschide emailul" : "Deschide emailul"}
+          </a>
+          {gmailWebUrl && (
+            <a
+              href={gmailWebUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full items-center justify-center gap-2 h-11 px-4 mb-3 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)]/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+            >
+              Sau deschide în Gmail web →
+            </a>
+          )}
+        </>
+      )}
+
       <p className="text-[11px] text-[var(--color-text-muted)] mb-6 leading-relaxed">
-        {isMobile
-          ? "Apasă butonul de sus → se deschide aplicația ta de email cu textul deja completat. Tu apeși Trimite în Gmail / Mail / Outlook."
-          : "Emailul ar trebui să se deschidă automat. Dacă nu, apasă butonul de sus."}
+        {platform === "android"
+          ? `Se deschide aplicația Gmail cu textul completat. Tu apeși Trimite. Dacă nu ai Gmail instalat, te trimite la aplicația ta default de email.`
+          : platform === "ios"
+            ? `Apasă „Gmail" dacă ai aplicația instalată. Altfel apasă „Mail (iOS)" și se deschide aplicația ta de email default.`
+            : `Emailul ar trebui să se deschidă automat. Dacă nu, apasă butonul de sus.`}
       </p>
 
       {/* Code + copy — secondary now (the email button is the real

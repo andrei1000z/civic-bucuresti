@@ -291,6 +291,48 @@ export function buildGmailLink(input: MailtoInput): string {
   return `https://mail.google.com/mail/?${params.toString()}`;
 }
 
+/**
+ * Android Chrome intent URL targeting the Gmail app directly. Bypasses
+ * Chrome's mailto: handler (which can route to Gmail web in a new tab
+ * on phones where the user has a Google account in the browser but
+ * Chrome's "default mail" isn't set to the Gmail app).
+ *
+ * `S.browser_fallback_url` fires if the Gmail app isn't installed —
+ * Chrome falls back to the system mailto: handler so non-Gmail-app
+ * users still get SOMETHING.
+ *
+ * Reference: https://developer.chrome.com/docs/android/intents
+ */
+export function buildGmailAndroidIntent(input: MailtoInput): string {
+  const p = buildEmailPayload(input);
+  const params = new URLSearchParams();
+  params.set("to", p.to.join(","));
+  params.set("subject", p.subject);
+  params.set("body", p.body);
+  if (p.cc.length > 0) params.set("cc", p.cc.join(","));
+  const fallback = encodeURIComponent(buildMailtoLink(input));
+  return `intent://send?${params.toString()}#Intent;scheme=mailto;package=com.google.android.gm;S.browser_fallback_url=${fallback};end`;
+}
+
+/**
+ * iOS Gmail app deep link. If the user doesn't have Gmail installed
+ * the link silently fails (iOS doesn't have a Chrome-style fallback
+ * mechanism for custom URL schemes), so the caller MUST also render a
+ * fallback mailto: button that the user can tap if the Gmail link
+ * does nothing.
+ *
+ * Reference: Gmail iOS URL scheme docs (legacy but stable).
+ */
+export function buildGmailIosLink(input: MailtoInput): string {
+  const p = buildEmailPayload(input);
+  const params = new URLSearchParams();
+  params.set("to", p.to.join(","));
+  params.set("subject", p.subject);
+  params.set("body", p.body);
+  if (p.cc.length > 0) params.set("cc", p.cc.join(","));
+  return `googlegmail:///co?${params.toString()}`;
+}
+
 export function buildOutlookLink(input: MailtoInput): string {
   // Modern Outlook web deep-link. The legacy `/owa/?path=/mail/action/compose`
   // URL we used before lands users on a "page not found" / empty inbox
