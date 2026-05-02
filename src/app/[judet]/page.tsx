@@ -683,8 +683,9 @@ export default async function CountyHomePage({
         ]}
       />
 
-      {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#047857] via-[#065f46] to-[#0a0a0a] text-white">
+      {/* ─── HERO ─── (gradient pinned to design tokens — same as
+          the national homepage hero so they read as one product). */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-[var(--color-primary)] via-emerald-800 to-[#0a0a0a] text-white">
         <div
           className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.3),transparent)]"
           aria-hidden="true"
@@ -707,7 +708,7 @@ export default async function CountyHomePage({
               </h1>
 
               <p className="text-lg md:text-xl text-emerald-100/85 max-w-xl leading-relaxed mb-8">
-                Tot ce ține de {isBucharest ? "Bucureștiul tău" : `județul ${county.name}`} într-un singur loc — sesizări, hărți, calitate aer, știri locale, autorități, întreruperi.
+                Tot ce ține de {isBucharest ? "Bucureștiul tău" : `județul ${county.name}`} într-un singur loc — sesizări la primărie, hărți interactive, știri locale și întreruperi programate.
               </p>
 
               <div className="flex flex-wrap gap-3">
@@ -806,14 +807,13 @@ export default async function CountyHomePage({
                 Cu cine vorbești în {county.name}
               </h2>
               <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                Top 3 autorități cu contact direct. Lista completă în{" "}
+                Top 3 instituții cu contact direct — email, telefon, adresă.{" "}
                 <Link
                   href={`/${judet}/autoritati`}
                   className="text-[var(--color-primary)] hover:underline"
                 >
-                  autorități
+                  Vezi catalogul complet →
                 </Link>
-                .
               </p>
             </div>
           </div>
