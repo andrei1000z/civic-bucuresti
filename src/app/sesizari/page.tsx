@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Eye, Search, CheckCircle2, Send, Scale, ChevronDown, HelpCircle } from "lucide-react";
+import { Eye, Search, CheckCircle2, Send, Scale, ChevronDown, HelpCircle, BookOpen } from "lucide-react";
 import { SesizareForm } from "@/components/sesizari/SesizareForm";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
@@ -28,6 +28,13 @@ interface QuickLink {
 }
 
 const STATIC_QUICK_LINKS: readonly QuickLink[] = [
+  {
+    href: "/ghiduri/ghid-sesizari",
+    icon: BookOpen,
+    title: "Cum scrii o sesizare bună",
+    desc: "5 reguli + exemple înainte / după",
+    accent: "#7C3AED",
+  },
   {
     href: "/sesizari-publice",
     icon: Eye,
@@ -98,15 +105,17 @@ export default async function SesizariPage() {
       />
 
       {/* Quick links — colored accent ring + icon chip per item.
-          Grid scales to the link count so two cards don't stretch
-          weirdly when the "Dovezi" entry is hidden pending the first
-          resolved-with-photo sesizare. Class names are listed as
-          literals so Tailwind's JIT picks them up. */}
+          Grid scales to the link count so cards don't stretch weirdly
+          when the "Dovezi" entry is hidden pending the first resolved-
+          with-photo sesizare. With 3 entries: 3 cols on sm+. With 4
+          (after Dovezi unlocks): 2 cols on sm, 4 cols on lg so the
+          fourth doesn't squeeze. Class names listed as literals so
+          Tailwind's JIT picks them up. */}
       <div
         className={
-          QUICK_LINKS.length === 3
-            ? "grid sm:grid-cols-3 gap-3 mb-8"
-            : "grid sm:grid-cols-2 gap-3 mb-8"
+          QUICK_LINKS.length === 4
+            ? "grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8"
+            : "grid sm:grid-cols-3 gap-3 mb-8"
         }
       >
         {QUICK_LINKS.map((q) => {
