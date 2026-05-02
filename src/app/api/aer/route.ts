@@ -9,12 +9,14 @@ import { DEDUP_RADIUS_M } from "@/lib/aer/constants";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 import { isInsideRomania, preloadRomaniaPolygon } from "@/lib/aer/romania-polygon";
 
-// 60s ISR cache. Sensor.Community + uRADMonitor update every ~1 min;
-// OpenAQ + WAQI are pulled hourly upstream but their endpoints are
-// fast. With 60s revalidate the map feels live without blowing
-// through Vercel function-invocation limits — at most 60 cold pulls
-// per hour per route.
-export const revalidate = 60;
+// 3-min ISR cache. Sensor.Community individual stations vary from
+// ~10s reporting to several minutes; the upstream aggregate is
+// effectively fresh at the 1–3 min mark. OpenAQ + WAQI cap out
+// hourly upstream but respond fast. Bumped from 60s to 180s after
+// metering: the 60s window was firing ~60 cold pulls/h per route
+// for marginal freshness gain (most sensors hadn't updated yet).
+// 180s halves origin cost; map still feels live.
+export const revalidate = 180;
 
 /**
  * Citizen-network sensors occasionally drift out of calibration and
@@ -178,7 +180,7 @@ export async function GET(req: Request) {
 
   return NextResponse.json(response, {
     headers: {
-      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=60",
+      "Cache-Control": "public, s-maxage=180, stale-while-revalidate=300",
       "X-Fetch-Time": `${Date.now() - startTime}ms`,
       "X-Outliers-Dropped": String(droppedOutliers),
       "X-Outside-Ro-Dropped": String(droppedOutsideRo),

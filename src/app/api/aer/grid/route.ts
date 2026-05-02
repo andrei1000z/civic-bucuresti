@@ -11,9 +11,10 @@ import {
 } from "@/lib/aer/estimation-grid";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 
-// 60s ISR — same cadence as /api/aer. Grid is cheap to compute (~50ms
-// for ~400 cells) once the sensors are fetched.
-export const revalidate = 60;
+// 3-min ISR — same cadence as /api/aer. Grid is cheap to compute
+// (~50ms for ~400 cells) once the sensors are fetched, but the
+// upstream sensor fetches are the cost; we want to amortize them.
+export const revalidate = 180;
 
 interface GridResponse {
   cells: GridCell[];
@@ -76,7 +77,7 @@ export async function GET(req: Request) {
 
   return NextResponse.json(response, {
     headers: {
-      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+      "Cache-Control": "public, s-maxage=180, stale-while-revalidate=300",
       "X-Fetch-Time": `${Date.now() - startTime}ms`,
     },
   });
