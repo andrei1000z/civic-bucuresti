@@ -4,11 +4,17 @@ import { BookOpen, Clock, ArrowRight } from "lucide-react";
 import { ghiduri } from "@/data/ghiduri";
 import { Badge } from "@/components/ui/Badge";
 
+const TOTAL = ghiduri.length;
+
 export const metadata: Metadata = {
   title: "Ghiduri practice — ce să faci când statul e dificil",
-  description: "11 ghiduri pas-cu-pas pentru cetățeni: Legea 544, contestarea unei amenzi, ajutoare sociale, cum înființezi un ONG, drepturi și proceduri explicate simplu — fără jargon juridic.",
+  description: `${TOTAL} ghiduri pas-cu-pas pentru cetățeni: Legea 544, contestarea unei amenzi, ajutoare sociale, cum înființezi un ONG, drepturi și proceduri explicate simplu — fără jargon juridic.`,
   alternates: { canonical: "/ghiduri" },
 };
+
+// Page is fully static (data-source is a typed constant). 24 h ISR is
+// generous; even if we add a guide, a one-day rebuild window is fine.
+export const revalidate = 86400;
 
 const dificultateMap = {
   usor: { label: "Ușor", variant: "success" as const },
@@ -19,7 +25,10 @@ const dificultateMap = {
 export default function GhiduriPage() {
   return (
     <>
-      {/* Hero */}
+      {/* Hero — kept as a full-bleed gradient (instead of the
+          PageHero card pattern) because the guides surface is a
+          discovery hub, not an action surface. The gradient + hero
+          quote sets the editorial tone for the catalog below. */}
       <section className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-fuchsia-700 to-pink-800 text-white">
         <div className="absolute inset-0 bg-grid-pattern opacity-20" />
         <div className="container-narrow relative z-10 py-20 md:py-28">
@@ -29,8 +38,11 @@ export default function GhiduriPage() {
           <h1 className="font-[family-name:var(--font-sora)] text-4xl md:text-6xl font-extrabold mb-4">
             Ce să faci când te lovești de stat
           </h1>
-          <p className="text-lg md:text-xl text-white/85 max-w-2xl">
-            11 ghiduri scurte, cu pași concreți. Contestarea unei amenzi, cererea de informații publice, înființarea unui ONG, pregătirea pentru cutremur — lucrurile pe care nu le înveți la școală dar pe care toți le înfruntăm.
+          <p className="text-lg md:text-xl text-white/85 max-w-2xl leading-relaxed">
+            {TOTAL} ghiduri scurte, cu pași concreți. Contestarea unei amenzi,
+            cererea de informații publice, înființarea unui ONG, pregătirea
+            pentru cutremur — lucrurile pe care nu le înveți la școală dar pe
+            care toți le înfruntăm.
           </p>
         </div>
       </section>
