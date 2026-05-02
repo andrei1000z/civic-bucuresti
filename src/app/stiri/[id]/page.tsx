@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Calendar, User, Tag, Building2, Info } from "lucide-react";
 import { createSupabaseAnon } from "@/lib/supabase/admin";
 import { Badge } from "@/components/ui/Badge";
-import { SOURCE_COLORS, SITE_URL, readableTextColor } from "@/lib/constants";
+import { SOURCE_COLORS, SITE_URL, readableTextColor, sourceTextColor } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
 import { getOrGenerateAiSummary } from "@/lib/stiri/ai-summary";
 import { AiSummary } from "./AiSummary";
@@ -144,6 +144,10 @@ export default async function StireDetailPage({
 
   const related = await getRelatedArticles(stire);
   const sourceColor = SOURCE_COLORS[stire.source] ?? "#64748b";
+  // Mid-tone variant for plain-text rendering on neutral surfaces — the
+  // raw brand color is sometimes pure black (G4Media) which disappears
+  // on dark theme. Borders + tinted backgrounds keep using the raw color.
+  const sourceTextTint = sourceTextColor(stire.source);
 
   return (
     <div className="container-narrow py-8 md:py-12 max-w-4xl">
@@ -295,7 +299,7 @@ export default async function StireDetailPage({
               <h2 className="text-[11px] text-[var(--color-text-muted)] uppercase tracking-wider font-bold mb-4 inline-flex items-center gap-2">
                 <span
                   className="w-5 h-5 rounded-[var(--radius-xs)] bg-[var(--color-surface-2)] grid place-items-center"
-                  style={{ color: sourceColor }}
+                  style={{ color: sourceTextTint }}
                   aria-hidden="true"
                 >
                   <Building2 size={11} />
@@ -329,7 +333,7 @@ export default async function StireDetailPage({
             <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-bold mb-3 inline-flex items-center gap-1.5">
               <span
                 className="w-5 h-5 rounded-[var(--radius-xs)] grid place-items-center"
-                style={{ backgroundColor: `${sourceColor}1a`, color: sourceColor }}
+                style={{ backgroundColor: `${sourceColor}1a`, color: sourceTextTint }}
                 aria-hidden="true"
               >
                 <Building2 size={11} />

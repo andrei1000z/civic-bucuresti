@@ -257,9 +257,13 @@ export function readableTextColor(bgHex: string): string {
 // G4Media near-black disappears on dark surface. Use these only for
 // `style={{ color: ... }}` text rendering — Badge components should
 // keep using SOURCE_COLORS + readableTextColor() for their solid bg.
+//
+// Picked slate-400 (#94A3B8, luminance ~0.62) for G4Media — readable
+// on dark surfaces (the homepage StiriWidget runs on a dark band) and
+// still acceptable on light. Slate-500 was too dark on dark surfaces.
 const SOURCE_TEXT_OVERRIDES: Record<string, string> = {
   "Hotnews": "#CA8A04",  // yellow-600 — readable on both light and dark
-  "G4Media": "#64748B",  // slate-500 — neutral; "black wordmark" doesn't translate to one text color
+  "G4Media": "#94A3B8",  // slate-400 — neutral; "black wordmark" can't render as black on dark
 };
 
 export function sourceTextColor(source: string): string {

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Newspaper, ArrowRight } from "lucide-react";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { NATIONAL_SOURCES } from "@/lib/stiri/sources";
-import { SOURCE_COLORS, readableTextColor } from "@/lib/constants";
+import { SOURCE_COLORS, readableTextColor, sourceTextColor } from "@/lib/constants";
 import { Badge } from "@/components/ui/Badge";
 import { TimeAgo } from "@/components/ui/TimeAgo";
 
@@ -132,7 +132,7 @@ export async function StiriWidget() {
                       className="w-16 h-16 rounded-[var(--radius-xs)] grid place-items-center shrink-0"
                       style={{
                         background: (SOURCE_COLORS[s.source] ?? "#64748b") + "1a",
-                        color: SOURCE_COLORS[s.source] ?? "#64748b",
+                        color: sourceTextColor(s.source),
                       }}
                       aria-hidden="true"
                     >
@@ -143,7 +143,7 @@ export async function StiriWidget() {
                     <div className="flex items-center gap-1.5 mb-1">
                       <span
                         className="text-[9px] uppercase tracking-wider font-bold"
-                        style={{ color: SOURCE_COLORS[s.source] ?? "#64748b" }}
+                        style={{ color: sourceTextColor(s.source) }}
                       >
                         {s.source}
                       </span>
