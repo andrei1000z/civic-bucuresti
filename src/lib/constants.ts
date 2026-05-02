@@ -172,22 +172,64 @@ export const STATUS_LABELS: Record<string, string> = Object.fromEntries(
 // Locals get distinct accent colors so they don't all look the same
 // on county pages.
 export const SOURCE_COLORS: Record<string, string> = {
-  // National
-  "Digi24": "#DC2626",          // red-600 — Digi24 broadcast red
-  "Hotnews": "#FACC15",          // yellow-400 — Hotnews signature yellow
-  "G4Media": "#0A0A0A",          // near-black — G4Media wordmark
-  "Mediafax": "#1D4ED8",         // blue-700 — Mediafax logo blue
-  "News.ro": "#16A34A",          // green-600 — News.ro logo green
+  // National wire-service tier
+  "Digi24": "#DC2626",          // red-600 — broadcast red
+  "Hotnews": "#FACC15",          // yellow-400 — signature yellow
+  "G4Media": "#0A0A0A",          // near-black wordmark
+  "Mediafax": "#1D4ED8",         // blue-700
+  "News.ro": "#16A34A",          // green-600
+  "Libertatea": "#DC2626",       // red — Libertatea logo red
+  "Adevărul": "#1E3A8A",         // navy — Adevărul masthead
+  "Gândul": "#0F766E",           // teal — Gândul accent
+  // National investigative + independent
+  "PressOne": "#7C3AED",         // violet — PressOne brand
+  "Spotmedia": "#0EA5E9",        // sky — Spotmedia
+  "Europa Liberă": "#0369A1",    // RFE/RL blue
+  "Recorder": "#EA580C",         // orange — Recorder accent
+  // Business / specialist
+  "Ziarul Financiar": "#9F1239", // ZF burgundy
+  // Long-tail aggregators
   "Ediția de Dimineață": "#F59E0B",
   "Știri din România": "#475569",
-  // Local houses
-  "B365.ro": "#10B981",          // București — emerald
-  "Monitorul CJ": "#7C3AED",     // Cluj — violet
-  "Știri de Cluj": "#A855F7",    // Cluj — purple
-  "Ziarul de Iași": "#6366F1",   // Iași — indigo
-  "Opinia Timișoarei": "#EC4899",// Timiș — pink
-  "Știri Suceava": "#14B8A6",    // Suceava — teal
-  "Gazeta BT": "#8B5CF6",        // Botoșani — purple
+  // Local — kept distinct per county for badge contrast
+  "B365.ro": "#10B981",
+  "Alba24": "#06B6D4",
+  "Ziarul Unirea": "#0891B2",
+  "Aradon": "#F97316",
+  "Jurnalul de Argeș": "#84CC16",
+  "Deșteptarea": "#0D9488",
+  "Bihon": "#A855F7",
+  "Gazeta de Bistrița": "#65A30D",
+  "Monitorul BT": "#8B5CF6",
+  "Obiectiv BR": "#EAB308",
+  "BizBrașov": "#059669",
+  "Opinia Buzău": "#DB2777",
+  "Monitorul CJ": "#7C3AED",
+  "Știri de Cluj": "#A855F7",
+  "Actual de Cluj": "#9333EA",
+  "Telegraf": "#0284C7",
+  "Ziua de Constanța": "#0369A1",
+  "Gazeta de Sud": "#B91C1C",
+  "Replica HD": "#9F1239",
+  "Ziarul de Iași": "#6366F1",
+  "BZI": "#4F46E5",
+  "7Iași": "#7C3AED",
+  "eMaramureș": "#15803D",
+  "Zi de Zi": "#C2410C",
+  "Monitorul NT": "#5B21B6",
+  "Observatorul PH": "#0E7490",
+  "Gazeta Nord-Vest": "#7E22CE",
+  "Turnul Sfatului": "#1D4ED8",
+  "Tribuna": "#1E40AF",
+  "Monitorul SV": "#14B8A6",
+  "News Bucovina": "#0F766E",
+  "Opinia Timișoarei": "#EC4899",
+  "PressAlert": "#DB2777",
+  "TION": "#BE185D",
+  "Monitorul VN": "#9333EA",
+  // Legacy entries kept for historical badge rendering
+  "Știri Suceava": "#14B8A6",
+  "Gazeta BT": "#8B5CF6",
 };
 
 /**

@@ -20,24 +20,96 @@ interface Feed {
 }
 
 /**
- * National RSS feeds — no keyword filtering at fetch time.
- * County tagging happens via detectCounties() on the full text.
+ * RSS feeds. National sources show on /stiri; local houses surface
+ * additionally on the matching /[judet]/stiri page (mapping in
+ * src/lib/stiri/sources.ts → LOCAL_SOURCES_BY_COUNTY).
+ *
+ * Source selection criteria (round 2026-05-02 expansion):
+ *   - Working RSS verified live (probed via curl)
+ *   - Editorial standards we'd want a civic platform associated with
+ *     — independent + investigative tier preferred (PressOne,
+ *     Recorder, Spotmedia, Europa Liberă) over pure ad-driven feeds
+ *   - Local: at least one strong outlet per county that publishes
+ *     daily and isn't a partisan party paper
  */
 const FEEDS: Feed[] = [
-  // National
+  // ─── NATIONAL — wire-service + investigative ─────────────────
   { url: "https://www.digi24.ro/rss", source: "Digi24" },
   { url: "https://www.hotnews.ro/rss", source: "Hotnews" },
   { url: "https://www.g4media.ro/feed", source: "G4Media" },
   { url: "https://www.mediafax.ro/rss", source: "Mediafax" },
   { url: "https://www.news.ro/rss", source: "News.ro" },
-  // Local / regional — more county coverage
-  { url: "https://b365.ro/feed/", source: "B365.ro" },
-  { url: "https://www.monitorulcj.ro/rss", source: "Monitorul CJ" },
-  { url: "https://www.ziaruldeiasi.ro/rss", source: "Ziarul de Iași" },
-  { url: "https://www.opiniatimisoarei.ro/feed", source: "Opinia Timișoarei" },
-  { url: "https://www.stiridecluj.ro/rss.xml", source: "Știri de Cluj" },
+  { url: "https://pressone.ro/api/rss", source: "PressOne" },
+  { url: "https://spotmedia.ro/feed", source: "Spotmedia" },
+  { url: "https://romania.europalibera.org/api/zomgpe%24qoyq", source: "Europa Liberă" },
+  { url: "https://recorder.ro/feed/", source: "Recorder" },
+  { url: "https://www.libertatea.ro/feed", source: "Libertatea" },
+  { url: "https://adevarul.ro/rss/index", source: "Adevărul" },
+  { url: "https://www.gandul.ro/feed", source: "Gândul" },
+  { url: "https://www.zf.ro/rss/", source: "Ziarul Financiar" },
   { url: "https://www.editiadedimineata.ro/feed", source: "Ediția de Dimineață" },
   { url: "https://www.stiridinromania.ro/feed", source: "Știri din România" },
+  // ─── LOCAL — at least one paper per major county ─────────────
+  // Bucharest
+  { url: "https://b365.ro/feed/", source: "B365.ro" },
+  // Cluj
+  { url: "https://www.monitorulcj.ro/rss", source: "Monitorul CJ" },
+  { url: "https://www.stiridecluj.ro/rss.xml", source: "Știri de Cluj" },
+  { url: "https://www.actualdecluj.ro/feed", source: "Actual de Cluj" },
+  // Iași
+  { url: "https://www.ziaruldeiasi.ro/rss", source: "Ziarul de Iași" },
+  { url: "https://www.bzi.ro/feed", source: "BZI" },
+  { url: "https://www.7iasi.ro/feed", source: "7Iași" },
+  // Timiș
+  { url: "https://www.opiniatimisoarei.ro/feed", source: "Opinia Timișoarei" },
+  { url: "https://pressalert.ro/feed", source: "PressAlert" },
+  { url: "https://www.tion.ro/feed", source: "TION" },
+  // Constanța
+  { url: "https://www.telegrafonline.ro/feed", source: "Telegraf" },
+  { url: "https://www.ziuaconstanta.ro/feed", source: "Ziua de Constanța" },
+  // Alba
+  { url: "https://alba24.ro/feed", source: "Alba24" },
+  { url: "https://www.ziarulunirea.ro/feed", source: "Ziarul Unirea" },
+  // Arad
+  { url: "https://www.aradon.ro/feed", source: "Aradon" },
+  // Argeș
+  { url: "https://www.jurnaluldearges.ro/feed", source: "Jurnalul de Argeș" },
+  // Bacău
+  { url: "https://www.desteptarea.ro/feed", source: "Deșteptarea" },
+  // Bihor
+  { url: "https://www.bihon.ro/feed", source: "Bihon" },
+  // Bistrița-Năsăud
+  { url: "https://www.gazetadebistrita.ro/feed", source: "Gazeta de Bistrița" },
+  // Botoșani
+  { url: "https://www.monitorulbt.ro/feed", source: "Monitorul BT" },
+  // Brăila
+  { url: "https://www.obiectivbr.ro/feed", source: "Obiectiv BR" },
+  // Brașov
+  { url: "https://www.bizbrasov.ro/feed", source: "BizBrașov" },
+  // Buzău
+  { url: "https://www.opiniabuzau.ro/feed", source: "Opinia Buzău" },
+  // Dolj
+  { url: "https://www.gds.ro/feed", source: "Gazeta de Sud" },
+  // Hunedoara
+  { url: "https://www.replicahd.ro/feed", source: "Replica HD" },
+  // Maramureș
+  { url: "https://www.emaramures.ro/feed", source: "eMaramureș" },
+  // Mureș
+  { url: "https://www.zi-de-zi.ro/feed", source: "Zi de Zi" },
+  // Neamț
+  { url: "https://www.monitorulneamt.ro/feed", source: "Monitorul NT" },
+  // Prahova
+  { url: "https://www.observatorulph.ro/feed", source: "Observatorul PH" },
+  // Satu Mare
+  { url: "https://www.gsm.ro/feed", source: "Gazeta Nord-Vest" },
+  // Sibiu
+  { url: "https://www.turnulsfatului.ro/feed", source: "Turnul Sfatului" },
+  { url: "https://www.tribuna.ro/feed", source: "Tribuna" },
+  // Suceava
+  { url: "https://www.monitorulsv.ro/feed", source: "Monitorul SV" },
+  { url: "https://www.newsbucovina.ro/feed", source: "News Bucovina" },
+  // Vrancea
+  { url: "https://www.monitoruldevrancea.ro/feed", source: "Monitorul VN" },
 ];
 
 // Simple category classifier from keywords in title + excerpt

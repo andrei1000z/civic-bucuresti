@@ -10,11 +10,23 @@
  */
 
 export const NATIONAL_SOURCES = [
+  // Wire-service tier — mainstream daily coverage
   "Digi24",
   "Hotnews",
   "G4Media",
   "Mediafax",
   "News.ro",
+  "Libertatea",
+  "Adevărul",
+  "Gândul",
+  // Investigative + independent — higher editorial bar
+  "PressOne",
+  "Spotmedia",
+  "Europa Liberă",
+  "Recorder",
+  // Business / specialist
+  "Ziarul Financiar",
+  // Long-tail aggregators
   "Ediția de Dimineață",
   "Știri din România",
 ] as const;
@@ -23,17 +35,62 @@ export const NATIONAL_SOURCES = [
  * Local news houses keyed by county ISO code. Only counties for which we
  * have a verified RSS feed appear here. Sources from rss.ts that are
  * regional but not yet mapped (rare) just won't show up on county pages.
+ *
+ * Counties without a dedicated paper still get the full national feed
+ * — anything tagged with their county via detectCounties() also lands.
  */
 export const LOCAL_SOURCES_BY_COUNTY: Record<string, string[]> = {
-  // București + Ilfov (Bucharest metro reads B365 either way)
+  // București + Ilfov metro share B365
   B: ["B365.ro"],
   IF: ["B365.ro"],
+  // Alba
+  AB: ["Alba24", "Ziarul Unirea"],
+  // Arad
+  AR: ["Aradon"],
+  // Argeș
+  AG: ["Jurnalul de Argeș"],
+  // Bacău
+  BC: ["Deșteptarea"],
+  // Bihor
+  BH: ["Bihon"],
+  // Bistrița-Năsăud
+  BN: ["Gazeta de Bistrița"],
+  // Botoșani
+  BT: ["Monitorul BT"],
+  // Brăila
+  BR: ["Obiectiv BR"],
+  // Brașov
+  BV: ["BizBrașov"],
+  // Buzău
+  BZ: ["Opinia Buzău"],
   // Cluj
-  CJ: ["Monitorul CJ", "Știri de Cluj"],
+  CJ: ["Monitorul CJ", "Știri de Cluj", "Actual de Cluj"],
+  // Constanța
+  CT: ["Telegraf", "Ziua de Constanța"],
+  // Dolj
+  DJ: ["Gazeta de Sud"],
+  // Hunedoara
+  HD: ["Replica HD"],
   // Iași
-  IS: ["Ziarul de Iași"],
+  IS: ["Ziarul de Iași", "BZI", "7Iași"],
+  // Maramureș
+  MM: ["eMaramureș"],
+  // Mureș
+  MS: ["Zi de Zi"],
+  // Neamț
+  NT: ["Monitorul NT"],
+  // Prahova
+  PH: ["Observatorul PH"],
+  // Satu Mare
+  SM: ["Gazeta Nord-Vest"],
+  // Sibiu
+  SB: ["Turnul Sfatului", "Tribuna"],
+  // Suceava
+  SV: ["Monitorul SV", "News Bucovina"],
   // Timiș
-  TM: ["Opinia Timișoarei"],
+  TM: ["Opinia Timișoarei", "PressAlert", "TION"],
+  // Vrancea
+  VN: ["Monitorul VN"],
 };
 
 /**
