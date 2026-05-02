@@ -1486,31 +1486,84 @@ function SuccessScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Copy-to-clipboard for the code. Since the user just submitted, this
+  // is the most likely thing they want to grab — small UX win.
+  const [codeCopied, setCodeCopied] = useState(false);
+  const copyCode = () => {
+    if (typeof navigator === "undefined" || !navigator.clipboard) return;
+    navigator.clipboard
+      .writeText(code)
+      .then(() => {
+        setCodeCopied(true);
+        setTimeout(() => setCodeCopied(false), 2000);
+      })
+      .catch(() => {
+        /* clipboard blocked — silent */
+      });
+  };
+
   return (
     <div className="max-w-md mx-auto py-8 text-center">
+      {/* aria-live polite — screen readers announce the submit success
+          + the code without interrupting whatever they were reading. */}
+      <div role="status" aria-live="polite" className="sr-only">
+        Sesizare înregistrată cu succes. Cod: {code.split("").join(" ")}
+      </div>
+
       <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
         <CheckCircle2 size={32} className="text-emerald-600 dark:text-emerald-400" />
       </div>
       <h3 className="font-[family-name:var(--font-sora)] text-2xl font-bold mb-2">
         Sesizare înregistrată!
       </h3>
-      <p className="text-[var(--color-text-muted)] mb-1">Cod unic:</p>
-      <p className="font-mono font-bold text-3xl text-[var(--color-primary)] mb-6">{code}</p>
+      <p className="text-[var(--color-text-muted)] mb-1 text-sm">Cod unic — salvează-l:</p>
+
+      <button
+        type="button"
+        onClick={copyCode}
+        className="group inline-flex items-center gap-2 mb-2 px-4 py-2 rounded-[var(--radius-xs)] bg-[var(--color-primary-soft)] hover:bg-[var(--color-primary)]/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+        aria-label={`Copiază codul ${code}`}
+      >
+        <span className="font-mono font-bold text-3xl text-[var(--color-primary)] tracking-wide">
+          {code}
+        </span>
+        {codeCopied ? (
+          <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+        ) : (
+          <Copy
+            size={16}
+            className="text-[var(--color-primary)]/60 group-hover:text-[var(--color-primary)] transition-colors"
+            aria-hidden="true"
+          />
+        )}
+      </button>
+      <p className="text-[11px] text-[var(--color-text-muted)] mb-6">
+        {codeCopied ? "Copiat în clipboard" : "Apasă să-l copiezi"}
+      </p>
 
       <div className="flex flex-col gap-3">
         <button
           onClick={() => router.push(`/sesizari/${code}`)}
-          className="h-12 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+          className="h-12 rounded-[var(--radius-xs)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-hover)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
         >
           Vezi sesizarea ta →
         </button>
         <button
           onClick={onAnother}
-          className="h-12 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] font-medium hover:bg-[var(--color-surface-2)] transition-colors"
+          className="h-12 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] font-medium hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
         >
           Altă sesizare
         </button>
       </div>
+
+      {/* Reassurance + next-step hint — preempts the most common
+          post-submit question ("am trimis-o, dar acum?"). */}
+      <p className="text-xs text-[var(--color-text-muted)] mt-6 leading-relaxed">
+        Am deschis emailul către primărie cu textul deja completat.
+        <br />
+        Tu apeși <strong className="text-[var(--color-text)]">Trimite</strong> în clientul tău de email.
+        Răspunsul vine în max. <strong className="text-[var(--color-text)]">30 de zile</strong> (OG 27/2002).
+      </p>
     </div>
   );
 }

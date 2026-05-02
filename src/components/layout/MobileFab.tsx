@@ -67,66 +67,85 @@ export function MobileFab() {
 
   if (hidden) return null;
 
-  return (
-    <div
-      ref={wrapRef}
-      data-floating
-      className="lg:hidden fixed right-4 z-40"
-      style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 5rem)" }}
-    >
-      {/* Action items — stack vertically, animate up when open */}
-      <div
-        className={`absolute right-0 bottom-full mb-3 flex flex-col items-end gap-2 transition-all duration-200 ${
-          open
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 translate-y-2 pointer-events-none"
-        }`}
-        role="menu"
-        aria-hidden={!open}
-      >
-        <SpeedDialLink
-          href={sesizariTarget}
-          icon={<FileText size={16} />}
-          label="Fă sesizare"
-          bg="bg-[var(--color-primary)]"
-        />
-        <SpeedDialLink
-          href={intreruperiTarget}
-          icon={<AlertTriangle size={16} />}
-          label="Întreruperi"
-          bg="bg-orange-500"
-        />
-        <SpeedDialLink
-          href="/autoritati"
-          icon={<Building2 size={16} />}
-          label="Autorități"
-          bg="bg-slate-700 dark:bg-slate-600"
-        />
-        <SpeedDialLink
-          href={aerTarget}
-          icon={<Wind size={16} />}
-          label="Aer live"
-          bg="bg-sky-600"
-        />
-      </div>
+  // The 4 speed-dial entries — declared as data so we can stagger their
+  // entrance animations cleanly. Order matters: top-of-stack appears
+  // last (highest in the column), so the primary "Fă sesizare" is at
+  // the bottom — closest to the thumb.
+  const dialItems = [
+    { href: aerTarget, icon: <Wind size={16} />, label: "Aer live", bg: "bg-sky-600" },
+    { href: "/autoritati", icon: <Building2 size={16} />, label: "Autorități", bg: "bg-slate-700 dark:bg-slate-600" },
+    { href: intreruperiTarget, icon: <AlertTriangle size={16} />, label: "Întreruperi", bg: "bg-orange-500" },
+    { href: sesizariTarget, icon: <FileText size={16} />, label: "Fă sesizare", bg: "bg-[var(--color-primary)]" },
+  ];
 
-      {/* Primary button: + / ✕ */}
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-label={open ? "Închide meniul de acțiuni rapide" : "Deschide meniul de acțiuni rapide"}
-        aria-expanded={open}
-        aria-haspopup="menu"
-        tabIndex={visible ? 0 : -1}
-        className={`inline-flex items-center justify-center w-14 h-14 rounded-full bg-[var(--color-primary)] text-white font-semibold shadow-[var(--shadow-xl)] transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-primary)]/40 ${
-          visible
-            ? "translate-y-0 opacity-100"
-            : "translate-y-20 opacity-0 pointer-events-none"
-        } ${open ? "rotate-45" : ""}`}
+  return (
+    <>
+      {/* Soft backdrop — appears when the dial is open. Tapping it
+          closes the dial (matches OS speed-dial conventions). The
+          z-index sits below the dial wrap (z-30 vs z-40) so the
+          buttons stay clickable. */}
+      <div
+        className={`lg:hidden fixed inset-0 z-30 bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ${
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setOpen(false)}
+        aria-hidden="true"
+      />
+      <div
+        ref={wrapRef}
+        data-floating
+        className="lg:hidden fixed right-4 z-40"
+        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 5rem)" }}
       >
-        {open ? <X size={22} strokeWidth={2.5} aria-hidden="true" /> : <Plus size={22} strokeWidth={2.5} aria-hidden="true" />}
-      </button>
-    </div>
+        {/* Action items — stack vertically, stagger when opening so the
+            chain feels responsive instead of all 4 popping at once. */}
+        <div
+          className={`absolute right-0 bottom-full mb-3 flex flex-col items-end gap-2 transition-all duration-200 ${
+            open
+              ? "opacity-100 translate-y-0 pointer-events-auto"
+              : "opacity-0 translate-y-2 pointer-events-none"
+          }`}
+          role="menu"
+          aria-hidden={!open}
+        >
+          {dialItems.map((item, i) => (
+            <div
+              key={item.label}
+              className="transition-all duration-200"
+              style={{
+                transitionDelay: open ? `${i * 30}ms` : "0ms",
+                opacity: open ? 1 : 0,
+                transform: open ? "translateY(0)" : "translateY(8px)",
+              }}
+            >
+              <SpeedDialLink
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                bg={item.bg}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Primary button: + / ✕ */}
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-label={open ? "Închide meniul de acțiuni rapide" : "Deschide meniul de acțiuni rapide"}
+          aria-expanded={open}
+          aria-haspopup="menu"
+          tabIndex={visible ? 0 : -1}
+          className={`inline-flex items-center justify-center w-14 h-14 rounded-full bg-[var(--color-primary)] text-white font-semibold shadow-[var(--shadow-xl)] transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-primary)]/40 ${
+            visible
+              ? "translate-y-0 opacity-100"
+              : "translate-y-20 opacity-0 pointer-events-none"
+          } ${open ? "rotate-45" : ""}`}
+        >
+          {open ? <X size={22} strokeWidth={2.5} aria-hidden="true" /> : <Plus size={22} strokeWidth={2.5} aria-hidden="true" />}
+        </button>
+      </div>
+    </>
   );
 }
 

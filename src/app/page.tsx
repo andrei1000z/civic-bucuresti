@@ -63,6 +63,24 @@ export default function HomePage() {
                 Semnează petiții
               </Link>
             </div>
+
+            {/* Trust strip — three signals that pre-empt the most common
+                first-visit objections (cost, ads, vendor lock-in). Subtle
+                so it doesn't compete with the CTAs above. */}
+            <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-emerald-100/75">
+              <li className="inline-flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" aria-hidden="true" />
+                Gratuit, mereu
+              </li>
+              <li className="inline-flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" aria-hidden="true" />
+                Fără reclame, fără tracking
+              </li>
+              <li className="inline-flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" aria-hidden="true" />
+                Date deschise (CC BY 4.0)
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -124,7 +142,14 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 mb-10">
+          {/* Connector line behind the cards on desktop — subtle visual
+              cue that the steps are sequential. Hidden on mobile (cards
+              stack vertically; the line would just float). */}
+          <div className="relative grid md:grid-cols-3 gap-6 lg:gap-8 mb-10">
+            <div
+              className="hidden md:block absolute top-8 left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-[var(--color-primary)]/30 to-transparent pointer-events-none"
+              aria-hidden="true"
+            />
             <Step
               num={1}
               icon={<Camera size={20} aria-hidden="true" />}
@@ -173,9 +198,17 @@ function Step({
 }) {
   return (
     <div className="relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 hover:shadow-[var(--shadow-3)] hover:border-[var(--color-primary)]/30 transition-all">
+      {/* Big numeric badge top-right — gives the eye an anchor when
+          scanning a row of three identical-looking cards. */}
+      <span
+        className="absolute top-4 right-4 text-4xl font-extrabold text-[var(--color-primary)]/10 leading-none tabular-nums select-none pointer-events-none"
+        aria-hidden="true"
+      >
+        {num}
+      </span>
       <div className="flex items-start gap-4 mb-3">
         <div
-          className="shrink-0 w-12 h-12 rounded-[var(--radius-md)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 flex items-center justify-center text-white shadow-[var(--shadow-2)]"
+          className="relative shrink-0 w-12 h-12 rounded-[var(--radius-md)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-900 flex items-center justify-center text-white shadow-[var(--shadow-2)] z-10"
           aria-hidden="true"
         >
           {icon}
@@ -184,7 +217,7 @@ function Step({
           <span className="inline-block text-[10px] uppercase tracking-wider font-bold text-[var(--color-primary)] mb-1">
             Pasul {num}
           </span>
-          <h3 className="font-[family-name:var(--font-sora)] font-bold text-base">
+          <h3 className="font-[family-name:var(--font-sora)] font-bold text-base leading-tight">
             {title}
           </h3>
         </div>
