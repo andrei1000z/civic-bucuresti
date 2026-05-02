@@ -29,25 +29,13 @@ const nextConfig: NextConfig = {
         : false,
   },
   images: {
+    // Permissive wildcard — we aggregate news from 30+ Romanian press
+    // outlets, each with their own CDN subdomain. Maintaining an
+    // explicit allowlist meant images silently broke whenever a feed
+    // was added. Next/Image only fetches via `image/*` Accept headers,
+    // so the SSRF surface is narrow.
     remotePatterns: [
-      { protocol: "https", hostname: "*.supabase.co" },
-      { protocol: "https", hostname: "unpkg.com" }, // Leaflet marker icons
-      // Newsfeed image hosts — wildcards ca să acopere CDN subdomains
-      { protocol: "https", hostname: "s.digi24.ro" },
-      { protocol: "https", hostname: "b365.ro" },
-      { protocol: "https", hostname: "hotnews.ro" },
-      { protocol: "https", hostname: "*.b365.ro" },
-      { protocol: "https", hostname: "*.hotnews.ro" },
-      { protocol: "https", hostname: "*.digi24.ro" },
-      { protocol: "https", hostname: "*.g4media.ro" },
-      { protocol: "https", hostname: "*.mediafax.ro" },
-      { protocol: "https", hostname: "*.news.ro" },
-      { protocol: "https", hostname: "*.monitorulcj.ro" },
-      { protocol: "https", hostname: "*.ziaruldeiasi.ro" },
-      { protocol: "https", hostname: "*.opiniatimisoarei.ro" },
-      { protocol: "https", hostname: "*.stiridecluj.ro" },
-      { protocol: "https", hostname: "*.editiadedimineata.ro" },
-      { protocol: "https", hostname: "*.stiridinromania.ro" },
+      { protocol: "https", hostname: "**" },
     ],
     // Format AVIF prima dată (~50% mai mic decât JPEG la aceeași calitate),
     // fallback automat la WebP, apoi JPEG. Next.js servește formatul cel mai

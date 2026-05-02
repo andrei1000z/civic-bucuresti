@@ -75,6 +75,18 @@ export function PageHero({
           className="absolute -bottom-16 -left-8 w-72 h-72 rounded-full bg-white/10 blur-3xl pointer-events-none"
           aria-hidden="true"
         />
+        {/* SVG grain — subtle film texture that prevents the gradient
+            from looking flat on big monitors. Inline data URI so no
+            extra request, and `mix-blend-overlay` keeps it perceptual
+            rather than additive (no greying-out on dark gradients). */}
+        <div
+          className="absolute inset-0 opacity-[0.07] mix-blend-overlay pointer-events-none"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>\")",
+          }}
+          aria-hidden="true"
+        />
         <div className="relative flex items-start gap-4 flex-wrap">
           <div
             className="w-12 h-12 rounded-[var(--radius-xs)] bg-white/15 backdrop-blur-sm ring-2 ring-white/30 grid place-items-center shrink-0"

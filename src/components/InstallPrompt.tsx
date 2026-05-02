@@ -61,12 +61,9 @@ export function InstallPrompt() {
     // Only register in production to avoid dev-mode caching headaches
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") return;
 
-    let registration: ServiceWorkerRegistration | null = null;
-
     navigator.serviceWorker
       .register("/sw.js")
       .then((reg) => {
-        registration = reg;
         // If a worker is already waiting (user previously dismissed
         // the update prompt and reopened the tab), surface again.
         if (reg.waiting) {
@@ -106,7 +103,6 @@ export function InstallPrompt() {
 
     return () => {
       navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
-      registration = null;
     };
   }, []);
 

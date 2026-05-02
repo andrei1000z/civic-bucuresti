@@ -178,24 +178,45 @@ export function CountyPicker() {
         )}
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-          {filtered.map((county) => (
-            <Link
-              key={county.id}
-              href={`/${county.slug}`}
-              prefetch
-              onClick={() => persist(county.slug)}
-              onMouseEnter={() => prefetchOnHover(county.slug)}
-              onTouchStart={() => prefetchOnHover(county.slug)}
-              className="group flex items-center gap-2 p-3 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all text-left min-w-0"
-            >
-              <span className="text-[10px] font-bold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-1.5 py-0.5 rounded shrink-0">
-                {county.id}
-              </span>
-              <span className="text-sm font-medium truncate min-w-0 flex-1 group-hover:text-[var(--color-primary)] transition-colors">
-                {county.name}
-              </span>
-            </Link>
-          ))}
+          {filtered.map((county) => {
+            const isActive = savedSlug === county.slug;
+            return (
+              <Link
+                key={county.id}
+                href={`/${county.slug}`}
+                prefetch
+                onClick={() => persist(county.slug)}
+                onMouseEnter={() => prefetchOnHover(county.slug)}
+                onTouchStart={() => prefetchOnHover(county.slug)}
+                aria-current={isActive ? "true" : undefined}
+                className={`group flex items-center gap-2 p-3 rounded-[var(--radius-xs)] border hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-md)] transition-all text-left min-w-0 ${
+                  isActive
+                    ? "bg-[var(--color-primary-soft)] border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/30"
+                    : "bg-[var(--color-surface)] border-[var(--color-border)]"
+                }`}
+              >
+                <span className="text-[10px] font-bold text-[var(--color-primary)] bg-[var(--color-primary-soft)] px-1.5 py-0.5 rounded shrink-0">
+                  {county.id}
+                </span>
+                <span
+                  className={`text-sm font-medium truncate min-w-0 flex-1 transition-colors ${
+                    isActive
+                      ? "text-[var(--color-primary)]"
+                      : "group-hover:text-[var(--color-primary)]"
+                  }`}
+                >
+                  {county.name}
+                </span>
+                {isActive && (
+                  <Check
+                    size={12}
+                    className="text-[var(--color-primary)] shrink-0"
+                    aria-hidden="true"
+                  />
+                )}
+              </Link>
+            );
+          })}
         </div>
 
         {filtered.length === 0 && query && (

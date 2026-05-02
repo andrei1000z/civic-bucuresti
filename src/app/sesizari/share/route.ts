@@ -66,33 +66,33 @@ export async function POST(req: Request) {
     // gets attached — keeps the redirect URL short and avoids
     // multi-upload latency on the share path.
     const photo = formData.get("photo") as File | null;
-    if (photo && photo.size > 0) {
-      if (!ALLOWED_TYPES.includes(photo.type)) {
-        // Unsupported file type — drop silently, redirect with text only.
-        photo;
-      } else if (photo.size > MAX_UPLOAD_BYTES) {
-        // Too large — drop silently rather than hard-fail the share.
-        photo;
-      } else {
-        const validMagic = await isValidImage(photo);
-        if (validMagic) {
-          const ext = EXT_FROM_MIME[photo.type] ?? "jpg";
-          const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-          const path = `public/${filename}`;
-          const supabase = await createSupabaseServer();
-          const arrayBuffer = await photo.arrayBuffer();
-          const { error } = await supabase.storage
+    // Skip silently if absent / unsupported MIME / oversize / failed magic
+    // check — the share path should always land the user on /sesizari, not
+    // hard-fail. Photo just won't be pre-attached.
+    if (
+      photo &&
+      photo.size > 0 &&
+      ALLOWED_TYPES.includes(photo.type) &&
+      photo.size <= MAX_UPLOAD_BYTES
+    ) {
+      const validMagic = await isValidImage(photo);
+      if (validMagic) {
+        const ext = EXT_FROM_MIME[photo.type] ?? "jpg";
+        const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const path = `public/${filename}`;
+        const supabase = await createSupabaseServer();
+        const arrayBuffer = await photo.arrayBuffer();
+        const { error } = await supabase.storage
+          .from("sesizari-photos")
+          .upload(path, arrayBuffer, {
+            contentType: photo.type,
+            cacheControl: "3600",
+          });
+        if (!error) {
+          const { data } = supabase.storage
             .from("sesizari-photos")
-            .upload(path, arrayBuffer, {
-              contentType: photo.type,
-              cacheControl: "3600",
-            });
-          if (!error) {
-            const { data } = supabase.storage
-              .from("sesizari-photos")
-              .getPublicUrl(path);
-            photoUrl = data.publicUrl;
-          }
+            .getPublicUrl(path);
+          photoUrl = data.publicUrl;
         }
       }
     }

@@ -95,7 +95,7 @@ export function TopVotedWidget() {
             aria-label={`#${i + 1}: ${s.titlu}, ${s.voturi_net} voturi, ${s.nr_comentarii} ${s.nr_comentarii === 1 ? "comentariu" : "comentarii"}`}
           >
             <div
-              className="shrink-0 w-12 h-12 rounded-[var(--radius-md)] bg-gradient-to-br from-red-500 to-orange-600 text-white flex flex-col items-center justify-center"
+              className="shrink-0 w-12 h-12 rounded-[var(--radius-md)] bg-gradient-to-br from-[var(--color-primary)] to-emerald-800 text-white flex flex-col items-center justify-center"
               aria-hidden="true"
             >
               <ThumbsUp size={14} strokeWidth={2.5} />

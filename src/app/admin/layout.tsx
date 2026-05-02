@@ -6,7 +6,7 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { AdminTabs } from "./AdminTabs";
 
 export const metadata: Metadata = {
-  title: "Admin — Civia",
+  title: "Admin",
   robots: { index: false, follow: false },
 };
 

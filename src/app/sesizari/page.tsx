@@ -6,7 +6,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
-  title: "Sesizări — Civia",
+  title: "Sesizări",
   description:
     "Trimite o sesizare formală la autorități. AI-ul generează textul cu temei legal. Detectăm automat județul din locația ta.",
   alternates: { canonical: "/sesizari" },

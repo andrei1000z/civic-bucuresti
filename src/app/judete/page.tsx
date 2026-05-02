@@ -7,7 +7,7 @@ import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 import { ALL_COUNTIES } from "@/data/counties";
 
 export const metadata: Metadata = {
-  title: "Alege sau schimbă județul — Civia",
+  title: "Alege sau schimbă județul",
   description:
     "42 de județe ale României într-un singur loc. Civia reține preferința ta de județ la următoarea vizită. Pe această pagină poți schimba oricând județul salvat sau șterge preferința.",
   alternates: { canonical: "/judete" },

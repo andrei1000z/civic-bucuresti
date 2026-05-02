@@ -61,8 +61,11 @@ export async function generateMetadata({
   const { judet } = await params;
   const county = getCountyBySlug(judet);
   if (!county) return {};
+  // No title here — the parent [judet]/layout.tsx already sets a
+  // `${county.name} — Civia` default. Setting one here would compose
+  // with that layout's template (`%s — ${county.name} — Civia`) and
+  // produce the duplicate `Cluj — Cluj — Civia`.
   return {
-    title: `${county.name} — Civia`,
     description: `Sesizări, calitate aer, statistici și ghiduri civice pentru județul ${county.name}.`,
     alternates: { canonical: `/${county.slug}` },
   };
@@ -391,7 +394,6 @@ function RecentStiriColumn({
                       width={56}
                       height={56}
                       className="w-14 h-14 rounded-[var(--radius-xs)] object-cover shrink-0"
-                      unoptimized
                     />
                   ) : (
                     <div
@@ -699,7 +701,7 @@ export default async function CountyHomePage({
                 🇷🇴 Platformă civică independentă · gratuit · fără reclame
               </p>
 
-              <h1 className="font-[family-name:var(--font-sora)] text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-extrabold leading-[1.05] tracking-tight mb-6">
+              <h1 className="font-[family-name:var(--font-sora)] text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-[1.05] tracking-tight mb-6">
                 Ajută la schimbarea
                 <br className="hidden sm:block" />{" "}
                 <span className="bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">

@@ -6,7 +6,7 @@ import { SITE_URL } from "@/lib/constants";
 import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
-  title: "Vezi ce semnalează cetățenii — Civia",
+  title: "Vezi ce semnalează cetățenii",
   description:
     "Probleme reale din orașele României: gropi, trotuare distruse, iluminat defect, parcări ilegale. Votează și trimite și tu — mai multe voci = răspuns mai rapid de la primărie.",
   alternates: { canonical: "/sesizari-publice" },

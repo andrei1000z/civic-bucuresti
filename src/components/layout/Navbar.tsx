@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Search } from "lucide-react";
 import { NAV_LINKS, NAV_MORE, SITE_NAME } from "@/lib/constants";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -131,7 +131,7 @@ export function Navbar() {
               );
             })}
 
-            {/* „Altele" dropdown — items secundare. countyOnly e ascuns
+            {/* „Explorează" dropdown — items secundare. countyOnly e ascuns
                 pe homepage național; nationalOnly păstrează URL absolut. */}
             {(() => {
               const visibleMoreItems = NAV_MORE.filter(
@@ -154,7 +154,7 @@ export function Navbar() {
                     aria-expanded={moreDropdown}
                     aria-haspopup="menu"
                   >
-                    Altele
+                    Explorează
                     <ChevronDown size={14} className={cn("transition-transform", moreDropdown && "rotate-180")} />
                   </button>
                   <div
@@ -189,6 +189,31 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-1 sm:gap-2">
+            {/* Search trigger — opens the command palette. The full
+                ⌘K keyboard shortcut still works; this button is the
+                discoverable entry for non-keyboard users. The desktop
+                variant shows a label + ⌘K hint, the mobile collapse
+                is just an icon to save tap space. */}
+            <button
+              type="button"
+              onClick={() => document.dispatchEvent(new CustomEvent("open-command-palette"))}
+              className="hidden md:inline-flex items-center gap-2 h-9 px-2.5 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              aria-label="Caută pe Civia"
+            >
+              <Search size={14} aria-hidden="true" />
+              <span className="hidden lg:inline">Caută…</span>
+              <kbd className="hidden lg:inline-flex items-center h-5 px-1.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-[10px] font-mono text-[var(--color-text-muted)]">
+                ⌘K
+              </kbd>
+            </button>
+            <button
+              type="button"
+              onClick={() => document.dispatchEvent(new CustomEvent("open-command-palette"))}
+              className="md:hidden w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]"
+              aria-label="Caută pe Civia"
+            >
+              <Search size={18} />
+            </button>
             <NotificationBell />
             <UserMenu />
             <button
@@ -258,7 +283,7 @@ export function Navbar() {
             return (
               <div className="pt-3 mt-3 border-t border-[var(--color-border)]">
                 <div className="px-4 py-1 text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
-                  Altele
+                  Explorează
                 </div>
                 {items.map((link) => (
                   <Link

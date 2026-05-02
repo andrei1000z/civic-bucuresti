@@ -14,7 +14,7 @@ import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 import { Building2 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Autorități publice în România — Civia",
+  title: "Autorități publice în România",
   description:
     "Catalog național cu date de contact verificate pentru primăriile și Poliția Locală din fiecare județ și oraș important. Trimite sesizarea ta la adresa corectă.",
   alternates: { canonical: "/autoritati" },

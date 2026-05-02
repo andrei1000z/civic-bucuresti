@@ -7,7 +7,7 @@ import { DatasetJsonLd } from "@/components/FaqJsonLd";
 import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
-  title: "API public pentru dezvoltatori — Civia",
+  title: "API public pentru dezvoltatori",
   description:
     "API public CORS-enabled pentru toate sesizările publice din România. Deschis pentru jurnaliști, cercetători, ONG-uri. Licență CC BY 4.0.",
   alternates: { canonical: "/dezvoltatori" },

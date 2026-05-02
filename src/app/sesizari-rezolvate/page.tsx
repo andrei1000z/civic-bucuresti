@@ -9,7 +9,7 @@ import type { SesizareRow } from "@/lib/supabase/types";
 import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 
 export const metadata: Metadata = {
-  title: "Probleme rezolvate — Civia",
+  title: "Probleme rezolvate",
   description:
     `Galerie "înainte / după" cu sesizări rezolvate efectiv de primării și autorități. Dovada că implicarea civică mișcă lucrurile în România.`,
   alternates: { canonical: "/sesizari-rezolvate" },

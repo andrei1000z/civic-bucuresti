@@ -14,7 +14,7 @@ import { PageHero, HERO_GRADIENT } from "@/components/layout/PageHero";
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
-  title: "Petiții civice — Civia",
+  title: "Petiții civice",
   description:
     "Petiții civice cu impact real. Click → vezi argumentele, semnezi pe site-ul oficial. Mai multe voci = autoritățile răspund.",
   alternates: { canonical: "/petitii" },
@@ -138,7 +138,7 @@ function EmptyState() {
   );
 }
 
-function PetitieCard({ p }: { p: { slug: string; title: string; summary: string; image_url: string | null; category: string | null; county_code: string | null; status: string; ends_at: string | null; external_url: string | null } }) {
+function PetitieCard({ p }: { p: { slug: string; title: string; summary: string; image_url: string | null; category: string | null; county_code: string | null; status: string; ends_at: string | null; external_url: string | null; target_signatures: number; signature_count: number } }) {
   const cat = PETITIE_CATEGORII.find((c) => c.value === p.category);
   let externalHost: string | null = null;
   if (p.external_url) {
@@ -148,6 +148,11 @@ function PetitieCard({ p }: { p: { slug: string; title: string; summary: string;
       externalHost = null;
     }
   }
+  // Progress towards target. We cap at 100% display-side even if the
+  // count exceeds (rare but happens when external sources backfill
+  // signatures). target_signatures defaults to 1000 in the DB.
+  const target = Math.max(1, p.target_signatures);
+  const pct = Math.min(100, Math.round((p.signature_count / target) * 100));
   return (
     <Link
       href={`/petitii/${p.slug}`}
@@ -191,6 +196,29 @@ function PetitieCard({ p }: { p: { slug: string; title: string; summary: string;
         <p className="text-sm text-[var(--color-text-muted)] line-clamp-3 mb-4 leading-relaxed">
           {p.summary}
         </p>
+        {/* Signature progress — visual proof the petition is moving.
+            Empty bar at 0 still gives users a "fill the bar" mental
+            target, more motivating than no bar. */}
+        <div className="mb-3" aria-label={`${p.signature_count.toLocaleString("ro-RO")} din ${target.toLocaleString("ro-RO")} semnături`}>
+          <div className="flex items-baseline justify-between mb-1">
+            <span className="text-xs font-bold text-[var(--color-text)] tabular-nums">
+              {p.signature_count.toLocaleString("ro-RO")}
+              <span className="text-[var(--color-text-muted)] font-normal">
+                {" / "}
+                {target.toLocaleString("ro-RO")}
+              </span>
+            </span>
+            <span className="text-[10px] font-semibold text-purple-600 dark:text-purple-400 tabular-nums">
+              {pct}%
+            </span>
+          </div>
+          <div className="h-1.5 w-full rounded-full bg-[var(--color-surface-2)] overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-purple-500 to-purple-700 transition-[width] duration-500"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+        </div>
         <div className="mt-auto flex items-center justify-between text-xs">
           {externalHost && (
             <span className="inline-flex items-center gap-1 text-[var(--color-text-muted)]">
