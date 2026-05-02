@@ -175,12 +175,15 @@ Răspunde JSON:
         ]
       : textContext;
 
-    // Multi-provider fallback chain. Order: Groq 70B (best Romanian
-    // prose) → Gemini 2.0 Flash (separate quota, equivalent quality)
-    // → Groq 8B-instant (degraded but always-on rescue). Vision
-    // requests stay on Groq Vision — Gemini can do vision too but
-    // we keep the photo path single-provider for now to avoid
-    // surprising the prompt-engineering work in SYSTEM_PROMPT_FORMAL.
+    // Multi-provider fallback chain. Order: Gemini 2.0 Flash (1500
+    // req/day free, separate quota, doesn't share Groq's daily token
+    // budget) → Groq 70B (richer Romanian prose when it has budget)
+    // → Groq 8B-instant (degraded but always-on rescue). Gemini goes
+    // first because in practice Groq's free 70B daily quota burns
+    // fast and the user was hitting the 429 path more often than the
+    // happy path. Vision requests stay on Groq Vision — Gemini can
+    // do vision too but we keep the photo path single-provider for
+    // now to avoid re-tuning SYSTEM_PROMPT_FORMAL's photo rules.
     //
     // Each candidate is a thunk so we can mix Groq SDK and Gemini
     // fetch calls in the same loop. isRateLimited() recognises 429
@@ -209,7 +212,6 @@ Răspunde JSON:
     const candidates: Candidate[] = hasPhotos
       ? [{ provider: "groq", model: GROQ_MODEL_VISION, run: groqCall(GROQ_MODEL_VISION) }]
       : [
-          { provider: "groq", model: GROQ_MODEL, run: groqCall(GROQ_MODEL) },
           ...(isGeminiConfigured()
             ? [
                 {
@@ -225,6 +227,7 @@ Răspunde JSON:
                 },
               ]
             : []),
+          { provider: "groq", model: GROQ_MODEL, run: groqCall(GROQ_MODEL) },
           { provider: "groq", model: GROQ_MODEL_FAST, run: groqCall(GROQ_MODEL_FAST) },
         ];
 
