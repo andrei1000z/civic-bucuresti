@@ -2,7 +2,15 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, Phone, Mail, ExternalLink, X } from "lucide-react";
+import { Search, Phone, Mail, ExternalLink, X, ChevronDown } from "lucide-react";
+
+// Pagination — render this many cards on first paint. Past metering
+// showed /autoritati was a 1 MB HTML payload because all 340 cards
+// (42 județe + ~298 orașe) rendered to HTML upfront. Sliced to 30
+// initial drops first paint to ~85 KB; "Vezi mai multe" reveals the
+// rest in batches. Active search/filter bypasses pagination — when
+// the user is hunting, they want to see all matches.
+const PAGE_SIZE = 30;
 
 export interface Row {
   kind: "judet" | "oras";
@@ -28,6 +36,7 @@ function normalize(s: string): string {
 export function AutoritatiSearch({ rows }: { rows: Row[] }) {
   const [query, setQuery] = useState("");
   const [kindFilter, setKindFilter] = useState<"all" | "judet" | "oras">("all");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // Build unique county list for the type filter label counts
   const counts = useMemo(() => {
@@ -45,6 +54,13 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
       return hay.includes(q);
     });
   }, [query, rows, kindFilter]);
+
+  // Pagination only applies when there's no active search/filter —
+  // when the user is hunting, hiding matches behind a "show more"
+  // button is hostile UX.
+  const isHunting = query.length > 0 || kindFilter !== "all";
+  const visible = isHunting ? filtered : filtered.slice(0, visibleCount);
+  const hasMore = !isHunting && visibleCount < filtered.length;
 
   return (
     <div>
@@ -122,7 +138,7 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filtered.map((row) => (
+          {visible.map((row) => (
             <article
               key={row.id}
               className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-1)] p-4 hover:border-[var(--color-primary)]/50 hover:shadow-[var(--shadow-2)] transition-all"
@@ -224,12 +240,30 @@ export function AutoritatiSearch({ rows }: { rows: Row[] }) {
         </div>
       )}
 
+      {hasMore && (
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-[var(--radius-sm)] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium hover:border-[var(--color-primary)]/40 hover:bg-[var(--color-surface-2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          >
+            <ChevronDown size={14} aria-hidden="true" />
+            Vezi încă {Math.min(PAGE_SIZE, filtered.length - visibleCount)} de autorități
+            <span className="text-[var(--color-text-muted)] tabular-nums">
+              ({filtered.length - visibleCount} rămase)
+            </span>
+          </button>
+        </div>
+      )}
+
       <p
         className="text-center text-xs text-[var(--color-text-muted)] mt-6"
         aria-live="polite"
         aria-atomic="true"
       >
-        {filtered.length} {filtered.length === 1 ? "rezultat" : "rezultate"}
+        {isHunting
+          ? `${filtered.length} ${filtered.length === 1 ? "rezultat" : "rezultate"}`
+          : `Afișate ${visible.length} din ${filtered.length}`}
       </p>
     </div>
   );
