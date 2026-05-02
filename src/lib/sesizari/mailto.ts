@@ -298,9 +298,12 @@ export function buildGmailLink(input: MailtoInput): string {
  * Chrome's "default mail" isn't set to the Gmail app).
  *
  * Format MATTERS: `intent:RECIPIENT?subject=X&body=Y#Intent;...;end`
- * (no `//` — mailto: URIs don't use authority). The previous version
- * used `intent://send?to=X` which produced data URI `mailto://send?...`
- * which Gmail doesn't recognise as a valid mailto:.
+ * (no `//` — mailto: URIs don't use authority).
+ *
+ * Encoding MATTERS: spaces must be `%20`, not `+`. URLSearchParams
+ * uses form-encoding (spaces → `+`) which Gmail does NOT decode in
+ * the body field — emails arrived with literal `+` instead of spaces.
+ * encodeURIComponent uses `%20` which Gmail decodes correctly.
  *
  * `S.browser_fallback_url` fires if the Gmail app isn't installed —
  * Chrome falls back to the system mailto: handler so non-Gmail-app
@@ -314,12 +317,13 @@ export function buildGmailAndroidIntent(input: MailtoInput): string {
   // becomes the mailto: URI body (e.g. mailto:a@x.com,b@y.com). The
   // @ sign is allowed in URI paths so we don't encode it.
   const to = p.to.join(",");
-  const params = new URLSearchParams();
-  params.set("subject", p.subject);
-  params.set("body", p.body);
-  if (p.cc.length > 0) params.set("cc", p.cc.join(","));
+  // Hand-build the query string with encodeURIComponent (NOT
+  // URLSearchParams) so spaces become %20 instead of +.
+  const subject = encodeURIComponent(p.subject);
+  const body = encodeURIComponent(p.body);
+  const cc = p.cc.length > 0 ? `&cc=${encodeURIComponent(p.cc.join(","))}` : "";
   const fallback = encodeURIComponent(buildMailtoLink(input));
-  return `intent:${to}?${params.toString()}#Intent;scheme=mailto;package=com.google.android.gm;S.browser_fallback_url=${fallback};end`;
+  return `intent:${to}?subject=${subject}&body=${body}${cc}#Intent;scheme=mailto;package=com.google.android.gm;S.browser_fallback_url=${fallback};end`;
 }
 
 /**
@@ -329,16 +333,17 @@ export function buildGmailAndroidIntent(input: MailtoInput): string {
  * fallback mailto: button that the user can tap if the Gmail link
  * does nothing.
  *
+ * Same encoding caveat as Android intent: spaces must be %20, not +.
+ *
  * Reference: Gmail iOS URL scheme docs (legacy but stable).
  */
 export function buildGmailIosLink(input: MailtoInput): string {
   const p = buildEmailPayload(input);
-  const params = new URLSearchParams();
-  params.set("to", p.to.join(","));
-  params.set("subject", p.subject);
-  params.set("body", p.body);
-  if (p.cc.length > 0) params.set("cc", p.cc.join(","));
-  return `googlegmail:///co?${params.toString()}`;
+  const to = encodeURIComponent(p.to.join(","));
+  const subject = encodeURIComponent(p.subject);
+  const body = encodeURIComponent(p.body);
+  const cc = p.cc.length > 0 ? `&cc=${encodeURIComponent(p.cc.join(","))}` : "";
+  return `googlegmail:///co?to=${to}&subject=${subject}&body=${body}${cc}`;
 }
 
 export function buildOutlookLink(input: MailtoInput): string {

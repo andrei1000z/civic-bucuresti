@@ -731,6 +731,56 @@ export function SesizareForm() {
     const isInBucharest = lat >= 44.33 && lat <= 44.55 && lng >= 25.97 && lng <= 26.25;
     const sector = isInBucharest ? (data.sector || detectSectorFromCoords(lat, lng) || "S3") : null;
 
+    // OPEN MAIL APP IMMEDIATELY — must happen synchronously inside
+    // the click handler, BEFORE the first await, so the user gesture
+    // is still active. After the first `await fetch(...)` the gesture
+    // is gone and protocol handlers (intent://, googlegmail://) are
+    // blocked by the browser. Triggering here gives a true 1-tap UX:
+    // user taps "Trimite" → Gmail app opens directly. The async POST
+    // continues in background; the success screen renders when the
+    // user navigates back from Gmail.
+    try {
+      const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+      const isAndroid = /Android/.test(ua);
+      const isIos = /iPad|iPhone|iPod/.test(ua);
+      const emailDraft: MailtoInput = {
+        tip: data.tip,
+        titlu: effectiveTitlu,
+        locatie: data.locatie,
+        sector,
+        lat,
+        lng,
+        descriere: data.descriere,
+        formal_text: data.formal_text || null,
+        author_name: data.nume,
+        author_email: data.email || null,
+        author_address: data.adresa || null,
+        imagini,
+        parking:
+          data.tip === "parcare"
+            ? {
+                plate: parkingPlateText,
+                jurisdiction: parkingJurisdiction || null,
+                observedAt: parkingObservedAt || null,
+              }
+            : undefined,
+      };
+      let mailUrl: string | null = null;
+      if (isAndroid) mailUrl = buildGmailAndroidIntent(emailDraft);
+      else if (isIos) mailUrl = buildGmailIosLink(emailDraft);
+      // Desktop is intentionally left out here — auto-open on submit
+      // would steal focus while the user might still be reading the
+      // form. Desktop gets the auto-open inside SuccessScreen instead.
+      if (mailUrl) {
+        // Use location.href (synchronous) inside the click context
+        // so the OS protocol handler fires. window.open() with a
+        // blank target is more likely to be blocked.
+        window.location.href = mailUrl;
+      }
+    } catch {
+      /* mail-open is best effort — fall through to the normal flow */
+    }
+
     // For parking sesizări the legal template is the canonical body —
     // persist that as formal_text so co-signers + admin views render the
     // same text that actually went to the police, not whatever the
@@ -1461,20 +1511,19 @@ function SuccessScreen({
 }) {
   const router = useRouter();
   type Platform = "ios" | "android" | "desktop";
-  const [platform, setPlatform] = useState<Platform>("desktop");
+  // Platform detected synchronously at mount via lazy useState
+  // initializer — no first-render race where isMobile=false fires
+  // the desktop auto-open before the platform-detection useEffect
+  // has a chance to run. The check is window-safe because the
+  // SuccessScreen only renders client-side after submit.
+  const [platform] = useState<Platform>(() => {
+    if (typeof navigator === "undefined") return "desktop";
+    const ua = navigator.userAgent || "";
+    if (/iPad|iPhone|iPod/.test(ua)) return "ios";
+    if (/Android/.test(ua)) return "android";
+    return "desktop";
+  });
   const [autoOpened, setAutoOpened] = useState(false);
-
-  // Detect platform once at mount. iOS / Android distinguished
-  // because they need different deep-link schemes
-  // (googlegmail:// vs intent://). Everything else falls into
-  // "desktop" — auto-open + Gmail web behavior.
-  useEffect(() => {
-    const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (/iPad|iPhone|iPod/.test(ua)) setPlatform("ios");
-    else if (/Android/.test(ua)) setPlatform("android");
-    else setPlatform("desktop");
-  }, []);
 
   const isMobile = platform === "ios" || platform === "android";
 
@@ -1494,6 +1543,13 @@ function SuccessScreen({
       : platform === "ios"
         ? buildGmailIosLink(emailInput)
         : null;
+
+  // Scroll to top so the success screen is visible. The form was
+  // taller than the success screen — without scroll-reset the user
+  // ends up on empty whitespace below the (now-removed) form bottom.
+  useEffect(() => {
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   // Auto-open ONLY on desktop. On mobile, programmatic click on
   // mailto:/intent:/googlegmail:// is blocked by Chrome / Safari
@@ -1523,7 +1579,7 @@ function SuccessScreen({
       /* popup blocked — user taps the button below */
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile]);
+  }, []);
 
   // Copy-to-clipboard for the code. Since the user just submitted, this
   // is the most likely thing they want to grab — small UX win.
