@@ -96,19 +96,27 @@ export async function POST(req: Request) {
 
     // Honeypot: if filled, silent drop with fake success — the bot thinks it worked,
     // we don't pollute the DB, and real users who hit this via mobile autofill also get a 200.
-    // Loghează la Sentry ca să detectezi false positives (autofill mobil completează
-    // câmpul „website" → user real e dropped → primește cod fals → /urmareste 404
-    // → utilizatorul crede că Civia e brokat).
+    //
+    // Severity heuristic: short/empty titlu+descriere with the honeypot
+    // filled = almost certainly a bot → log at `info` (noise tolerant).
+    // Long content with the honeypot filled = almost certainly a real
+    // user whose mobile autofill leaked the address-bar URL into the
+    // hidden „website" field → log at `warning` so we can investigate
+    // the false positive. Either way the response is identical: bots
+    // think it worked, real users get the same fake success and find
+    // their /urmareste 404 (which surfaces a "verifică codul" prompt).
     if (parsed._honey && parsed._honey.length > 0) {
+      const looksLikeBot =
+        (parsed.titlu?.length ?? 0) < 5 && (parsed.descriere?.length ?? 0) < 20;
       Sentry.captureMessage("honeypot triggered on /api/sesizari POST", {
-        level: "info",
-        tags: { kind: "honeypot" },
+        level: looksLikeBot ? "info" : "warning",
+        tags: { kind: "honeypot", classification: looksLikeBot ? "bot" : "false_positive" },
         extra: {
           honey_value: parsed._honey.slice(0, 200),
           ip_hash: getClientIp(req).slice(0, 8) + "…",
           user_agent: req.headers.get("user-agent")?.slice(0, 200) ?? "",
-          has_real_content:
-            (parsed.titlu?.length ?? 0) > 5 || (parsed.descriere?.length ?? 0) > 20,
+          titlu_len: parsed.titlu?.length ?? 0,
+          descriere_len: parsed.descriere?.length ?? 0,
         },
       });
       return NextResponse.json({ data: { code: "XXXXXX", titlu: parsed.titlu } });

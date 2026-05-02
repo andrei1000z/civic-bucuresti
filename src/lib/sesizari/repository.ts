@@ -12,16 +12,22 @@ import type {
 
 const ANONYMOUS_LABEL = "Cetățean anonim";
 
-// One pass on the session: returns the viewer's user id (if any) and whether
-// they have the admin role. Used by both the name anonymizer and the
-// formal_text scrubber so we fetch the auth+profile row once per request.
-async function getViewerContext(): Promise<{ viewerId: string | null; isAdmin: boolean }> {
+// One pass on the session: returns the viewer's user id (if any), email
+// (for legacy guest-then-signed-up rows where user_id may be null but
+// author_email matches), and whether they have the admin role. Used by
+// both the name anonymizer and the formal_text scrubber so we fetch the
+// auth+profile row once per request.
+async function getViewerContext(): Promise<{
+  viewerId: string | null;
+  viewerEmail: string | null;
+  isAdmin: boolean;
+}> {
   try {
     const supabase = await createSupabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) return { viewerId: null, isAdmin: false };
+    if (!user) return { viewerId: null, viewerEmail: null, isAdmin: false };
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -29,10 +35,11 @@ async function getViewerContext(): Promise<{ viewerId: string | null; isAdmin: b
       .maybeSingle();
     return {
       viewerId: user.id,
+      viewerEmail: user.email?.toLowerCase().trim() ?? null,
       isAdmin: (profile as { role?: string } | null)?.role === "admin",
     };
   } catch {
-    return { viewerId: null, isAdmin: false };
+    return { viewerId: null, viewerEmail: null, isAdmin: false };
   }
 }
 
@@ -47,12 +54,16 @@ type Anonymizable = {
  * Applies public-viewer privacy to a list of sesizări:
  *   - always scrubs the home address out of formal_text (promised on the
  *     public page: "adresa de domiciliu a fost ascunsă automat")
+ *   - always nulls author_email for non-owner non-admin viewers — the
+ *     email is collected only for OG 27/2002 compliance + notifications,
+ *     never displayed publicly. Defense in depth on top of the in-page
+ *     redaction so the API GET response can't leak it either.
  *   - additionally scrubs the author name (in author_name AND in
  *     formal_text) when the owner toggled hide_name in /cont. The match
  *     happens on user_id OR author_email — guests-then-signed-up users
  *     have legacy rows with user_id=null but their email in
  *     author_email; the email path catches those.
- *   - admins and the row's owner bypass both scrubs (they're either
+ *   - admins and the row's owner bypass all scrubs (they're either
  *     moderating or reading their own sesizare)
  *
  * Runs two Redis SMISMEMBER round-trips (user_ids + emails) plus one
@@ -61,7 +72,7 @@ type Anonymizable = {
 async function anonymizeHiddenAuthors<T extends Anonymizable>(rows: T[]): Promise<T[]> {
   if (rows.length === 0) return rows;
 
-  const { viewerId, isAdmin } = await getViewerContext();
+  const { viewerId, viewerEmail, isAdmin } = await getViewerContext();
   if (isAdmin) return rows;
 
   const userIds = Array.from(new Set(rows.map((r) => r.user_id).filter((v): v is string => !!v)));
@@ -79,8 +90,13 @@ async function anonymizeHiddenAuthors<T extends Anonymizable>(rows: T[]): Promis
   ]);
 
   return rows.map((r) => {
-    const isOwner = !!r.user_id && r.user_id === viewerId;
-    if (isOwner) return r; // owner sees their own name + address
+    // Ownership: by user_id OR by email match (for legacy guest-then-
+    // signed-up rows where user_id may be null but author_email matches
+    // the now-signed-up viewer's email).
+    const isOwner =
+      (!!r.user_id && r.user_id === viewerId) ||
+      (!!viewerEmail && r.author_email?.toLowerCase().trim() === viewerEmail);
+    if (isOwner) return r; // owner sees their own name + address + email
 
     const idHit = !!r.user_id && hiddenIds.has(r.user_id);
     const emailHit =
@@ -98,6 +114,7 @@ async function anonymizeHiddenAuthors<T extends Anonymizable>(rows: T[]): Promis
     return {
       ...r,
       author_name: hideName ? ANONYMOUS_LABEL : r.author_name,
+      author_email: null, // never expose to non-owner non-admin viewers
       formal_text: scrubbedFormalText,
     };
   });

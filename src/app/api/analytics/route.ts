@@ -8,11 +8,21 @@ import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const ALLOWED_ORIGINS = new Set([
-  "https://civia.ro",
-  "https://www.civia.ro",
-  "http://localhost:3000",
-  "http://localhost:3001",
+// Production allowlist baked into the bundle. Localhost variants are
+// added only outside production so a leaked local origin can't be
+// spoofed to bypass the check on Vercel. Custom origins can be appended
+// via NEXT_PUBLIC_ANALYTICS_ORIGINS (comma-separated) — used for staging
+// previews etc.
+const PROD_ORIGINS = ["https://civia.ro", "https://www.civia.ro"];
+const DEV_ORIGINS = ["http://localhost:3000", "http://localhost:3001"];
+const EXTRA_ORIGINS = (process.env.NEXT_PUBLIC_ANALYTICS_ORIGINS ?? "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+const ALLOWED_ORIGINS = new Set<string>([
+  ...PROD_ORIGINS,
+  ...(process.env.NODE_ENV === "production" ? [] : DEV_ORIGINS),
+  ...EXTRA_ORIGINS,
 ]);
 
 function today(): string {
