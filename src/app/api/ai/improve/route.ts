@@ -247,24 +247,27 @@ Răspunde JSON:
     // Translate upstream Groq errors to a clean Romanian message
     // instead of dumping the raw JSON blob onto the form. Devs can
     // still read the full error in server logs via the caught
-    // exception. User-visible copy avoids "AI" name-dropping —
-    // user doesn't care which model failed, only what to do next.
+    // exception. User-visible copy avoids "AI" name-dropping AND
+    // tells the user they can submit anyway — the submit-time
+    // polishSesizare() has a fallback to raw text, so the sesizare
+    // goes through with the user's description even when this route
+    // is fully throttled.
     const raw = e instanceof Error ? e.message : "";
     if (!isProd()) console.error("[ai-improve]", raw);
     if (/json_validate_failed|invalid JSON/i.test(raw)) {
       return NextResponse.json(
-        { error: "Generatorul a întors un răspuns invalid. Încearcă din nou — de obicei reușește a doua oară." },
+        { error: "Refacerea textului a returnat un răspuns invalid. Încearcă din nou — de obicei reușește a doua oară. Sau trimite sesizarea direct cu textul tău." },
         { status: 502 }
       );
     }
     if (/rate[- ]?limit|429/i.test(raw)) {
       return NextResponse.json(
-        { error: "Sunt prea multe cereri în acest moment. Încearcă din nou peste câteva secunde." },
+        { error: "Limita zilnică de refacere automată a textului a fost atinsă. Trimite sesizarea direct cu descrierea ta — va merge la primărie cu textul tău, fără probleme." },
         { status: 429 }
       );
     }
     return NextResponse.json(
-      { error: "Generarea textului oficial e temporar indisponibilă. Scrie manual textul formal sau încearcă peste câteva minute." },
+      { error: "Refacerea automată a textului e temporar indisponibilă. Trimite sesizarea cu descrierea ta — va ajunge la primărie cu textul tău." },
       { status: 503 }
     );
   }
