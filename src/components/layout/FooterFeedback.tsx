@@ -89,7 +89,13 @@ export function FooterFeedback() {
   };
 
   return (
-    <div className="mt-10 pt-8 border-t border-[var(--color-border)] grid md:grid-cols-2 gap-6 lg:gap-10">
+    // `id="footer-feedback"` is the anchor target for /not-found and
+    // a few other pages that say "scrie-ne aici" — without it those
+    // links would jump to the homepage top.
+    <div
+      id="footer-feedback"
+      className="mt-10 pt-8 border-t border-[var(--color-border)] grid md:grid-cols-2 gap-6 lg:gap-10 scroll-mt-24"
+    >
       {/* Feedback */}
       <section>
         <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
