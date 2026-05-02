@@ -1,10 +1,20 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getGroqClient, GROQ_MODEL, GROQ_MODEL_VISION } from "@/lib/groq/client";
+import * as Sentry from "@sentry/nextjs";
+import { getGroqClient, GROQ_MODEL, GROQ_MODEL_FAST, GROQ_MODEL_VISION } from "@/lib/groq/client";
 import { SYSTEM_PROMPT_FORMAL } from "@/lib/groq/prompts";
 import { getTemplate } from "@/lib/groq/templates";
 import { rateLimitAsync, getClientIp } from "@/lib/ratelimit";
 import { isProd } from "@/lib/env";
+
+/** True for Groq 429 (rate limit / token budget exhausted). Mirrors
+ *  the same helper in lib/petitii/ai-summary.ts. */
+function isRateLimited(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const e = err as { status?: number; message?: string };
+  if (e.status === 429) return true;
+  return typeof e.message === "string" && /rate.?limit|429/i.test(e.message);
+}
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 45;
@@ -163,20 +173,50 @@ Răspunde JSON:
         ]
       : textContext;
 
-    const completion = await groq.chat.completions.create({
-      model: hasPhotos ? GROQ_MODEL_VISION : GROQ_MODEL,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT_FORMAL },
-        // Groq SDK accepts string or array content depending on model.
-        { role: "user", content: userContent as unknown as string },
-      ],
-      temperature: 0.3,
-      max_tokens: 1100,
-      response_format: { type: "json_object" },
-    });
+    // Model-fallback pattern: try the strict 70B (or vision) first,
+    // fall back to the faster 8B-instant when 70B is rate-limited.
+    // Without this, a Groq 429 left the user with a hard error and
+    // they'd retry blindly while the limiter was still cooling down.
+    // Vision requests can't fall back to a text model — if the vision
+    // tier is throttled, we surface the original error.
+    const candidates = hasPhotos
+      ? [{ model: GROQ_MODEL_VISION, max_tokens: 1100 }]
+      : [
+          { model: GROQ_MODEL, max_tokens: 1100 },
+          { model: GROQ_MODEL_FAST, max_tokens: 1100 },
+        ];
 
-    const content = completion.choices[0]?.message?.content;
-    if (!content) throw new Error("Empty AI response");
+    let content: string | null = null;
+    let lastError: unknown = null;
+    for (const cand of candidates) {
+      try {
+        const completion = await groq.chat.completions.create({
+          model: cand.model,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT_FORMAL },
+            // Groq SDK accepts string or array content depending on model.
+            { role: "user", content: userContent as unknown as string },
+          ],
+          temperature: 0.3,
+          max_tokens: cand.max_tokens,
+          response_format: { type: "json_object" },
+        });
+        content = completion.choices[0]?.message?.content ?? null;
+        if (content) break;
+      } catch (err) {
+        lastError = err;
+        if (isRateLimited(err) && cand.model !== GROQ_MODEL_FAST) {
+          Sentry.captureMessage("ai-improve fell back to fast model (70B 429)", {
+            level: "info",
+            tags: { kind: "ai_improve_fallback" },
+            extra: { fromModel: cand.model, toModel: GROQ_MODEL_FAST },
+          });
+          continue;
+        }
+        throw err;
+      }
+    }
+    if (!content) throw lastError ?? new Error("Empty response from text generator");
 
     let parsed: AIResponse;
     try {
@@ -205,26 +245,26 @@ Răspunde JSON:
       return NextResponse.json({ error: "Input invalid" }, { status: 400 });
     }
     // Translate upstream Groq errors to a clean Romanian message
-    // instead of dumping the raw JSON blob onto the form. The
-    // "json_validate_failed" case was the one the user saw — now
-    // maps to a generic retry hint; devs can still read the full
-    // error in server logs via the caught exception.
+    // instead of dumping the raw JSON blob onto the form. Devs can
+    // still read the full error in server logs via the caught
+    // exception. User-visible copy avoids "AI" name-dropping —
+    // user doesn't care which model failed, only what to do next.
     const raw = e instanceof Error ? e.message : "";
     if (!isProd()) console.error("[ai-improve]", raw);
     if (/json_validate_failed|invalid JSON/i.test(raw)) {
       return NextResponse.json(
-        { error: "AI-ul a generat un răspuns invalid. Încearcă din nou — de obicei reușește a doua oară." },
+        { error: "Generatorul a întors un răspuns invalid. Încearcă din nou — de obicei reușește a doua oară." },
         { status: 502 }
       );
     }
     if (/rate[- ]?limit|429/i.test(raw)) {
       return NextResponse.json(
-        { error: "AI-ul e sub presiune. Încearcă în câteva secunde." },
+        { error: "Sunt prea multe cereri în acest moment. Încearcă din nou peste câteva secunde." },
         { status: 429 }
       );
     }
     return NextResponse.json(
-      { error: "AI-ul e temporar indisponibil. Scrie manual sau reîncearcă în câteva minute." },
+      { error: "Generarea textului oficial e temporar indisponibilă. Scrie manual textul formal sau încearcă peste câteva minute." },
       { status: 503 }
     );
   }
